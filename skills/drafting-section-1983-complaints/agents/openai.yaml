@@ -1,0 +1,4 @@
+interface:
+  display_name: "Draft §1983 Complaints"
+  short_description: "Draft element-complete civil-rights complaints"
+  default_prompt: "Use $drafting-section-1983-complaints to draft or revise a Section 1983 complaint claim by claim."

@@ -1,7 +1,6 @@
 ---
 name: rrd
-description: "Generate a Response Requirements Document (RRD) for opposing (or supporting) a specific claim/argument in a legal motion. Use when planning a motion response, building a claim-by-claim checklist, or when asked to create an RRD.
-Triggers on: create an rrd, write rrd for, respond to this motion, opposition plan, response checklist, requirements for response, claim-by-claim response, 12(b)(6) response plan, qualified immunity response plan."
+description: "Generate a Response Requirements Document (RRD) for opposing (or supporting) a specific claim/argument in a legal motion. Use when planning a motion response, building a claim-by-claim checklist, or when asked to create an RRD. Triggers on: create an rrd, write rrd for, respond to this motion, opposition plan, response checklist, requirements for response, claim-by-claim response, 12(b)(6) response plan, qualified immunity response plan."
 ---
 
 # RRD Generator

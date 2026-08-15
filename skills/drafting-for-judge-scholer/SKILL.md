@@ -5,6 +5,12 @@ description: Drafts and audits federal civil-rights pleadings and briefs for mat
 
 # Drafting for Judge Scholer
 
+## Role in the skill stack
+
+Use this skill as a judge-specific overlay after the applicable document and claim skills. For a false-arrest complaint, load `section-1983-drafting`, `drafting-section-1983-complaints`, `drafting-false-arrest-complaints`, and then this skill. This skill adds documented Judge Scholer tendencies; it does not replace governing authority, the complaint contract, or the authority-verification gate.
+
+**REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the judge-specific and authority audits and rerun it after any material revision. Remove unsupported emphasis, legalese, mind-reading, accusation, and rhetoric without deleting controlling terms of art, accurately quoted language, or necessary clearly-established-law distinctions.
+
 ## Quick start
 
 1. Locate and follow the case strategy file: `strategy.md`, or the highest-numbered `strategy-v*.md`, in the case or workstream folder; ask the user for it if missing. Propose any needed departure as a new strategy version and proceed only per the user's decision — never deviate silently, and never edit a strategy version in place.
@@ -72,3 +78,5 @@ Do not combine alternative theories into an omnibus Monell paragraph. Do not tre
 - Confirm the draft follows the case strategy file and its prescribed audits ran.
 - End each argument with the precise ruling requested.
 - State corpus-derived observations as tendencies or documented examples, never predictions.
+- Run `audit-authorities` before treating any judge-specific or clearly-established-law proposition as filing-ready.
+- Run `horan-bad-words` after the last substantive or authority revision.

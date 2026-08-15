@@ -1,14 +1,6 @@
 ---
 name: audit-authorities
-description: "Audits legal briefs for citation integrity: verifies authority identity and pinpoints, classifies holding vs dicta, checks procedural-posture fit, validates record support, and evaluates differentiators/distinguishing claims. Produces issue severity and fix-ready edits."
-triggers:
-  - audit citations
-  - verify authorities
-  - audit brief
-  - check citations
-  - citation check
-  - before filing
-  - final check
+description: "Use when auditing citations, authorities, quotations, pinpoints, procedural-posture fit, record support, distinguishing claims, or clearly-established-law analysis in a pleading, amendment proffer, motion, response, brief, RRD, or filing-ready legal document."
 ---
 
 # SKILL: Audit Authorities, Citations, and Differentiators in a Legal Response
@@ -24,32 +16,31 @@ Verify that every cited authority, factual assertion, and "differentiator" (dist
 5. **Not undermined** (distinguished, limited, overruled, abrogated, or factually inapplicable)
 6. **Used honestly** (no "laundering" of a proposition through a quote or parenthetical)
 
-This skill applies to: motions, responses, replies, briefs, declarations, and appendices.
+This skill applies to complaints, amendment proffers, RRDs, motions, responses, replies, briefs, declarations, and appendices.
 
 ## Project Integration
 
-### Input files (expected paths, relative to project root)
+### Input files
 
-- **Response**: `sources/responses/{date}/{response-dir}/response.md`
-- **Authorities**: `sources/authorities/verified/cases/{case-name}/authority.pdf` and `SOURCE.yaml`
-- **Citations tracker** (optional, NOT source of truth - the response body is): `sources/responses/{date}/{response-dir}/citations.yaml`
+Resolve the controlling draft, verified-authority root, source units, and audit-output location from the repository instructions. If no repository schema exists, ask for or identify explicit paths. A citation tracker is optional and never replaces the document body or authority source.
 
 ### Output file
 
-- **Audit results**: `sources/responses/{date}/{response-dir}/citation-audit.yaml`
+Write the audit where the repository requires. If no location is defined, return the structured audit without inventing a source-tree path.
 
 ### Authority sourcing and verification
 
-Before auditing, ensure every cited authority has an `authority.pdf` on disk:
+Before auditing, obtain the best available source copy for every cited authority:
 
-1. Check `sources/authorities/verified/cases/{case-name}/authority.pdf`
-2. If missing, check `SOURCE.yaml` for a download URI
+1. Check the repository's verified authority unit and metadata.
+2. If missing, check the source metadata for a retrieval URI.
 3. If no URI, attempt to fetch from known free sources:
    - **SCOTUS**: Library of Congress (`tile.loc.gov/storage-services/service/ll/usrep/`)
    - **Fifth Circuit**: `ca5.uscourts.gov/opinions/`
    - **General**: CourtListener RECAP archive
-4. Download to `authority.pdf` and update `SOURCE.yaml` with the URI and `verified: true`
-5. If the PDF cannot be obtained, flag as **NEEDS VERIFICATION** (not auto-fail) and note in audit output
+4. Preserve the source and retrieval provenance where repository rules require.
+5. Do not mark an authority verified merely because a PDF was downloaded. Verification requires identity, court, publication and binding status, proposition and pinpoint, holding classification, procedural posture, pre-event timing when material, later history, and any rule-of-orderliness check.
+6. If a load-bearing or filing-near authority cannot be verified, mark a filing-critical GAP. Do not treat the document as filing-ready.
 
 ### Audit depth by citation role
 
@@ -227,6 +218,22 @@ Deliverable: "On-point rating":
 - DISTINGUISHABLE,
 - INAPPLICABLE.
 
+### Clearly established law audit — required for individual-capacity claims
+
+For every claim, defendant, and challenged act, verify a separate fair-warning record:
+
+| Field              | Required content                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Event              | Event date, stage, and challenged conduct                                                                                       |
+| Rule               | The constitutional right or rule at the conduct-specific level                                                                  |
+| Authority          | Case, court, publication and binding status, decision date, and pinpoint                                                        |
+| Precedential force | Holding, alternative holding, implicit holding, dicta, silence or non-holding, appellate fact statement, or persuasive-only use |
+| Comparison         | Material factual similarities and material differences                                                                          |
+| Fair warning       | Why the authority made the alleged unlawfulness apparent on the event date                                                      |
+| Status             | Verified, needs narrowing, or filing-critical GAP                                                                               |
+
+Check actual probable cause separately from arguable probable cause. Do not use a district-court decision, nonprecedential decision, or later-decided case as the source of clearly established law. When several cases allegedly combine to supply fair warning, verify the contribution and status of each case and explain the combined rule. Apply the rule of orderliness and later-history checks before approving the proposition.
+
 ### Stage 6 - Negative authority / undermining checks
 
 For each key authority you rely on (and each adverse case you cite):
@@ -263,7 +270,7 @@ Deliverable: "Quote integrity: PASS/FAIL" + corrected parenthetical + page in PD
 
 ### Stage 8 - Record cite and inference audit (facts vs evidence)
 
-For each factual claim:
+For each factual claim, first classify it as a source observation, pleaded allegation, party or court characterization, permitted inference, or GAP. Then:
 
 1. Identify whether it is:
 

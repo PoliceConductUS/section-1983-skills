@@ -26,12 +26,16 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what must
    - mirrors the motion’s heading order
    - breaks work into small Response Units (RUs)
    - maps each heading to Monell elements + required allegations
-4. Save to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+4. Save to the repository-defined response path; if none exists, default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
 5. Be **idempotent** with deterministic IDs
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
-**Required companion skill:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates Monell pleading sufficiency, identifies an amendment, or specifies an amendment proffer. Each municipal theory must follow **Element → Facts → Inference → Result** and must remain separate from other municipal theories.
+**Required companion skills:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates Monell pleading sufficiency, identifies an amendment, or specifies an amendment proffer. Apply `drafting-false-arrest-complaints` when the underlying violation turns on false arrest, probable cause, alternative offenses, seizure timing, or incorporated arrest video. Run `audit-authorities` before marking an authority-dependent unit ready.
+
+Apply this skill as a municipal overlay on `rrd-rule12`. The base skill controls canonical IDs, common field names, record-gate structure, amendment handoffs, and the total of 3–5 clarifying questions. The fields below add Monell detail; they do not create aliases for base fields.
+
+Qualified immunity and its clearly-established-law prong are not municipal defenses. Verify the underlying constitutional rule, but do not import the individual defendant's prong-two burden into the City's Monell analysis.
 
 ---
 
@@ -40,11 +44,13 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what must
 - Treat well‑pleaded complaint facts as true; draw reasonable inferences for plaintiff.
 - Do not resolve factual disputes.
 - Record gate: complaint + complaint exhibits; judicial notice (existence/filing); incorporation-by-reference where proper.
-- Do not use new facts to “fix” Monell gaps; mark **GAP** and route to amendment.
+- Do not use new facts to “fix” Monell gaps; mark **GAP** and route to amendment. Discovery-controlled details may refine a theory only when known pleaded facts already support its plausible municipal inference.
 
 ---
 
-## Step 1 — Clarifying Questions (ask 3–5 only)
+## Step 1 — City-Specific Clarifying Questions
+
+Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base question with a narrower question below when useful; do not ask both sets.
 
 1. **Do you have the city motion’s headings/outline to preserve?**  
    A. Yes — I will paste the TOC/headings verbatim  
@@ -80,10 +86,10 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what must
 
 ## Step 2 — Deterministic IDs + Idempotence (required, lightweight)
 
-**RU fingerprint (city):**
+**RU fingerprint:** Use the canonical base recipe. For a City RU, set `defendant_key` to the City, `event_stage` to the injury event stage, and `challenged_conduct` to the identified municipal action or omission.
 
 ```
-ru|<motion_folder>|<movant_heading>|<monell_theory_key>|<element_cluster_key>
+ru|<motion_key>|<claim_key>|<defendant_key>|<event_stage>|<challenged_conduct>|<movant_cluster_key>|<attacked_issue_key>
 ```
 
 Normalize + `sha256` → first 10 hex chars uppercase → `RU-<HASH10>`.
@@ -121,7 +127,7 @@ A compact map of:
 - pleaded facts supporting each element (cite placeholders)
 - the element-specific inference supported by those facts
 - the requested result for that theory
-- what will be proven later (discovery)
+- which already-plausible details remain within defendants' control
 - gaps + amendment plan
 
 ### 5) Argument Map
@@ -146,16 +152,31 @@ response_units:
     movant_heading_ordinal: "II.B"
     movant_heading: "II.B. ..."
     title: "Short name"
+    attacked_claim: "<claim_key>"
+    attacked_issue: "<element_cluster_key>"
+    defendant: "<city_key>"
+    event_stage: "<injury_event_stage>"
+    challenged_conduct: "<identified municipal action or omission>"
+    event_start: ""
+    event_end: ""
+    movants_ask: "dismiss|other"
+    movant_argument_cluster: "<stable key>"
     monell_theory: "policy|custom|failure_to_train|failure_to_supervise|ratification|mixed"
     targeted_elements:
       - "policy_or_custom"
       - "deliberate_indifference"
       - "moving_force"
     record_gate:
-      posture: "pleadings_only|judicial_notice|incorporation|conversion_risk"
-      materials:
-        - cite: "Complaint ¶__"
-          source: "complaint|complaint_exhibit|judicial_notice|incorporated_document"
+      classification: "pleadings_only|judicial_notice|incorporation|conversion_risk"
+      materials_relied_on:
+        - material_type: "complaint|complaint_exhibit|judicial_notice|incorporated_document"
+          source_id: ""
+          cite: "Complaint ¶__"
+      video:
+        in_play: true|false
+        court_has_access: true|false|null
+        authenticity: "concede|contest|unknown"
+        interpretation: "disputed|undisputed"
     controlling_standard_required: []
     record_facts_required: []
     claim_pleading_contract:
@@ -164,21 +185,35 @@ response_units:
         verified_authority: []
       facts:
         underlying_violation: []
-        policy_custom_or_practice: []
-        policymaker_attribution: []
-        notice_and_deliberate_indifference: []
-        moving_force_and_injury: []
+        identified_municipal_path: []
+        concrete_supporting_facts: []
+        reasonable_municipal_inference: []
+        attribution_and_notice: []
+        particular_injury: []
+        injury_event_stage: ""
+        moving_force_mechanism: []
+        information_and_belief_basis:
+          known_facts: []
+          controlled_information: []
+          custodian: ""
+          supported_inference: ""
         complaint_cites: []
       inference:
         text: ""
         element_supported: ""
         supported_alternative_inferences: []
+      qualified_immunity:
+        applies: false
+        prong_1_application: []
+        clearly_established_law:
+          applicable: false
+          status: "not_applicable"
       result:
         requested_sentence: ""
-    movant_framing_to_neutralize: []
+    movants_supporting_facts_to_neutralize: []
     counter_authority_required: []
     rebuttal_logic_required: []
-    done_test: []
+    falsifiable_hypothesis: []
     exhibits_citations_needed: []
     requested_ruling: "Deny dismissal of Monell claim / theory ..."
     cross_references:
@@ -188,6 +223,8 @@ response_units:
     status: "draft|ready|stale"
     user_notes: ""
 ```
+
+Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every proposed cure, including its deterministic ID, proposed complaint version, target section/count and paragraph placement, nonfutility explanation, and GAP status. Set `defendant` to the City, identify the municipal theory in the claim or defect fields, and use the particular injury's event stage. Anticipated discovery cannot replace a presently missing plausible allegation.
 
 ### 7) Standards Library
 
@@ -200,7 +237,7 @@ response_units:
 Capture:
 
 - what’s in the complaint
-- what will be proven in discovery
+- which details remain within defendants' control after the complaint states a plausible basis
 - judicial notice candidates (existence vs truth caution)
 
 ### 9) Risk Register
@@ -220,7 +257,7 @@ Common city risks:
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** `responses/<response-due-date>/<motion-folder>/`
+- **Location:** repository-defined response path; default to `responses/<response-due-date>/<motion-folder>/`
 - **Filename:** `rrd.yaml`
 
 ---
@@ -231,8 +268,10 @@ Common city risks:
 - [ ] Response outline mirrors order and maps headings to RU IDs
 - [ ] Monell theory map exists and is element-complete
 - [ ] Each Monell theory separately maps verified elements, pleaded facts, element-specific inferences, and requested result
-- [ ] Each theory addresses the underlying violation, municipal act or omission, policymaker attribution, required notice or deliberate indifference, moving force, and injury
+- [ ] Each theory separately states the identified path, concrete facts, municipal inference, attribution and notice, particular injury, injury event stage, and moving-force mechanism
+- [ ] Information-and-belief allegations identify known facts, controlled information, custodian, and supported inference
 - [ ] Each movant heading has at least one RU
 - [ ] Record gate is explicit for each RU
 - [ ] Deterministic IDs + idempotent merge behavior
-- [ ] Saved to `responses/<due-date>/<motion-folder>/rrd.yaml`
+- [ ] Every proposed amendment has a complete `amendment_handoff` entry
+- [ ] Saved to the repository-defined response path, or the documented default when none exists

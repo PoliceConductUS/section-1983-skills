@@ -43,8 +43,10 @@ Users pick up the new version with `npx skills update`.
 
 ```bash
 # Run the test suite
-python -m unittest discover skills/section-1983-drafting/scripts
+python3 -m unittest discover skills/section-1983-drafting/scripts
 
 # Confirm the CLI can discover the skills from the local checkout
 npx skills add . --list
 ```
+
+Before pushing, also run the `skill-creator` runtime's `quick_validate.py` against every `skills/*/` directory that contains `SKILL.md`.

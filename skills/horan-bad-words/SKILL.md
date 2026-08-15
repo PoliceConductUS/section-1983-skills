@@ -4,7 +4,6 @@ description: 'Knowledge base from "Bad Words: A Legal Writer''s Guide to What No
 allowed-tools:
   - Read
   - Grep
-argument-hint: [word, phrase, editing issue, or chapter number]
 ---
 
 # Bad Words: A Legal Writer's Guide to What Not to Say

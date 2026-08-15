@@ -26,12 +26,14 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what fact
    - mirrors the motion’s heading order
    - breaks work into small, checkable “Response Units” (RUs)
    - forces officer-by-officer QI completion where needed
-4. Save to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+4. Save to the repository-defined response path; if none exists, default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
 5. Be **idempotent**: re-running updates/merges without duplicating RUs
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
-**Required companion skill:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates complaint sufficiency, identifies an amendment, or specifies an amendment proffer. Each claim against each officer must follow **Element → Facts → Inference → Result**, with qualified immunity addressed officer by officer.
+**Required companion skills:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates complaint sufficiency, identifies an amendment, or specifies an amendment proffer. Also apply `drafting-false-arrest-complaints` when probable cause, arguable probable cause, alternative offenses, seizure timing, later alleged resistance, or incorporated arrest video is material. Run `audit-authorities` before marking a qualified-immunity or authority-dependent unit ready.
+
+Apply this skill as an officers-specific overlay on `rrd-rule12`. The base skill controls canonical IDs, common field names, record-gate structure, amendment handoffs, and the total of 3–5 clarifying questions. The fields below add officer and qualified-immunity detail; they do not create aliases for base fields.
 
 ---
 
@@ -48,9 +50,9 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what fact
 
 ---
 
-## Step 1 — Clarifying Questions (ask 3–5 only)
+## Step 1 — Officers-Specific Clarifying Questions
 
-Ask only what is needed to structure the RRD and properly gate the record.
+Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base question with a narrower question below when useful; do not ask both sets.
 
 ### Required Questions (use this format)
 
@@ -99,7 +101,7 @@ Each RU gets an ID derived from a stable fingerprint:
 **Fingerprint (RU):**
 
 ```
-ru|<motion_folder>|<movant_heading>|<claim_key>|<issue_key>|<officer_name_or_ALL>
+ru|<motion_key>|<claim_key>|<defendant_key>|<event_stage>|<challenged_conduct>|<movant_cluster_key>|<attacked_issue_key>
 ```
 
 Normalize each component: lowercase, trim, collapse spaces, strip punctuation except `-_/`.
@@ -185,7 +187,7 @@ Create one RU per:
 
 - **(movant heading) × (claim/issue) × (officer)**
 
-Only use `officer: ALL` if the issue is purely legal and genuinely identical.
+Only use `defendant: ALL` if the issue is purely legal and genuinely identical.
 
 Each RU MUST be checkable and must include:
 
@@ -197,13 +199,19 @@ response_units:
     title: "Short name"
     attacked_claim: "<claim_key>"
     attacked_issue: "<issue_key>" # e.g., pc_public_intox, qi_prong1, qi_prong2
-    officer: "Officer Name|ALL"
+    defendant: "Officer Name|ALL"
+    event_stage: "encounter|arrest_decision|seizure|force|continued_custody|report|prosecution|other"
+    challenged_conduct: ""
+    event_start: ""
+    event_end: ""
     movants_ask: "dismiss|grant_qi|other"
+    movant_argument_cluster: "<stable key>"
     record_gate:
-      posture: "pleadings_only|judicial_notice|incorporation|conversion_risk"
-      materials:
-        - cite: "Complaint ¶__"
-          source: "complaint|complaint_exhibit|motion_attachment|judicial_notice|incorporated_document"
+      classification: "pleadings_only|judicial_notice|incorporation|conversion_risk"
+      materials_relied_on:
+        - material_type: "complaint|complaint_exhibit|motion_attachment|judicial_notice|incorporated_document"
+          source_id: ""
+          cite: "Complaint ¶__"
       video:
         in_play: true|false
         court_has_access: true|false|null
@@ -219,17 +227,41 @@ response_units:
         elements: []
         verified_authority: []
       facts:
-        officer_specific_allegations: []
+        defendant_specific_allegations: []
         complaint_cites: []
       inference:
         text: ""
         element_supported: ""
       qualified_immunity:
+        applies: true|false
         prong_1_application: []
-        prong_2_clearly_established_authority: []
+        clearly_established_law:
+          applicable: true|false
+          event_date: ""
+          precise_right_or_rule: ""
+          authorities:
+            - citation: ""
+              identity_status: "verified|gap"
+              court_and_publication_status: ""
+              decision_date: ""
+              pre_event: true|false|null
+              holding_classification: "holding|alternative_holding|implicit_holding|dicta|non_holding|appellate_fact|persuasive_only"
+              procedural_posture: ""
+              pinpoint: ""
+              later_history: ""
+              rule_of_orderliness: ""
+              material_similarities: []
+              material_differences: []
+              fair_warning_explanation: ""
+              audit_status: "verified|needs_narrowing|filing_critical_gap"
+          material_similarities: []
+          material_differences: []
+          fair_warning_explanation: ""
+          orderliness_and_later_history: ""
+          status: "verified|needs_narrowing|filing_critical_gap|not_applicable"
       result:
         requested_sentence: ""
-    movant_framing_to_neutralize:
+    movants_supporting_facts_to_neutralize:
       - "M1: ... — response constraint at Rule 12"
     counter_authority_required:
       - "Case: proposition"
@@ -239,9 +271,9 @@ response_units:
     qualified_immunity_requirements:
       applies: true|false
       prong_1_violation_requirements: []
-      prong_2_clearly_established_requirements: []
+      clearly_established_law_complete: true|false
       officer_specific_application_required: true|false
-    done_test:
+    falsifiable_hypothesis:
       - "If H1 is true, movant loses — how verified"
       - "If H1 false, mitigation"
     exhibits_citations_needed:
@@ -251,6 +283,10 @@ response_units:
     status: "draft|ready|stale"
     user_notes: ""
 ```
+
+For a false-arrest unit, use the canonical linked `seizure_point` and `suspected_offenses[].offense_elements[]` schema in `rrd-rule12`. Complete the contemporaneous, negating, later-only, actual-probable-cause, and arguable-probable-cause fields for each offense element.
+
+Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every proposed cure, including its deterministic ID, proposed complaint version, target section/count and paragraph placement, clearly-established-law cure, nonfutility explanation, and GAP status. Set `defendant` to the individual officer. A brief assertion or anticipated discovery cannot cure a missing complaint allegation.
 
 ### 7) Video / BWC Dispute Map (Conditional)
 
@@ -314,7 +350,7 @@ Remaining unknowns that block drafting.
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** `responses/<response-due-date>/<motion-folder>/`
+- **Location:** repository-defined response path; default to `responses/<response-due-date>/<motion-folder>/`
 - **Filename:** `rrd.yaml`
 
 ---
@@ -327,7 +363,10 @@ Remaining unknowns that block drafting.
 - [ ] If QI is raised, each relevant RU is officer-specific (no lumping)
 - [ ] Each claim/officer RU states the elements, officer-specific facts, element-specific inference, and requested result
 - [ ] Each individual-capacity RU separately completes QI prong one and prong two for that officer
+- [ ] Each prong-two analysis contains the complete clearly-established-law object and is not `ready` with a filing-critical GAP
+- [ ] Each RU identifies event stage and challenged conduct; false-arrest units include the arrest-decision fields
 - [ ] Record gate is explicitly stated for each RU
 - [ ] Video authenticity vs interpretation is separated; interpretation not conceded where disputed
 - [ ] Deterministic RU IDs + idempotent merge behavior
-- [ ] Saved to `responses/<due-date>/<motion-folder>/rrd.yaml`
+- [ ] Every proposed amendment has a complete `amendment_handoff` entry
+- [ ] Saved to the repository-defined response path, or the documented default when none exists

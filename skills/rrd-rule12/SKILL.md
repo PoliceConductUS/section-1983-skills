@@ -11,8 +11,6 @@ An RRD is **not** the brief. It is a checkable plan: what must be argued, what f
 
 This skill is designed to be run **once per motion**. If there are two motions (e.g., **officers MTD** and **city MTD**), run it **twice** and write to two separate folders.
 
-> Note: I received only one of the two example `rrd.yaml` uploads in this chat because the second upload overwrote the same filename. This updated SKILL is written to be compatible with the structure in the available example while adding deterministic IDs and stronger idempotence rules.
-
 ---
 
 ## The Job
@@ -20,12 +18,14 @@ This skill is designed to be run **once per motion**. If there are two motions (
 1. Receive the motion arguments the user must respond to (or a summary)
 2. Ask **3–5 essential** clarifying questions (lettered options)
 3. Generate a structured **RRD** (Rule 12 optimized)
-4. Save to: `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+4. Save to the response path required by the repository; if none is defined, default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
 5. Be **idempotent**: re-running the skill updates/merges the existing `rrd.yaml` without duplicating Response Units.
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
-**Required companion skill:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates whether a § 1983 claim is plausibly pleaded, identifies an amendment, or specifies an amendment proffer. The RRD must preserve that skill's **Element → Facts → Inference → Result** structure.
+**Required companion skills:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates whether a § 1983 claim is plausibly pleaded, identifies an amendment, or specifies an amendment proffer. Also apply `drafting-false-arrest-complaints` when probable cause, arguable probable cause, alternative offenses, seizure timing, later alleged resistance, or incorporated arrest video is material. Run `audit-authorities` before marking an authority-dependent unit ready.
+
+Use `rrd-rule12-officers` for an individual-officer motion and `rrd-rule12-city` for a municipal motion. This skill owns canonical identifiers, common field names, the 3–5-question total, and shared guardrails. A specialization may add fields and replace a base question with a narrower one; it may not create aliases, require an additional question set, or remove record, amendment, event-stage, or authority requirements.
 
 ---
 
@@ -105,6 +105,7 @@ Objects that MUST have deterministic IDs:
 - `argument_map[]` items (if you keep them as discrete objects)
 - `video_dispute_map[]` items (when present)
 - `risk_register[]` items (optional but recommended)
+- `amendment_handoff[]`
 
 ### Fingerprint
 
@@ -131,6 +132,7 @@ A fingerprint is a _stable_ string derived from the essence of the thing, then h
 - Video dispute map items: `VDM-<HASH10>`
 - Risks: `RISK-<HASH10>`
 - Argument map entries: `AM-<HASH10>`
+- Amendment handoffs: `AH-<HASH10>`
 
 ### Fingerprint recipes (canonical)
 
@@ -139,7 +141,7 @@ These are the default recipes; if the user supplies claim IDs from a `claims/` f
 **Response Unit fingerprint:**
 
 ```
-ru|<motion_key>|<claim_key>|<defendant_key>|<movant_cluster_key>|<attacked_issue_key>
+ru|<motion_key>|<claim_key>|<defendant_key>|<event_stage>|<challenged_conduct>|<movant_cluster_key>|<attacked_issue_key>
 ```
 
 **Strategic argument fingerprint:**
@@ -166,6 +168,12 @@ risk|<motion_key>|<risk_key>|<risk_statement_normalized>
 am|<motion_key>|<movant_heading_normalized>|<targeted_claim_key>|<defense_type_key>
 ```
 
+**Amendment handoff fingerprint:**
+
+```
+ah|<motion_key>|<motion_or_ruling_premise>|<claim_key>|<defendant_key>|<event_stage>|<exact_defect_normalized>
+```
+
 ### Merge rules (idempotent updates)
 
 When `rrd.yaml` already exists, the generator MUST:
@@ -178,7 +186,9 @@ When `rrd.yaml` already exists, the generator MUST:
 4. For objects present in the old file but not regenerated:
    - Keep them, but mark with `status: stale` (do not delete automatically).
 
-**User-preserved fields** (never overwrite if present):
+Apply these same update-by-ID and stale-item rules to `amendment_handoff[]`; do not duplicate a cure when its deterministic ID already exists.
+
+**User-preserved fields** (never overwrite on a regenerated object if present):
 
 - `user_notes`
 - `status` (unless it is missing; default to `draft`)
@@ -186,12 +196,14 @@ When `rrd.yaml` already exists, the generator MUST:
 - `owner`
 - any field under a `manual:` subtree (reserved)
 
+The generated transition from an item no longer produced to `status: stale` is the sole exception to status preservation. If the item is produced again, restore its last non-stale user status when recorded; otherwise use the schema default.
+
 ---
 
 ## Output: File Layout
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+- **Location:** use the repository-defined response path; default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
 - **Filename:** fixed `rrd.yaml`
 
 Example:
@@ -207,7 +219,7 @@ responses/
         └── rrd.yaml
 ```
 
-If `SOURCE.yaml` does not exist, create it. `rrd.yaml` should reference `SOURCE.yaml` items by `source_id` (see schema below).
+Create or update source metadata only when the repository's source schema requires it. `rrd.yaml` should reference repository source IDs when available.
 
 ---
 
@@ -239,6 +251,7 @@ standards_library: {}
 evidence_exhibit_plan: {}
 risk_register: []
 compliance_packaging: {}
+amendment_handoff: []
 open_questions: []
 ```
 
@@ -252,6 +265,10 @@ Each `response_units[]` entry MUST include:
   attacked_claim: "" # claim_key preferred
   attacked_issue: "" # e.g., "qi_prong_1", "arguable_pc", "monell_policy"
   defendant: "" # defendant_key or "ALL" for purely legal items
+  event_stage: "" # encounter|arrest_decision|seizure|force|continued_custody|report|prosecution|other
+  challenged_conduct: ""
+  event_start: ""
+  event_end: ""
   movants_ask: "" # dismiss / grant QI / etc.
   movant_argument_cluster: "" # stable key, not a sequence number
   record_gate:
@@ -280,7 +297,30 @@ Each `response_units[]` entry MUST include:
     qualified_immunity:
       applies: true|false
       prong_1_application: []
-      prong_2_clearly_established_authority: []
+      clearly_established_law:
+        applicable: true|false
+        event_date: ""
+        precise_right_or_rule: ""
+        authorities:
+          - citation: ""
+            court_and_publication_status: ""
+            decision_date: ""
+            pre_event: true|false|null
+            holding_classification: "holding|alternative_holding|implicit_holding|dicta|non_holding|appellate_fact|persuasive_only"
+            pinpoint: ""
+            identity_status: "verified|gap"
+            procedural_posture: ""
+            later_history: ""
+            rule_of_orderliness: ""
+            material_similarities: []
+            material_differences: []
+            fair_warning_explanation: ""
+            audit_status: "verified|needs_narrowing|filing_critical_gap"
+        material_similarities: []
+        material_differences: []
+        fair_warning_explanation: ""
+        orderliness_and_later_history: ""
+        status: "verified|needs_narrowing|filing_critical_gap|not_applicable"
     result:
       requested_sentence: ""
   movants_supporting_facts_to_neutralize: []
@@ -292,6 +332,48 @@ Each `response_units[]` entry MUST include:
   status: "draft|ready|stale"
   user_notes: "" # preserved on regen
 ```
+
+For a false-arrest unit, use this linked offense-and-element schema so a later fact cannot silently support an earlier arrest decision:
+
+```yaml
+seizure_point: ""
+suspected_offenses:
+  - offense_key: ""
+    offense: ""
+    legal_source: ""
+    offense_elements:
+      - element_key: ""
+        element: ""
+        facts_known_then: []
+        negating_facts: []
+        later_only_facts: []
+        probable_cause_conclusions: []
+        arguable_probable_cause_conclusions: []
+```
+
+Use this contract for every proposed amendment:
+
+```yaml
+amendment_handoff:
+  - id: "AH-XXXXXXXXXX" # hash motion|premise|claim|defendant|event_stage|defect
+    motion_or_ruling_premise: ""
+    claim: ""
+    defendant: ""
+    event_stage: ""
+    exact_defect: []
+    proposed_factual_cure: []
+    source_or_supported_inference: []
+    proposed_complaint_version: "next numbered version or repository-defined version"
+    target_complaint_section_or_count: []
+    target_paragraphs: []
+    clearly_established_law_cure:
+      applicable: true|false
+      cure: {} # use {} only when applicable is false
+    nonfutility_explanation: ""
+    status: "draft|supported|needs_narrowing|filing_critical_gap|stale"
+```
+
+A brief assertion or anticipated discovery cannot cure a missing complaint allegation.
 
 ### Video dispute map (conditional)
 
@@ -387,9 +469,9 @@ Unknowns that block drafting.
 
 ---
 
-## Step 4 — SOURCE.yaml (minimal required behavior)
+## Step 4 — Source metadata (when repository-required)
 
-If `SOURCE.yaml` is missing, create it with at least:
+If the repository requires `SOURCE.yaml` and it is missing, create it under that repository's schema. A minimal fallback is:
 
 ```yaml
 meta:
@@ -417,9 +499,12 @@ Before saving:
 - [ ] Claim × Defendant matrix present (especially for officer motion)
 - [ ] Every claim-focused RU states the elements, defendant-specific facts, element-specific inference, and requested result
 - [ ] Every individual-capacity RU addresses both qualified-immunity prongs separately for each defendant
+- [ ] Every prong-two analysis contains the complete clearly-established-law object and is not `ready` with a filing-critical GAP
+- [ ] Every RU identifies the event stage and challenged conduct; false-arrest units contain the arrest-decision fields
 - [ ] Every RU includes record gate + standard + facts + authority + logic + done test + requested ruling
 - [ ] If video is in play, included `video_dispute_map` and did not concede interpretation
 - [ ] Judicial notice used for existence/filing only unless undisputed
 - [ ] Gaps are explicitly labeled with mitigation (amendment / later proof)
-- [ ] Saved to `responses/<due-date>/<motion-folder>/rrd.yaml`
+- [ ] Every proposed amendment has a complete `amendment_handoff` entry
+- [ ] Saved to the repository-defined response path, or the documented default when none exists
 - [ ] No internal tool artifacts in output

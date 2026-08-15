@@ -1,4 +1,3 @@
-```markdown
 ---
 name: rrd
 description: "Generate a Response Requirements Document (RRD) for opposing (or supporting) a specific claim/argument in a legal motion. Use when planning a motion response, building a claim-by-claim checklist, or when asked to create an RRD.
@@ -10,6 +9,10 @@ Triggers on: create an rrd, write rrd for, respond to this motion, opposition pl
 Create detailed **Response Requirements Documents (RRDs)** that are clear, actionable, and suitable for drafting a motion response **claim-by-claim**.
 
 An RRD is **not** the brief. It is the blueprint: what must be argued, proved, cited, and attached so the final response is tight, checkable, and complete.
+
+## Routing rule
+
+Use this generic skill for non-Rule-12 response planning. For a Section 1983 Rule 12 motion, use `rrd-rule12` and then `rrd-rule12-officers` or `rrd-rule12-city` as applicable. If the plan evaluates a complaint or amendment, load `drafting-section-1983-complaints`; add `drafting-false-arrest-complaints` when probable cause, alternative offenses, seizure timing, or arrest video is material. Run `audit-authorities` before marking any authority-dependent unit ready.
 
 ---
 
@@ -33,6 +36,7 @@ Ask only critical questions where the prompt is ambiguous. Focus on:
 - **Record:** What evidence/record exists and what is admissible at this stage?
 - **Relief & Outcomes:** What exact ruling are we asking for (deny/strike/partial deny/etc.)?
 - **Constraints:** Deadlines, page limits, local rules, required sections.
+
 ```
 
 ### Format Questions Like This
@@ -64,12 +68,14 @@ Ask only critical questions where the prompt is ambiguous. Focus on:
 
 This lets users reply with “1A, 2A, 3A, 4B” for quick iteration.
 
-````
+```
+
 ## Step 2: RRD Structure
 
 Generate the RRD with these sections.
 
 ### 1. Matter Snapshot
+
 - Case name / caption (as provided)
 - Motion being responded to
 - Filing deadline (if provided)
@@ -77,14 +83,18 @@ Generate the RRD with these sections.
 - Standard of review posture (pleadings-only vs evidentiary record)
 
 ### 2. Response Objectives
+
 Bulleted list of **specific outcomes**:
+
 - Deny dismissal of Claim X
 - Preserve Claim Y under alternative theory Z
 - Prevent conversion to Rule 56 (if relevant)
 - Preserve issues for appeal / avoid waiver
 
 ### 3. Argument Map
+
 A table-like outline mapping:
+
 - **Movant Heading / Argument**
 - **Targeted Claim/Element**
 - **Controlling Standard**
@@ -95,51 +105,61 @@ A table-like outline mapping:
 - **What Defeats Them (falsifiable hypothesis/test)**
 
 ### 4. Response Units (RU) — Claim-by-Claim Requirements
+
 For each attacked claim/argument, create a “Response Unit” that is small and checkable.
 
 **Format:**
 
 ```markdown
 ## RU-001: [Movant Argument Heading or Short Name]
+
 **Attacked Claim/Issue:** [e.g., First Amendment retaliation; PI probable cause; Qualified immunity prong 1/2]
 
 **Movant’s Ask:** [dismiss / grant QI / strike / convert / etc.]
 
 **Controlling Standard (Required):**
+
 - [ ] Quote or accurately paraphrase the controlling test elements
 - [ ] Identify burden allocation (who must show what)
 - [ ] Identify what the court must accept as true at this stage (if pleadings)
 
 **Record Facts We Must Establish (Required):**
+
 - [ ] Fact F1: [statement] — cite: [BWC timestamp / exhibit / complaint ¶]
 - [ ] Fact F2: [statement] — cite: [...]
 - [ ] Fact F3: [statement] — cite: [...]
 
 **Movant’s “Supporting Facts” to Neutralize (Required):**
+
 - [ ] Alleged fact M1: [their framing] — response: [why disputed/irrelevant/conclusory]
 - [ ] Alleged fact M2: [...]
 
 **Counter-Authority (Required):**
+
 - [ ] Case/Rule A: [proposition] — why it controls here
 - [ ] Case/Rule B: [proposition] — why it distinguishes movant’s cases
 
 **Rebuttal Logic (Required):**
+
 - [ ] Syllogism: If [standard element], then [result], because [facts + authority]
 - [ ] Alternative framing (backup): [narrower argument that still wins]
 
 **Falsifiable Hypothesis / “Done Test” (Required):**
+
 - [ ] If **H1** is true, movant’s argument fails: [precise statement]
 - [ ] How we would verify H1: [cite / exhibit / declaration / judicial notice]
 - [ ] If **H1** is false, mitigation: [amendment / alternative claim / concession]
 
 **Exhibits & Citations Needed (Required):**
+
 - [ ] Exhibit E1: [name] — purpose: [what it proves]
 - [ ] Exhibit E2: [...]
 - [ ] Citation list: [complaint ¶ / docket entry / transcript page / timestamp]
 
 **Requested Ruling (Required):**
+
 - [ ] Deny / deny-in-part / preserve leave to amend / other: [exact language]
-````
+```
 
 **Important:**
 

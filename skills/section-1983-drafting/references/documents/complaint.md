@@ -3,13 +3,17 @@
 ## Document skeleton
 
 1. Caption (court, parties, case number placeholder, document title)
-2. Introduction (2–4 paragraphs, facts only, no argument)
+2. Introduction (optional; short, outcome-first, and factual)
 3. Jurisdiction and venue
 4. Parties (each defendant: name, role, employer, capacity sued in, and an
    allegation that the defendant acted under color of state law)
-5. Statement of Facts (numbered paragraphs, chronological, one set of
-   circumstances per paragraph)
-6. Counts (one per legal theory; each incorporates the facts by reference,
+5. Statement of Facts:
+   - Use numbered paragraphs and present events chronologically.
+   - When implicated, separate pre-seizure observations, the investigative encounter, the arrest decision, the seizure, alleged resistance, force, continued custody, and later reports or prosecution into distinct subsections or paragraph groups.
+   - For each stage, identify the actor, what that actor knew then, and what that actor did.
+   - Do not use later conduct or later-acquired information to justify an earlier decision unless supported facts show the decisionmaker knew it then.
+   - Limit each paragraph to one material event or closely connected set of circumstances within one stage.
+6. Counts (one per legal theory; each incorporates only the factual paragraphs relevant to that count,
    then maps facts to elements in short paragraphs; element recitations
    track the controlling authority's wording, with a citation, rather than
    paraphrasing the standard into plain-word substitutions)
@@ -59,10 +63,13 @@ Official capacity / municipality (Monell):
 Anticipating qualified immunity:
 
 - Plead the facts with enough specificity that the violated right is
-  identifiable at the right level of generality, and that the right was
-  clearly established at the time. Cite factually similar precedent in
-  later briefing, not in the complaint, but plead the facts that will match
-  it.
+  identifiable at the right level of generality.
+- Build a complete internal comparison for every individual-capacity claim and defendant: event date, precise right or rule, binding pre-event authority and status, material similarities, material differences, and why the authority gave fair warning.
+- In the complaint, include a concise claim-and-defendant-specific fair-warning paragraph when qualified immunity is raised, a controlling ruling identifies the issue, or an applicable specialized skill requires it. Keep the full comparison in the internal matrix rather than turning the complaint into an authority brief.
+
+## False-arrest extension
+
+Apply `drafting-false-arrest-complaints` when a count turns on probable cause, arguable probable cause, an alternative offense, the seizure boundary, later alleged resistance, or incorporated arrest video. Use its arrest-decision and actor matrices before drafting the count.
 
 ## Pleading-standard discipline
 

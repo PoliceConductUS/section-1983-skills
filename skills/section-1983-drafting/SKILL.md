@@ -17,6 +17,21 @@ The skill is layered the way the law varies: an invariant writing system,
 a uniform federal baseline per document type, and a protocol for the
 district-by-district layer that cannot be authored in advance.
 
+## Skill routing and precedence
+
+Load each applicable skill once, in this order:
+
+1. Use this skill for routing, deadlines, localization, authority sourcing, and writing rules.
+2. Add `drafting-section-1983-complaints` for a complaint, amended complaint, or amendment proffer.
+3. Add `drafting-false-arrest-complaints` when false arrest, probable cause, arguable probable cause, alternative offenses, seizure timing, or incorporated arrest video is material.
+4. Add an assigned-judge skill, such as `drafting-for-judge-scholer`, as a court-specific overlay.
+5. Run `audit-authorities` before treating a filing or clearly-established-law proposition as verified.
+6. Run `horan-bad-words` on the substantively complete draft and rerun it after any material authority-driven revision.
+
+The more specific skill adds requirements. It does not relax this skill, governing court rules, repository instructions, source gates, or authority gates.
+
+**REQUIRED FINAL EDITING SUB-SKILL:** Every drafting task must use `horan-bad-words`. Apply it after the facts, claims, requested relief, and authorities are complete. It may remove unsupported emphasis, legalese, mind-reading, accusation, and rhetoric. It may not delete or paraphrase controlling terms of art, accurately quoted language, offense elements, or necessary clearly-established-law distinctions.
+
 ## No-concession default
 
 No concession by default. Do not accept, adopt, or restate an adverse
@@ -90,7 +105,7 @@ any document, if present at all.
    and repair every violation:
 
    ```bash
-   python scripts/draft_lint.py draft.md
+   python3 scripts/draft_lint.py draft.md
    ```
 
    Score is violations per 100 words. Lint, revise, lint again; target

@@ -15,6 +15,8 @@ Use the complete inventories at:
 - `research-notes/judicial-docket-study-2026-07-24/scholer-missing-recap-documents.csv`
 - `research-notes/judicial-docket-study-2026-07-24/scholer-recap-retrieval-status.csv`
 
+These paths belong to the source research workspace and may be absent from an installed copy of this skill. If a file is unavailable, do not imply that it was reviewed. Treat the summaries below as retrieval leads, obtain the underlying decision from a reliable source, and verify identity, authorship, holding, pinpoint, authority status, and later history before use.
+
 ## High-value independently reasoned decisions
 
 - _Cornett v. Ward_, No. 3:18-cv-01395-S, ECF 46: pleaded force facts, qualified immunity, conspiracy.

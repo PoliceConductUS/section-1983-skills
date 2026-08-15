@@ -34,8 +34,11 @@ dictionary dispatch instead of if statements.
 Run the tests before every push:
 
 ```bash
-python -m unittest discover skills/section-1983-drafting/scripts
+python3 -m unittest discover skills/section-1983-drafting/scripts
+npx skills add . --list
 ```
+
+Also run the `skill-creator` runtime's `quick_validate.py` against every `skills/*/` directory that contains `SKILL.md`. Every skill must pass before review.
 
 New document types are new skeletons under
 `skills/section-1983-drafting/references/documents/`, following the

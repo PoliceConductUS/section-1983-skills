@@ -9,7 +9,11 @@ description: Use when drafting, revising, or auditing a federal Section 1983 com
 
 Draft every count through an **Element → Facts → Inference → Result** structure. Rule 8 requires a short and plain statement, not a fact dump or a brief. Include enough defendant-specific factual content for the court to draw each liability inference.
 
-Before drafting, read the repository `AGENTS.md` and obey its authority, source, citation, and gap rules. Use verified authority only. Preserve supported alternative theories when discovery-controlled facts prevent choosing among them.
+Use `section-1983-drafting` for document routing, localization, and the shared writing system. When a complaint includes false arrest, probable cause, arguable probable cause, alternative offenses, seizure timing, or incorporated arrest video, also use `drafting-false-arrest-complaints`. Load each applicable skill once; this skill owns the general complaint contract and the false-arrest skill adds the specialized contract.
+
+Before drafting, read the repository `AGENTS.md` when one exists and obey its authority, source, citation, and gap rules. Use verified authority only. Preserve supported alternative theories when discovery-controlled facts prevent choosing among them. Run `audit-authorities` before treating a filing-near authority or clearly-established-law proposition as verified.
+
+**REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the complaint is substantively complete and rerun it after any material authority-driven revision. Remove unsupported emphasis, legalese, mind-reading, accusation, and rhetoric without deleting controlling terms of art, accurately quoted language, offense elements, or necessary clearly-established-law distinctions.
 
 ## Immutable versioned drafts
 
@@ -210,7 +214,7 @@ Each alternative must satisfy all six steps on its own. An omnibus conclusion, a
 
 Do not merge custom, failure to train, failure to supervise, and ratification into one conclusion. Facts within municipal control may be alleged on information and belief only when the complaint states the factual basis for the inference and identifies the discovery-controlled information.
 
-When the alleged municipal theory follows an end-to-end decision path, audit every supported checkpoint and preserve the complete path in each summary. Do not stop at arrest or jail intake. Check field training; the arrest decision; report, recording, force, and supervisory review; post-arrest custody; jail intake; municipal prosecution and the City Attorney's Office; plea, suppression, dismissal, and final-disposition decisions; expunction requests or certification decisions; civil defense; later corrective review; and continuing record harm. Distinguish pre-incident causation from later notice, failure to correct, continued prosecution, and continuing-harm theories.
+When the case strategy alleges an end-to-end municipal decision path, audit every supported checkpoint and preserve the complete path in each summary. Do not stop at arrest or jail intake. Check only the supported stages material to the identified municipal theory. Distinguish pre-incident causation from later notice, failure to correct, continued prosecution, and continuing-harm theories.
 
 The end-to-end accountability-avoidance system is a strategy map, not one omnibus Monell theory. Allocate each supported checkpoint to a separately identified municipal path and particular injury. For each path, state whether the relevant municipal act or omission predates and allegedly caused the injury or instead supplies later notice or causes a later continuing injury. A later prosecution, suppression, dismissal, civil-defense, records, or expunction event cannot be the moving force behind an earlier arrest or use of force. If any one of the six required steps is missing for a proposed path, omit that path from the complaint and log the missing proof as a GAP.
 
@@ -218,7 +222,7 @@ The end-to-end accountability-avoidance system is a strategy map, not one omnibu
 
 - Every factual allegation must be traceable to a source or marked as a gap.
 - Use the complaint as the pleading; do not turn the count into an evidentiary appendix.
-- For body-worn-camera citations, give both elapsed duration and the visible overlay date/time, naming the wearing officer: `BWC-Doe elapsed 04:17.900; overlay 2024-01-15 21:34:05.120`. If the case defines its own recording-citation convention (for example, a fixed elapsed-to-overlay offset), follow the case document that defines it.
+- If the repository or case strategy requires dual body-worn-camera timestamps, give both elapsed duration and the visible overlay date/time, naming the wearing officer: `BWC-Doe elapsed 04:17.900; overlay 2024-01-15 21:34:05.120`. Otherwise follow the case's verified recording-citation convention.
 - Describe what the recording shows. Mark uncertainty, occlusion, speaker attribution, and inference.
 - Do not state that video resolves a disputed movement unless the view does so continuously and unambiguously.
 
@@ -271,5 +275,5 @@ A count is complete only if:
 - [ ] no bare legal conclusion or liability label substitutes for element-specific facts;
 - [ ] factual and authority gaps are logged;
 - [ ] “person-level” does not appear and each data count states its exact unit;
-- [ ] the prose is simple, concise, direct, and has passed a plain-language legal-writing review (for example, the `horan-bad-words` skill); and
-- [ ] paragraph numbering, cross-references, and dual BWC timestamps are verified.
+- [ ] the prose is simple, concise, direct, and has passed the required `horan-bad-words` review after the last material substantive revision; and
+- [ ] paragraph numbering and cross-references are verified, and any repository-required BWC timestamp convention is followed.

@@ -15,6 +15,25 @@ Before drafting, read the repository `AGENTS.md` when one exists and obey its au
 
 **REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the complaint is substantively complete and rerun it after any material authority-driven revision. Remove unsupported emphasis, legalese, mind-reading, accusation, and rhetoric without deleting controlling terms of art, accurately quoted language, offense elements, or necessary clearly-established-law distinctions.
 
+## Complaint-level clearly-established law is mandatory and non-waivable
+
+For every individual-capacity count against a defendant who can assert qualified immunity, the **filed complaint text itself** must contain a concise, defendant-specific fair-warning unit. This is a hard contract term. It is satisfied only by allegations that appear in the complaint being filed — never by a separate brief, an internal matrix, a strategy or control memo, or a promise to supply the analysis later. A brief may **add** authority discussion; it can never **substitute** for the complaint's fair-warning unit.
+
+For each such claim and defendant, the complaint states:
+
+1. the right stated at the factual specificity of that defendant's conduct;
+2. the defendant's act, knowledge, and event stage;
+3. verified binding authority decided before the event date;
+4. the materially similar facts and the material differences;
+5. why that authority gave this defendant fair warning; and
+6. a conclusion addressing both qualified-immunity prongs.
+
+**Precedence.** A case-specific strategy, control, routing, packet, or "put the clearly-established analysis in the brief only" instruction does **not** relax this term. Such an instruction may route the full five-role case stack, later-history research, competing-authority discussion, and extended futility analysis to the brief and internal audits. It may not remove the concise fair-warning unit from the complaint. When a case instruction conflicts with this contract, this contract controls: flag the conflict, keep the complaint-level unit, and route only the surplus analysis to the brief.
+
+**Rule 8 does not lower this floor.** _Johnson v. City of Shelby_, 574 U.S. 10 (2014), confirms a complaint need not contain a brief or perfectly state every legal theory, but a plaintiff confronting qualified immunity in this circuit must plead specific facts supporting liability and defeating immunity with corresponding specificity (_Degenhardt_ and _Kelson_, below). A prior qualified-immunity ruling or a futility inquiry raises, not lowers, the required specificity. The unit is concise, not a brief; it defeats immunity on the face of the complaint without turning the pleading into an authority memo.
+
+**Exception.** A count against a defendant who cannot assert qualified immunity — for example a municipality or other entity on a Monell count — does not require this unit.
+
 ## Immutable versioned drafts
 
 Every change to an existing numbered amended-complaint or objection draft requires a new numbered version. Never edit, overwrite, or replace an existing version, including for a small correction or a same-session addition. Complaint and objection numbering are independent; increment each from the latest version in its own workstream. When revising both, create a new version of each and create matching new versioned metadata, gap, citation-audit, and derived artifact files. Preserve every earlier version unchanged.
@@ -124,6 +143,8 @@ For each prong-two proposition, create a conduct-to-precedent comparison before 
 
 | Defendant and challenged conduct | Binding case and authority status | Materially similar facts | Material differences | Why the case gave fair warning on the event date |
 | -------------------------------- | --------------------------------- | ------------------------ | -------------------- | ------------------------------------------------ |
+
+The full matrix is internal work product, but a concise result of this comparison — the six-part fair-warning unit required by **Complaint-level clearly-established law is mandatory and non-waivable**, above — must appear in the complaint text for each individual-capacity claim and defendant. Do not defer it to the brief.
 
 Use the level of specificity at which the defendant acted. A general right to be free from arrest, retaliation, or excessive force is not enough. Identify the facts that drive the constitutional rule, including the suspected offense, threat, resistance, flight, compliance, force type, duration, warning interval, injury, protected activity, probable-cause posture, and event sequence as applicable. Explain material differences instead of hiding them. Do not use a district-court decision, an unpublished nonprecedential decision, or a later-decided case as the source of clearly established law. Such authority may be persuasive on method or application only when its status and limited use are stated accurately.
 
@@ -260,7 +281,8 @@ A count is complete only if:
 - [ ] every defendant has a participant-specific application;
 - [ ] every claim that depends on a challenged statement, omission, characterization, or later-added justification compactly states the statement, contradiction, corrected account, and materiality;
 - [ ] the requested inference is stated and follows from the facts;
-- [ ] individual liability addresses both qualified-immunity prongs;
+- [ ] individual liability addresses both qualified-immunity prongs **in the filed complaint text**, not only in a brief, control memo, or internal matrix;
+- [ ] every individual-capacity count against a defendant who can assert qualified immunity contains, in the complaint itself, the concise six-part fair-warning unit (right at conduct-level specificity; act, knowledge, and stage; verified binding pre-event authority; materially similar facts and material differences; why fair warning existed; both-prong conclusion), and no case strategy, control, or routing instruction has removed it;
 - [ ] each qualified-immunity prong-two proposition includes a conduct-to-precedent comparison using binding, pre-event authority at the required factual specificity and candidly addresses material differences;
 - [ ] Monell theories separately address policy/custom, policymaker, required notice or deliberate indifference, and moving force;
 - [ ] every Monell claim and every alternative Monell theory separately completes the identified municipal path -> concrete supporting facts -> reasonable municipal inference -> municipal attribution and notice -> particular injury -> moving-force mechanism sequence;

@@ -10,10 +10,12 @@ a checklist. Run it once per district, cache the answers, and reuse them.
 The district, the division, the assigned district judge, and the assigned
 magistrate judge. All four can carry their own rules.
 
-## Step 2: Check the cache
+## Step 2: Check available caches
 
-Look for `jurisdictions/<district-slug>.md` (for example
-`jurisdictions/d-minn.md`). If it exists and is recent, apply it and stop.
+First use a project-defined localization or local-rules cache. A bundled
+`jurisdictions/<district-slug>.md` file may be used as a retrieval lead if it is
+current, but an installed skill directory is not the user's case workspace. Do
+not write to or commit changes inside an installed skill package.
 
 ## Step 3: Fetch the sources
 
@@ -43,12 +45,14 @@ For the district and, where they speak, the assigned judges:
    plaintiff runs (mail or ECF notice).
 7. Anything the assigned judge's standing orders add or change.
 
-## Step 5: Write the cache file
+## Step 5: Preserve the localization result
 
-Create `jurisdictions/<district-slug>.md` with the answers, one section per
-checklist item, each with a citation to the local rule or standing order and the
-date checked. Commit it. The repository accretes localization exactly where
-cases are litigated.
+If the project defines a localization-cache path, write the answers there, one
+section per checklist item, each with a citation to the local rule or standing
+order and the date checked. Otherwise return the completed checklist as an
+internal audit and ask before creating a durable project file. Do not invent a
+repository path, edit the installed skill tree, commit, or push unless the user
+separately authorizes that repository action.
 
 ## Step 6: Apply it
 

@@ -106,10 +106,11 @@ rhetorical argument is a small part of any document, if present at all.
    case map is the answer.
 3. Calendar. Establish the deadline before drafting. A perfect late filing
    loses. Local rules control most response deadlines.
-4. Localize. Run `references/localization.md`: use the cached
-   `references/jurisdictions/<district>.md` if one exists, otherwise fetch the
-   district's local rules and the assigned judges' standing orders, answer the
-   checklist, and write the cache file.
+4. Localize. Run `references/localization.md`: use the cached project
+   localization record if one exists. Otherwise fetch the district's local rules
+   and the assigned judges' standing orders and answer the checklist. Preserve
+   it where the project requires; never write into an installed skill package or
+   invent a repository path.
 5. Source authorities. Follow `references/authorities.md` for every citation: a
    verified-authorities tool or repository when available, binding before
    persuasive, and a `[VERIFY]` marker on anything cited without a verified
@@ -160,7 +161,8 @@ and keep their required wording.
 - `references/case-map.md` — docket event to responsive document, with federal
   deadline baselines.
 - `references/localization.md` — the protocol for district and judge variation,
-  cached per forum under `references/jurisdictions/`.
+  using a project-defined cache when one exists and a returned internal audit
+  otherwise.
 - `references/authorities.md` — citation sourcing rules and the interface this
   skill expects from a verified-authorities tool or repository.
 - `references/documents/` — one federal-baseline skeleton per document type:

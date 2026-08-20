@@ -33,15 +33,13 @@ npx skills update
 | `drafting-section-1983-complaints` | General complaint and amended-complaint pleading contract, including defendant-specific facts, qualified immunity, and Monell.                                             |
 | `drafting-false-arrest-complaints` | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
 | `drafting-for-judge-scholer`       | Judge-specific overlay for matters assigned to Judge Karen Gren Scholer.                                                                                                   |
+| `studying-rule-59e-decisions`      | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
 | `rrd`                              | Generic Response Requirements Document planner; routes Section 1983 Rule 12 matters to the specialized RRD skills.                                                         |
 | `rrd-rule12`                       | Base Rule 12 response-planning contract.                                                                                                                                   |
 | `rrd-rule12-officers`              | Officer-motion specialization with claim-by-claim and officer-by-officer qualified-immunity analysis.                                                                      |
 | `rrd-rule12-city`                  | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
 | `audit-authorities`                | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
 | `horan-bad-words`                  | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
-
-The repository also contains `prd`, a standalone software-product planning
-utility. It does not participate in the legal-drafting workflow.
 
 ## How the skills compose
 
@@ -68,6 +66,28 @@ establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; the authority and writing
 skills are final gates.
 
+## Project inputs and portability
+
+The skills describe artifact roles, not a required case-management product.
+Projects may use different filenames or keep the same information in one
+document. When a skill calls for a strategy, chronology or fact lock, claim
+ledger, gap register, authority library, or coded corpus:
+
+- use the project's existing equivalent;
+- do not invent a file or imply that a missing artifact was reviewed;
+- ask before drafting without a strategy; and
+- create a minimal internal working table for other missing roles when the
+  document can still be prepared from verified sources.
+
+Localization results belong in a project-defined cache or returned internal
+audit, not inside an installed skill package. Numbered packet folders,
+manifests, hashes, and source records apply only when the user's project already
+uses them.
+
+Judge-specific observations are optional. If the reviewed corpus does not
+support an issue-specific conclusion, the judge overlay contributes no
+judge-specific proposition for that issue.
+
 ## Writing system
 
 The core drafting skill enforces one merged writing system: Simplified Technical
@@ -91,8 +111,10 @@ npx prettier --check .
 
 ## Contributing
 
-See `CONTRIBUTING.md`. Every push to `main` is a release: installation always
-pulls the latest commit, and users update with `npx skills update`.
+See `CONTRIBUTING.md`. `main` is the stable release branch. Develop changes on
+feature branches, merge only after the required validation passes, and tag each
+release. Installation pulls the current stable branch, and users update with
+`npx skills update`.
 
 ## Disclaimer
 

@@ -5,6 +5,9 @@ Every skill in this repository serves one audience: pro se plaintiffs in Section
 1983 cases. Keep that reader in mind. They are smart, unrepresented, and judged
 on their filings.
 
+Develop changes on feature branches. `main` is the stable release branch; merge
+only a complete change that passes the repository tests and skill validation.
+
 ## Adding a skill
 
 1. Create `skills/<skill-name>/SKILL.md` with `name` and `description` in the

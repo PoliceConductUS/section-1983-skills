@@ -33,6 +33,23 @@ make the appendix longer. Include the full document only when a court rule,
 incorporation issue, or context needed to understand the cited excerpt requires
 it.
 
+When the applicable local rule requires appendix citations, each assertion in
+the brief about documentary or non-documentary material must cite every appendix
+page that supports it. A parallel docket citation may identify the source, but
+it does not replace the appendix citation. Before filing, compare the brief,
+appendix index, and rendered appendix page by page. Reject a citation that
+points to the wrong proposition, a relied-on record page absent from the
+appendix, or a load-bearing record assertion supported only by a docket
+citation.
+
+Preserve that review as a sentence-level matrix:
+
+`brief line or sentence | documentary assertion | docket source and page | every supporting appendix page | status`.
+
+A docket-only citation fails when the localized rule requires an appendix cite.
+A missing relied-on source page fails. Rebuilding the appendix invalidates the
+matrix and requires a complete page-by-page rerun.
+
 ## Reviewable-error ledger
 
 | Error | Challenged ruling | Governing standard | Preservation cite | Exhibit A cite | Requested ruling | Brief location |
@@ -121,6 +138,8 @@ Confirm:
 - each issue was raised at the earliest required stage and again only as needed;
 - the Rule 59 motion states the precise error and requested correction;
 - every procedural quotation is verifiable in the appendix;
+- every record assertion subject to an appendix-citation rule identifies the
+  supporting appendix page;
 - Exhibit A and the crosswalk use stable paragraph references;
 - no brief assertion supplies a missing complaint allegation;
 - full and alternative relief are consistent across documents;

@@ -1,7 +1,10 @@
-# Jurisdiction cache
+# Bundled jurisdiction references
 
-One file per district, created by the localization protocol
-(`../localization.md`) the first time a document is drafted for that forum, then
-committed and reused. Name files by district slug, for example `d-minn.md`. Each
-entry cites the local rule or standing order it came from and records the date
-checked.
+Maintainers may publish one reviewed reference per district, named by district
+slug, for example `d-minn.md`. Each entry cites the local rule or standing order
+and records the date checked.
+
+Installed users treat these files as read-only retrieval leads. A case-specific
+localization result belongs in the project's configured cache or in a returned
+internal audit under `../localization.md`. Do not create, edit, or commit a file
+inside an installed skill package.

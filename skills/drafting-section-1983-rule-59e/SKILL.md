@@ -75,10 +75,19 @@ Before drafting, identify and read:
 9. canonical verified sources for every load-bearing authority and record
    quotation.
 
+Treat the artifact names in item 7 as roles, not mandatory filenames. If a
+public user's project has no formal fact lock, claim ledger, gap register, or
+authority audit, use the available equivalents and create a minimal internal
+working table for the missing role. Do not invent a path or imply that an
+artifact was reviewed. The minimum substitutes are: a dated chronology and
+source list; a claim-by-defendant disposition table; an unresolved-fact and
+source list; and an authority-status ledger. Follow `section-1983-drafting` for
+a missing strategy: ask the user for one or for permission to proceed without
+one.
+
 Before using material developed or located near the filing deadline, apply the
-evidence-maturity and source-use gate in the postjudgment-amendment contract.
-Do not let a new analysis obscure when its underlying facts or data were
-available.
+evidence-maturity and source-use gate in the postjudgment-amendment contract. Do
+not let a new analysis obscure when its underlying facts or data were available.
 
 Do not infer a defect the court did not identify. For a collectively dismissed
 theory, state that no claim-specific defect was identified when accurate and
@@ -184,6 +193,10 @@ authorship, posture, denominator, sample limits, and primary source. Treat
 documented judge practices as drafting information, not authority or prediction.
 Governing binding authority controls.
 
+If the corpus does not support an issue-specific tendency, say that it adds no
+judge-specific information for that issue and omit the proposed tendency. An
+incomplete retrieval set may supply verified examples only.
+
 ## Requested-ruling branches
 
 The motion, brief, and proposed order request:
@@ -205,9 +218,52 @@ Generate the documents required by the court and strategy, commonly the motion,
 brief, complete proposed complaint, proposed order, appendix, exhibit
 instructions, accurate conference certificate, and internal audits.
 
-Keep each packet immutable. Create the next numbered folder, carry forward only
-still-used artifacts, identify unchanged files, and update the manifest and
-source record. Never overwrite a prior packet.
+Follow the project's existing version and audit system. When it uses numbered
+packet folders, manifests, hashes, or source records, create the next version,
+carry forward only still-used artifacts, identify unchanged files, and update
+those records. Never overwrite a prior packet.
+
+When no project versioning system exists, do not invent numbered folders,
+manifests, or source schemas as filing requirements. Preserve the prior draft,
+create a clearly identified new working version in the user's chosen location,
+and report which documents changed. Ask before creating a new directory or
+repository structure.
+
+## Appendix and final-render traceability
+
+Localize the appendix rule before drafting. When an appendix accompanies the
+motion, apply these gates to the filed brief:
+
+1. Every assertion about documentary or non-documentary material must cite each
+   appendix page that supports it when the applicable rule requires appendix
+   citations.
+2. A docket citation may identify the source, but it does not replace a required
+   appendix-page citation.
+3. Every record quotation, preservation assertion, procedural date, and
+   amendment request used in the argument must map to the appendix index and the
+   cited page.
+4. Do not cite an appendix page that does not contain the proposition. Do not
+   rely on a record page omitted from the appendix when the applicable rule
+   requires its inclusion.
+5. After the appendix and brief are final, audit the citations from both
+   directions: every appendix citation resolves to the correct page, and every
+   load-bearing appendix page is cited where the brief uses it.
+
+Maintain a sentence-level appendix-support matrix with these fields:
+
+`brief line or sentence | documentary assertion | docket source and page | every supporting appendix page | status`.
+
+Reject a row when a required appendix citation is missing, when the brief gives
+only a docket citation, when any relied-on source page is absent from the
+appendix, or when the cited appendix page does not support the assertion. Any
+appendix rebuild invalidates the prior matrix and requires a new page-by-page
+audit against the rebuilt PDF.
+
+Treat pagination-dependent requirements as final-render gates. Populate the
+table of contents and table of authorities with the page references from the
+final rendered brief. Do not leave blank or estimated page fields in a filing
+candidate. Put any required generative-AI disclosure in the location and form
+required by the rules effective on the filing date.
 
 ## Final review
 
@@ -230,10 +286,16 @@ Reject the packet unless:
     verified;
 12. every late-window fact, statistic, record, and timestamp passes the
     evidence-maturity and source-use gate;
-13. tables of authorities and rules match the final body;
-14. the writing-system lint and `horan-bad-words` review pass; and
-15. page limit, conference statement, appendix cites, hashes, and manifest are
-    verified.
+13. tables of authorities and rules match the final body and contain final,
+    render-verified page references;
+14. every required appendix-page citation passes the bidirectional traceability
+    audit;
+15. every required filing-date disclosure, including any generative-AI
+    disclosure, appears in the required place and form;
+16. the writing-system lint and `horan-bad-words` review pass; and
+17. page limit, conference statement, and appendix pagination are verified; and
+18. hashes, manifests, and source records are verified when the project requires
+    them.
 
 Do not call the packet filing-ready while a load-bearing source, authority,
 deadline, conference statement, proposed-complaint cross-reference, requested

@@ -5,7 +5,7 @@ this repository to GitHub. There is no separate registry step.
 
 ## First-time setup
 
-From `/Users/dalelotts/dev/PoliceConductUS/section-1983-skills`:
+From the repository root:
 
 The `PoliceConductUS` GitHub organization must exist first (create it at
 github.com/organizations/plan if it does not).
@@ -31,10 +31,22 @@ credentials.
 
 ## Releasing changes
 
+Treat `main` as the stable release branch. Make and test changes on a feature
+branch. Merge to `main` only when the release is complete and the verification
+gates below pass. Tag the merged release so users and maintainers can identify
+the exact contract version.
+
 ```bash
+git switch -c feature/describe-the-change
 git add --all
 git commit --message "Describe the change"
-git push
+git push --set-upstream origin feature/describe-the-change
+
+# After review and merge to main
+git switch main
+git pull --ff-only
+git tag --annotate vX.Y.Z --message "Release vX.Y.Z"
+git push origin main vX.Y.Z
 ```
 
 Users pick up the new version with `npx skills update`.

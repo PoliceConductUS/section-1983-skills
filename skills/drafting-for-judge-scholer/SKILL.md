@@ -15,9 +15,15 @@ description:
 Use this skill as a judge-specific overlay after the applicable document and
 claim skills. For a false-arrest complaint, load `section-1983-drafting`,
 `drafting-section-1983-complaints`, `drafting-false-arrest-complaints`, and then
-this skill. This skill adds documented Judge Scholer tendencies; it does not
-replace governing authority, the complaint contract, or the
-authority-verification gate.
+this skill. This skill adds only issue-specific Judge Scholer observations that
+the available reviewed corpus supports. It does not replace governing authority,
+the complaint contract, or the authority-verification gate.
+
+When the coded corpus contains no independently reasoned Judge Scholer decision
+on the issue, say that the corpus adds no judge-specific information for that
+issue. Apply only this skill's generic drafting discipline. Do not convert an
+adoption order, outcome-only entry, incomplete retrieval set, or decision by
+another judicial officer into a Scholer tendency.
 
 **REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the
 judge-specific and authority audits and rerun it after any material revision.
@@ -33,13 +39,16 @@ necessary clearly-established-law distinctions.
    version and proceed only per the user's decision — never deviate silently,
    and never edit a strategy version in place.
 2. Read [REFERENCE.md](REFERENCE.md).
-3. Identify the document, posture, challenged claims, requested ruling, and
+3. For each issue, determine whether the available corpus supports a documented
+   example, a tendency, or no judge-specific conclusion. If it supports none,
+   use no judge-specific proposition for that issue.
+4. Identify the document, posture, challenged claims, requested ruling, and
    record materials the court may consider.
-4. Apply the repository authority and factual-source gates. Research cases are
+5. Apply the repository authority and factual-source gates. Research cases are
    not citeable merely because they appear in the corpus.
-5. Draft in this order: governing rule → actor-specific facts →
+6. Draft in this order: governing rule → actor-specific facts →
    element-by-element application → requested ruling.
-6. Ground every point in record facts, permitted inferences, and verified
+7. Ground every point in record facts, permitted inferences, and verified
    authority so the court has justification and reason to agree; persuasive or
    rhetorical argument is a small part of the document, if present at all.
 
@@ -116,6 +125,8 @@ alleged causal policy is independently identified.
 - End each argument with the precise ruling requested.
 - State corpus-derived observations as tendencies or documented examples, never
   predictions.
+- For each issue lacking qualifying corpus support, confirm that the overlay
+  added no judge-specific proposition.
 - Run `audit-authorities` before treating any judge-specific or
   clearly-established-law proposition as filing-ready.
 - Run `horan-bad-words` after the last substantive or authority revision.

@@ -67,6 +67,14 @@ Exhibit A is the complete pleading that follows the earlier request. It is not
 newly discovered evidence merely because the document was completed after
 judgment.
 
+If the plaintiff did not amend as of course, do not treat expiration of Rule
+15(a)(1)'s period as a repeated failure to cure. State the actual sequence:
+whether a court had identified a defect, when the plaintiff requested Rule
+15(a)(2) leave, whether the plaintiff was proceeding pro se, whether an earlier
+amendment or court-directed cure opportunity existed, and what prejudice the
+interval caused. Distinguish notice of an opponent's arguments from a judicial
+ruling identifying the defect to be cured.
+
 ## Division of labor
 
 ### Exhibit A
@@ -162,14 +170,14 @@ method for derived results, permitted filing use, and proposed filing location.
 
 For a derived statistic, preserve the query or code, definitions, joins,
 denominators, exclusions, time window, missingness treatment, and source
-version. Match the statistic to the precise element it supports. Audit
-weakening and contrary results with the same care as favorable results. Do not
-convert a row count into an event, person, booking, incident, or policy count.
+version. Match the statistic to the precise element it supports. Audit weakening
+and contrary results with the same care as favorable results. Do not convert a
+row count into an event, person, booking, incident, or policy count.
 
 A postjudgment calculation from earlier data is not newly discovered evidence
 merely because the calculation is new. State when the underlying data was
-available and address diligence and permissible use under the governing Rule
-59 and Rule 15 standards.
+available and address diligence and permissible use under the governing Rule 59
+and Rule 15 standards.
 
 For mixed-source timelines, label each clock and distinguish an event time from
 an administrative field, upload time, report time, or unsynchronized device
@@ -182,8 +190,8 @@ guide verification but may not be quoted or attached until the permission gate
 is closed. The same fact may still be pleaded when supported independently by
 personal knowledge or another usable source.
 
-If a load-bearing proposition cannot pass this gate before the deadline, omit
-or qualify it and proceed with the verified record.
+If a load-bearing proposition cannot pass this gate before the deadline, omit or
+qualify it and proceed with the verified record.
 
 ## Plain-language pass
 

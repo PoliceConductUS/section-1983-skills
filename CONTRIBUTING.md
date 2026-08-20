@@ -5,8 +5,11 @@ Every skill in this repository serves one audience: pro se plaintiffs in Section
 1983 cases. Keep that reader in mind. They are smart, unrepresented, and judged
 on their filings.
 
-Develop changes on feature branches. `main` is the stable release branch; merge
-only a complete change that passes the repository tests and skill validation.
+Develop changes on feature branches. `main` is the integration branch, not a
+published version. Merge only a complete change that passes the repository tests
+and skill validation. Releases use the manually dispatched workflow in
+`PUBLISHING.md`; it validates the exact `main` commit before creating an
+immutable semantic-version tag.
 
 ## Adding a skill
 

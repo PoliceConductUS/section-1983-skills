@@ -10,19 +10,24 @@ agent that reads `SKILL.md`.
 Install into your agent with the
 [skills CLI](https://github.com/vercel-labs/skills):
 
+The commands below pin release `v0.1.0`. A pinned install never follows the
+moving `main` branch.
+
 ```bash
 # Interactive: pick skills and target agents
-npx skills add PoliceConductUS/section-1983-skills
+npx skills add https://github.com/PoliceConductUS/section-1983-skills/tree/v0.1.0
 
 # A specific skill, non-interactive, into Claude Code
-npx skills add PoliceConductUS/section-1983-skills --skill section-1983-drafting -a claude-code -y
+npx skills add https://github.com/PoliceConductUS/section-1983-skills/tree/v0.1.0 --skill section-1983-drafting -a claude-code -y
 
 # List what this repository offers
-npx skills add PoliceConductUS/section-1983-skills --list
-
-# Update installed skills later
-npx skills update
+npx skills add https://github.com/PoliceConductUS/section-1983-skills/tree/v0.1.0 --list
 ```
+
+To upgrade deliberately, choose a newer published tag from
+[Releases](https://github.com/PoliceConductUS/section-1983-skills/releases),
+replace `v0.1.0` in the install command, and run it again. Do not substitute a
+branch name: tags are the immutable release identity.
 
 ## Skills
 
@@ -136,10 +141,10 @@ npx prettier --check .
 
 ## Contributing
 
-See `CONTRIBUTING.md`. `main` is the stable release branch. Develop changes on
-feature branches, merge only after the required validation passes, and tag each
-release. Installation pulls the current stable branch, and users update with
-`npx skills update`.
+See `CONTRIBUTING.md`. `main` is the integration branch, not a published
+version. Develop changes on feature branches and merge only after the required
+validation passes. The release workflow validates the exact `main` commit before
+creating its immutable semantic-version tag.
 
 ## Disclaimer
 

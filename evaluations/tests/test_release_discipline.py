@@ -97,6 +97,7 @@ class ReleaseDisciplineTest(unittest.TestCase):
         self.assert_workflow_order(
             "npm ci",
             "npm run validate",
+            "git diff --exit-code",
             "git tag --annotate",
             "git push origin",
             "gh release create",

@@ -40,6 +40,7 @@ npx skills update
 | `rrd-rule12-city`                  | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
 | `audit-authorities`                | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
 | `horan-bad-words`                  | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
+| `filing-ci`                        | Orchestrates a project-configured deterministic filing-integrity checker and its fail-closed filing gate.                                                                  |
 
 ## How the skills compose
 
@@ -60,11 +61,15 @@ does not replace source, authority, or court rules.
    by the applicable writing-system pass and the required `horan-bad-words` edit
    pass. Every drafting skill requires that final pass; rerun it after a
    material authority-driven revision.
+8. Run `filing-ci` after the applicable prose and authority audits, after each
+   material change, and immediately before a filing-readiness statement. A
+   current Filing CI pass does not replace authority or writing review; those
+   remain independent gates.
 
 The ownership boundaries are deliberate: the umbrella routes; complaint skills
 establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; the authority and writing
-skills are final gates.
+skills are final gates, and Filing CI adds a separate configured integrity gate.
 
 ## Project inputs and portability
 

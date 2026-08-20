@@ -57,12 +57,15 @@ Create `adversarial-filing-review` with:
 The clean-room packet contains the immutable canonical draft content, its
 version and fingerprint, one supported document family, and approved sources
 with stable identifiers, roles, immutable content, and content fingerprints.
-Paths and URLs may appear only as provenance metadata. The launcher requires an
-empty reviewer capability set; filesystem, repository, browser, and conversation
+Paths and URLs are excluded from the packet. The launcher requires an empty
+reviewer capability set; filesystem, repository, browser, and conversation
 access are forbidden. If the configured runtime cannot enforce those
 restrictions or start a fresh reviewer, the orchestrator reports
 `independent review unavailable` rather than simulating independence in the
 drafting context.
+
+The packet represents every draft and source fingerprint as `sha256`, the
+lowercase hexadecimal SHA-256 digest of the exact UTF-8 content bytes.
 
 The report keeps five finding categories separate: Fatal Defects, Credible
 Opposition Arguments, Factual Disputes, Discovery Issues, and Style Complaints.

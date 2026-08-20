@@ -7,9 +7,10 @@ context with only the immutable canonical draft content, its version and
 fingerprint, one supported document family, the public review skill and
 checklist, and explicit user- or repository-approved sources. Every source MUST
 contain a stable identifier, role, immutable content, and content fingerprint.
-Paths and URLs MAY be provenance metadata but MUST NOT be resolvable reviewer
-inputs. The orchestrator MUST resolve and verify every fingerprint before
-dispatch.
+Paths and URLs MUST NOT appear in the packet. The orchestrator MUST resolve and
+verify every fingerprint before dispatch. Each draft and source fingerprint MUST
+use a `sha256` field containing the lowercase hexadecimal SHA-256 digest of the
+exact UTF-8 bytes of its `content` field.
 
 The launcher MUST reject extra packet fields and MUST expose the complete
 dispatched payload and enabled capability set for verification. The reviewer
@@ -39,7 +40,8 @@ The skill SHALL apply one universal attack pass and exactly one checklist for
 complaint or amended complaint, motion-to-dismiss response, summary-judgment
 response, leave to amend, extension motion, R&R objection, or R&R response. It
 MUST report an unsupported document family rather than substitute the nearest
-checklist.
+checklist. Those seven human-readable names SHALL be the canonical
+`document_family` values.
 
 #### Scenario: Supported filing is reviewed
 

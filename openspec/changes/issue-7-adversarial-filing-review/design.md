@@ -30,7 +30,9 @@ narrower than the drafting context and whose output cannot mutate the filing.
 The orchestrator resolves canonical draft bytes, a version and fingerprint, one
 supported document family, and explicit approved sources. Each source entry
 contains its stable ID, role, immutable content, and content fingerprint. Paths
-and URLs are provenance only and are never resolvable reviewer inputs.
+and URLs are prohibited packet fields rather than resolvable reviewer inputs.
+The `sha256` field is the lowercase hexadecimal SHA-256 digest of the exact
+UTF-8 bytes of the corresponding `content` field.
 
 A standard-library launcher validates the exact packet schema and fingerprints,
 rejects extra fields, and starts a configured reviewer command in a new process
@@ -47,7 +49,9 @@ does not start or simulate a review.
 The checklist owns complaint or amended complaint, motion-to-dismiss response,
 summary-judgment response, leave to amend, extension motion, R&R objection, and
 R&R response. An unsupported filing type is reported rather than mapped to the
-nearest checklist.
+nearest checklist. Those seven human-readable names are also the canonical
+machine values for `document_family`; the launcher does not invent a second slug
+vocabulary.
 
 ### Findings and corrections
 

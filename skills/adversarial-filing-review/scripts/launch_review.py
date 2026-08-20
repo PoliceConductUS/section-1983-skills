@@ -202,6 +202,7 @@ def launch_review(
                 check=False,
                 shell=False,
             )
+            reviewer_outputs = sorted(os.listdir(directory))
     except FileNotFoundError as error:
         raise ReviewLaunchError(
             "reviewer-command-unavailable",
@@ -222,6 +223,13 @@ def launch_review(
 
     stdout = _bounded(completed.stdout)
     stderr = _bounded(completed.stderr)
+    if reviewer_outputs:
+        raise ReviewLaunchError(
+            "reviewer-output-boundary-violated",
+            "Reviewer wrote outside its JSON report channel",
+            stdout=stdout,
+            stderr=stderr,
+        )
     if completed.returncode != 0:
         raise ReviewLaunchError(
             "reviewer-command-nonzero",

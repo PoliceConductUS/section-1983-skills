@@ -9,11 +9,11 @@
 
 ## 2. GREEN contracts
 
-- [ ] 2.1 Add the general governance rule.
-- [ ] 2.2 Add the compact conditional rule to affected public skill entrypoints.
-- [ ] 2.3 Extend deterministic governance validation.
-- [ ] 2.4 Run fresh-agent GREEN scenarios and full validation.
-- [ ] 2.5 Commit and sync the GREEN implementation.
+- [x] 2.1 Add the general governance rule.
+- [x] 2.2 Add the compact conditional rule to affected public skill entrypoints.
+- [x] 2.3 Extend deterministic governance validation.
+- [x] 2.4 Run fresh-agent GREEN scenarios and full validation.
+- [x] 2.5 Commit and sync the GREEN implementation.
 
 ## 3. Review and archive
 

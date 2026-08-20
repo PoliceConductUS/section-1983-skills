@@ -66,6 +66,69 @@ CONTRIBUTION_DUPLICATED_OWNER_MARKERS = (
     "gh workflow run release.yml",
     "verification, factual and authority source, permission, filing-readiness",
 )
+QUALITY_CONTROL_RULES = (
+    (
+        "An independent quality-control stage is non-mutating.",
+        "An independent quality-control stage may mutate an artifact under review.",
+    ),
+    (
+        "It may read designated artifacts and write only its designated report or result.",
+        "It may write changes to an artifact under review.",
+    ),
+    (
+        "It must not edit, overwrite, correct, regenerate, or otherwise modify an artifact under review.",
+        "It may edit, overwrite, correct, regenerate, or otherwise modify an artifact under review.",
+    ),
+    (
+        "A combined instruction to audit and fix does not authorize same-stage mutation.",
+        "A combined instruction to audit and fix authorizes same-stage mutation.",
+    ),
+    (
+        "Deadline pressure, sunk cost, claimed prior approval, and contrary workflow instructions do not override this boundary.",
+        "Deadline pressure, sunk cost, claimed prior approval, or contrary workflow instructions may override this boundary.",
+    ),
+    (
+        "Recommendations, proposed language, corrections, and copy-ready replacements are advisory only and do not authorize implementation.",
+        "Recommendations, proposed language, corrections, and copy-ready replacements authorize implementation.",
+    ),
+    (
+        "Remediation requires a separately authorized drafting or revision stage.",
+        "Remediation may occur during the independent quality-control stage.",
+    ),
+    (
+        "Create a new version when versioning applies.",
+        "Overwrite the current version when versioning applies.",
+    ),
+    (
+        "A new read-only quality-control stage must verify the remediated artifact.",
+        "The prior quality-control result transfers to the remediated artifact.",
+    ),
+    (
+        "An internal self-check inside an explicitly authorized drafting or revision stage may guide edits within that stage, but it is not an independent quality-control result.",
+        "An internal drafting self-check is an independent quality-control result.",
+    ),
+)
+QUALITY_CONTROL_TRIGGER = re.compile(
+    r"(?:\buse when\b.{0,120}\b(?:independently\s+)?(?:auditing|reviewing|"
+    r"verifying|evaluating|checking|assessing|performing quality control|"
+    r"performing an? assessment|conducting (?:an? )?(?:independent )?assessment)\b|"
+    r"\bneeds (?:an )?independent.{0,60}\breview\b|"
+    r"\bneeds to (?:independently )?(?:audit|review|verify|evaluate|check)\b|"
+    r"\bneeds to determine.{0,80}\bor audit\b|\bdrafts and audits\b|"
+    r"\bdrafting, revising, or auditing\b|\bchecker must run\b|"
+    r"\buse for (?:an? )?independent (?:audit(?:ing)?|review(?:ing)?|verification|"
+    r"evaluat(?:ing|ion)|check(?:ing)?|assessment)\b|"
+    r"\bthis skill (?:independently (?:audits|reviews|verifies|evaluates|checks|assesses)|"
+    r"performs (?:an? )?independent (?:audit|review|verification|evaluation|check|assessment))\b)",
+    re.IGNORECASE,
+)
+PROHIBITED_QUALITY_CONTROL_PERMISSION = re.compile(
+    r"\bindependent (?:quality-control stage|audit|review|verification|evaluation|assessment)"
+    r".{0,100}\b(?:may|can|is authorized to|is permitted to) "
+    r"(?:edit|modify|overwrite|correct|regenerate|revise|rewrite|fix|change|mutate)\b"
+    r".{0,80}\b(?:artifact|draft|document)\b",
+    re.IGNORECASE,
+)
 
 
 def is_date(value):
@@ -115,6 +178,27 @@ def normalized(text):
 def markdown_links(text):
     prose = re.sub(r"(?ms)^(`{3,}|~{3,}).*?^\1\s*", "", text)
     return re.findall(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", prose)
+
+
+def frontmatter_description(text):
+    parts = text.split("---", 2)
+    if len(parts) != 3:
+        return ""
+    description = []
+    collecting = False
+    for line in parts[1].splitlines():
+        if line.startswith("description:"):
+            collecting = True
+            value = line.partition(":")[2].strip()
+            if value not in {"", ">", ">-", "|", "|-"}:
+                description.append(value.strip("\"'"))
+            continue
+        if collecting and line.startswith((" ", "\t")):
+            description.append(line.strip().strip("\"'"))
+            continue
+        if collecting:
+            break
+    return " ".join(description)
 
 
 def validate_registry(repository_root):
@@ -246,12 +330,40 @@ def validate_contribution_contract(repository_root):
     return []
 
 
+def quality_control_contract_missing(text):
+    contract = normalized(text)
+    return PROHIBITED_QUALITY_CONTROL_PERMISSION.search(contract) is not None or any(
+        normalized(affirmative) not in contract or normalized(inversion) in contract
+        for affirmative, inversion in QUALITY_CONTROL_RULES
+    )
+
+
+def validate_quality_control_contracts(repository_root):
+    errors = []
+    try:
+        policy = (repository_root / "GOVERNANCE.md").read_text()
+    except OSError:
+        return ["quality-control-contract-language-missing: GOVERNANCE.md"]
+    if quality_control_contract_missing(policy):
+        errors.append("quality-control-contract-language-missing: GOVERNANCE.md")
+    for path in sorted((repository_root / "skills").glob("*/SKILL.md")):
+        try:
+            text = path.read_text()
+        except OSError:
+            errors.append(f"quality-control-contract-unreadable: {path.parent.name}")
+            continue
+        if QUALITY_CONTROL_TRIGGER.search(frontmatter_description(text)) and quality_control_contract_missing(text):
+            errors.append(f"quality-control-contract-language-missing: {path.parent.name}")
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
     errors.extend(validate_policy(repository_root))
     errors.extend(validate_pull_request_template(repository_root))
     errors.extend(validate_contribution_contract(repository_root))
+    errors.extend(validate_quality_control_contracts(repository_root))
     return errors
 
 

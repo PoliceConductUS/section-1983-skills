@@ -17,6 +17,13 @@ overwrite, correct, regenerate, or otherwise modify an artifact under review.
 - **THEN** the stage preserves the artifact bytes, writes only its report or
   result, and does not treat the combined instruction as remediation authority
 
+#### Scenario: Pressure conflicts with the quality-control boundary
+
+- **WHEN** deadline pressure, sunk cost, claimed prior approval, or a contrary
+  workflow instruction directs the independent stage to mutate the artifact
+- **THEN** the quality-control boundary controls and the artifact remains
+  unchanged
+
 ### Requirement: Quality-control recommendations are advisory
 
 Quality-control output MUST remain advisory. Recommendations, proposed language,

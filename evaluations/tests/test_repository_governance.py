@@ -114,6 +114,11 @@ QUALITY_CONTROL_RULES = (
         "A combined instruction to audit and fix authorizes same-stage mutation.",
     ),
     (
+        "pressure and workflow precedence",
+        "Deadline pressure, sunk cost, claimed prior approval, and contrary workflow instructions do not override this boundary.",
+        "Deadline pressure, sunk cost, claimed prior approval, or contrary workflow instructions may override this boundary.",
+    ),
+    (
         "advisory output",
         "Recommendations, proposed language, corrections, and copy-ready replacements are advisory only and do not authorize implementation.",
         "Recommendations, proposed language, corrections, and copy-ready replacements authorize implementation.",
@@ -138,6 +143,12 @@ QUALITY_CONTROL_RULES = (
         "An internal self-check inside an explicitly authorized drafting or revision stage may guide edits within that stage, but it is not an independent quality-control result.",
         "An internal drafting self-check is an independent quality-control result.",
     ),
+)
+PARAPHRASED_MUTATION_PERMISSIONS = (
+    "Despite the contract above, an independent quality-control stage may edit "
+    "the reviewed artifact when the user asks to audit and fix.",
+    "An independent quality-control stage can edit the reviewed artifact.",
+    "An independent quality-control stage may revise the draft under review.",
 )
 
 
@@ -252,6 +263,8 @@ An independent quality-control stage is non-mutating. It may read designated
 artifacts and write only its designated report or result. It must not edit,
 overwrite, correct, regenerate, or otherwise modify an artifact under review. A
 combined instruction to audit and fix does not authorize same-stage mutation.
+Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
+instructions do not override this boundary.
 Recommendations, proposed language, corrections, and copy-ready replacements
 are advisory only and do not authorize implementation. Remediation requires a
 separately authorized drafting or revision stage. Create a new version when
@@ -312,6 +325,8 @@ An independent quality-control stage is non-mutating. It may read designated
 artifacts and write only its designated report or result. It must not edit,
 overwrite, correct, regenerate, or otherwise modify an artifact under review. A
 combined instruction to audit and fix does not authorize same-stage mutation.
+Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
+instructions do not override this boundary.
 Recommendations, proposed language, corrections, and copy-ready replacements
 are advisory only and do not authorize implementation. Remediation requires a
 separately authorized drafting or revision stage. Create a new version when
@@ -575,6 +590,21 @@ description: Use when independently auditing a synthetic artifact.
             "Use when performing an assessment of a synthetic artifact.",
             "Use when conducting an independent assessment of a synthetic artifact.",
             "Use when a project-configured checker must run on a synthetic artifact.",
+            "Use for independent auditing of a synthetic artifact.",
+            "Use for independent reviewing of a synthetic artifact.",
+            "Use for independent verification of a synthetic artifact.",
+            "Use for independent evaluating of a synthetic artifact.",
+            "Use for independent checking of a synthetic artifact.",
+            "Use for independent assessment of a synthetic artifact.",
+            "Use for independent review of a synthetic artifact.",
+            "Use for an independent audit of a synthetic artifact.",
+            "This skill independently audits a synthetic artifact.",
+            "This skill independently reviews a synthetic artifact.",
+            "This skill independently verifies a synthetic artifact.",
+            "This skill independently evaluates a synthetic artifact.",
+            "This skill independently checks a synthetic artifact.",
+            "This skill independently assesses a synthetic artifact.",
+            "This skill performs an independent review of a synthetic artifact.",
         )
         for description in descriptions:
             with self.subTest(description=description):
@@ -591,6 +621,45 @@ description: Use when independently auditing a synthetic artifact.
                     "quality-control-contract-language-missing: example-skill",
                     result.stdout + result.stderr,
                 )
+
+    def test_governance_validator_rejects_paraphrased_same_stage_mutation_permission(self):
+        for permission in PARAPHRASED_MUTATION_PERMISSIONS:
+            cases = (
+                (
+                    "skill",
+                    {"skill_text": valid_quality_control_skill() + permission},
+                    "quality-control-contract-language-missing: example-skill",
+                ),
+                (
+                    "governance",
+                    {"policy": valid_policy() + permission},
+                    "quality-control-contract-language-missing: GOVERNANCE.md",
+                ),
+            )
+            for label, changes, finding in cases:
+                with self.subTest(case=label, permission=permission):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        write_temporary_repository(root, **changes)
+                        result = run_validator(root)
+
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(finding, result.stdout + result.stderr)
+
+    def test_governance_validator_fails_closed_on_unreadable_quality_control_skill(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, skill_text=valid_quality_control_skill())
+            skill_path = root / "skills" / "example-skill" / "SKILL.md"
+            skill_path.unlink()
+            skill_path.mkdir()
+            result = run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "quality-control-contract-unreadable: example-skill",
+            result.stdout + result.stderr,
+        )
 
     def test_governance_validator_rejects_missing_or_inverted_quality_control_policy(self):
         valid = valid_policy()

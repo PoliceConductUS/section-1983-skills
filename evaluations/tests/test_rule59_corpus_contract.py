@@ -74,6 +74,14 @@ def schema_allows_null(contract):
     )
 
 
+def candidate_only_ids(corpus):
+    return {
+        gap["candidate_id"]
+        for gap in corpus["retrieval_gaps"]
+        if gap["status"] == "unresolved-candidate" and gap["record_id"] is None
+    }
+
+
 def write_json(directory, name, corpus):
     path = Path(directory) / name
     path.write_text(json.dumps(corpus), encoding="utf-8")
@@ -315,6 +323,38 @@ class Rule59CorpusContractTest(unittest.TestCase):
         self.assertEqual(denominator["completeness_status"], "incomplete")
         self.assertTrue(denominator["limits"])
 
+    def test_incomplete_fixture_candidate_count_matches_its_inventory(self):
+        corpus = self.fixture("valid-incomplete-example.json")
+        denominator = corpus["denominator"]
+
+        self.assertEqual(
+            denominator["candidate_count"],
+            denominator["coded_pair_count"] + len(candidate_only_ids(corpus)),
+        )
+
+    def test_corrected_candidate_inventory_is_a_valid_bounded_example(self):
+        corpus = self.fixture("valid-incomplete-example.json")
+        denominator = corpus["denominator"]
+        denominator["candidate_count"] = denominator["coded_pair_count"] + len(
+            candidate_only_ids(corpus)
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "corrected-candidate-inventory.json", corpus)
+            completed = run_validator(path)
+            self.assertEqual(completed.returncode, 0, validator_output(completed))
+
+    def test_inconsistent_candidate_inventory_has_stable_finding(self):
+        corpus = self.fixture("valid-incomplete-example.json")
+        denominator = corpus["denominator"]
+        denominator["candidate_count"] = (
+            denominator["coded_pair_count"] + len(candidate_only_ids(corpus)) + 1
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "inconsistent-candidate-inventory.json", corpus)
+            self.assert_invalid(path, "candidate-inventory-inconsistent")
+
     def test_malformed_json_and_types_fail_cleanly(self):
         with tempfile.TemporaryDirectory() as directory:
             malformed = Path(directory) / "malformed.json"
@@ -372,6 +412,45 @@ class Rule59CorpusContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = write_json(directory, "broken-source-row.json", corpus)
             self.assert_invalid(path, "source-row-reference-invalid")
+
+    def test_example_card_rejects_unverified_source_rows(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for retrieval_status in ("lead-only", "index-only"):
+                with self.subTest(retrieval_status=retrieval_status):
+                    corpus = self.fixture("valid-complete.json")
+                    card = corpus["transfer_cards"][0]
+                    card["evidence_level"] = "example"
+                    source_record = next(
+                        record
+                        for record in corpus["decision_records"]
+                        if record["record_id"] == card["source_row_ids"][0]
+                    )
+                    source_record["retrieval_status"] = retrieval_status
+                    path = write_json(
+                        directory,
+                        f"example-{retrieval_status}-source.json",
+                        corpus,
+                    )
+                    self.assert_invalid(path, "unverified-card-source")
+
+    def test_unverified_coded_record_blocks_tendency_even_when_not_a_card_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for retrieval_status in ("lead-only", "index-only"):
+                with self.subTest(retrieval_status=retrieval_status):
+                    corpus = self.fixture("valid-complete.json")
+                    card_sources = set(corpus["transfer_cards"][0]["source_row_ids"])
+                    non_source_record = next(
+                        record
+                        for record in corpus["decision_records"]
+                        if record["record_id"] not in card_sources
+                    )
+                    non_source_record["retrieval_status"] = retrieval_status
+                    path = write_json(
+                        directory,
+                        f"tendency-with-{retrieval_status}-record.json",
+                        corpus,
+                    )
+                    self.assert_invalid(path, "incomplete-tendency")
 
     def test_unpublished_stated_reason_has_controlled_value_finding(self):
         corpus = self.fixture("valid-complete.json")
@@ -482,6 +561,20 @@ class Rule59CorpusContractTest(unittest.TestCase):
         adoption.pop("adopting_judge")
         cases.append(("adoption-missing-author.json", adoption_missing_author))
 
+        adoption_missing_recommendation_author = self.fixture("valid-complete.json")
+        adoption = next(
+            record
+            for record in adoption_missing_recommendation_author["decision_records"]
+            if record["decision_type"] == "adoption-only-order"
+        )
+        adoption["recommendation_author"] = None
+        cases.append(
+            (
+                "adoption-missing-recommendation-author.json",
+                adoption_missing_recommendation_author,
+            )
+        )
+
         adoption_attributes_recommendation_reasoning = self.fixture("valid-complete.json")
         adoption = next(
             record
@@ -575,6 +668,9 @@ class Rule59CorpusContractTest(unittest.TestCase):
     def test_candidate_only_gap_validates_without_a_fabricated_decision_record(self):
         corpus = self.fixture("valid-incomplete-example.json")
         denominator = corpus["denominator"]
+        denominator["candidate_count"] = denominator["coded_pair_count"] + len(
+            candidate_only_ids(corpus)
+        )
         denominator["candidate_count"] += 1
         denominator["unresolved_relevant_missingness"] += 1
         denominator["completeness_status"] = "incomplete"
@@ -606,7 +702,9 @@ class Rule59CorpusContractTest(unittest.TestCase):
 
         candidate_gap = self.fixture("valid-incomplete-example.json")
         denominator = candidate_gap["denominator"]
-        denominator["candidate_count"] += 1
+        denominator["candidate_count"] = denominator["coded_pair_count"] + len(
+            candidate_only_ids(candidate_gap)
+        )
         denominator["unresolved_relevant_missingness"] += 1
         denominator["limits"].append(
             "One synthetic candidate docket is included only to test gap scope"

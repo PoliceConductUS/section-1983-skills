@@ -1,0 +1,8 @@
+schema: superpowers-bridge
+
+context: |
+  Repository: section-1983-skills
+  Purpose: This repository owns public Section 1983 agent skills.
+  Boundary: General-purpose executable tooling belongs in its owning repository
+    behind thin skills.
+  Validation: Behavior changes require public-seam tests and skill validation.

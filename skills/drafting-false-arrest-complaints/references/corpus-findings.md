@@ -64,8 +64,10 @@ The strongest complaints repeatedly supplied:
 - affirmative conduct plus material negative facts;
 - separation of later resistance or force from earlier probable cause;
 - participant-specific acts rather than collective labels;
-- a short factual inference tied to each element; and
+- a direct element-level application tied to the decisive facts and each officer's contemporaneous knowledge; and
 - a claim structure that does not make the court assemble the theory.
+
+The reviewed complaints did not consistently use a formula such as "These facts support the reasonable inference." Treat the fact-to-element bridge as the recurring function, not that wording. Use a labeled inference when the bridge is non-obvious; otherwise state the application directly.
 
 ### Direct pleading examples
 

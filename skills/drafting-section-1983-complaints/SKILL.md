@@ -7,7 +7,7 @@ description: Use when drafting, revising, or auditing a federal Section 1983 com
 
 ## Core standard
 
-Draft every count through an **Element → Facts → Inference → Result** structure. Rule 8 requires a short and plain statement, not a fact dump or a brief. Include enough defendant-specific factual content for the court to draw each liability inference.
+Draft every count through an **Element → Decisive Facts → Relevant-Time Knowledge → Application → Result** structure. Every count must make three functions explicit: the decisive facts, the facts known to the defendant at the legally relevant time, and the resulting element-level legal application. This is a functional requirement, not mandatory wording or a fixed number of paragraphs. Rule 8 requires a short and plain statement, not a fact dump or a brief.
 
 Use `section-1983-drafting` for document routing, localization, and the shared writing system. When a complaint includes false arrest, probable cause, arguable probable cause, alternative offenses, seizure timing, or incorporated arrest video, also use `drafting-false-arrest-complaints`. Load each applicable skill once; this skill owns the general complaint contract and the false-arrest skill adds the specialized contract.
 
@@ -44,7 +44,7 @@ Treat this section as a hard pleading rule. Before including a sentence, classif
 
 1. **Plaintiff's personal knowledge** — something Plaintiff personally saw, heard, said, did, experienced, or later observed about his own condition or injury.
 2. **An attributed record fact** — what an identified recording, report, transcript, filing, dataset, or other source shows or states. Attribute the assertion to the source. A report's allegation is not automatically the truth of the allegation.
-3. **An expressly labeled inference** — a reasonable inference drawn from identified facts. State the supporting facts first, then use language such as: "These facts support the reasonable inference that...."
+3. **An inferential factual allegation** — a reasonable inference drawn from identified facts. State the supporting facts first. Expressly label the inference when it concerns an unobserved state of mind, agreement, causal mechanism, municipal attribution, or another proposition that might otherwise read as an observed fact. No fixed phrase is required.
 4. **A legal standard, application, or result** — permitted only where needed to state the claim, apply its elements, or request relief. A legal conclusion does not count as a supporting fact and may not replace element-specific factual allegations.
 
 Do not present as fact anything outside Plaintiff's personal knowledge unless an identified source supports it. Do not state a defendant's knowledge, intent, motive, purpose, audience, agreement, understanding, or other state of mind as an observed fact unless Plaintiff heard a direct statement or an identified source expressly establishes it. When state of mind is an element, plead the observable words, sequence, conduct, omissions, and circumstances first and then state only the reasonable inference they support.
@@ -72,7 +72,7 @@ For every factual-allegation sentence, ask:
 
 1. Could Plaintiff testify to this from personal knowledge?
 2. If not, does an identified source state or show it?
-3. If it is an inference, is it expressly labeled and grounded in stated facts?
+3. If it is an inferential fact that might read as directly observed, is the inference identified and grounded in stated facts?
 4. If it is a legal conclusion, is it confined to the Standard, Application, or Result portion and supported by the preceding facts?
 
 If every answer is no, remove the sentence and record the missing support as a GAP.
@@ -120,13 +120,15 @@ Connect pleaded facts to each element:
 
 Use concrete conduct, words, knowledge, sequence, and omissions. Cite the complaint paragraphs containing those facts. Do not substitute labels such as “retaliated,” “conspired,” or “ratified” for the facts supporting them.
 
-### 3. Element-specific inference
+### 3. Element-specific application
 
-State the inference the facts permit:
+State the application the decisive facts and the defendant's relevant-time knowledge support. Name the defendant and the element established or negated. For example:
 
-> These facts support the reasonable inference that Officer Doe arrested Plaintiff in retaliation for Plaintiff's protected recording and criticism.
+> Before ordering the arrest, Officer Doe observed [decisive facts]. Those then-known facts did not support [the disputed offense element]. No reasonable officer with the same information could have believed probable cause existed.
 
-Name the defendant and the element established. When supported facts permit alternatives, plead them expressly:
+Use a direct application when it fully states the bridge. Expressly identify a reasonable inference when the application depends on an unobserved state of mind, agreement, causal mechanism, municipal attribution, or another non-obvious inferential step. Do not add a stock phrase such as "These facts support the reasonable inference" when the application already performs that work.
+
+When supported facts permit alternatives, plead them expressly:
 
 > If responsible City personnel reviewed the recording and took no corrective action, the facts support deliberate acceptance. If the review system failed to surface the recorded conduct, the facts support inadequate supervision, training, or review.
 
@@ -280,7 +282,8 @@ A count is complete only if:
 - [ ] every element maps to cited factual allegations;
 - [ ] every defendant has a participant-specific application;
 - [ ] every claim that depends on a challenged statement, omission, characterization, or later-added justification compactly states the statement, contradiction, corrected account, and materiality;
-- [ ] the requested inference is stated and follows from the facts;
+- [ ] the count states the decisive facts, the defendant's knowledge at the relevant time, and the resulting element-level legal application;
+- [ ] any non-obvious factual inference on which the application depends is identified and grounded in the stated facts;
 - [ ] individual liability addresses both qualified-immunity prongs **in the filed complaint text**, not only in a brief, control memo, or internal matrix;
 - [ ] every individual-capacity count against a defendant who can assert qualified immunity contains, in the complaint itself, the concise six-part fair-warning unit (right at conduct-level specificity; act, knowledge, and stage; verified binding pre-event authority; materially similar facts and material differences; why fair warning existed; both-prong conclusion), and no case strategy, control, or routing instruction has removed it;
 - [ ] each qualified-immunity prong-two proposition includes a conduct-to-precedent comparison using binding, pre-event authority at the required factual specificity and candidly addresses material differences;
@@ -292,7 +295,7 @@ A count is complete only if:
 - [ ] every dispositive premise in each motion, recommendation, and controlling order is answered with verified authority and developed application, expressly conceded, or intentionally not pursued;
 - [ ] every amendment proffer identifies the defect, exact cure, complaint location, and nonfutility analysis;
 - [ ] the result sentence identifies the claim and defendant;
-- [ ] every factual sentence is personal knowledge, an attributed source fact, or an expressly labeled inference grounded in stated facts;
+- [ ] every factual sentence is personal knowledge, an attributed source fact, or a supported inference that is expressly identified when it might otherwise read as directly observed;
 - [ ] no allegation presents a defendant's mindset, motive, purpose, audience, agreement, or knowledge as fact without direct support;
 - [ ] no bare legal conclusion or liability label substitutes for element-specific facts;
 - [ ] factual and authority gaps are logged;

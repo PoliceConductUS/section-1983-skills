@@ -22,7 +22,7 @@ Use this order unless the governing court or case requires a different one:
 3. Parties, capacities, and color of law.
 4. Jurisdiction and venue.
 5. Chronological facts using the stage-by-stage contract below.
-6. Separate counts identifying the right, defendant set, conduct, inference, and injury.
+6. Separate counts identifying the right, defendant set, conduct, relevant-time knowledge, application, and injury.
 7. Damages, requested relief, and jury demand.
 
 An introduction is optional. A clear event sequence and separate counts are not.
@@ -66,7 +66,7 @@ Complete one row for every stated or charged offense and every alternative offen
 
 Draft the resulting allegation through:
 
-> **Offense → element → contemporaneous knowledge → factual absence → probable-cause inference.**
+> **Offense → element → decisive facts → contemporaneous knowledge → probable-cause application.**
 
 Use concrete negative facts only when supported and material to an offense element: no threat, no obstruction, no force, no flight, no warning, no question asked, no described impairment, or no refusal. Do not copy a generic list of negatives into the complaint. A legal conclusion that an element was absent does not replace the facts showing its absence.
 
@@ -88,14 +88,17 @@ Do not assign every claim to every officer. Use “Defendants” as a collective
 Each count must contain:
 
 1. **Element:** verified authority and the elements actually disputed.
-2. **Facts:** participant-specific allegations and precise incorporated paragraphs.
-3. **Inference:** the element-specific conclusion those facts plausibly support.
-4. **Clearly established law:** for each individual and claim, the event date, precisely framed right or rule, verified binding pre-event authority, material factual similarities and differences, and why that authority gave this defendant fair warning.
-5. **Result:** the claim, defendant, and requested ruling.
+2. **Decisive facts:** participant-specific allegations and precise incorporated paragraphs.
+3. **Relevant-time knowledge:** what each defendant knew when that defendant performed the challenged act.
+4. **Application:** the element-specific legal conclusion produced by those facts and that knowledge.
+5. **Clearly established law:** for each individual and claim, the event date, precisely framed right or rule, verified binding pre-event authority, material factual similarities and differences, and why that authority gave this defendant fair warning.
+6. **Result:** the claim, defendant, and requested ruling.
+
+The decisive-facts, relevant-time-knowledge, and application functions are mandatory; their exact wording and paragraph count are not. State the application directly when the connection is clear. Expressly identify the inference when the application depends on an unobserved state of mind, agreement, causal mechanism, municipal attribution, or another non-obvious bridge. Do not add "These facts support the reasonable inference" as an incantation when a direct application already does the work.
 
 Address alternative probable cause and arguable probable cause where the defense or controlling law makes them material. Do not rely only on a general right to be free from arrest.
 
-Each count must identify the constitutional source, defendant and capacity, challenged act, event stage, disputed element or rule, relevant incorporated paragraphs, supported inference, particular injury, and relief. Incorporate only the factual paragraphs that do work in that count.
+Each count must identify the constitutional source, defendant and capacity, challenged act, event stage, disputed element or rule, decisive facts, relevant-time knowledge, relevant incorporated paragraphs, resulting application, any necessary non-obvious inference, particular injury, and relief. Incorporate only the factual paragraphs that do work in that count.
 
 Do not repeat the entire chronology, incorporate every preceding paragraph, or combine the initial arrest, later force, continued detention, report conduct, and prosecution merely because they arose from one encounter. Do not name an officer in a count based only on presence or employment. Do not use “unreasonable,” “malicious,” “retaliatory,” “conspired,” “ratified,” “knew or should have known,” or a similar label as a substitute for the conduct and facts supporting that inference.
 
@@ -159,9 +162,9 @@ Do not list every Monell path and say discovery will determine which one applies
 
 For each paragraph, classify it:
 
-| Keep                                                                      | Move to internal work product                                                         | Combine                                                            | Omit                                                                        |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| Decisive fact, necessary context, supported inference, element, or relief | source methodology, extended authority discussion, discovery plan, evidentiary detail | repeated chronology, duplicated standards, overlapping allegations | unsupported label, immaterial history, redundant rhetoric, abandoned theory |
+| Keep                                                                                     | Move to internal work product                                                         | Combine                                                            | Omit                                                                        |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Decisive fact, necessary context, supported application or inference, element, or relief | source methodology, extended authority discussion, discovery plan, evidentiary detail | repeated chronology, duplicated standards, overlapping allegations | unsupported label, immaterial history, redundant rhetoric, abandoned theory |
 
 Then ask:
 

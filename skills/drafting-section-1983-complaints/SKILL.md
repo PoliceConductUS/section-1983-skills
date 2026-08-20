@@ -202,12 +202,45 @@ Every count must perform these functions in this order.
 
 ### 1. Standard
 
-State the claim's elements and cite verified authority:
+State the governing test precisely and attach verified authority **with a
+pinpoint** to the statement of the test — not only to the count as a whole:
 
-> To state a claim for [claim], a plaintiff must allege that [elements].
+> To state a claim for [claim], a plaintiff must allege [elements]. _[Case]_,
+> [vol] [rptr] [first], [pincite] ([court] [year]).
+
+State the test in the controlling authority's own formulation. Do not paraphrase
+it into a looser or broader proposition, and do not state a black-letter rule as
+a bare, uncited sentence. Match the level of generality the disputed element
+requires; a vague rule invites a vague application and understates the fair-
+warning burden.
+
+When the claim runs on a **named multi-factor or multi-prong framework, state
+and cite that framework before applying any facts to it.** Do not apply the
+factors while leaving the test itself unstated. Common examples (verify current
+status and the controlling circuit's formulation for each):
+
+- Excessive force — the _Graham v. Connor_ objective-reasonableness factors
+  (severity of the offense, immediate threat, active resistance or flight).
+- Retaliatory arrest — the protected-activity / adverse-action / but-for-
+  causation elements and the _Nieves v. Bartlett_ probable-cause rule and its
+  narrow exception.
+- Pretrial-detainee conditions or punishment — the _Bell v. Wolfish_ / _Kingsley
+  v. Hendrickson_ punishment standard.
+- Section 1983 conspiracy, failure to intervene, and Monell — state each claim's
+  elements with authority, not as an uncited recital.
 
 Identify the constitutional right, not only Section 1983. Section 1983 requires
-deprivation of a federal right by a person acting under color of state law.
+deprivation of a federal right by a person acting under color of state law. When
+the claim turns on a state-law offense, state the offense elements from the
+statute and cite the controlling state-court construction that fixes those
+elements; do not state the offense from memory or as a bare statutory
+paraphrase.
+
+Every legal proposition stating a test, element, factor, or offense element
+carries its own verified pinpoint citation. A bare uncited proposition does not
+satisfy this step, and a citation that appears only later in the count's fair-
+warning or application discussion does not cure a Standard stated without
+authority.
 
 ### 2. Defendant-specific facts
 

@@ -27,6 +27,18 @@ use briefing assertions to cure missing complaint allegations.
 
 A count is complete only if:
 
+- [ ] the count's Standard states the governing test in the controlling
+      authority's own formulation, faithful and not loosely paraphrased, and
+      each test, element, factor, or offense element carries its own verified
+      pinpoint citation at the point it is stated — no bare uncited legal
+      proposition, and no test whose only citation appears later in the
+      application or fair-warning discussion;
+- [ ] any named multi-factor or multi-prong framework the claim depends on
+      (e.g., _Graham_ force factors, _Nieves_ probable-cause rule,
+      _Bell_/_Kingsley_ punishment standard, conspiracy or failure-to-intervene
+      elements) is stated and cited before facts are applied to it;
+- [ ] a state-law offense element is stated from the statute and pinned to the
+      controlling state-court construction, not paraphrased from memory;
 - [ ] verified authority states every required element;
 - [ ] every element maps to cited factual allegations;
 - [ ] every defendant has a participant-specific application;
@@ -74,6 +86,20 @@ A count is complete only if:
 - [ ] every factual sentence is personal knowledge, an attributed source fact,
       or a supported inference that is expressly identified when it might
       otherwise read as directly observed;
+- [ ] every factual allegation about an event during a recorded interval has
+      been checked against the video and the asserted event or conduct is
+      visible in that video, or the filed text clearly identifies it as based on
+      Plaintiff's present recollection, states that the recordings presently
+      available do not resolve the point, and states that the allegation is
+      subject to correction if additional recordings are produced or located;
+- [ ] every quoted, paraphrased, or attributed statement during a recorded
+      interval appears in the verified transcript, with exact quotations
+      matching exactly, paraphrases adding no content, and uncertain speaker
+      attribution preserved, or the filed text clearly identifies the statement
+      as based on Plaintiff's present recollection, states that the recordings
+      presently available do not resolve the point, and states that the
+      allegation is subject to correction if additional recordings are produced
+      or located;
 - [ ] no allegation presents a defendant's mindset, motive, purpose, audience,
       agreement, or knowledge as fact without direct support;
 - [ ] no bare legal conclusion or liability label substitutes for

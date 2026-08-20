@@ -5,10 +5,18 @@ user's first hour. It is documentation only. It does not create a workspace
 template, companion repository, or scaffolding command, and completing it does
 not make any document filing-ready.
 
-Install one immutable release before starting:
+Use one immutable release when the tagged version is available:
 
 ```bash
 npx skills add https://github.com/PoliceConductUS/section-1983-skills/tree/v0.1.0
+```
+
+If that tag has not been published, do not substitute `main` or another moving
+branch. From the current source checkout, inspect the locally available skills
+instead:
+
+```bash
+npx skills add . --list
 ```
 
 The paths below are example paths, not mandatory paths. Rename them or use a

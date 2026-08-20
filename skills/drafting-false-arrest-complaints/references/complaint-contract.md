@@ -84,6 +84,13 @@ Do not add every conceivable offense.
 | Offense | Required element | Arrest-time supporting fact | Contrary or absent fact | Defendant who knew it | Source or GAP |
 | ------- | ---------------- | --------------------------- | ----------------------- | --------------------- | ------------- |
 
+State each offense's required elements from the statute itself and pin them to
+the controlling state-court construction that fixes those elements. Do not
+paraphrase the offense from memory or state only the statute number; a loose or
+uncited element statement understates the probable-cause gap and the
+fair-warning burden. Record the statutory citation and the construction
+authority (or a GAP) in the matrix source column.
+
 Draft the resulting allegation through:
 
 > **Offense → element → decisive facts → contemporaneous knowledge →
@@ -121,7 +128,12 @@ seizure, force, intervention, report conduct, or later custody.
 
 Each count must contain:
 
-1. **Element:** verified authority and the elements actually disputed.
+1. **Element:** the governing test in the controlling authority's own
+   formulation, with a verified pinpoint citation attached to the statement of
+   the test, plus the elements actually disputed. State any named framework
+   (e.g., the arguable-probable-cause standard, or a _Nieves_ probable-cause
+   rule) and cite it before applying facts. Do not state the test as a bare
+   uncited proposition or defer its citation to the fair-warning discussion.
 2. **Decisive facts:** participant-specific allegations and precise incorporated
    paragraphs.
 3. **Relevant-time knowledge:** what each defendant knew when that defendant

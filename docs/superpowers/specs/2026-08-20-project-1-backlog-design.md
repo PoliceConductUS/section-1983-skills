@@ -25,8 +25,9 @@ Each issue branch must contain only that backlog item's OpenSpec artifacts,
 implementation, tests, and documentation on top of its parent branch.
 
 Do not merge, close issues, or change GitHub Project status. Commit completed
-work locally. Add external comments only to issues skipped under the routing
-boundary below.
+work on its branch and run `git town sync` after every commit so the branch is
+pushed to `origin`. Add external comments only to issues skipped under the
+routing boundary below.
 
 ## Workflow
 
@@ -42,7 +43,14 @@ For every eligible issue:
 3. Work in vertical red-green TDD slices at the approved public seams.
 4. Validate the skill or command through its public interface.
 5. Complete the bridge verification and retrospective artifacts.
-6. Commit the complete issue change before starting the next project item.
+6. Archive that issue's OpenSpec change on its owning issue branch.
+7. Commit and sync the complete archived issue change before creating the next
+   child branch.
+
+Archiving belongs on the branch that owns the OpenSpec change, not on its child.
+This keeps every issue branch independently complete and mergeable. The child
+inherits its parent's durable specification and archived cycle as branch
+history.
 
 ## Public test seams
 

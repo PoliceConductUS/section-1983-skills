@@ -49,8 +49,11 @@ OBLIGATIONS = {
         r"additional recordings (?:are )?produced or located"
     ),
     "fail closed": (
-        r"(?:count is complete only if|(?:^|[.!?] |- )"
-        r"(?:fail validation|fail packet validation) when)"
+        r"(?:count is complete only if|"
+        r"fail validation when a recorded-event fact is not visible.{0,160}"
+        r"recorded statement does not appear.{0,120}unless|"
+        r"fail packet validation when neither.{0,80}route nor.{0,80}route"
+        r" is satisfied)"
     ),
 }
 
@@ -141,10 +144,13 @@ class RecordedEvidenceContractTest(unittest.TestCase):
             ),
             "fail closed": "do not fail validation when the route is incomplete",
             "negated fail closed": "never fail validation when the route is incomplete",
+            "inverted fail closed": (
+                "fail validation when both recorded-evidence routes are complete"
+            ),
         }
         for obligation, mutation in mutations.items():
             with self.subTest(obligation=obligation):
-                pattern_id = obligation.removeprefix("negated ")
+                pattern_id = re.sub(r"^(?:negated|inverted) ", "", obligation)
                 self.assertNotRegex(mutation, OBLIGATIONS[pattern_id])
 
 

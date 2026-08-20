@@ -2,8 +2,10 @@
 
 ## Purpose
 
-TBD - created by archiving change issue-1-filing-ci. Update Purpose after
-archive.
+Define thin, project-configured Filing CI orchestration that runs deterministic
+filing-integrity checks at the required workflow stages, preserves checker
+findings, and fails closed without taking ownership of checker logic or
+drafting.
 
 ## Requirements
 

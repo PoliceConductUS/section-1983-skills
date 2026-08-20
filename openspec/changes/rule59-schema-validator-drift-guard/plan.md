@@ -46,6 +46,7 @@ OpenSpec 1.3.1.
 
 - [ ] Add named sets for sampling method, completeness status, Rule subsection,
       representation status, gap status, evidence level, and metric type.
+- [ ] Add a named required-field tuple for the study date range.
 - [ ] Replace the corresponding inline sets with the named constants.
 - [ ] Run focused GREEN and the existing Rule 59 corpus suite.
 - [ ] Commit the validator refactor and sync.

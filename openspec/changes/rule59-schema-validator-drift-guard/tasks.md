@@ -10,7 +10,7 @@
 ## 2. GREEN validator seam
 
 - [ ] 2.1 Extract named constants for every currently inline schema-controlled
-      enum without changing any allowed value.
+      enum and the study date-range required fields without changing any value.
 - [ ] 2.2 Reuse those constants at the existing controlled-value call sites.
 - [ ] 2.3 Run the focused alignment and Rule 59 corpus suites.
 - [ ] 2.4 Commit the GREEN refactor and sync the child branch.

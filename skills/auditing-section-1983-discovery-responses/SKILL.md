@@ -61,3 +61,8 @@ Plaintiff Decisions. The skill must not certify an objection as valid, declare
 waiver, or draft meet-and-confer correspondence. It must not choose whether to
 accept, challenge, narrow, confer, compel, seek fees, or seek sanctions. Route
 any later correspondence to a separate meet-and-confer workflow.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

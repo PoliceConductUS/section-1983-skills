@@ -243,3 +243,8 @@ completely after remediation and perform that reconciliation before approval.
 If you want, paste one paragraph from your response (with its citations) and
 I'll show what a **completed audit_item** looks like end-to-end, including a
 court-safe rewrite.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

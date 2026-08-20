@@ -57,6 +57,8 @@ def validate_registry(repository_root):
         if not isinstance(source, dict) or not is_nonblank(source.get("id")):
             errors.append("invalid-source")
             continue
+        if source["id"] in source_ids:
+            errors.append("duplicate-source-id")
         source_ids.add(source["id"])
         if not is_https_url(source.get("url")):
             errors.append("insecure-source-url")
@@ -71,7 +73,7 @@ def validate_registry(repository_root):
         name = skill.get("name")
         names.append(name)
         mode = skill.get("rules_mode")
-        if mode not in MODES:
+        if not isinstance(mode, str) or mode not in MODES:
             errors.append("invalid-rules-mode")
         if not is_date(skill.get("reviewed_on")):
             errors.append("invalid-date")

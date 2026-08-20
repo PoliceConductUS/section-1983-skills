@@ -288,6 +288,24 @@ class RepositoryGovernanceTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("runtime-source-date-required", result.stdout + result.stderr)
 
+    def test_every_live_runtime_sourced_skill_requires_output_provenance(self):
+        registry = json.loads(
+            read_public_file(REPOSITORY / "governance" / "rules-provenance.json")
+        )
+        runtime_skills = [
+            entry["name"]
+            for entry in registry["skills"]
+            if entry["rules_mode"] == "runtime-sourced"
+        ]
+
+        for name in runtime_skills:
+            with self.subTest(skill=name):
+                skill = read_public_file(REPOSITORY / "skills" / name / "SKILL.md")
+                self.assertRegex(
+                    skill,
+                    r"(?is)returned.{0,80}artifact.{0,200}actual.{0,100}approved.{0,100}source.{0,30}identity.{0,180}checked.{0,30}date.{0,100}used",
+                )
+
     def test_skill_entry_mismatch_is_rejected(self):
         self.assert_temporary_repository_error(
             lambda registry: registry["skills"].append(
@@ -313,6 +331,21 @@ class RepositoryGovernanceTest(unittest.TestCase):
             "invalid-rules-mode",
         )
 
+    def test_non_string_rules_modes_are_rejected_without_traceback(self):
+        for value in ([], {}, 7):
+            with self.subTest(rules_mode=value):
+                registry = valid_registry()
+                registry["skills"][0]["rules_mode"] = value
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, registry=registry)
+                    result = run_validator(root)
+
+                output = result.stdout + result.stderr
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("invalid-rules-mode", output)
+                self.assertNotIn("Traceback", output)
+
     def test_invalid_date_is_rejected(self):
         self.assert_temporary_repository_error(
             lambda registry: registry["skills"][0].update({"reviewed_on": "20-08-2026"}),
@@ -335,6 +368,12 @@ class RepositoryGovernanceTest(unittest.TestCase):
         self.assert_temporary_repository_error(
             lambda registry: registry["sources"][0].update({"url": "http://www.uscourts.gov"}),
             "insecure-source-url",
+        )
+
+    def test_duplicate_source_id_is_rejected(self):
+        self.assert_temporary_repository_error(
+            lambda registry: registry["sources"].append(dict(registry["sources"][0])),
+            "duplicate-source-id",
         )
 
     def test_jurisdiction_reference_is_required(self):

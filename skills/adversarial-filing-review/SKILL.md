@@ -120,3 +120,8 @@ A user-approved correction occurs in a separate drafting workflow and a new
 versioned draft. After any material change, run the applicable authority and
 writing checks, rerun independent adversarial review, and run Filing CI again as
 applicable. A prior review never transfers to changed draft content.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

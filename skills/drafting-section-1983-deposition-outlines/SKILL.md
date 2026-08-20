@@ -62,3 +62,8 @@ select a deponent or witness, decide deposition order or which witness goes
 first, or decide whether to take a deposition. It also must not select duration,
 30(b)(6) scope, document sequencing, impeachment timing, or a theory-changing
 follow-up.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

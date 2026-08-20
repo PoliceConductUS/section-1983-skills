@@ -80,8 +80,7 @@ def _invoke(command, request, error_type, agent, timeout_seconds):
         with tempfile.TemporaryDirectory(prefix="drafting-evaluation-") as directory:
             completed = subprocess.run(
                 _command(command),
-                input=json.dumps(request),
-                text=True,
+                input=json.dumps(request).encode("utf-8"),
                 capture_output=True,
                 cwd=directory,
                 env=_child_environment(),
@@ -116,8 +115,8 @@ def _invoke(command, request, error_type, agent, timeout_seconds):
             stderr=stderr,
         )
     try:
-        response = json.loads(completed.stdout)
-    except json.JSONDecodeError as error:
+        response = json.loads(completed.stdout.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise error_type(
             f"{agent}-response-malformed-json",
             f"{agent} response was not valid JSON",
@@ -187,6 +186,8 @@ def _validate_judgment_response(fixture, run_id, response, stdout, stderr):
         if not isinstance(decision, dict):
             incomplete("judgment decisions must be objects")
         criterion_id = decision.get("criterion_id")
+        if not isinstance(criterion_id, str) or not criterion_id:
+            incomplete("judgment criterion id must be a nonempty string")
         observed.append(criterion_id)
         if type(decision.get("passed")) is not bool:
             incomplete("judgment passed value must be boolean")

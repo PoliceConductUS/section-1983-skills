@@ -2,8 +2,10 @@
 
 ## Purpose
 
-TBD - created by archiving change issue-7-adversarial-filing-review. Update
-Purpose after archive.
+Define a clean-room, read-only adversarial review for supported Section 1983
+filings using an immutable bounded packet, document-specific attacks,
+categorized findings, source-supported corrections, and plaintiff-reserved
+strategy decisions.
 
 ## Requirements
 

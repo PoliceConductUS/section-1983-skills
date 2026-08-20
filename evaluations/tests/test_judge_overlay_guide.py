@@ -1,6 +1,8 @@
 import json
 import importlib.util
 import re
+import shlex
+import subprocess
 import unittest
 from datetime import date
 from pathlib import Path
@@ -172,6 +174,10 @@ def json_record(markdown, heading):
     body = section(markdown, heading)
     match = re.search(r"(?ms)^```json\s*$\n(.*?)^```\s*$", body)
     return json.loads(match.group(1)) if match else {}
+
+
+def bash_commands(markdown):
+    return re.findall(r"(?ms)^```bash\s*$\n(.*?)^```\s*$", markdown)
 
 
 class JudgeOverlayGuideTest(unittest.TestCase):
@@ -431,6 +437,31 @@ class JudgeOverlayGuideTest(unittest.TestCase):
             r"canonical corpus.*must pass.*validate_corpus\.py.*before "
             r"(?:publication or transfer|publication and transfer)",
         )
+
+    def test_published_validator_command_runs_from_repository_root(self):
+        commands = bash_commands(self.guide)
+        self.assertEqual(len(commands), 1)
+        argv = shlex.split(commands[0])
+        self.assertEqual(
+            argv,
+            [
+                "python3",
+                "skills/studying-rule-59e-decisions/scripts/validate_corpus.py",
+                "skills/studying-rule-59e-decisions/references/fixtures/valid-complete.json",
+            ],
+        )
+        for path in argv[1:]:
+            self.assertTrue((REPOSITORY_ROOT / path).is_file())
+        completed = subprocess.run(
+            argv,
+            cwd=REPOSITORY_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertEqual(completed.stdout.strip(), "corpus validation passed")
 
     def test_degradation_clause_rejects_reversed_semantics(self):
         self.assert_degradation_contract(self.guide)

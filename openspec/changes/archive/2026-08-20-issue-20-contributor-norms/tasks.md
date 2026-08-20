@@ -18,7 +18,7 @@
 
 ## 3. Review, verification, and archive
 
-- [ ] 3.1 Independently review the whole story and mutations.
-- [ ] 3.2 Correct any Important findings test-first.
-- [ ] 3.3 Record verification and retrospective artifacts.
-- [ ] 3.4 Archive, validate the durable specification, commit, and sync.
+- [x] 3.1 Independently review the whole story and mutations.
+- [x] 3.2 Correct any Important findings test-first.
+- [x] 3.3 Record verification and retrospective artifacts.
+- [x] 3.4 Archive, validate the durable specification, commit, and sync.

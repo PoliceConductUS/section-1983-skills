@@ -56,9 +56,16 @@ Classify and report the result without changing the controlling filing:
 - Return actionable findings, including the attacked location and required
   correction when supplied, to the drafting loop for correction and rerun.
 
-Filing CI is read-only orchestration. Do not silently edit the controlling
-filing, create project paths, rewrite checker output, or represent a correction
-as user-approved.
+Filing CI is read-only orchestration. While Filing CI is active, do not edit the
+controlling filing, even when a broader user request asks to make it
+filing-ready. Do not silently edit the filing, create project paths, rewrite
+checker output, or claim that a correction is user-approved.
+
+For a user-authorized correction, explicitly hand off to the applicable drafting
+workflow outside Filing CI orchestration. That workflow must use a
+checker-supplied correction or source-supported drafting; do not invent
+corrective filing text. After the correction, return to Filing CI for a fresh
+checker run.
 
 ## Filing gate and boundaries
 

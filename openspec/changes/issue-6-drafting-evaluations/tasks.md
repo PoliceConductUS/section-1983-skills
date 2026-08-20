@@ -9,11 +9,11 @@
 
 ## 2. Minimal Harness
 
-- [ ] 2.1 Implement the fixture loader and deterministic grader with no external
+- [x] 2.1 Implement the fixture loader and deterministic grader with no external
       Python dependency.
-- [ ] 2.2 Implement configured candidate and judge process execution with one
+- [x] 2.2 Implement configured candidate and judge process execution with one
       empty temporary directory per run.
-- [ ] 2.3 Implement variance aggregation, baseline comparison, and stable
+- [x] 2.3 Implement variance aggregation, baseline comparison, and stable
       reports.
 
 ## 3. Synthetic Corpus

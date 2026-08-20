@@ -113,7 +113,9 @@ class DeterministicGraderTest(unittest.TestCase):
     def test_reports_missing_required_and_unknown_citation_identifiers(self):
         fixture = fixture_with_contract(required_citations=["SRC-1", "SRC-2"])
 
-        result = grade_candidate(fixture, "The report cites [SRC-1] and [SRC-404].")
+        result = grade_candidate(
+            fixture, "The report cites [cite:SRC-1] and [cite:SRC-404]."
+        )
 
         self.assertIn(("citation-missing", "SRC-2"), finding_pairs(result))
         self.assertIn(("citation-unknown", "SRC-404"), finding_pairs(result))
@@ -122,11 +124,27 @@ class DeterministicGraderTest(unittest.TestCase):
         fixture = fixture_with_contract(required_citations=["SRC-1", "SRC-2"])
 
         result = grade_candidate(
-            fixture, "The report cites [SRC-1] and [SRC-2]."
+            fixture, "The report cites [cite:SRC-1] and [cite:SRC-2]."
         )
 
         self.assertTrue(result["passed"])
         self.assertEqual(result["findings"], [])
+
+    def test_does_not_treat_other_markdown_brackets_as_citation_tokens(self):
+        fixture = fixture_with_contract(required_citations=["SRC-1"])
+        candidate = """[SRC-1]
+[a link](https://example.test/SRC-1)
+- [x] reviewed SRC-1
+[^SRC-1]
+![SRC-1](image.png)
+"""
+
+        result = grade_candidate(fixture, candidate)
+
+        self.assertEqual(
+            finding_pairs(result),
+            {("citation-missing", "SRC-1")},
+        )
 
     def test_returns_every_applicable_finding_with_stable_counts(self):
         fixture = fixture_with_contract(
@@ -135,7 +153,7 @@ class DeterministicGraderTest(unittest.TestCase):
             required_citations=["SRC-1"],
         )
 
-        result = grade_candidate(fixture, "merely [SRC-404]")
+        result = grade_candidate(fixture, "merely [cite:SRC-404]")
 
         self.assertEqual(result["fixture_id"], "deterministic-fixture")
         self.assertEqual(result["finding_count"], 4)

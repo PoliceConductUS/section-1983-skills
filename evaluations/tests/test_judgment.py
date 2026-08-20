@@ -1,8 +1,12 @@
 import json
+import math
+import os
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from evaluations.judgment import (
     CandidateProtocolError,
@@ -17,7 +21,7 @@ FIXTURE = {
     "id": "judgment-fixture",
     "prompt": "Review the synthetic candidate.",
     "sources": [{"id": "SRC-1", "content": "Synthetic source."}],
-    "candidate": "Synthetic candidate [SRC-1].",
+    "candidate": "Synthetic candidate [cite:SRC-1].",
     "rubric": [
         {"id": "source-boundary", "description": "Uses bounded sources only."},
         {"id": "no-silent-edit", "description": "Does not edit the draft."},
@@ -28,9 +32,12 @@ FIXTURE = {
 FAKE_JUDGE = """import json
 import os
 import sys
+import time
 
 request = json.load(sys.stdin)
 mode = sys.argv[1]
+if mode == "timeout":
+    time.sleep(3)
 criteria = [item["id"] for item in request["rubric"]]
 if mode == "missing":
     criteria = criteria[:-1]
@@ -74,12 +81,29 @@ json.dump(response, sys.stdout)
 FAKE_CANDIDATE = """import json
 import os
 import sys
+import time
 
 request = json.load(sys.stdin)
+if sys.argv[1] == "timeout":
+    time.sleep(3)
+environment_keys = (
+    "PREFIX_CONVERSATION_SUFFIX",
+    "SESSION_TOKEN_EXTRA",
+    "AGENT_THREAD_CONTEXT",
+    "MiXeD_SeSsIoN_Key",
+    "PWD",
+    "OLDPWD",
+    "EVALUATION_API_KEY",
+)
 details = {
     "cwd": os.getcwd(),
     "entries": os.listdir(),
     "request": request,
+    "environment": {
+        key: os.environ[key]
+        for key in environment_keys
+        if key in os.environ
+    },
 }
 response = {"output": json.dumps(details, sort_keys=True)}
 if sys.argv[1] == "missing-output":
@@ -95,13 +119,38 @@ class CandidateRunnerTest(unittest.TestCase):
         candidate.write_text(FAKE_CANDIDATE)
         return candidate
 
+    def test_public_runners_apply_default_timeout_to_short_commands(self):
+        with tempfile.TemporaryDirectory() as root:
+            candidate = self.write_fake_candidate(root)
+            judge = Path(root) / "fake_judge.py"
+            judge.write_text(FAKE_JUDGE)
+
+            candidate_result = run_candidate(
+                FIXTURE,
+                [sys.executable, str(candidate), "valid"],
+                run_id="candidate-default-timeout",
+            )
+            judgment_result = run_judgments(
+                FIXTURE,
+                [sys.executable, str(judge), "valid"],
+                repetitions=3,
+            )
+
+        self.assertIn("output", candidate_result)
+        self.assertTrue(judgment_result["available"])
+        self.assertEqual(len(judgment_result["runs"]), 3)
+
     def test_each_candidate_invocation_uses_a_new_process_and_empty_working_directory(self):
         with tempfile.TemporaryDirectory() as root:
             candidate = self.write_fake_candidate(root)
             command = [sys.executable, str(candidate), "valid"]
 
-            first = run_candidate(FIXTURE, command, run_id="candidate-1")
-            second = run_candidate(FIXTURE, command, run_id="candidate-2")
+            first = run_candidate(
+                FIXTURE, command, run_id="candidate-1", timeout_seconds=2
+            )
+            second = run_candidate(
+                FIXTURE, command, run_id="candidate-2", timeout_seconds=2
+            )
 
         details = [json.loads(first["output"]), json.loads(second["output"])]
         self.assertEqual(len({item["cwd"] for item in details}), 2)
@@ -133,7 +182,79 @@ class CandidateRunnerTest(unittest.TestCase):
                     FIXTURE,
                     [sys.executable, str(candidate), "missing-output"],
                     run_id="candidate-1",
+                    timeout_seconds=2,
                 )
+
+    def test_child_environment_removes_context_keys_and_working_directory_state(self):
+        seeded_environment = {
+            "PREFIX_CONVERSATION_SUFFIX": "synthetic-context",
+            "SESSION_TOKEN_EXTRA": "synthetic-session",
+            "AGENT_THREAD_CONTEXT": "synthetic-thread",
+            "MiXeD_SeSsIoN_Key": "synthetic-mixed",
+            "PWD": "/synthetic/pwd",
+            "OLDPWD": "/synthetic/oldpwd",
+            "EVALUATION_API_KEY": "synthetic-allowed-credential",
+        }
+        with tempfile.TemporaryDirectory() as root:
+            candidate = self.write_fake_candidate(root)
+            with mock.patch.dict(os.environ, seeded_environment, clear=False):
+                result = run_candidate(
+                    FIXTURE,
+                    [sys.executable, str(candidate), "valid"],
+                    run_id="candidate-environment",
+                    timeout_seconds=2,
+                )
+
+        environment = json.loads(result["output"])["environment"]
+        self.assertEqual(
+            environment,
+            {"EVALUATION_API_KEY": "synthetic-allowed-credential"},
+        )
+
+    def test_candidate_rejects_invalid_timeout_before_command_execution(self):
+        for timeout_seconds in (
+            0,
+            -1,
+            True,
+            False,
+            math.nan,
+            math.inf,
+            -math.inf,
+        ):
+            with self.subTest(timeout=timeout_seconds), tempfile.TemporaryDirectory() as root:
+                root_path = Path(root)
+                sentinel = root_path / "executed"
+                command = root_path / "sentinel.py"
+                command.write_text(
+                    "from pathlib import Path\n"
+                    "import sys\n"
+                    "Path(sys.argv[1]).write_text('executed')\n"
+                )
+
+                with self.assertRaises(ValueError):
+                    run_candidate(
+                        FIXTURE,
+                        [sys.executable, str(command), str(sentinel)],
+                        run_id="candidate-timeout-validation",
+                        timeout_seconds=timeout_seconds,
+                    )
+
+                self.assertFalse(sentinel.exists())
+
+    def test_candidate_timeout_is_bounded_and_uses_stable_protocol_error(self):
+        with tempfile.TemporaryDirectory() as root:
+            candidate = self.write_fake_candidate(root)
+            started = time.monotonic()
+
+            with self.assertRaisesRegex(CandidateProtocolError, "timeout"):
+                run_candidate(
+                    FIXTURE,
+                    [sys.executable, str(candidate), "timeout"],
+                    run_id="candidate-timeout",
+                    timeout_seconds=0.05,
+                )
+
+            self.assertLess(time.monotonic() - started, 1)
 
 
 class JudgmentRunnerTest(unittest.TestCase):
@@ -148,7 +269,10 @@ class JudgmentRunnerTest(unittest.TestCase):
             judge = self.write_fake_judge(root)
 
             result = run_judgments(
-                FIXTURE, [sys.executable, str(judge), "valid"], repetitions=3
+                FIXTURE,
+                [sys.executable, str(judge), "valid"],
+                repetitions=3,
+                timeout_seconds=2,
             )
 
         self.assertTrue(result["available"])
@@ -194,6 +318,7 @@ class JudgmentRunnerTest(unittest.TestCase):
                         FIXTURE,
                         [sys.executable, str(judge), mode],
                         repetitions=3,
+                        timeout_seconds=2,
                     )
 
     def test_rejects_invalid_fixture_run_reason_and_passed_protocol_values(self):
@@ -216,18 +341,71 @@ class JudgmentRunnerTest(unittest.TestCase):
                         FIXTURE,
                         [sys.executable, str(judge), mode],
                         repetitions=3,
+                        timeout_seconds=2,
                     )
 
     def test_requires_at_least_three_repetitions(self):
         with self.assertRaisesRegex(ValueError, "at least three"):
-            run_judgments(FIXTURE, [sys.executable, "unused.py"], repetitions=2)
+            run_judgments(
+                FIXTURE,
+                [sys.executable, "unused.py"],
+                repetitions=2,
+                timeout_seconds=2,
+            )
+
+    def test_judgment_rejects_invalid_timeout_before_command_execution(self):
+        for timeout_seconds in (
+            0,
+            -1,
+            True,
+            False,
+            math.nan,
+            math.inf,
+            -math.inf,
+        ):
+            with self.subTest(timeout=timeout_seconds), tempfile.TemporaryDirectory() as root:
+                root_path = Path(root)
+                sentinel = root_path / "executed"
+                command = root_path / "sentinel.py"
+                command.write_text(
+                    "from pathlib import Path\n"
+                    "import sys\n"
+                    "Path(sys.argv[1]).write_text('executed')\n"
+                )
+
+                with self.assertRaises(ValueError):
+                    run_judgments(
+                        FIXTURE,
+                        [sys.executable, str(command), str(sentinel)],
+                        repetitions=3,
+                        timeout_seconds=timeout_seconds,
+                    )
+
+                self.assertFalse(sentinel.exists())
+
+    def test_judgment_timeout_is_bounded_and_uses_stable_protocol_error(self):
+        with tempfile.TemporaryDirectory() as root:
+            judge = self.write_fake_judge(root)
+            started = time.monotonic()
+
+            with self.assertRaisesRegex(JudgmentProtocolError, "timeout"):
+                run_judgments(
+                    FIXTURE,
+                    [sys.executable, str(judge), "timeout"],
+                    repetitions=3,
+                    timeout_seconds=0.05,
+                )
+
+            self.assertLess(time.monotonic() - started, 1)
 
     def test_marks_unconfigured_or_unexecutable_judgment_unavailable(self):
         cases = (None, ["command-that-does-not-exist-issue-6"])
 
         for command in cases:
             with self.subTest(command=command):
-                result = run_judgments(FIXTURE, command, repetitions=3)
+                result = run_judgments(
+                    FIXTURE, command, repetitions=3, timeout_seconds=2
+                )
 
                 self.assertFalse(result["available"])
                 self.assertEqual(result["runs"], [])

@@ -10,7 +10,7 @@ def write_fixture(directory, manifest_changes=None, source_changes=None):
     directory.mkdir(parents=True)
     (directory / "prompt.md").write_text("Draft a synthetic filing report.\n")
     (directory / "source.md").write_text("Synthetic source text.\n")
-    (directory / "passing.md").write_text("# Result\n\n[SRC-1]\n")
+    (directory / "passing.md").write_text("# Result\n\n[cite:SRC-1]\n")
     (directory / "regression.md").write_text("Regression output.\n")
     sources = [{"id": "SRC-1", "path": "source.md"}]
     if source_changes:
@@ -235,6 +235,197 @@ class FixtureLoaderTest(unittest.TestCase):
 
             with self.assertRaisesRegex(FixtureValidationError, "invented-tool"):
                 load_fixture(fixture_directory)
+
+    def test_rejects_malformed_deterministic_contract_values(self):
+        cases = (
+            ("required-fields-not-list", "required_fields", "analysis.result"),
+            ("required-field-not-string", "required_fields", [7]),
+            ("required-field-empty", "required_fields", [""]),
+            ("headings-not-list", "ordered_headings", "Result"),
+            ("heading-not-string", "ordered_headings", [7]),
+            ("heading-empty", "ordered_headings", [""]),
+            ("citations-not-list", "required_citations", "SRC-1"),
+            ("citation-not-string", "required_citations", [7]),
+            ("citation-empty", "required_citations", [""]),
+            ("terms-not-list", "banned_terms", {}),
+            ("patterns-not-list", "banned_patterns", {}),
+        )
+
+        for label, field, value in cases:
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as root:
+                def change_contract(manifest):
+                    manifest["deterministic"][field] = value
+
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=change_contract
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_malformed_banned_rules_and_invalid_regular_expression(self):
+        cases = (
+            ("term-missing-id", "banned_terms", [{"term": "merely"}]),
+            ("term-empty-id", "banned_terms", [{"id": "", "term": "merely"}]),
+            ("term-missing-value", "banned_terms", [{"id": "merely"}]),
+            ("term-non-string", "banned_terms", [{"id": "merely", "term": 7}]),
+            ("term-empty", "banned_terms", [{"id": "merely", "term": ""}]),
+            ("pattern-missing-id", "banned_patterns", [{"pattern": "merely"}]),
+            (
+                "pattern-empty-id",
+                "banned_patterns",
+                [{"id": "", "pattern": "merely"}],
+            ),
+            ("pattern-missing-value", "banned_patterns", [{"id": "merely"}]),
+            (
+                "pattern-non-string",
+                "banned_patterns",
+                [{"id": "merely", "pattern": 7}],
+            ),
+            (
+                "pattern-empty",
+                "banned_patterns",
+                [{"id": "merely", "pattern": ""}],
+            ),
+            (
+                "pattern-invalid-regex",
+                "banned_patterns",
+                [{"id": "invalid", "pattern": "["}],
+            ),
+        )
+
+        for label, field, rules in cases:
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as root:
+                def change_rules(manifest):
+                    manifest["deterministic"][field] = rules
+
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=change_rules
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_malformed_rubric_criteria(self):
+        cases = (
+            [{"description": "Uses bounded sources."}],
+            [{"id": "", "description": "Uses bounded sources."}],
+            [{"id": 7, "description": "Uses bounded sources."}],
+            [{"id": "source-boundary"}],
+            [{"id": "source-boundary", "description": ""}],
+            [{"id": "source-boundary", "description": 7}],
+        )
+
+        for rubric in cases:
+            with self.subTest(rubric=rubric), tempfile.TemporaryDirectory() as root:
+                def change_rubric(manifest):
+                    manifest["rubric"] = rubric
+
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=change_rubric
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_empty_or_non_string_fixture_and_target_skill_identifiers(self):
+        cases = (
+            ("id", ""),
+            ("id", 7),
+            ("target_skill", ""),
+            ("target_skill", 7),
+        )
+
+        for field, value in cases:
+            with self.subTest(field=field, value=value), tempfile.TemporaryDirectory() as root:
+                def change_identifier(manifest):
+                    manifest[field] = value
+
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=change_identifier
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_empty_source_regression_expected_findings_and_rubric(self):
+        def empty_source(sources):
+            sources[0]["id"] = ""
+            return sources
+
+        def empty_regression_id(manifest):
+            manifest["regressions"][0]["id"] = ""
+
+        def empty_expected_findings(manifest):
+            manifest["regressions"][0]["expected_findings"] = []
+
+        def empty_rubric(manifest):
+            manifest["rubric"] = []
+
+        cases = (
+            ("source-id", None, empty_source),
+            ("regression-id", empty_regression_id, None),
+            ("expected-findings", empty_expected_findings, None),
+            ("rubric", empty_rubric, None),
+        )
+
+        for label, manifest_changes, source_changes in cases:
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as root:
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture",
+                    manifest_changes=manifest_changes,
+                    source_changes=source_changes,
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_duplicate_contract_and_expected_finding_entries(self):
+        def duplicate_required_fields(manifest):
+            manifest["deterministic"]["required_fields"] = [
+                "analysis.result",
+                "analysis.result",
+            ]
+
+        def duplicate_headings(manifest):
+            manifest["deterministic"]["ordered_headings"] = ["Result", "Result"]
+
+        def duplicate_citations(manifest):
+            manifest["deterministic"]["required_citations"] = ["SRC-1", "SRC-1"]
+
+        def duplicate_expected_findings(manifest):
+            manifest["regressions"][0]["expected_findings"] = [
+                "citation-missing",
+                "citation-missing",
+            ]
+
+        cases = (
+            duplicate_required_fields,
+            duplicate_headings,
+            duplicate_citations,
+            duplicate_expected_findings,
+        )
+
+        for manifest_changes in cases:
+            with self.subTest(change=manifest_changes.__name__), tempfile.TemporaryDirectory() as root:
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=manifest_changes
+                )
+
+                with self.assertRaisesRegex(FixtureValidationError, "duplicate"):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_empty_corpus(self):
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaisesRegex(FixtureValidationError, "fixture"):
+                load_corpus(Path(root))
+
+    def test_rejects_immediate_corpus_child_without_fixture_manifest(self):
+        with tempfile.TemporaryDirectory() as root:
+            (Path(root) / "missing-manifest").mkdir()
+
+            with self.assertRaisesRegex(FixtureValidationError, "fixture.json"):
+                load_corpus(Path(root))
 
 
 if __name__ == "__main__":

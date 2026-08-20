@@ -13,6 +13,8 @@ description:
   and even for a single count, section, or paragraph. Also use it when the user
   asks what to file in response to a docket event or deadline, or asks to remove
   banned words, intensifiers, legalese, or "AI slop" from an existing filing.
+  Also use it to route discovery requests, audits, conferences, privilege logs,
+  or depositions.
 ---
 
 # section-1983-drafting
@@ -42,10 +44,20 @@ Load each applicable skill once, in this order:
    incorporated arrest video is material.
 4. Add an assigned-judge skill, such as `drafting-for-judge-scholer`, as a
    court-specific overlay.
-5. Run `audit-authorities` before treating a filing or clearly-established-law
-   proposition as verified.
-6. Run `horan-bad-words` on the substantively complete draft and rerun it after
-   any material authority-driven revision.
+5. Add `drafting-section-1983-written-discovery` for requests for production,
+   interrogatories, or requests for admission.
+6. Add `auditing-section-1983-discovery-responses` for a request-by-request
+   response, objection, production, and withholding audit.
+7. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
+   completed discovery-response audit.
+8. Add `auditing-section-1983-privilege-logs` to determine approved log
+   requirements or audit a supplied privilege log.
+9. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
+   gap-driven deposition questions.
+10. Run `audit-authorities` before treating a filing or clearly-established-law
+    proposition as verified.
+11. Run `horan-bad-words` on the substantively complete draft and rerun it after
+    any material authority-driven revision.
 
 The more specific skill adds requirements. It does not relax this skill,
 governing court rules, repository instructions, source gates, or authority
@@ -100,10 +112,12 @@ rhetorical argument is a small part of any document, if present at all.
    authority, a structural problem — do not deviate silently: propose the change
    as the next strategy version and proceed only per the user's decision. Never
    edit a strategy version in place.
-2. Route. Identify the document from the user's request or the docket event
-   using `references/case-map.md`, which maps events to responsive documents and
-   their federal deadline baselines. When the user asks "what do I file," the
-   case map is the answer.
+2. Route. For discovery, select the applicable peer skill above and apply
+   `references/discovery-coordination-contract.md`. For a filing, identify the
+   document from the user's request or docket event using
+   `references/case-map.md`, which maps events to responsive documents and
+   federal deadline baselines. When the user asks "what do I file," the case map
+   is the answer.
 3. Calendar. Establish the deadline before drafting. A perfect late filing
    loses. Local rules control most response deadlines.
 4. Localize. Run `references/localization.md`: use the cached project
@@ -165,6 +179,9 @@ and keep their required wording.
   otherwise.
 - `references/authorities.md` — citation sourcing rules and the interface this
   skill expects from a verified-authorities tool or repository.
+- `references/discovery-coordination-contract.md` — shared discovery target,
+  proportionality, source, existence, and plaintiff-decision boundaries. Each
+  public discovery peer repeats its operative minimum for standalone use.
 - `references/documents/` — one federal-baseline skeleton per document type:
   complaint.md, mtd-response.md, leave-to-amend.md, extension-motion.md,
   rr-objection.md, rr-response.md, msj-response.md.

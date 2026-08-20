@@ -1,0 +1,6 @@
+interface:
+  display_name: "Draft §1983 Deposition Outlines"
+  short_description: "Draft gap-driven Section 1983 deposition outlines"
+  default_prompt:
+    "Use $drafting-section-1983-deposition-outlines to draft a chronology- and
+    element-gap-driven deposition outline."

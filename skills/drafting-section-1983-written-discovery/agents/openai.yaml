@@ -1,0 +1,6 @@
+interface:
+  display_name: "Draft §1983 Written Discovery"
+  short_description: "Draft mapped Section 1983 written discovery"
+  default_prompt:
+    "Use $drafting-section-1983-written-discovery to draft bounded, traceable
+    written discovery for my Section 1983 case."

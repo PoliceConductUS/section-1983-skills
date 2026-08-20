@@ -103,13 +103,16 @@
         "review_standard": "Not applicable",
         "result": "No appeal located in the fictional record",
         "checked_through": "2025-01-15"
-      }
+      },
+      "retrieval_status": "ruling-complete",
+      "coding_confidence": "medium"
     }
   ],
   "retrieval_gaps": [
     {
       "gap_id": "EXAMPLE-GAP-001",
       "record_id": "EXAMPLE-INCOMPLETE-RECORD-001",
+      "candidate_id": "EXAMPLE-INCOMPLETE-CANDIDATE-001",
       "document_type": "motion",
       "status": "unavailable",
       "retrieval_attempts": [
@@ -120,6 +123,7 @@
     {
       "gap_id": "EXAMPLE-GAP-002",
       "record_id": "EXAMPLE-INCOMPLETE-RECORD-001",
+      "candidate_id": "EXAMPLE-INCOMPLETE-CANDIDATE-001",
       "document_type": "proposed pleading",
       "status": "unavailable",
       "retrieval_attempts": [

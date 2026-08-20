@@ -105,11 +105,17 @@ schema. At minimum record:
   procedural disposition, administrative-only action, withdrawn, or unresolved;
 - stated reasons and outcome-changing reason;
 - standard of review and appellate result; and
-- retrieval completeness and open gaps.
+- controlled retrieval status, coding confidence, and open gaps.
 
 Do not attribute a magistrate judge's reasoning to the district judge merely
 because the district judge adopted it. A consent-case final order by a
 magistrate judge is different from a recommendation.
+
+Use the same `motion_id` for every linked recommendation, adoption, or other
+stage. Every retrieval gap identifies its stable candidate. A missing-document
+gap also identifies its decision record and exact document type. An unresolved
+candidate uses `unresolved-candidate` with a null `record_id`; do not fabricate
+a decision record for it.
 
 ## Analysis gates
 

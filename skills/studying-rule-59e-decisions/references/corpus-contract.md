@@ -65,7 +65,9 @@ recommendation author, and does not attribute final district-court reasoning. An
 adoption-only order uses `adopts-without-additional-reasoning`, identifies the
 adopting judge, and does not claim an independent reasoning author. An
 independently reasoned final decision uses `independent` and identifies its
-reasoning author.
+reasoning author. Every canonical decision record also requires one controlled
+`retrieval_status` and `coding_confidence` value from the lists below. Every
+stated reason uses a code from the reason-coding list.
 
 ## Controlled values
 
@@ -195,8 +197,12 @@ End every study with:
 5. excluded cases by reason; and
 6. whether the defined universe supports examples, a cluster, or a tendency.
 
-Every missing-document object must carry the `gap_id` of its matching retrieval
-gap. Report the defined universe, sampling method, located candidate count,
-coded motion-disposition pair count, research-question-complete count,
-unresolved relevant missingness, completeness status, and explicit limits in the
-canonical denominator.
+Every retrieval gap carries a stable `candidate_id`. A document gap uses
+`unavailable`, `unresolved`, or `not-found`, identifies a non-null `record_id`,
+and matches one missing-document object's `gap_id`, record, and document type.
+An unresolved candidate uses `unresolved-candidate` with a null `record_id` and
+does not create a decision record. The denominator's unresolved relevant
+missingness count equals the retrieval-gap inventory. Report the defined
+universe, sampling method, located candidate count, coded motion-disposition
+pair count, research-question-complete count, completeness status, and explicit
+limits in the canonical denominator.

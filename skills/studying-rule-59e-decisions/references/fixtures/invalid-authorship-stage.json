@@ -72,7 +72,7 @@
       "independent_reasoning": "independent",
       "disposition": {
         "code": "deny",
-        "stated_reasons": ["Adoption of the fictional recommendation"],
+        "stated_reasons": ["other-stated-reason"],
         "outcome_changing_reason": "No additional reasoning was stated"
       },
       "sources": [
@@ -89,7 +89,9 @@
         "review_standard": "Not applicable",
         "result": "No appeal in the fictional record",
         "checked_through": "2025-01-15"
-      }
+      },
+      "retrieval_status": "complete-pair",
+      "coding_confidence": "high"
     }
   ],
   "retrieval_gaps": [],

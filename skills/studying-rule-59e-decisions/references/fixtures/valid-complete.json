@@ -90,7 +90,9 @@
         "review_standard": "Not applicable",
         "result": "No appeal in the fictional record",
         "checked_through": "2025-01-15"
-      }
+      },
+      "retrieval_status": "complete-pair",
+      "coding_confidence": "high"
     },
     {
       "record_id": "EXAMPLE-ADOPT-001",
@@ -129,7 +131,7 @@
       "independent_reasoning": "adopts-without-additional-reasoning",
       "disposition": {
         "code": "deny",
-        "stated_reasons": ["Adoption of the fictional recommendation"],
+        "stated_reasons": ["other-stated-reason"],
         "outcome_changing_reason": "No additional reasoning was stated"
       },
       "sources": [
@@ -146,7 +148,9 @@
         "review_standard": "Not applicable",
         "result": "No appeal in the fictional record",
         "checked_through": "2025-01-15"
-      }
+      },
+      "retrieval_status": "complete-pair",
+      "coding_confidence": "high"
     },
     {
       "record_id": "EXAMPLE-FINAL-001",
@@ -205,7 +209,9 @@
         "review_standard": "Fictional abuse-of-discretion review",
         "result": "Fictional affirmance",
         "checked_through": "2025-01-15"
-      }
+      },
+      "retrieval_status": "complete-pair",
+      "coding_confidence": "high"
     }
   ],
   "retrieval_gaps": [],

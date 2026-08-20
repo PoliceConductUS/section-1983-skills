@@ -92,13 +92,16 @@
         "review_standard": "Not applicable",
         "result": "No appeal located in the fictional record",
         "checked_through": "2025-01-15"
-      }
+      },
+      "retrieval_status": "ruling-complete",
+      "coding_confidence": "medium"
     }
   ],
   "retrieval_gaps": [
     {
       "gap_id": "EXAMPLE-TENDENCY-GAP-001",
       "record_id": "EXAMPLE-TENDENCY-RECORD-001",
+      "candidate_id": "EXAMPLE-TENDENCY-CANDIDATE-001",
       "document_type": "motion",
       "status": "unavailable",
       "retrieval_attempts": [

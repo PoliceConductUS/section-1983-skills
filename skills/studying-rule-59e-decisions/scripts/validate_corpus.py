@@ -64,6 +64,8 @@ DECISION_REQUIRED = (
     "sources",
     "missing_documents",
     "appellate_history",
+    "retrieval_status",
+    "coding_confidence",
 )
 
 POSTURE_REQUIRED = (
@@ -97,6 +99,7 @@ APPELLATE_HISTORY_REQUIRED = (
 GAP_REQUIRED = (
     "gap_id",
     "record_id",
+    "candidate_id",
     "document_type",
     "status",
     "retrieval_attempts",
@@ -159,6 +162,24 @@ DISPOSITION_VALUES = {
     "unresolved",
 }
 
+STATED_REASON_VALUES = {
+    "manifest-error-not-shown",
+    "new-evidence-not-shown",
+    "intervening-law-not-shown",
+    "rehash-or-available-before-judgment",
+    "vehicle-or-timing-defect",
+    "rule15-factors",
+    "futility",
+    "delay-bad-faith-or-prejudice",
+    "prior-failure-to-cure",
+    "record-or-inference-error",
+    "correction-does-not-change-result",
+    "other-stated-reason",
+}
+
+RETRIEVAL_STATUS_VALUES = {"complete-pair", "ruling-complete", "index-only", "lead-only"}
+CODING_CONFIDENCE_VALUES = {"high", "medium", "low"}
+
 
 def nonblank(value):
     return isinstance(value, str) and bool(value.strip())
@@ -166,6 +187,10 @@ def nonblank(value):
 
 def nonnegative_integer(value):
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def controlled_value(value, allowed_values):
+    return isinstance(value, str) and value in allowed_values
 
 
 def iso_date(value):
@@ -264,9 +289,9 @@ def validate_denominator(denominator, findings):
     if not validate_object(denominator, "denominator", DENOMINATOR_REQUIRED, findings):
         return
     validate_nonblank_fields(denominator, "denominator", ("defined_universe",), findings)
-    if denominator.get("sampling_method") not in {"attempted-census", "convenience"}:
+    if not controlled_value(denominator.get("sampling_method"), {"attempted-census", "convenience"}):
         findings.append("controlled-value-invalid: denominator.sampling_method")
-    if denominator.get("completeness_status") not in {"complete", "incomplete"}:
+    if not controlled_value(denominator.get("completeness_status"), {"complete", "incomplete"}):
         findings.append("controlled-value-invalid: denominator.completeness_status")
     for field in (
         "candidate_count",
@@ -299,9 +324,9 @@ def validate_posture(posture, path, findings):
         ("challenged_disposition", "judgment_status", "motion_type", "case_category"),
         findings,
     )
-    if posture.get("rule_subsection") not in {"59(a)", "59(e)", "59-unspecified"}:
+    if not controlled_value(posture.get("rule_subsection"), {"59(a)", "59(e)", "59-unspecified"}):
         findings.append(f"controlled-value-invalid: {path}.rule_subsection")
-    if posture.get("representation_status") not in {"represented", "pro-se", "unknown"}:
+    if not controlled_value(posture.get("representation_status"), {"represented", "pro-se", "unknown"}):
         findings.append(f"controlled-value-invalid: {path}.representation_status")
 
 
@@ -320,7 +345,7 @@ def validate_ground_children(grounds, path, findings):
 def validate_proposed_material(material, path, findings):
     if not validate_object(material, path, PROPOSED_MATERIAL_REQUIRED, findings):
         return
-    if material.get("status") not in PROPOSED_MATERIAL_VALUES:
+    if not controlled_value(material.get("status"), PROPOSED_MATERIAL_VALUES):
         findings.append(f"controlled-value-invalid: {path}.status")
     if "description" in material and not nonblank(material["description"]):
         add_malformed(findings, f"{path}.description")
@@ -329,10 +354,16 @@ def validate_proposed_material(material, path, findings):
 def validate_disposition(disposition, path, findings):
     if not validate_object(disposition, path, DISPOSITION_REQUIRED, findings):
         return
-    if disposition.get("code") not in DISPOSITION_VALUES:
+    if not controlled_value(disposition.get("code"), DISPOSITION_VALUES):
         findings.append(f"controlled-value-invalid: {path}.code")
     if "stated_reasons" in disposition:
         validate_string_list(disposition["stated_reasons"], f"{path}.stated_reasons", findings)
+        if isinstance(disposition["stated_reasons"], list):
+            for index, reason in enumerate(disposition["stated_reasons"]):
+                if not controlled_value(reason, STATED_REASON_VALUES):
+                    findings.append(
+                        f"controlled-value-invalid: {path}.stated_reasons[{index}]"
+                    )
     if "outcome_changing_reason" in disposition and not nonblank(
         disposition["outcome_changing_reason"]
     ):
@@ -407,7 +438,9 @@ def validate_authorship(record, findings):
             and adopting is None
         )
     elif decision_type == "outcome-only-order":
-        consistent = independence in {"docket-outcome-only", "unclear"} and reasoning is None
+        consistent = controlled_value(
+            independence, {"docket-outcome-only", "unclear"}
+        ) and reasoning is None
     if not consistent:
         findings.append("authorship-stage-inconsistent")
 
@@ -435,10 +468,14 @@ def validate_decision_records(records, findings):
                 add_malformed(findings, f"{path}.{field}")
         if "related_stage_ids" in record:
             validate_string_list(record["related_stage_ids"], f"{path}.related_stage_ids", findings)
-        if record.get("decision_type") not in DECISION_TYPES:
+        if not controlled_value(record.get("decision_type"), DECISION_TYPES):
             findings.append(f"controlled-value-invalid: {path}.decision_type")
-        if record.get("independent_reasoning") not in INDEPENDENCE_VALUES:
+        if not controlled_value(record.get("independent_reasoning"), INDEPENDENCE_VALUES):
             findings.append(f"controlled-value-invalid: {path}.independent_reasoning")
+        if not controlled_value(record.get("retrieval_status"), RETRIEVAL_STATUS_VALUES):
+            findings.append(f"controlled-value-invalid: {path}.retrieval_status")
+        if not controlled_value(record.get("coding_confidence"), CODING_CONFIDENCE_VALUES):
+            findings.append(f"controlled-value-invalid: {path}.coding_confidence")
         if "posture" in record:
             validate_posture(record["posture"], f"{path}.posture", findings)
         if "ground_children" in record:
@@ -474,11 +511,20 @@ def validate_retrieval_gaps(gaps, findings):
         validate_nonblank_fields(
             gap,
             path,
-            ("gap_id", "record_id", "document_type", "limit"),
+            ("gap_id", "candidate_id", "document_type", "limit"),
             findings,
         )
-        if gap.get("status") not in {"unavailable", "unresolved", "not-found"}:
+        status = gap.get("status")
+        record_id = gap.get("record_id")
+        if not controlled_value(
+            status, {"unavailable", "unresolved", "not-found", "unresolved-candidate"}
+        ):
             findings.append(f"controlled-value-invalid: {path}.status")
+        if status == "unresolved-candidate":
+            if record_id is not None:
+                findings.append("gap-scope-inconsistent")
+        elif not nonblank(record_id):
+            findings.append("gap-scope-inconsistent")
         if "retrieval_attempts" in gap:
             validate_string_list(gap["retrieval_attempts"], f"{path}.retrieval_attempts", findings)
     return valid_gaps
@@ -517,9 +563,18 @@ def validate_transfer_cards(cards, findings):
                 validate_string_list(
                     card[field], f"{path}.{field}", findings, field == "source_row_ids"
                 )
-        if card.get("evidence_level") not in {"example", "documented-cluster", "tendency"}:
+                values = card[field]
+                if (
+                    isinstance(values, list)
+                    and all(isinstance(value, str) for value in values)
+                    and len(values) != len(set(values))
+                ):
+                    findings.append("duplicate-card-row-id")
+        if not controlled_value(
+            card.get("evidence_level"), {"example", "documented-cluster", "tendency"}
+        ):
             findings.append(f"controlled-value-invalid: {path}.evidence_level")
-        if card.get("metric_type") not in {"descriptive", "success-rate"}:
+        if not controlled_value(card.get("metric_type"), {"descriptive", "success-rate"}):
             findings.append(f"controlled-value-invalid: {path}.metric_type")
         for field in ("checked_through", "source_checked_date"):
             if field in card and not iso_date(card[field]):
@@ -545,10 +600,19 @@ def duplicate_findings(items, identifier, finding):
 
 
 def validate_references(records, gaps, cards, findings):
-    record_ids = {record.get("record_id") for record in records if nonblank(record.get("record_id"))}
+    record_by_id = {
+        record.get("record_id"): record
+        for record in records
+        if nonblank(record.get("record_id"))
+    }
+    record_ids = set(record_by_id)
     gap_by_id = {gap.get("gap_id"): gap for gap in gaps if nonblank(gap.get("gap_id"))}
     for gap in gaps:
-        if nonblank(gap.get("record_id")) and gap["record_id"] not in record_ids:
+        if (
+            gap.get("status") != "unresolved-candidate"
+            and nonblank(gap.get("record_id"))
+            and gap["record_id"] not in record_ids
+        ):
             findings.append("gap-row-reference-invalid")
     for record in records:
         record_id = record.get("record_id")
@@ -557,6 +621,11 @@ def validate_references(records, gaps, cards, findings):
             for related_id in related:
                 if nonblank(related_id) and related_id not in record_ids:
                     findings.append("related-stage-reference-invalid")
+                elif (
+                    nonblank(related_id)
+                    and record_by_id[related_id].get("motion_id") != record.get("motion_id")
+                ):
+                    findings.append("related-stage-motion-inconsistent")
         documents = record.get("missing_documents")
         if isinstance(documents, list):
             for document in documents:
@@ -564,8 +633,31 @@ def validate_references(records, gaps, cards, findings):
                     continue
                 gap_id = document.get("gap_id")
                 gap = gap_by_id.get(gap_id)
-                if gap is None or gap.get("record_id") != record_id:
+                if (
+                    gap is None
+                    or gap.get("record_id") != record_id
+                    or gap.get("document_type") != document.get("document_type")
+                    or gap.get("status") == "unresolved-candidate"
+                ):
                     findings.append("missing-gap-entry")
+    missing_document_keys = {
+        (record.get("record_id"), document.get("gap_id"), document.get("document_type"))
+        for record in records
+        if isinstance(record.get("missing_documents"), list)
+        for document in record["missing_documents"]
+        if isinstance(document, dict)
+        and nonblank(record.get("record_id"))
+        and nonblank(document.get("gap_id"))
+        and nonblank(document.get("document_type"))
+    }
+    for gap in gaps:
+        if gap.get("status") == "unresolved-candidate":
+            continue
+        gap_key = (gap.get("record_id"), gap.get("gap_id"), gap.get("document_type"))
+        if not all(nonblank(value) for value in gap_key):
+            continue
+        if gap_key not in missing_document_keys:
+            findings.append("missing-gap-entry")
     for card in cards:
         for field in ("source_row_ids", "disconfirming_row_ids"):
             values = card.get(field)
@@ -587,6 +679,8 @@ def validate_denominator_semantics(denominator, records, gaps, cards, findings):
         for record in records
     )
     unresolved_count = denominator.get("unresolved_relevant_missingness")
+    if nonnegative_integer(unresolved_count) and unresolved_count != len(gaps):
+        findings.append("denominator-missingness-inconsistent")
     candidate_count = denominator.get("candidate_count")
     research_complete_count = denominator.get("research_question_complete_count")
     complete_universe = (

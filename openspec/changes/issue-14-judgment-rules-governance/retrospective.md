@@ -65,26 +65,12 @@ c870c58 fix: harden governance provenance validation
 
 ## 4. Skill / workflow compliance
 
-| Skill                                              | Used |
-| -------------------------------------------------- | ---- |
-| `superpowers:brainstorming`                        | ✓    |
-| `superpowers:writing-plans`                        | ✓    |
-| `superpowers:using-git-worktrees`                  | ✓    |
-| `superpowers:subagent-driven-development`          | ✓    |
-| `(transitive) superpowers:test-driven-development` | ✓    |
-| `(transitive) superpowers:requesting-code-review`  | ✓    |
-| `superpowers:finishing-a-development-branch`       | ✗    |
-
-### Deliberately Skipped Skills
-
-- **`superpowers:finishing-a-development-branch`**
-  - **What was skipped**: the post-verification finishing and archive phase.
-  - **Why this cycle**: the Task 3 brief says “Do not archive” and assigns
-    controller review before an archive request; Task 3.4 therefore remains the
-    sole unchecked task.
-  - **How to prevent recurrence**: scope-judgment rule — in a pre-archive
-    verification dispatch, stop after committed evidence and let the controller
-    invoke the finishing workflow in the separately authorized archive cycle.
+Repository artifacts show a brainstorm, a plan, a dedicated worktree, tests
+preceding implementation, and the Task 3 review. They do not retain invocation
+logs proving which workflow skills produced those artifacts. This retrospective
+therefore makes no unsupported used-or-skipped assertion for any workflow skill.
+The only contemporaneous scope fact is that the Task 3 brief prohibited archive;
+Task 3.4 remains intentionally unchecked for the controller.
 
 ## 5. Surprises
 
@@ -94,11 +80,5 @@ c870c58 fix: harden governance provenance validation
 
 ## 6. Promote candidates → long-term learning
 
-- [ ] 📌 **Recheck runtime contracts alongside registry metadata whenever a
-      registry mode describes returned-artifact behavior.** → **Promote to**
-      one-off
-  > **Why**: The controller’s Issue #14 ruling required a narrow expansion from
-  > registry-only metadata to eight public SKILL contracts. **How to apply**:
-  > During review of a mode-specific registry promise, search every classified
-  > public contract for the corresponding user-visible output obligation before
-  > marking the implementation complete.
+None. The controller's runtime-contract ruling was completed in `c870c58` and
+creates no remaining action or follow-up candidate.

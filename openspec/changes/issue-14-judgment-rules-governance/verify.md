@@ -95,6 +95,37 @@ There are no `[~]` deferred rows in `plan.md`; no equivalence table is needed.
 | Static boundaries                                       | No root `docs` or `.superpowers`; no added Python line comments; 20 registry names exactly match 20 public directories; 8 runtime contracts match; all 5 provenance URLs are HTTPS official-government domains. |
 | Remote state                                            | `HEAD` equals `origin/codex/issue-14-governance`; no Issue #14 commit is missing from the remote-tracking branch.                                                                                               |
 
+### Exact fresh command record
+
+```bash
+VALIDATOR=/Users/dalelotts/.codex/skills/.system/skill-creator/scripts/quick_validate.py
+skill_count=0
+skill_failures=0
+while IFS= read -r skill_file; do
+  skill_dir=${skill_file%/SKILL.md}
+  skill_count=$((skill_count + 1))
+  if python3 "$VALIDATOR" "$skill_dir"; then :; else skill_failures=$((skill_failures + 1)); fi
+done < <(rg --files skills -g SKILL.md | sort)
+printf "quick_validate total=%s failures=%s\n" "$skill_count" "$skill_failures"
+test "$skill_failures" -eq 0
+```
+
+Fresh result: the installed runtime at the stated absolute path validated all 20
+public skills; `quick_validate total=20 failures=0`.
+
+```bash
+python3 -m unittest evaluations.tests.test_repository_governance -v
+```
+
+Fresh result: 21 tests ran in 0.600 seconds; `OK`.
+
+```bash
+npx openspec validate issue-14-judgment-rules-governance --json
+```
+
+Fresh result: the sole active change item returned `valid: true` with an empty
+issues array; summary `items: 1`, `passed: 1`, `failed: 0`.
+
 ## Overall Decision
 
 - [x] PASS WITH WARNINGS — implementation verification passes. The sole

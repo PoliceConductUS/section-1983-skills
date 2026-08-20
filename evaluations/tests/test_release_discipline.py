@@ -10,11 +10,9 @@ CONTRIBUTING_PATH = REPOSITORY_ROOT / "CONTRIBUTING.md"
 RELEASE_WORKFLOW_PATH = REPOSITORY_ROOT / ".github" / "workflows" / "release.yml"
 PINNED_SOURCE = re.compile(
     r"^https://github\.com/PoliceConductUS/section-1983-skills/tree/"
-    r"(?P<tag>v\d+\.\d+\.\d+)$"
+    r"(?P<tag>v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))$"
 )
-FORCED_TAG_PUSH = re.compile(
-    r"(?m)^\s*git\s+push\b[^\n]*(?:--force(?:-with-lease)?|-f(?:\s|$))"
-)
+SAFE_TAG_PUSH = 'git push origin "$RELEASE_VERSION"'
 
 
 def read(path):
@@ -31,6 +29,14 @@ def remote_install_sources(markdown):
         if source != ".":
             sources.append(source)
     return sources
+
+
+def tag_push_commands(workflow):
+    return [
+        line.strip()
+        for line in workflow.splitlines()
+        if re.match(r"^\s*git\s+push\b", line)
+    ]
 
 
 class ReleaseDisciplineTest(unittest.TestCase):
@@ -57,6 +63,15 @@ class ReleaseDisciplineTest(unittest.TestCase):
                 tags.append(match.group("tag"))
         self.assertEqual(len(set(tags)), 1, f"README install versions differ: {tags}")
         self.assertNotIn("npx skills update", self.readme)
+
+    def test_pinned_install_guard_rejects_leading_zero_versions(self):
+        for version in ("v01.2.3", "v1.02.3", "v1.2.03"):
+            with self.subTest(version=version):
+                source = (
+                    "https://github.com/PoliceConductUS/section-1983-skills/tree/"
+                    f"{version}"
+                )
+                self.assertIsNone(PINNED_SOURCE.fullmatch(source))
 
     def test_release_documents_do_not_publish_a_moving_main_branch(self):
         combined = f"{self.readme}\n{self.publishing}\n{self.contributing}".lower()
@@ -107,18 +122,31 @@ class ReleaseDisciplineTest(unittest.TestCase):
             "git push origin",
             "gh release create",
         )
-        self.assertNotRegex(self.workflow, FORCED_TAG_PUSH)
+        self.assertRegex(self.workflow, r'\$\(git status --porcelain\)')
+        self.assertEqual(tag_push_commands(self.workflow), [SAFE_TAG_PUSH])
         self.assertIn("--verify-tag", self.workflow)
         self.assertIn("--generate-notes", self.workflow)
 
-    def test_force_push_guard_rejects_force_flags(self):
-        for flag in ("--force", "--force-with-lease", "-f"):
-            with self.subTest(flag=flag):
-                mutated = self.workflow.replace(
-                    'git push origin "$RELEASE_VERSION"',
-                    f'git push {flag} origin "$RELEASE_VERSION"',
-                )
-                self.assertRegex(mutated, FORCED_TAG_PUSH)
+    def test_tag_push_guard_rejects_destructive_mutations(self):
+        mutations = (
+            'git push --force origin "$RELEASE_VERSION"',
+            'git push --force-with-lease origin "$RELEASE_VERSION"',
+            'git push -f origin "$RELEASE_VERSION"',
+            'git push origin "+$RELEASE_VERSION"',
+            'git push origin --delete "$RELEASE_VERSION"',
+            'git push origin ":refs/tags/$RELEASE_VERSION"',
+        )
+        for command in mutations:
+            with self.subTest(command=command):
+                mutated = self.workflow.replace(SAFE_TAG_PUSH, command)
+                self.assertNotEqual(tag_push_commands(mutated), [SAFE_TAG_PUSH])
+
+    def test_clean_tree_guard_rejects_ignored_untracked_files_mutation(self):
+        mutated = self.workflow.replace(
+            "git status --porcelain",
+            "git status --porcelain --untracked-files=no",
+        )
+        self.assertNotRegex(mutated, r'\$\(git status --porcelain\)')
 
 
 if __name__ == "__main__":

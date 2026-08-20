@@ -435,7 +435,7 @@ class Rule59CorpusContractTest(unittest.TestCase):
 
     def test_unverified_coded_record_blocks_tendency_even_when_not_a_card_source(self):
         with tempfile.TemporaryDirectory() as directory:
-            for retrieval_status in ("lead-only", "index-only"):
+            for retrieval_status in ("lead-only", "index-only", "ruling-complete"):
                 with self.subTest(retrieval_status=retrieval_status):
                     corpus = self.fixture("valid-complete.json")
                     card_sources = set(corpus["transfer_cards"][0]["source_row_ids"])

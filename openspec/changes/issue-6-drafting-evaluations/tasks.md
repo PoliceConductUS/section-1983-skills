@@ -27,16 +27,16 @@
 
 ## 4. Pull-Request Gate
 
-- [ ] 4.1 Extend repository unit validation with the evaluation tests and corpus
+- [x] 4.1 Extend repository unit validation with the evaluation tests and corpus
       regression command.
-- [ ] 4.2 Add a pull-request evaluation workflow that writes the Markdown report
+- [x] 4.2 Add a pull-request evaluation workflow that writes the Markdown report
       to the job summary and preserves machine-readable output.
-- [ ] 4.3 Prove deterministic or baseline regressions return nonzero and visible
+- [x] 4.3 Prove deterministic or baseline regressions return nonzero and visible
       judgment unavailability does not masquerade as a pass.
 
 ## 5. Verification
 
-- [ ] 5.1 Run the complete repository suite, all runtime skill validators,
+- [x] 5.1 Run the complete repository suite, all runtime skill validators,
       OpenSpec validation, full-range whitespace checks, and forbidden-folder
       checks.
 - [ ] 5.2 Obtain fresh task and final reviews, resolve findings, and archive

@@ -21,4 +21,4 @@
 - [x] 3.2 Run OpenSpec, compile, formatting, diff, forbidden-folder, and comment
       checks.
 - [x] 3.3 Record verification and retrospective artifacts.
-- [ ] 3.4 Archive the OpenSpec change, commit, and sync the child branch.
+- [x] 3.4 Archive the OpenSpec change, commit, and sync the child branch.

@@ -1,7 +1,6 @@
 # Verification Report
 
-**Change**: `issue-14-judgment-rules-governance`  
-**Verified at**: 2026-08-20  
+**Change**: `issue-14-judgment-rules-governance` **Verified at**: 2026-08-20
 **Verifier**: Issue #14 Task 3 pre-archive verification
 
 ---

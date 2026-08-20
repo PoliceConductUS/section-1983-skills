@@ -1,0 +1,4 @@
+interface:
+  display_name: "Study Rule 59(e) Decisions"
+  short_description: "Build evidence-coded Rule 59 decision corpora"
+  default_prompt: "Use $studying-rule-59e-decisions to study Rule 59(e) decisions without selection or authorship errors."

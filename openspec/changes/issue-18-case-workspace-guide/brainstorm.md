@@ -3,8 +3,8 @@
 ## Approved direction
 
 Add one concise root-level guide and link it from the README. Explain the first
-hour of establishing the artifact roles assumed by the skills without creating
-a template, repository, skill, or scaffolding script.
+hour of establishing the artifact roles assumed by the skills without creating a
+template, repository, skill, or scaffolding script.
 
 ## Boundaries
 

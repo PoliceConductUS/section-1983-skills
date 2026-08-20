@@ -1,8 +1,8 @@
 ## 1. RED guide contract
 
 - [ ] 1.1 Add focused tests for README discovery and the install-local link.
-- [ ] 1.2 Add focused tests for the first-hour roles, portability, pinned install,
-      explicit gaps, and no-private-material boundary.
+- [ ] 1.2 Add focused tests for the first-hour roles, portability, pinned
+      install, explicit gaps, and no-private-material boundary.
 - [ ] 1.3 Run focused RED against the absent guide.
 - [ ] 1.4 Commit the RED test and OpenSpec design, then sync the child branch.
 

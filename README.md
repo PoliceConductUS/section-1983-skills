@@ -103,6 +103,10 @@ Projects may use different filenames or keep the same information in one
 document. When a skill calls for a strategy, chronology or fact lock, claim
 ledger, gap register, authority library, or coded corpus:
 
+New users can follow [Start a case workspace](CASE_WORKSPACE.md) to establish
+those roles with generic source-bounded examples before using the drafting
+skills.
+
 - use the project's existing equivalent;
 - do not invent a file or imply that a missing artifact was reviewed;
 - ask before drafting without a strategy; and

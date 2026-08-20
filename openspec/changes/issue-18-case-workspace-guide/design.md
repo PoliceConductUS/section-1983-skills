@@ -32,15 +32,15 @@ so a tagged installation or source checkout resolves without an external site.
 
 The guide names immutable inputs, approved source registry, chronology,
 protected decisions, verified authorities, gaps, working material, and generated
-artifacts. An example layout makes the roles concrete, but every example path
-is renameable when project configuration identifies the equivalent role.
+artifacts. An example layout makes the roles concrete, but every example path is
+renameable when project configuration identifies the equivalent role.
 
 ### Explicit first-hour evidence boundary
 
 The flow records one synthetic source ID and one source-bounded chronology entry
 before a protected decision. Unknown facts, missing authorities, and absent
-validation commands are recorded as gaps or unavailable; the guide never
-invents them.
+validation commands are recorded as gaps or unavailable; the guide never invents
+them.
 
 ## Risks / Trade-offs
 

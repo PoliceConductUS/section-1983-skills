@@ -24,7 +24,7 @@ class CaseWorkspaceGuideTest(unittest.TestCase):
         self.assertTrue(GUIDE_PATH.is_file())
         self.assertRegex(
             self.readme,
-            r"\[[^\]]*(?:start|starting)[^\]]*case workspace[^\]]*\]"
+            r"(?i)\[[^\]]*(?:start|starting)[^\]]*case workspace[^\]]*\]"
             r"\(CASE_WORKSPACE\.md\)",
         )
         self.assertNotRegex(

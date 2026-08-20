@@ -1,7 +1,9 @@
 # Verification Report
 
-**Change**: `issue-1-filing-ci`  
-**Verified at**: `2026-08-20 02:26 CDT`  
+**Change**: `issue-1-filing-ci`
+
+**Verified at**: `2026-08-20 02:26 CDT`
+
 **Verifier**: Codex
 
 ---

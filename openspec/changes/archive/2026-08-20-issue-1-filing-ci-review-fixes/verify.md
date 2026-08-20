@@ -1,7 +1,9 @@
 # Verification Report
 
-**Change**: `issue-1-filing-ci-review-fixes`  
-**Verified at**: `2026-08-20 02:37 CDT`  
+**Change**: `issue-1-filing-ci-review-fixes`
+
+**Verified at**: `2026-08-20 02:37 CDT`
+
 **Verifier**: Codex
 
 ## 1. Structural Validation
@@ -50,6 +52,10 @@ Drift warnings: None.
 Four independent reports under `/private/tmp/filing-ci-issue-1` confirm absent
 configuration, unavailable required root, non-hard warning, and current-success
 behavior. All passed without another public-skill change.
+
+> **Update 2026-08-20**: A later final review identified one unexecuted durable
+> scenario. `final-review-evidence.md` records the successful three-response
+> finding, separately authorized drafting, and separate fresh-rerun sequence.
 
 ## 6. Front-Door Routing Leak Detector
 

@@ -1,5 +1,10 @@
 ## 1. Skill behavior
 
+> **Update 2026-08-20**: The separate authorized-drafting and fresh-rerun
+> sequence is recorded in
+> `../2026-08-20-issue-1-filing-ci-review-fixes/final-review-evidence.md` and
+> its linked synthetic report.
+
 - [x] 1.1 Run fresh-context baseline pressure scenarios without the new skill
       and record failures at the approved installed-skill seam.
 - [x] 1.2 Add the minimal `filing-ci` skill and README routing needed to satisfy

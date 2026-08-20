@@ -1,7 +1,13 @@
 # Retrospective: issue-1-filing-ci-review-fixes
 
-> Written: 2026-08-20 (after verification passed)  
-> Commit range: `5ffa109..0e1281e`  
+> **Update 2026-08-20**: The §0 test-coverage signal was incomplete at write
+> time. `final-review-evidence.md` records the additional successful
+> three-response separate-drafting and fresh-rerun scenario.
+
+> Written: 2026-08-20 (after verification passed)
+>
+> Commit range: `5ffa109..0e1281e`
+>
 > Worktree: `.worktrees/issue-1-filing-ci`
 
 ## 0. Evidence

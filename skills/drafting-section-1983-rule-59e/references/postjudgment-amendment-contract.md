@@ -1,100 +1,120 @@
 # Postjudgment amendment contract
 
-Read this reference when drafting or materially restructuring a Section 1983 Rule 59(e) brief that seeks leave to amend after judgment.
+Use this contract when a Section 1983 Rule 59(e) motion seeks leave to amend after judgment.
 
-## Decide the motion's center of gravity
+## Center of gravity
 
-The requested outcome is postjudgment leave to amend. The judgment issue and amendment issue remain distinct legal steps, but the brief presents them as one decisional path.
+The requested outcome is postjudgment leave to amend. The judgment and amendment steps remain legally distinct, but the brief presents one path:
 
-- Rule 59(e) answers why the court may reopen or alter the judgment.
-- Rule 15(a) answers why the court should permit the proposed amendment when controlling law applies its considerations in this posture.
-- Rule 12 answers whether the proposed amendment is futile.
+`requested relief -> Rule 59(e) ground -> Rule 15(a) considerations -> Rule 12 nonfutility -> ruling`
 
-Do not give those steps equal, disconnected introductions. Start with the result and move through the steps in that order.
+Rule 59(e) explains why the judgment should reopen. Rule 15(a) explains why amendment should be permitted. Rule 12 tests futility. Do not write three disconnected introductions or a second objections brief.
 
 ## Recommended architecture
 
-Adapt the headings to controlling law and the record. A useful structure is:
+1. Requested outcome and shortest complete reason.
+2. Combined Rule 59(e), Rule 15(a), and futility framework.
+3. Plaintiff followed the amendment procedure the court prescribed.
+4. The court denied the request to lodge a complete pleading and adopted futility without testing that pleading.
+5. Concise ruling-to-Exhibit-A crosswalk.
+6. Strongest examples showing Exhibit A is not necessarily futile.
+7. Full leave, partial leave, or a claim-specific ruling identifying the deficient element.
 
-1. Introduction: requested result, procedural vehicle, governing amendment analysis, asserted Rule 59(e) ground, and short reason.
-2. Combined governing framework: Rule 59(e), Rule 15(a), and the futility standard.
-3. The court should alter the judgment and grant the first amendment.
-   - The plaintiff followed the amendment process the court prescribed.
-   - The Rule 15(a) considerations favor leave.
-   - Futility must be tested against the complete proposed pleading.
-4. The proposed complaint is not necessarily futile.
-   - Organize by claim group and defendant.
-   - Place each relevant Rule 12 inference error inside its claim group.
-5. At minimum, grant leave for claims not found futile and identify any remaining defect claim by claim.
-
-This architecture is not mandatory when controlling authority or the case strategy requires another order. The invariant is one visible chain from requested relief to the governing test to application.
+Adapt headings to the record and controlling law. Preserve the sequence.
 
 ## Introduction test
 
-The introduction passes only if a reader can answer these questions before reaching the standards section:
+Before the standards section, a reader must know:
 
-1. What exact order does the movant want?
-2. What happens to the case if the court grants the motion?
-3. Which pleading should the clerk accept?
-4. What Rule 59(e) ground supports relief?
-5. Why does the amendment posture matter?
-
-A concise opening can perform these functions without summarizing every claim. Put claim details in the nonfutility sections.
+1. which order should change;
+2. what happens if relief is granted;
+3. which pleading should be accepted;
+4. which Rule 59(e) ground is asserted; and
+5. why the amendment procedure matters.
 
 ## Manifest-error discipline
 
-State the claimed manifest error as a rule-and-application proposition. Examples of possible categories include:
+State each claimed manifest error as rule, challenged ruling, record conflict, effect, and requested correction. A disagreement is not manifest error because it is labeled so.
 
-- applying an all-claims futility conclusion without testing the complete pleading the plaintiff requested leave to file;
-- resolving a material factual dispute or incomplete recording interval against the pleader under Rule 12; or
-- applying the wrong legal standard to the amendment request.
+Possible record-supported errors include:
 
-Use only grounds supported by the record and verified authority. Do not use “manifest error” as an adjective for disagreement. Explain the rule, the ruling, the conflict, and the effect on the judgment.
+- an all-claims futility ruling without testing the complete pleading the plaintiff requested leave to file;
+- an adverse resolution of a material factual dispute or incomplete recording interval under Rule 12; or
+- use of the wrong amendment standard.
 
 ## Amendment-procedure discipline
 
-If a recommendation or order invited cure notice through objections, distinguish notice from a complete pleading only when the cited authority and the court's words support that distinction.
+When a recommendation or order invited cure notice:
 
-Quote the operative language. Identify what the objections supplied. Quote the request for leave to lodge or file the complete pleading. Entry of judgment may amount to an implicit denial, so address that fact directly.
+1. quote the operative instruction;
+2. identify the timely cure notice;
+3. quote the request to lodge or file a complete pleading;
+4. acknowledge that judgment implicitly denied the request; and
+5. explain the legal effect of declaring futility without testing the tendered pleading.
 
-The proposed complaint is the tendered pleading that permits the court to conduct the requested futility test. It is not newly discovered evidence merely because the document was completed after judgment.
+Exhibit A is the complete pleading that follows the earlier request. It is not newly discovered evidence merely because the document was completed after judgment.
 
-## Fifth Circuit research route
+## Division of labor
 
-For a Fifth Circuit postjudgment amendment request, verify and consider:
+### Exhibit A
 
-- _Calhoun v. Collier_, 78 F.4th 846 (5th Cir. 2023), for the relationship between Rule 59(e), Rule 15(a), judgment on the pleadings, and an amendment that is not necessarily futile;
-- _Foman v. Davis_, 371 U.S. 178 (1962), for amendment considerations and unexplained denial;
-- current Fifth Circuit cases defining Rule 59(e), futility, and the effect of a complete proposed pleading; and
-- any controlling case that limits amendment because the movant relied on material or arguments available before judgment.
+Exhibit A pleads the facts, claims, defendants, causation, municipal paths, remedies, and concise fair-warning units.
 
-These are research routes, not preverified citations. Use the canonical verified-authority repository. Confirm the correct opinion, reporter, court, date, posture, holding, pinpoint, later history, and current validity before citing any case.
+### Filed brief
 
-## Nonfutility depth
+The brief explains the reviewable procedural error, supplies the concise crosswalk, develops the strongest nonfutility examples, and requests alternative rulings.
 
-The brief should prove enough for the requested amendment ruling. It need not reproduce the proposed complaint or present a second complaint inside the brief.
+### Internal audit
 
-For each claim group:
+The internal ledger tests each claim, defendant, element, immunity prong, Monell path, authority, and source. It is not filed merely because it exists.
 
-1. state the governing element or defense premise;
-2. identify the decisive allegations and paragraph cites;
-3. state the permitted inference;
-4. address claim-specific immunity or municipal requirements; and
-5. state why the claim is not necessarily futile.
+## Crosswalk contract
 
-Use exact complaint paragraph references. Do not rely on briefing assertions to supply a missing allegation.
+| Claim or ruling unit | Finding or defect | Exhibit A response | Requested ruling |
+| --- | --- | --- | --- |
+
+- Cite the ruling and exact complaint paragraphs.
+- Group identical findings and cures.
+- Separate a defendant when conduct, knowledge, defect, or cure differs.
+- Say “no claim-specific defect identified” only when accurate.
+- Do not brief every element or immunity prong in the row.
+- Request leave or a claim-specific ruling for collectively dismissed theories.
+- Use separate rows for a count, defendant, legal theory, or Monell path when the defect, cure, or requested ruling differs. Group only identical units.
+
+## Strongest-example rule
+
+The narrative claim discussion should prove enough for the amendment ruling. It should not conduct a substantial merits analysis of every claim.
+
+Select the smallest set of examples that demonstrates the blanket futility ruling affected the judgment. An example should have:
+
+1. an identified dismissal premise;
+2. decisive pleaded allegations with exact paragraph cites;
+3. the permitted Rule 12 inference;
+4. the relevant immunity or municipal point; and
+5. the requested result.
+
+Add another example only if it performs distinct work.
+
+When examples compete, prefer the set that covers the greatest number of distinct dispositive errors with the fewest narrative sections. Give priority to a directly preserved error with exact record and complaint cites over a theory that requires new factual or legal development. Do not set an arbitrary numeric quota.
+
+## Distinctness audit
+
+Compare every merits paragraph with the prior responses and objections. Keep it only if it establishes the Rule 59 ground, explains the amendment sequence, identifies a material proposed cure, demonstrates nonfutility, or preserves requested relief. Record the function in an internal audit.
+
+## Governing-law research route
+
+Build the governing stack from authority binding in the Fifth Circuit: federal rules and statutes, Supreme Court holdings, Fifth Circuit en banc and published panel holdings, and binding former Fifth Circuit holdings. Add controlling state substantive law when relevant.
+
+Research routes include postjudgment amendment, the interaction of Rules 59(e) and 15(a), futility, prior amendment requests, diligence, alternative grounds for affirmance, supersession, abandonment, and appellate review. A named case is a lead until its canonical source, holding, pinpoint, posture, later history, and current validity are verified.
+
+Judge-specific examples come only from a current corpus produced under `studying-rule-59e-decisions` and never displace binding law.
 
 ## Plain-language pass
 
-After the legal and record work is complete:
-
 - put the actor before the action;
 - use one point per sentence;
-- use the short common word in the writer's voice;
-- preserve controlling legal terms and accurate quotations;
-- delete intensifiers, accusations, throat-clearing, and rhetorical questions;
-- replace labels with the fact or rule that earns them;
-- keep paragraphs focused; and
-- end each major argument with the ruling requested.
-
-Run the shared linter and the `horan-bad-words` review after the last substantive revision.
+- preserve controlling terms and exact quotations;
+- replace labels with the fact or rule that supports them;
+- delete intensifiers, accusation, throat-clearing, and rhetorical questions;
+- end each argument with the requested ruling; and
+- run the shared linter and `horan-bad-words` after the last substantive revision.

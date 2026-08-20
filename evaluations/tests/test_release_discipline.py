@@ -12,6 +12,9 @@ PINNED_SOURCE = re.compile(
     r"^https://github\.com/PoliceConductUS/section-1983-skills/tree/"
     r"(?P<tag>v\d+\.\d+\.\d+)$"
 )
+FORCED_TAG_PUSH = re.compile(
+    r"(?m)^\s*git\s+push\b[^\n]*(?:--force(?:-with-lease)?|-f(?:\s|$))"
+)
 
 
 def read(path):
@@ -79,7 +82,9 @@ class ReleaseDisciplineTest(unittest.TestCase):
     def test_release_workflow_validates_version_and_remote_tag_before_install(self):
         self.assertRegex(
             self.workflow,
-            r"\^v\[0-9\]\+\\\.\[0-9\]\+\\\.\[0-9\]\+\$",
+            r"\^v\(0\|\[1-9\]\[0-9\]\*\)"
+            r"\\\.\(0\|\[1-9\]\[0-9\]\*\)"
+            r"\\\.\(0\|\[1-9\]\[0-9\]\*\)\$",
         )
         self.assertIn(
             'git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_VERSION"',
@@ -97,13 +102,23 @@ class ReleaseDisciplineTest(unittest.TestCase):
         self.assert_workflow_order(
             "npm ci",
             "npm run validate",
-            "git diff --exit-code",
+            "git status --porcelain",
             "git tag --annotate",
             "git push origin",
             "gh release create",
         )
+        self.assertNotRegex(self.workflow, FORCED_TAG_PUSH)
         self.assertIn("--verify-tag", self.workflow)
         self.assertIn("--generate-notes", self.workflow)
+
+    def test_force_push_guard_rejects_force_flags(self):
+        for flag in ("--force", "--force-with-lease", "-f"):
+            with self.subTest(flag=flag):
+                mutated = self.workflow.replace(
+                    'git push origin "$RELEASE_VERSION"',
+                    f'git push {flag} origin "$RELEASE_VERSION"',
+                )
+                self.assertRegex(mutated, FORCED_TAG_PUSH)
 
 
 if __name__ == "__main__":

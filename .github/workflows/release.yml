@@ -27,7 +27,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
-          if [[ ! "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ ! "$RELEASE_VERSION" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "version must use vMAJOR.MINOR.PATCH"
             exit 1
           fi
@@ -37,7 +37,12 @@ jobs:
           fi
       - run: npm ci
       - run: npm run validate
-      - run: git diff --exit-code
+      - name: Require clean validated tree
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git status --short
+            exit 1
+          fi
       - name: Create annotated tag
         env:
           GH_TOKEN: ${{ github.token }}

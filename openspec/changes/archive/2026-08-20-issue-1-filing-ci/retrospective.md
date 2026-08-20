@@ -1,5 +1,10 @@
 # Retrospective: issue-1-filing-ci
 
+> **Update 2026-08-20**: The coverage and durable-contract conclusions in §§0–1
+> are superseded by
+> `../2026-08-20-issue-1-filing-ci-review-fixes/retrospective.md`, which records
+> four missing scenario runs and the corrective specification delta.
+
 > Written: 2026-08-20 (after verification passed)  
 > Commit range: `5f271d2..7a04be4`  
 > Worktree: `.worktrees/issue-1-filing-ci`

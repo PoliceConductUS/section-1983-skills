@@ -16,3 +16,12 @@ jobs:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run validate
+      - name: Add evaluation summary
+        if: ${{ always() && hashFiles('evaluations/corpus-report.md') != '' }}
+        run: cat evaluations/corpus-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload evaluation report
+        if: ${{ always() && hashFiles('evaluations/corpus-report.json') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: drafting-skill-evaluation
+          path: evaluations/corpus-report.json

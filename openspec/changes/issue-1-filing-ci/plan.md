@@ -118,7 +118,7 @@ runtime skill validator, npm repository validation.
   Run:
 
   ```bash
-  python3 /Users/dalelotts/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/filing-ci
+  python3 "${HOME}/.codex/skills/.system/skill-creator/scripts/quick_validate.py" skills/filing-ci
   ```
 
   Expected: `Skill is valid!`

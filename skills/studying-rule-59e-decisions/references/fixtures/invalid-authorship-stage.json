@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "study": {
+    "study_id": "EXAMPLE-INVALID-AUTHORSHIP-001",
+    "version": "1.0",
+    "research_question": "Does a fictional Example District adoption-only order contain independent reasoning?",
+    "governing_circuit": "Example Circuit",
+    "district": "Example District",
+    "decisionmakers": [
+      "Judge Adopting Example",
+      "Magistrate Recommending Example"
+    ],
+    "date_range": {
+      "start": "2024-01-01",
+      "end": "2024-12-31"
+    },
+    "included_motion_types": ["Rule 59(e) alter or amend"],
+    "case_categories": ["fictional civil action"],
+    "excluded_categories": [],
+    "databases_searched": ["Example District synthetic docket index"],
+    "search_queries": ["fictional Rule 59(e) Example District adoption"],
+    "search_dates": ["2025-01-15"],
+    "deduplication_method": "Case number and motion identifier",
+    "known_unavailable_sources": [],
+    "denominator_definition": "One fictional Example District motion-disposition pair"
+  },
+  "denominator": {
+    "defined_universe": "One fictional Example District motion-disposition pair",
+    "sampling_method": "attempted-census",
+    "candidate_count": 1,
+    "coded_pair_count": 1,
+    "research_question_complete_count": 1,
+    "unresolved_relevant_missingness": 0,
+    "completeness_status": "complete",
+    "limits": ["Fictional validation material only"]
+  },
+  "decision_records": [
+    {
+      "record_id": "EXAMPLE-AUTHORSHIP-RECORD-001",
+      "motion_id": "EXAMPLE-AUTHORSHIP-MOTION-001",
+      "related_stage_ids": [],
+      "case_name": "Example Epsilon v. Example Office",
+      "case_number": "EX-24-0101",
+      "court": "Example District",
+      "assigned_judge": "Judge Adopting Example",
+      "reasoning_author": "Judge Adopting Example",
+      "recommendation_author": "Magistrate Recommending Example",
+      "adopting_judge": "Judge Adopting Example",
+      "decision_type": "adoption-only-order",
+      "posture": {
+        "challenged_disposition": "Fictional dismissal judgment",
+        "judgment_status": "Final fictional judgment entered",
+        "rule_subsection": "59(e)",
+        "motion_type": "Alter or amend judgment",
+        "case_category": "fictional civil action",
+        "representation_status": "represented"
+      },
+      "ground_children": [
+        {
+          "ground_id": "EXAMPLE-AUTHORSHIP-GROUND-001",
+          "asserted_ground": "manifest-error-not-shown",
+          "court_treatment": "The fictional order adopted a recommendation without additional reasoning",
+          "ground_result": "not sustained",
+          "supporting_pinpoint": "Synthetic adoption order page 1"
+        }
+      ],
+      "requested_relief": ["Vacate the fictional dismissal judgment"],
+      "proposed_material": {
+        "status": "complete-attached",
+        "description": "Synthetic proposed amended pleading"
+      },
+      "independent_reasoning": "independent",
+      "disposition": {
+        "code": "deny",
+        "stated_reasons": ["Adoption of the fictional recommendation"],
+        "outcome_changing_reason": "No additional reasoning was stated"
+      },
+      "sources": [
+        {
+          "source_id": "EXAMPLE-AUTHORSHIP-SOURCE-001",
+          "source_type": "synthetic adoption order",
+          "identity": "Example District synthetic docket document 50",
+          "checked_date": "2025-01-15"
+        }
+      ],
+      "missing_documents": [],
+      "appellate_history": {
+        "appeal_taken": false,
+        "review_standard": "Not applicable",
+        "result": "No appeal in the fictional record",
+        "checked_through": "2025-01-15"
+      }
+    }
+  ],
+  "retrieval_gaps": [],
+  "transfer_cards": [
+    {
+      "card_id": "EXAMPLE-AUTHORSHIP-CARD-001",
+      "proposition": "The fictional adoption-only order denied the motion.",
+      "universe": "One fictional Example District motion-disposition pair",
+      "numerator": 1,
+      "denominator": 1,
+      "date_range": "2024-01-01 through 2024-12-31",
+      "source_row_ids": ["EXAMPLE-AUTHORSHIP-RECORD-001"],
+      "evidence_level": "example",
+      "missingness": "No unresolved relevant missingness in the fictional record",
+      "disconfirming_row_ids": [],
+      "permitted_use": "No use until authorship coding is corrected",
+      "prohibited_inference": "Do not attribute recommendation reasoning to the adopting judge",
+      "checked_through": "2025-01-15",
+      "actual_source_identity": "Example District synthetic docket document 50",
+      "source_checked_date": "2025-01-15",
+      "metric_type": "descriptive"
+    }
+  ]
+}

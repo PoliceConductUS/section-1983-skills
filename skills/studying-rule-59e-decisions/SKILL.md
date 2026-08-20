@@ -18,6 +18,15 @@ unless the motion and relevant record are also reviewed.
 Read [references/corpus-contract.md](references/corpus-contract.md) before
 beginning a study or adding a corpus conclusion to another skill.
 
+Use
+[references/decision-corpus.schema.json](references/decision-corpus.schema.json)
+for every published or transferred corpus and
+[references/transfer-card.schema.json](references/transfer-card.schema.json) for
+standalone downstream transfers. Before release, run
+`python3 scripts/validate_corpus.py <corpus.json>` from the installed skill
+directory. CSV, YAML, and databases remain valid working formats, but they must
+export canonical JSON that passes the validator before publication or transfer.
+
 ## Required companion skill
 
 Use `audit-authorities` for every legal proposition, quotation, pinpoint,
@@ -82,7 +91,8 @@ retrieval date, and artifact hash when the repository requires hashes.
 
 ## Coding rules
 
-Code the fields and controlled values in the corpus contract. At minimum record:
+Code the fields and controlled values in the corpus contract and canonical
+schema. At minimum record:
 
 - assigned judge, reasoning author, recommendation author, and adopting judge;
 - whether the ruling contains independent reasoning, adopts another judge's
@@ -156,9 +166,11 @@ Produce:
 7. transfer cards stating exactly what, if anything, another drafting skill may
    use.
 
-Each transfer card must identify the source rows, evidence level, supported
-instruction, limits, and expiration or update date. If the evidence does not
-support a drafting change, say so.
+Each neutral transfer card must identify its source rows, evidence level,
+denominator, missingness, permitted use, prohibited inference, actual source
+identity, and checked dates. It transfers bounded evidence without selecting a
+legal path or litigation strategy. If the evidence does not support a drafting
+change, say so.
 
 ## Update rule
 
@@ -182,7 +194,8 @@ Before release, confirm:
 - governing law and judge examples remain separate;
 - later history and current rules were checked;
 - quotations and pinpoints were verified from primary artifacts; and
-- every downstream drafting instruction has a transfer card.
+- every downstream drafting instruction has a neutral transfer card; and
+- the canonical JSON export passes `scripts/validate_corpus.py`.
 
 ## Output provenance
 

@@ -298,12 +298,10 @@ Reject the packet unless:
 10. the appellate-record audit passes when applicable;
 11. every quotation, pinpoint, procedural statement, and authority status is
     verified;
-12. every factual assertion about a recorded interval is visible in the video,
-    and every quoted, paraphrased, or attributed recorded statement appears in
-    the verified transcript, or the filed text clearly identifies the assertion
-    as based on Plaintiff's present recollection, states that the recordings
-    presently available do not resolve the point, and states that the assertion
-    is subject to correction if additional recordings are produced or located;
+12. every assertion about an event or conduct during a recorded interval is
+    visible in the video itself or satisfies the express present-recollection
+    route above, and every quoted, paraphrased, or attributed recorded statement
+    appears in the verified transcript or satisfies that same route;
 13. every late-window fact, statistic, record, and timestamp passes the
     evidence-maturity and source-use gate;
 14. tables of authorities and rules match the final body and contain final,

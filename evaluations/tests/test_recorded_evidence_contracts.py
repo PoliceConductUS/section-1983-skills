@@ -22,7 +22,9 @@ CONTRACT_PATHS = {
 }
 OBLIGATIONS = {
     "recorded interval": r"recorded interval",
-    "visible event or conduct": r"event or conduct (?:is|must be) visible.{0,40}video",
+    "visible event or conduct": (
+        r"event or conduct.{0,80}(?:is|must be) visible.{0,40}video"
+    ),
     "verified transcript": r"verified transcript",
     "exact quotation": (
         r"exact quotations? (?:must )?match(?:ing)?"

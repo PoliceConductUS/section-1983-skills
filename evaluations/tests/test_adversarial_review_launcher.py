@@ -101,6 +101,19 @@ def spy_script(directory):
         import sys
         import uuid
 
+        SEEDED_NAMES = {
+            "CHECKER_OUTPUT",
+            "CONTROL_MEMO",
+            "CONVERSATION_ID",
+            "DRAFTING_HISTORY",
+            "OLDPWD",
+            "PRIOR_REVIEW",
+            "PROVIDER_SESSION",
+            "PWD",
+            "STRATEGY_CONCLUSION",
+            "THREAD_TOKEN",
+            "UNRELATED_SENTINEL",
+        }
         PROCESS_START_TOKEN = uuid.uuid4().hex
         request = json.load(sys.stdin)
         scrubbed_names = [
@@ -118,6 +131,7 @@ def spy_script(directory):
             "cwd": os.getcwd(),
             "cwd_entries": os.listdir("."),
             "scrubbed_names": scrubbed_names,
+            "inherited_seed_names": sorted(SEEDED_NAMES & set(os.environ)),
             "argv": sys.argv[1:],
         }))
         """,
@@ -276,6 +290,127 @@ class AdversarialReviewLauncherTest(unittest.TestCase):
             self.assertIn("independent review unavailable", str(captured.exception))
             self.assertFalse(marker.exists())
 
+    def test_whitespace_only_metadata_is_rejected_before_execution(self):
+        launcher = launcher_module()
+        mutations = {
+            "draft-version": lambda packet: packet["draft"].update(
+                {"version": " \t\n"}
+            ),
+            "source-id": lambda packet: packet["sources"][0].update(
+                {"id": " \t\n"}
+            ),
+            "source-role": lambda packet: packet["sources"][0].update(
+                {"role": " \t\n"}
+            ),
+            "skill-content": lambda packet: packet["skill"].update(
+                {"content": " \t\n"}
+            ),
+            "checklist-content": lambda packet: packet["checklist"].update(
+                {"content": " \t\n"}
+            ),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            script = write_script(
+                directory,
+                "marker.py",
+                """
+                import pathlib
+                import sys
+
+                pathlib.Path(sys.argv[1]).write_text("executed")
+                """,
+            )
+            for label, mutate in mutations.items():
+                with self.subTest(field=label):
+                    marker = Path(directory) / label
+                    packet = valid_packet()
+                    mutate(packet)
+                    with self.assertRaises(launcher.PacketValidationError):
+                        launcher.launch_review(
+                            packet,
+                            [sys.executable, str(script), str(marker)],
+                            runtime_enforces_empty_capabilities=True,
+                        )
+                    self.assertFalse(marker.exists())
+
+    def test_unpaired_surrogate_in_every_string_field_is_rejected_before_execution(self):
+        launcher = launcher_module()
+        mutations = {
+            "draft-content": lambda packet: packet["draft"].update(
+                {"content": "\ud800"}
+            ),
+            "draft-version": lambda packet: packet["draft"].update(
+                {"version": "\ud800"}
+            ),
+            "draft-sha256": lambda packet: packet["draft"].update(
+                {"sha256": "\ud800"}
+            ),
+            "document-family": lambda packet: packet.update(
+                {"document_family": "\ud800"}
+            ),
+            "source-id": lambda packet: packet["sources"][0].update(
+                {"id": "\ud800"}
+            ),
+            "source-role": lambda packet: packet["sources"][0].update(
+                {"role": "\ud800"}
+            ),
+            "source-content": lambda packet: packet["sources"][0].update(
+                {"content": "\ud800"}
+            ),
+            "source-sha256": lambda packet: packet["sources"][0].update(
+                {"sha256": "\ud800"}
+            ),
+            "skill-content": lambda packet: packet["skill"].update(
+                {"content": "\ud800"}
+            ),
+            "checklist-content": lambda packet: packet["checklist"].update(
+                {"content": "\ud800"}
+            ),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            script = write_script(
+                directory,
+                "marker.py",
+                """
+                import pathlib
+                import sys
+
+                pathlib.Path(sys.argv[1]).write_text("executed")
+                """,
+            )
+            for label, mutate in mutations.items():
+                with self.subTest(field=label):
+                    marker = Path(directory) / label
+                    packet = valid_packet()
+                    mutate(packet)
+                    with self.assertRaises(launcher.PacketValidationError):
+                        launcher.launch_review(
+                            packet,
+                            [sys.executable, str(script), str(marker)],
+                            runtime_enforces_empty_capabilities=True,
+                        )
+                    self.assertFalse(marker.exists())
+
+    def test_content_hashes_use_exact_untrimmed_text(self):
+        launcher = launcher_module()
+        packet = valid_packet()
+        draft_content = "  Synthetic draft with exact whitespace.  \n"
+        source_content = "\tSynthetic source with exact whitespace. \n"
+        packet["draft"]["content"] = draft_content
+        packet["draft"]["sha256"] = sha256(draft_content)
+        packet["sources"][0]["content"] = source_content
+        packet["sources"][0]["sha256"] = sha256(source_content)
+
+        validated = launcher.validate_packet(packet)
+
+        self.assertEqual(validated["draft"]["content"], draft_content)
+        self.assertEqual(validated["draft"]["sha256"], sha256(draft_content))
+        self.assertEqual(validated["sources"][0]["content"], source_content)
+        self.assertEqual(
+            validated["sources"][0]["sha256"],
+            sha256(source_content),
+        )
+
     def test_timeout_must_be_finite_positive_and_not_boolean(self):
         launcher = launcher_module()
         with tempfile.TemporaryDirectory() as directory:
@@ -318,9 +453,15 @@ class AdversarialReviewLauncherTest(unittest.TestCase):
             literal_argument = "literal;not-a-shell-command"
             command = [sys.executable, str(script), literal_argument]
             inherited = {
+                "CHECKER_OUTPUT": "excluded",
+                "CONTROL_MEMO": "excluded",
                 "CONVERSATION_ID": "excluded",
+                "DRAFTING_HISTORY": "excluded",
                 "PROVIDER_SESSION": "excluded",
+                "PRIOR_REVIEW": "excluded",
+                "STRATEGY_CONCLUSION": "excluded",
                 "THREAD_TOKEN": "excluded",
+                "UNRELATED_SENTINEL": "excluded",
                 "PWD": "excluded",
                 "OLDPWD": "excluded",
             }
@@ -341,6 +482,7 @@ class AdversarialReviewLauncherTest(unittest.TestCase):
         self.assertEqual(first["response"]["request"], packet)
         self.assertEqual(first["response"]["cwd_entries"], [])
         self.assertEqual(first["response"]["scrubbed_names"], [])
+        self.assertEqual(first["response"]["inherited_seed_names"], [])
         self.assertEqual(first["response"]["argv"], [literal_argument])
         self.assertRegex(
             first["response"]["process_start_token"],

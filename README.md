@@ -28,6 +28,7 @@ npx skills update
 
 | Skill                              | Role                                                                                                                                                                       |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adversarial-filing-review`        | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.               |
 | `section-1983-drafting`            | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
 | `drafting-section-1983-rule-59e`   | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
 | `drafting-section-1983-complaints` | General complaint and amended-complaint pleading contract, including defendant-specific facts, qualified immunity, and Monell.                                             |
@@ -61,7 +62,10 @@ does not replace source, authority, or court rules.
    by the applicable writing-system pass and the required `horan-bad-words` edit
    pass. Every drafting skill requires that final pass; rerun it after a
    material authority-driven revision.
-8. Run `filing-ci` after the applicable prose and authority audits, after each
+8. Run `adversarial-filing-review` in a fresh clean-room context after
+   substantive, authority, and writing review. Any approved correction returns
+   to a separate drafting workflow and requires a new independent review.
+9. Run `filing-ci` after the applicable prose and authority audits, after each
    material change, and immediately before a filing-readiness statement. A
    current Filing CI pass does not replace authority or writing review; those
    remain independent gates.

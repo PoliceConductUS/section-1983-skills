@@ -111,6 +111,22 @@ class AdversarialReviewStructureTest(unittest.TestCase):
             ),
         )
 
+    def test_skill_prohibits_paths_and_urls_in_the_reviewer_packet(self):
+        skill = required_text(SKILL)
+
+        self.assertRegex(
+            skill,
+            r"(?is)(?:paths?.{0,30}urls?|urls?.{0,30}paths?).{0,80}must\s+not\s+appear.{0,80}(?:reviewer\s+)?packet",
+        )
+
+    def test_skill_does_not_allow_provenance_only_paths_or_urls(self):
+        skill = required_text(SKILL)
+
+        self.assertNotRegex(
+            skill,
+            r"(?is)(?:provenance[- ]only|only\s+as\s+provenance|provenance\s+metadata\s+only)",
+        )
+
     def test_skill_requires_five_categories_corrections_and_plaintiff_gate(self):
         skill = required_text(SKILL)
 

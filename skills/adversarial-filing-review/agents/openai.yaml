@@ -1,0 +1,6 @@
+interface:
+  display_name: "Adversarial Filing Review"
+  short_description: "Independently attack a Section 1983 filing"
+  default_prompt:
+    "Use $adversarial-filing-review to independently red-team my canonical
+    Section 1983 filing."

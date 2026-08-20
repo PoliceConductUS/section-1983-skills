@@ -5,11 +5,29 @@ Every skill in this repository serves one audience: pro se plaintiffs in Section
 1983 cases. Keep that reader in mind. They are smart, unrepresented, and judged
 on their filings.
 
-Develop changes on feature branches. `main` is the integration branch, not a
-published version. Merge only a complete change that passes the repository tests
-and skill validation. Releases use the manually dispatched workflow in
-`PUBLISHING.md`; it validates the exact `main` commit before creating an
-immutable semantic-version tag.
+## Change workflow
+
+Use one story per stacked branch. Write the RED failing test before GREEN
+implementation. Refactor only while the tests remain green. Complete OpenSpec
+design, tasks, verification, retrospective, and archive artifacts.
+
+Automation must not silently select plaintiff decisions, litigation strategy, or
+legal conclusions. Follow [GOVERNANCE.md](GOVERNANCE.md).
+
+Measurement is feedback, never a verdict. Score deltas and judgment-based
+evaluations prompt review and do not decide legal quality, filing readiness, or
+human judgment.
+
+Prefer self-documenting code. Refactor before adding a comment. A necessary
+comment is short and clear and references an ADR or recorded decision when
+practical.
+
+Run `npm run validate` before release. A push to `main` is not publication.
+Release only with immutable semantic-version tags. Follow
+[PUBLISHING.md](PUBLISHING.md).
+
+The validator checks deterministic boundaries, not subjective prose, comment,
+test, or legal quality.
 
 ## Adding a skill
 

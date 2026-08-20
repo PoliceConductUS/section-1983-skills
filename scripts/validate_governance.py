@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -6,6 +7,65 @@ from urllib.parse import urlparse
 
 
 MODES = {"rules-independent", "runtime-sourced", "bundled-rules-dependent"}
+CONTRIBUTION_RULES = (
+    (
+        "Use one story per stacked branch.",
+        "Do not use one story per stacked branch.",
+    ),
+    (
+        "Write the RED failing test before GREEN implementation.",
+        "Write GREEN implementation before the RED failing test.",
+    ),
+    (
+        "Refactor only while the tests remain green.",
+        "Refactor while the tests are failing.",
+    ),
+    (
+        "Complete OpenSpec design, tasks, verification, retrospective, and archive artifacts.",
+        "Do not complete OpenSpec design, tasks, verification, retrospective, and archive artifacts.",
+    ),
+    (
+        "Automation must not silently select plaintiff decisions, litigation strategy, or legal conclusions.",
+        "Automation may silently select plaintiff decisions, litigation strategy, or legal conclusions.",
+    ),
+    ("Measurement is feedback, never a verdict.", "Measurement is a verdict."),
+    (
+        "Score deltas and judgment-based evaluations prompt review and do not decide legal quality, filing readiness, or human judgment.",
+        "Score deltas and judgment-based evaluations decide legal quality, filing readiness, and human judgment.",
+    ),
+    ("Prefer self-documenting code.", "Do not prefer self-documenting code."),
+    (
+        "Refactor before adding a comment.",
+        "Do not refactor before adding a comment.",
+    ),
+    (
+        "A necessary comment is short and clear and references an ADR or recorded decision when practical.",
+        "A necessary comment may be long and unclear and need not reference an ADR or recorded decision.",
+    ),
+    (
+        "Run `npm run validate` before release.",
+        "Do not run `npm run validate` before release.",
+    ),
+    ("A push to `main` is not publication.", "A push to `main` is publication."),
+    (
+        "Release only with immutable semantic-version tags.",
+        "Do not use immutable semantic-version tags.",
+    ),
+    (
+        "The validator checks deterministic boundaries, not subjective prose, comment, test, or legal quality.",
+        "The validator checks subjective prose, comment, test, and legal quality.",
+    ),
+)
+CONTRIBUTION_OWNER_LINKS = {
+    "GOVERNANCE.md": "GOVERNANCE.md",
+    "PUBLISHING.md": "PUBLISHING.md",
+}
+CONTRIBUTION_DUPLICATED_OWNER_MARKERS = (
+    "## protected legal gates",
+    "## releasing a validated version",
+    "gh workflow run release.yml",
+    "verification, factual and authority source, permission, filing-readiness",
+)
 
 
 def is_date(value):
@@ -46,6 +106,15 @@ def inside_root(root, value):
     except ValueError:
         return False
     return True
+
+
+def normalized(text):
+    return " ".join(text.lower().split())
+
+
+def markdown_links(text):
+    prose = re.sub(r"(?ms)^(`{3,}|~{3,}).*?^\1\s*", "", text)
+    return re.findall(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", prose)
 
 
 def validate_registry(repository_root):
@@ -151,11 +220,38 @@ def validate_pull_request_template(repository_root):
     return [] if all(item in normalized for item in required) else ["protected-review-language-missing"]
 
 
+def validate_contribution_contract(repository_root):
+    try:
+        guide = (repository_root / "CONTRIBUTING.md").read_text()
+    except OSError:
+        return ["contribution-contract-language-missing"]
+    contract = normalized(guide)
+    if any(
+        normalized(affirmative) not in contract or normalized(inversion) in contract
+        for affirmative, inversion in CONTRIBUTION_RULES
+    ):
+        return ["contribution-contract-language-missing"]
+    if any(marker in contract for marker in CONTRIBUTION_DUPLICATED_OWNER_MARKERS):
+        return ["contribution-contract-language-missing"]
+    links = markdown_links(guide)
+    for label, destination in CONTRIBUTION_OWNER_LINKS.items():
+        targets = [target for link_label, target in links if link_label == label]
+        if not targets:
+            return ["contribution-contract-language-missing"]
+        for target in targets:
+            if target != destination or not inside_root(repository_root, target):
+                return ["contribution-contract-language-missing"]
+            if not (repository_root / target).is_file():
+                return ["contribution-contract-language-missing"]
+    return []
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
     errors.extend(validate_policy(repository_root))
     errors.extend(validate_pull_request_template(repository_root))
+    errors.extend(validate_contribution_contract(repository_root))
     return errors
 
 

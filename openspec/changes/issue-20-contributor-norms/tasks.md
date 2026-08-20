@@ -2,19 +2,19 @@
 
 ## 1. RED contribution contract
 
-- [ ] 1.1 Add focused live-document and temporary-validator tests.
-- [ ] 1.2 Cover stacked stories, TDD, OpenSpec, human judgment, measurement,
+- [x] 1.1 Add focused live-document and temporary-validator tests.
+- [x] 1.2 Cover stacked stories, TDD, OpenSpec, human judgment, measurement,
       comments, validation, and releases.
-- [ ] 1.3 Add bounded inverse mutations and run focused RED.
-- [ ] 1.4 Commit and sync the RED contract.
+- [x] 1.3 Add bounded inverse mutations and run focused RED.
+- [x] 1.4 Commit and sync the RED contract.
 
 ## 2. GREEN guidance and validation
 
-- [ ] 2.1 Update `CONTRIBUTING.md` without duplicating owner policies.
-- [ ] 2.2 Extend the existing governance validator with one stable failure
+- [x] 2.1 Update `CONTRIBUTING.md` without duplicating owner policies.
+- [x] 2.2 Extend the existing governance validator with one stable failure
       class.
-- [ ] 2.3 Run focused and full repository validation.
-- [ ] 2.4 Commit and sync the GREEN implementation.
+- [x] 2.3 Run focused and full repository validation.
+- [x] 2.4 Commit and sync the GREEN implementation.
 
 ## 3. Review, verification, and archive
 

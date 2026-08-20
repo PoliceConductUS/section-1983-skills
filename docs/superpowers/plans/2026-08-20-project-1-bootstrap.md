@@ -13,11 +13,10 @@ Prettier as development dependencies, vendor the same prompt-only bridge schema
 used by the PoliceConductUS template repositories, and run current Python skill
 tests plus OpenSpec and formatting checks through npm and GitHub Actions.
 
-**Tech Stack:** Node.js 24 or newer, npm, `@fission-ai/openspec` 1.3.1,
-Prettier 3.8.3, Python standard-library `unittest`, Agent Skills CLI.
+**Tech Stack:** Node.js 24 or newer, npm, `@fission-ai/openspec` 1.3.1, Prettier
+3.8.3, Python standard-library `unittest`, Agent Skills CLI.
 
-**Spec:**
-`docs/superpowers/specs/2026-08-20-project-1-backlog-design.md`
+**Spec:** `docs/superpowers/specs/2026-08-20-project-1-backlog-design.md`
 
 ## Global Constraints
 
@@ -104,8 +103,10 @@ Prettier 3.8.3, Python standard-library `unittest`, Agent Skills CLI.
 
 - Create: `openspec/schemas/superpowers-bridge/README.md`
 - Create: `openspec/schemas/superpowers-bridge/schema.yaml`
-- Create: `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md`
-- Create: `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md`
+- Create:
+  `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md`
+- Create:
+  `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md`
 - Create: `openspec/schemas/superpowers-bridge/templates/brainstorm.md`
 - Create: `openspec/schemas/superpowers-bridge/templates/design.md`
 - Create: `openspec/schemas/superpowers-bridge/templates/plan.md`
@@ -156,8 +157,7 @@ Prettier 3.8.3, Python standard-library `unittest`, Agent Skills CLI.
 
 **Interfaces:**
 
-- Consumes: the repository configuration and vendored bridge from Tasks 1 and
-  2.
+- Consumes: the repository configuration and vendored bridge from Tasks 1 and 2.
 - Produces: current passing evidence for the bootstrap branch.
 
 - [ ] **Step 1: Run complete validation**

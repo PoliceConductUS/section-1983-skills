@@ -6,7 +6,6 @@
 
 1. Parse the draft response.
 2. Extract:
-
    - every **citation** (case, rule, statute),
    - every **record cite** (exhibit, declaration, transcript),
    - every **legal standard sentence** (often most error-prone),
@@ -19,14 +18,12 @@ Deliverable: an ordered list of audit items in the same order as the brief.
 For each sentence/paragraph with citations:
 
 1. Write the proposition in plain English, scoped narrowly:
-
    - Bad: "Qualified immunity doesn't apply."
    - Good: "At the 12(b)(6) stage, the court must accept pleaded facts as true
      and may deny qualified immunity when the complaint plausibly alleges
      violation of clearly established law."
 
 2. Identify whether the proposition is:
-
    - legal rule/standard,
    - application of rule to facts,
    - factual claim,
@@ -46,7 +43,6 @@ For each cited authority:
 4. Confirm you're using the correct version/source (official reporter vs slip
    opinion vs Westlaw/Lexis).
 5. Record metadata:
-
    - court,
    - jurisdiction,
    - date,
@@ -72,7 +68,6 @@ if needed.
 2. Extract the smallest slice that contains the supposed rule
    (quote/paraphrase).
 3. Confirm:
-
    - the text exists at that pinpoint,
    - every direct quote exists verbatim in the exact cited document,
    - the pinpoint isn't off by 1-5 pages due to PDF vs reporter pagination,
@@ -107,18 +102,15 @@ This is where most "technically true but misleading" citations get caught.
 Checklist:
 
 1. **Procedural posture match**:
-
    - MTD rule cited from a summary judgment case?
    - Qualified immunity standard cited from trial evidence posture?
 
 2. **Legal standard match**:
-
    - "probable cause" vs "arguable probable cause"
    - "reasonable suspicion" vs "probable cause"
    - "clearly established" framing correct for your circuit?
 
 3. **Fact similarity** (material facts only):
-
    - what facts did that court treat as decisive?
    - do you have those facts, or the opposite?
 
@@ -203,14 +195,12 @@ For each factual claim, first classify it as a source observation, pleaded
 allegation, party or court characterization, permitted inference, or GAP. Then:
 
 1. Identify whether it is:
-
    - directly supported by evidence,
    - supported by testimony,
    - or an inference.
 
 2. Ensure the record cite actually supports it at that location.
 3. For inferences:
-
    - state as inference ("a reasonable inference is…"),
    - ensure it's permitted under the procedural posture (MTD vs SJ).
 

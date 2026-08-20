@@ -20,8 +20,8 @@ Use an ordered Git Town stack rooted at `main`:
 7. `codex/issue-14-governance`
 8. `codex/issue-15-rule-59-corpus`
 
-Keep one linked worktree for every branch under `.worktrees/<branch-slug>`.
-Each issue branch must contain only that backlog item's OpenSpec artifacts,
+Keep one linked worktree for every branch under `.worktrees/<branch-slug>`. Each
+issue branch must contain only that backlog item's OpenSpec artifacts,
 implementation, tests, and documentation on top of its parent branch.
 
 Do not merge, close issues, or change GitHub Project status. Commit completed
@@ -32,9 +32,9 @@ routing boundary below.
 ## Workflow
 
 The bootstrap branch installs the repository-local OpenSpec configuration and
-the `superpowers-bridge` schema used by the PoliceConductUS template repositories.
-It also records repository instructions and validation commands needed by later
-branches.
+the `superpowers-bridge` schema used by the PoliceConductUS template
+repositories. It also records repository instructions and validation commands
+needed by later branches.
 
 For every eligible issue:
 
@@ -63,15 +63,15 @@ agent's resulting work product, not wording or internal reasoning.
 
 ### Deterministic scripts and evaluation tools
 
-The public seam is the command-line interface. Standard-library `unittest`
-tests must verify exit status, machine-readable output, and observable files.
-Mock only external agent runners or checker executables. Do not mock repository
+The public seam is the command-line interface. Standard-library `unittest` tests
+must verify exit status, machine-readable output, and observable files. Mock
+only external agent runners or checker executables. Do not mock repository
 modules that the command controls.
 
 ### Repository governance
 
-The public seam is the documented contributor workflow plus commands executed
-by continuous integration. A proposed weakening of a protected verification,
+The public seam is the documented contributor workflow plus commands executed by
+continuous integration. A proposed weakening of a protected verification,
 source, permission, or filing-readiness gate must be visible to an explicit
 reviewer rather than passing as an ordinary unreviewed edit.
 
@@ -158,7 +158,7 @@ it is never converted into a passing result.
 
 ## Scope boundaries
 
-Do not implement the skipped general-purpose packages in this repository. Do
-not add compatibility paths, fallback behavior, provider-specific agent code,
+Do not implement the skipped general-purpose packages in this repository. Do not
+add compatibility paths, fallback behavior, provider-specific agent code,
 private case material, automatic filing, automatic signing, or automatic
 calendar mutation. Do not silently choose legal strategy for the user.

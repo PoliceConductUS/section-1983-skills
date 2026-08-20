@@ -122,6 +122,9 @@ Judge-specific observations are optional. If the reviewed corpus does not
 support an issue-specific conclusion, the judge overlay contributes no
 judge-specific proposition for that issue.
 
+[Create a judge overlay](JUDGE_OVERLAYS.md) explains the reusable corpus,
+transfer, court-conduct, degradation, and anti-gaming method.
+
 ## Writing system
 
 The core drafting skill enforces one merged writing system: Simplified Technical

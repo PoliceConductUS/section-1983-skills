@@ -52,6 +52,11 @@ def normalize(markdown):
     return " ".join(markdown.lower().split())
 
 
+def replace_phrase(markdown, phrase, replacement):
+    pattern = re.compile(r"\s+".join(re.escape(word) for word in phrase.split()), re.I)
+    return pattern.sub(replacement, markdown, count=1)
+
+
 STRUCTURAL_CONTRACT = normalize(
     "The existing "
     "[Scholer overlay](skills/drafting-for-judge-scholer/SKILL.md) is a "
@@ -438,7 +443,9 @@ class JudgeOverlayGuideTest(unittest.TestCase):
     def test_anti_gaming_boundary_rejects_inverse_permission(self):
         self.assert_anti_gaming(self.guide)
         for rule in ANTI_GAMING_RULES:
-            mutated = self.guide.replace(rule, rule.replace("do not ", "may ", 1))
+            mutated = replace_phrase(
+                self.guide, rule, rule.replace("do not ", "may ", 1)
+            )
             with self.subTest(rule=rule), self.assertRaises(AssertionError):
                 self.assert_anti_gaming(mutated)
         with self.assertRaises(AssertionError):
@@ -473,7 +480,9 @@ class JudgeOverlayGuideTest(unittest.TestCase):
         self.assertIn("governing law remains separate", self.prose)
         self.assertIn("does not expose private strategy", self.prose)
         self.assertIn("does not select a litigation path", self.prose)
-        mutated = self.guide.replace("preserve each card's", "discard each card's")
+        mutated = replace_phrase(
+            self.guide, "preserve each card's", "discard each card's"
+        )
         with self.assertRaises(AssertionError):
             self.assert_transfer_contract(mutated)
         contradiction = (
@@ -542,7 +551,8 @@ class JudgeOverlayGuideTest(unittest.TestCase):
         ):
             with self.subTest(unsafe=unsafe), self.assertRaises(AssertionError):
                 self.assert_no_private_or_real_conclusion(self.guide + f"\n{unsafe}\n")
-        structural_mutation = self.guide.replace(
+        structural_mutation = replace_phrase(
+            self.guide,
             "structural example only",
             "structural example only. Judge Scholer usually denies Rule 59 motions. "
             "Source: /private/tmp/client-record",
@@ -554,8 +564,8 @@ class JudgeOverlayGuideTest(unittest.TestCase):
             "Judge Scholer has a preference for denying Rule 59 motions.",
             "Judge Scholer outcomes favor denial of Rule 59 motions.",
         ):
-            mutated = self.guide.replace(
-                "Do not copy its substantive conclusions.", conclusion
+            mutated = replace_phrase(
+                self.guide, "Do not copy its substantive conclusions.", conclusion
             )
             with self.subTest(conclusion=conclusion), self.assertRaises(AssertionError):
                 self.assert_no_private_or_real_conclusion(mutated)
@@ -563,7 +573,8 @@ class JudgeOverlayGuideTest(unittest.TestCase):
             "\n```text\nJudge Scholer has a tendency to deny Rule 59 motions.\n```",
             "\n    Judge Scholer has a preference for denying Rule 59 motions.",
         ):
-            mutated = self.guide.replace(
+            mutated = replace_phrase(
+                self.guide,
                 "Do not copy its substantive conclusions.",
                 f"Do not copy its substantive conclusions.{hidden}",
             )

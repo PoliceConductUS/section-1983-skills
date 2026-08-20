@@ -1,10 +1,10 @@
 ## 1. RED Evaluation Contracts
 
-- [ ] 1.1 Add failing tests for fixture confinement, synthetic-only data,
+- [x] 1.1 Add failing tests for fixture confinement, synthetic-only data,
       required contract fields, headings, banned patterns, and citation gates.
-- [ ] 1.2 Add failing tests for fresh-process judgment runs, strict rubric
+- [x] 1.2 Add failing tests for fresh-process judgment runs, strict rubric
       output, three-run minimums, and variance.
-- [ ] 1.3 Add failing command tests for permanent regression examples, baseline
+- [x] 1.3 Add failing command tests for permanent regression examples, baseline
       regressions, JSON output, Markdown output, and exit status.
 
 ## 2. Minimal Harness

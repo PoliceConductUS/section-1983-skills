@@ -27,9 +27,9 @@ summary was 10 passed and 0 failed.
 | 3.4  | This dispatch must not archive the change. The controller performs that separate step after review. | No; archive-only |
 
 All other Task 1-3 checkboxes are complete. Fresh evidence included the focused
-21-test governance suite, full `npm run validate`, 20 successful public-skill
+22-test governance suite, full `npm run validate`, 20 successful public-skill
 quick validations, OpenSpec JSON validation, the direct governance validator,
-and a whole-range review of `fefaeb2..c870c58`.
+and a whole-range review of `fefaeb2..e68340f`.
 
 ---
 
@@ -60,11 +60,11 @@ and a whole-range review of `fefaeb2..c870c58`.
 - [x] Implementation changes were committed and present on
       `origin/codex/issue-14-governance`.
 
-**Implementation range**: `fefaeb2..c870c58`
+**Implementation range**: `fefaeb2..e68340f`
 
-The implementation commits are `ff2469b`, `f4c2cce`, `4ebe519`, and `c870c58`.
-At this report's creation, the only uncommitted changes are the permitted Task 3
-evidence files: this file, `retrospective.md`, and `tasks.md`.
+The implementation commits are `ff2469b`, `f4c2cce`, `4ebe519`, `c870c58`, and
+`e68340f`. At this report's creation, the only uncommitted changes are the
+permitted Task 3 evidence files: this file, `retrospective.md`, and `tasks.md`.
 
 ---
 
@@ -87,7 +87,7 @@ There are no `[~]` deferred rows in `plan.md`; no equivalence table is needed.
 
 | Check                                                   | Fresh result                                                                                                                                                                                                    |
 | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run validate`                                      | Passed: Prettier; 16 skill-script tests; 149 evaluation tests; 20 discovered skills; 10 OpenSpec items; corpus; governance validator.                                                                           |
+| `npm run validate`                                      | Passed: Prettier; 16 skill-script tests; 150 evaluation tests; 20 discovered skills; 10 OpenSpec items; corpus; governance validator.                                                                           |
 | Runtime `quick_validate.py`                             | 20 total, 0 failures.                                                                                                                                                                                           |
 | `python3 -m compileall scripts evaluations`             | Passed; generated caches removed afterward.                                                                                                                                                                     |
 | Direct `python3 scripts/validate_governance.py`         | Passed.                                                                                                                                                                                                         |
@@ -117,7 +117,7 @@ public skills; `quick_validate total=20 failures=0`.
 python3 -m unittest evaluations.tests.test_repository_governance -v
 ```
 
-Fresh result: 21 tests ran in 0.600 seconds; `OK`.
+Fresh result: 22 tests ran in 0.765 seconds; `OK`.
 
 ```bash
 npx openspec validate issue-14-judgment-rules-governance --json
@@ -125,6 +125,20 @@ npx openspec validate issue-14-judgment-rules-governance --json
 
 Fresh result: the sole active change item returned `valid: true` with an empty
 issues array; summary `items: 1`, `passed: 1`, `failed: 0`.
+
+## Final correction review
+
+The final whole-branch review identified two validator defects and corrected
+them in `e68340f`: malformed bracket URLs raised a traceback while a hostname
+with whitespace was accepted, and bundled-source errors did not name the
+affected skill. New public CLI tests first reproduced both conditions. The
+corrected validator rejects malformed bracket URLs, whitespace hostnames, and
+invalid ports with the stable `insecure-source-url` prefix and no traceback. It
+now emits `bundled-source-required: <skill>` and `unknown-source-id: <skill>`;
+the jurisdiction-reference error follows the same format.
+
+No claim here certifies the continuing legal accuracy of any external source;
+the validation is structural and provenance-focused. Task 3.4 remains pending.
 
 ## Overall Decision
 

@@ -40,7 +40,7 @@ The canonical corpus must pass
 before publication or transfer:
 
 ```bash
-python3 scripts/validate_corpus.py <corpus.json>
+python3 skills/studying-rule-59e-decisions/scripts/validate_corpus.py skills/studying-rule-59e-decisions/references/fixtures/valid-complete.json
 ```
 
 Validation proves the declared structural and semantic contract. It does not

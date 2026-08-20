@@ -24,29 +24,24 @@ def load_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def schema_terms(value):
-    names = set()
-    values = set()
-    if isinstance(value, dict):
-        properties = value.get("properties")
-        if isinstance(properties, dict):
-            names.update(properties)
-        required = value.get("required")
-        if isinstance(required, list):
-            names.update(required)
-        enum = value.get("enum")
-        if isinstance(enum, list):
-            values.update(item for item in enum if isinstance(item, str))
-        for child in value.values():
-            child_names, child_values = schema_terms(child)
-            names.update(child_names)
-            values.update(child_values)
-    elif isinstance(value, list):
-        for child in value:
-            child_names, child_values = schema_terms(child)
-            names.update(child_names)
-            values.update(child_values)
-    return names, values
+def resolve_local_reference(schema, value):
+    while isinstance(value, dict) and "$ref" in value:
+        reference = value["$ref"]
+        if not reference.startswith("#/"):
+            raise AssertionError(f"expected a local schema reference, got {reference}")
+        target = schema
+        for part in reference.removeprefix("#/").split("/"):
+            target = target[part.replace("~1", "/").replace("~0", "~")]
+        value = target
+    return value
+
+
+def schema_property_enums(contract):
+    return {
+        name: tuple(value["enum"])
+        for name, value in contract["properties"].items()
+        if isinstance(value, dict) and isinstance(value.get("enum"), list)
+    }
 
 
 def run_validator(path):
@@ -84,6 +79,9 @@ class Rule59CorpusContractTest(unittest.TestCase):
     def test_decision_schema_requires_canonical_public_components(self):
         schema = load_json(DECISION_SCHEMA)
 
+        self.assertEqual(
+            schema["$schema"], "https://json-schema.org/draft/2020-12/schema"
+        )
         self.assertTrue(
             {
                 "schema_version",
@@ -96,7 +94,11 @@ class Rule59CorpusContractTest(unittest.TestCase):
         )
 
     def test_decision_schema_exposes_required_stage_and_record_fields(self):
-        names, values = schema_terms(load_json(DECISION_SCHEMA))
+        schema = load_json(DECISION_SCHEMA)
+        decision_records = resolve_local_reference(
+            schema, schema["properties"]["decision_records"]
+        )
+        decision_record = resolve_local_reference(schema, decision_records["items"])
 
         self.assertTrue(
             {
@@ -115,7 +117,7 @@ class Rule59CorpusContractTest(unittest.TestCase):
                 "sources",
                 "missing_documents",
                 "appellate_history",
-            }.issubset(names)
+            }.issubset(decision_record["required"])
         )
         self.assertTrue(
             {
@@ -124,12 +126,17 @@ class Rule59CorpusContractTest(unittest.TestCase):
                 "independently-reasoned-final-decision",
                 "consent-final-decision",
                 "outcome-only-order",
-            }.issubset(values)
+            }.issubset(
+                decision_record["properties"]["decision_type"]["enum"]
+            )
         )
 
     def test_transfer_card_schema_requires_neutral_evidence_and_source_limits(self):
-        names, values = schema_terms(load_json(TRANSFER_SCHEMA))
+        schema = load_json(TRANSFER_SCHEMA)
 
+        self.assertEqual(
+            schema["$schema"], "https://json-schema.org/draft/2020-12/schema"
+        )
         self.assertTrue(
             {
                 "card_id",
@@ -148,12 +155,35 @@ class Rule59CorpusContractTest(unittest.TestCase):
                 "actual_source_identity",
                 "source_checked_date",
                 "metric_type",
-            }.issubset(names)
+            }.issubset(schema["required"])
         )
         self.assertTrue(
-            {"example", "documented-cluster", "tendency", "success-rate"}.issubset(
-                values
+            {"example", "documented-cluster", "tendency"}.issubset(
+                schema["properties"]["evidence_level"]["enum"]
             )
+        )
+        self.assertIn("success-rate", schema["properties"]["metric_type"]["enum"])
+
+    def test_embedded_transfer_cards_match_the_standalone_contract(self):
+        decision_schema = load_json(DECISION_SCHEMA)
+        transfer_schema = load_json(TRANSFER_SCHEMA)
+        transfer_cards = resolve_local_reference(
+            decision_schema,
+            decision_schema["properties"]["transfer_cards"],
+        )
+        embedded_card = resolve_local_reference(
+            decision_schema, transfer_cards["items"]
+        )
+
+        self.assertEqual(
+            set(embedded_card["properties"]), set(transfer_schema["properties"])
+        )
+        self.assertEqual(
+            embedded_card["required"], transfer_schema["required"]
+        )
+        self.assertEqual(
+            schema_property_enums(embedded_card),
+            schema_property_enums(transfer_schema),
         )
 
     def test_checked_in_fixtures_have_declared_cli_outcomes(self):
@@ -261,23 +291,115 @@ class Rule59CorpusContractTest(unittest.TestCase):
             path = write_json(directory, "broken-source-row.json", corpus)
             self.assert_invalid(path, "source-row-reference-invalid")
 
-    def test_authorship_stage_conflict_has_stable_finding(self):
-        corpus = self.fixture("valid-complete.json")
+    def test_authorship_stage_contract_rejects_each_invalid_judicial_role(self):
+        cases = []
+
+        recommendation_missing_author = self.fixture("valid-complete.json")
+        recommendation = next(
+            record
+            for record in recommendation_missing_author["decision_records"]
+            if record["decision_type"] == "recommendation"
+        )
+        recommendation.pop("recommendation_author")
+        cases.append(("recommendation-missing-author.json", recommendation_missing_author))
+
+        recommendation_wrong_author = self.fixture("valid-complete.json")
+        recommendation = next(
+            record
+            for record in recommendation_wrong_author["decision_records"]
+            if record["decision_type"] == "recommendation"
+        )
+        recommendation["recommendation_author"] = recommendation["assigned_judge"]
+        cases.append(("recommendation-wrong-author.json", recommendation_wrong_author))
+
+        recommendation_wrong_independence = self.fixture("valid-complete.json")
+        recommendation = next(
+            record
+            for record in recommendation_wrong_independence["decision_records"]
+            if record["decision_type"] == "recommendation"
+        )
+        recommendation["independent_reasoning"] = "independent"
+        cases.append(
+            ("recommendation-wrong-independence.json", recommendation_wrong_independence)
+        )
+
+        adoption_missing_author = self.fixture("valid-complete.json")
         adoption = next(
             record
-            for record in corpus["decision_records"]
+            for record in adoption_missing_author["decision_records"]
+            if record["decision_type"] == "adoption-only-order"
+        )
+        adoption.pop("adopting_judge")
+        cases.append(("adoption-missing-author.json", adoption_missing_author))
+
+        adoption_attributes_recommendation_reasoning = self.fixture("valid-complete.json")
+        adoption = next(
+            record
+            for record in adoption_attributes_recommendation_reasoning["decision_records"]
+            if record["decision_type"] == "adoption-only-order"
+        )
+        adoption["reasoning_author"] = adoption["adopting_judge"]
+        cases.append(
+            (
+                "adoption-attributes-recommendation-reasoning.json",
+                adoption_attributes_recommendation_reasoning,
+            )
+        )
+
+        adoption_wrong_independence = self.fixture("valid-complete.json")
+        adoption = next(
+            record
+            for record in adoption_wrong_independence["decision_records"]
             if record["decision_type"] == "adoption-only-order"
         )
         adoption["independent_reasoning"] = "independent"
+        cases.append(("adoption-wrong-independence.json", adoption_wrong_independence))
+
+        final_missing_author = self.fixture("valid-complete.json")
+        final_decision = next(
+            record
+            for record in final_missing_author["decision_records"]
+            if record["decision_type"] == "independently-reasoned-final-decision"
+        )
+        final_decision.pop("reasoning_author")
+        cases.append(("final-missing-author.json", final_missing_author))
+
+        final_wrong_independence = self.fixture("valid-complete.json")
+        final_decision = next(
+            record
+            for record in final_wrong_independence["decision_records"]
+            if record["decision_type"] == "independently-reasoned-final-decision"
+        )
+        final_decision["independent_reasoning"] = "recommendation-only"
+        cases.append(("final-wrong-independence.json", final_wrong_independence))
 
         with tempfile.TemporaryDirectory() as directory:
-            path = write_json(directory, "invalid-authorship-stage.json", corpus)
-            self.assert_invalid(path, "authorship-stage-inconsistent")
+            for name, corpus in cases:
+                with self.subTest(path=name):
+                    self.assert_invalid(
+                        write_json(directory, name, corpus),
+                        "authorship-stage-inconsistent",
+                    )
 
-    def test_missing_document_without_gap_entry_has_stable_finding(self):
+    def test_missing_document_without_matching_gap_has_stable_finding(self):
         corpus = self.fixture("valid-incomplete-example.json")
-        self.assertTrue(corpus["decision_records"][0]["missing_documents"])
-        corpus["retrieval_gaps"] = []
+        record = corpus["decision_records"][0]
+        missing_documents = record["missing_documents"]
+
+        self.assertGreaterEqual(len(missing_documents), 2)
+        matching_gap_ids = {gap["gap_id"] for gap in corpus["retrieval_gaps"]}
+        self.assertTrue(
+            {document["gap_id"] for document in missing_documents}.issubset(
+                matching_gap_ids
+            )
+        )
+        record["missing_documents"][0]["gap_id"] = "GAP-UNLOGGED"
+        self.assertTrue(
+            any(
+                document["gap_id"] in matching_gap_ids
+                for document in record["missing_documents"][1:]
+            )
+        )
 
         with tempfile.TemporaryDirectory() as directory:
             path = write_json(directory, "missing-gap-entry.json", corpus)
@@ -294,6 +416,31 @@ class Rule59CorpusContractTest(unittest.TestCase):
             tendency_path = write_json(directory, "incomplete-tendency.json", tendency)
             success_rate_path = write_json(
                 directory, "incomplete-success-rate.json", success_rate
+            )
+            self.assert_invalid(tendency_path, "incomplete-tendency")
+            self.assert_invalid(success_rate_path, "incomplete-success-rate")
+
+    def test_unresolved_missingness_rejects_strong_cards_despite_complete_status(self):
+        tendency = self.fixture("valid-incomplete-example.json")
+        tendency["denominator"]["completeness_status"] = "complete"
+        tendency["transfer_cards"][0]["evidence_level"] = "tendency"
+
+        success_rate = self.fixture("valid-incomplete-example.json")
+        success_rate["denominator"]["completeness_status"] = "complete"
+        success_rate["transfer_cards"][0]["metric_type"] = "success-rate"
+
+        for corpus in (tendency, success_rate):
+            self.assertTrue(corpus["retrieval_gaps"])
+            self.assertTrue(corpus["decision_records"][0]["missing_documents"])
+
+        with tempfile.TemporaryDirectory() as directory:
+            tendency_path = write_json(
+                directory, "complete-status-unresolved-tendency.json", tendency
+            )
+            success_rate_path = write_json(
+                directory,
+                "complete-status-unresolved-success-rate.json",
+                success_rate,
             )
             self.assert_invalid(tendency_path, "incomplete-tendency")
             self.assert_invalid(success_rate_path, "incomplete-success-rate")

@@ -39,5 +39,5 @@
 - [x] 5.1 Run the complete repository suite, all runtime skill validators,
       OpenSpec validation, full-range whitespace checks, and forbidden-folder
       checks.
-- [ ] 5.2 Obtain fresh task and final reviews, resolve findings, and archive
+- [x] 5.2 Obtain fresh task and final reviews, resolve findings, and archive
       this change on the Issue #6 branch.

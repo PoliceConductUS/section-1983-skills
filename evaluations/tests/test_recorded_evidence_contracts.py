@@ -85,16 +85,20 @@ class RecordedEvidenceContractTest(unittest.TestCase):
         ]
         self.assertEqual(len(recorded_items), 1)
         item = recorded_items[0]
-        for obligation in (
-            "visible event or conduct",
-            "verified transcript",
-            "present recollection",
-            "unresolved recording",
-            "later correction",
-            "additional recording",
-        ):
+        checkpoint_obligations = {
+            "visible event or conduct": OBLIGATIONS["visible event or conduct"],
+            "transcript-backed statement": (
+                r"quoted, paraphrased, or attributed recorded statement"
+                r" appears in the verified transcript"
+            ),
+            "event alternative route": (
+                r"or satisfies the express present-recollection route above"
+            ),
+            "statement alternative route": r"or satisfies that same route",
+        }
+        for obligation, pattern in checkpoint_obligations.items():
             with self.subTest(obligation=obligation):
-                self.assertRegex(item, OBLIGATIONS[obligation])
+                self.assertRegex(item, pattern)
 
     def test_obligation_patterns_reject_reversed_semantics(self):
         mutations = {

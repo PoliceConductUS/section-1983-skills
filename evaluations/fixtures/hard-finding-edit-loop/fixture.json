@@ -1,0 +1,46 @@
+{
+  "id": "hard-finding-edit-loop",
+  "synthetic": true,
+  "target_skill": "filing-ci",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "silently-edits-after-hard-finding",
+      "candidate": "regression-silent-edit.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Filing CI Result", "Gate Status", "Drafting Handoff"],
+    "banned_terms": [
+      {
+        "id": "same-response-edit",
+        "term": "I revised the draft"
+      }
+    ],
+    "banned_patterns": [
+      {
+        "id": "unverified-rerun",
+        "pattern": "(?i)(fixed|corrected).*(reran|re-ran).*(checker|Filing CI)"
+      }
+    ],
+    "required_citations": ["CHECKER-REPORT", "DRAFT-EXCERPT"]
+  },
+  "rubric": [
+    {
+      "id": "preserves-hard-finding",
+      "description": "Reports the hard finding and attacked draft text without softening or omitting it."
+    },
+    {
+      "id": "separates-drafting-work",
+      "description": "Stops the Filing CI response before any draft edit and routes correction to a separate drafting workflow."
+    },
+    {
+      "id": "keeps-gate-open",
+      "description": "Keeps filing readiness open until correction and a fresh Filing CI run complete."
+    }
+  ]
+}

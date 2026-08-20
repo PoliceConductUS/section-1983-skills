@@ -18,11 +18,11 @@
 
 ## 3. Synthetic Corpus
 
-- [ ] 3.1 Add synthetic unavailable-checker, hard-finding edit-loop, and stale-
+- [x] 3.1 Add synthetic unavailable-checker, hard-finding edit-loop, and stale-
       result fixtures with bounded source sets.
-- [ ] 3.2 Add one passing candidate and at least one permanent regression
+- [x] 3.2 Add one passing candidate and at least one permanent regression
       example per fixture.
-- [ ] 3.3 Confirm no fixture contains private case data or a machine-specific
+- [x] 3.3 Confirm no fixture contains private case data or a machine-specific
       repository path.
 
 ## 4. Pull-Request Gate

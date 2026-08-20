@@ -21,8 +21,17 @@ def is_date(value):
 def is_https_url(value):
     if not isinstance(value, str):
         return False
-    parsed = urlparse(value)
-    return parsed.scheme == "https" and bool(parsed.netloc)
+    try:
+        parsed = urlparse(value)
+        hostname = parsed.hostname
+        parsed.port
+    except ValueError:
+        return False
+    return (
+        parsed.scheme == "https"
+        and bool(hostname)
+        and not any(character.isspace() for character in hostname)
+    )
 
 
 def is_nonblank(value):
@@ -82,12 +91,12 @@ def validate_registry(repository_root):
         if mode == "bundled-rules-dependent":
             ids = skill.get("source_ids")
             if not isinstance(ids, list) or not ids or not all(is_nonblank(item) for item in ids):
-                errors.append("bundled-source-required")
+                errors.append(f"bundled-source-required: {name}")
             elif any(item not in source_ids for item in ids):
-                errors.append("unknown-source-id")
+                errors.append(f"unknown-source-id: {name}")
             reference = skill.get("jurisdiction_reference")
             if not inside_root(repository_root, reference) or not (repository_root / reference).is_file():
-                errors.append("jurisdiction-reference-required")
+                errors.append(f"jurisdiction-reference-required: {name}")
         if mode == "runtime-sourced":
             provenance = skill.get("output_provenance")
             if not isinstance(provenance, dict) or not is_nonblank(provenance.get("source_identity")):

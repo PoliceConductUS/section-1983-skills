@@ -353,22 +353,47 @@ class RepositoryGovernanceTest(unittest.TestCase):
         )
 
     def test_bundled_rules_source_is_required(self):
-        self.assert_temporary_repository_error(
-            lambda registry: registry["skills"][0].update({"source_ids": []}),
-            "bundled-source-required",
-        )
+        registry = valid_registry()
+        registry["skills"][0]["source_ids"] = []
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, registry=registry)
+            result = run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("bundled-source-required: example-skill", result.stdout + result.stderr)
 
     def test_unknown_source_id_is_rejected(self):
-        self.assert_temporary_repository_error(
-            lambda registry: registry["skills"][0].update({"source_ids": ["unknown-source"]}),
-            "unknown-source-id",
-        )
+        registry = valid_registry()
+        registry["skills"][0]["source_ids"] = ["unknown-source"]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, registry=registry)
+            result = run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unknown-source-id: example-skill", result.stdout + result.stderr)
 
     def test_insecure_source_url_is_rejected(self):
         self.assert_temporary_repository_error(
             lambda registry: registry["sources"][0].update({"url": "http://www.uscourts.gov"}),
             "insecure-source-url",
         )
+
+    def test_malformed_source_urls_are_rejected_without_traceback(self):
+        for url in ("https://[", "https://white space.example"):
+            with self.subTest(url=url):
+                registry = valid_registry()
+                registry["sources"][0]["url"] = url
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, registry=registry)
+                    result = run_validator(root)
+
+                output = result.stdout + result.stderr
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("insecure-source-url", output)
+                self.assertNotIn("Traceback", output)
 
     def test_duplicate_source_id_is_rejected(self):
         self.assert_temporary_repository_error(

@@ -20,24 +20,21 @@ summary was 10 passed and 0 failed.
 
 ## 2. Task Completion (`tasks.md`)
 
-- [ ] All tasks are complete; archive has not occurred.
+- [x] All tasks are complete; archive is complete.
 
-| Task | Reason unfinished                                                                                   | Blocks archive   |
-| ---- | --------------------------------------------------------------------------------------------------- | ---------------- |
-| 3.4  | This dispatch must not archive the change. The controller performs that separate step after review. | No; archive-only |
-
-All other Task 1-3 checkboxes are complete. Fresh evidence included the focused
-22-test governance suite, full `npm run validate`, 20 successful public-skill
-quick validations, OpenSpec JSON validation, the direct governance validator,
-and a whole-range review of `fefaeb2..e68340f`.
+Task 3.4 was completed by the controller-authorized archive command on the
+owning Issue #14 branch. Fresh evidence included the focused 22-test governance
+suite, full `npm run validate`, 20 successful public-skill quick validations,
+OpenSpec JSON validation, the direct governance validator, and a whole-range
+review of `fefaeb2..e68340f`.
 
 ---
 
 ## 3. Delta Spec Sync State
 
-| Capability                    | Sync state | Notes                                                                                                                                                                |
-| ----------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `repository-skill-governance` | Needs sync | The delta exists at `changes/issue-14-judgment-rules-governance/specs/`; `openspec/specs/repository-skill-governance/` does not yet exist. Sync occurs with archive. |
+| Capability                    | Sync state | Notes                                                                                                                                                           |
+| ----------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repository-skill-governance` | Synced     | Archive created `openspec/specs/repository-skill-governance/spec.md` and moved this change to `changes/archive/2026-08-20-issue-14-judgment-rules-governance/`. |
 
 ---
 
@@ -138,13 +135,11 @@ now emits `bundled-source-required: <skill>` and `unknown-source-id: <skill>`;
 the jurisdiction-reference error follows the same format.
 
 No claim here certifies the continuing legal accuracy of any external source;
-the validation is structural and provenance-focused. Task 3.4 remains pending.
+the validation is structural and provenance-focused. Archive is complete and all
+Task 3 checkboxes are complete.
 
 ## Overall Decision
 
-- [x] PASS WITH WARNINGS — implementation verification passes. The sole
-      nonblocking next step is controller-owned archive, which will sync the new
-      delta spec and complete Task 3.4.
+- [x] PASS — implementation verification and archive are complete.
 
-**Next step**: Review this evidence, then archive on the Issue #14 branch only
-when the controller directs it.
+**Next step**: None for this archived change.

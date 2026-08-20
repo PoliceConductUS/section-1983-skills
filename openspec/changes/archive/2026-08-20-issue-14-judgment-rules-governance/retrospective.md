@@ -68,7 +68,7 @@ e68340f fix: fail closed on malformed provenance
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2.2 / 2.3    | The implementation added explicit output-provenance contract text to all eight runtime-sourced SKILL files and hardened its validator tests. | The controller ruled that the runtime-output contract required this narrow scope expansion so the registry requirement was reflected in every affected public contract, not solely in registry metadata. |
 | Final review | The validator now catches URL parsing, hostname, and port failures, and names bundled-entry errors with their skill.                         | Whole-branch review found fail-open or traceback behavior and insufficiently contextual bundled provenance errors.                                                                                       |
-| 3.4          | Archive and canonical-spec sync are not performed in this dispatch.                                                                          | The Task 3 brief expressly reserves archive to the controller after task and whole-branch review.                                                                                                        |
+| 3.4          | Archive and canonical-spec sync completed: the durable `repository-skill-governance` specification now exists under `openspec/specs/`.       | The controller authorized archive after clean whole-branch review.                                                                                                                                       |
 
 ## 4. Skill / workflow compliance
 
@@ -76,8 +76,8 @@ Repository artifacts show a brainstorm, a plan, a dedicated worktree, tests
 preceding implementation, and the Task 3 review. They do not retain invocation
 logs proving which workflow skills produced those artifacts. This retrospective
 therefore makes no unsupported used-or-skipped assertion for any workflow skill.
-The only contemporaneous scope fact is that the Task 3 brief prohibited archive;
-Task 3.4 remains intentionally unchecked for the controller.
+The pre-archive scope initially prohibited archive; after clean whole-branch
+review, the controller authorized it and Task 3.4 is complete.
 
 ## 5. Surprises
 

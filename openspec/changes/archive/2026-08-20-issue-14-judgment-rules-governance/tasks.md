@@ -24,5 +24,5 @@
       OpenSpec, corpus, formatting, diff, and forbidden-folder gates.
 - [x] 3.3 Review the whole Issue #14 diff against the public spec and correct
       any blocking or important finding.
-- [ ] 3.4 Complete verify and retrospective artifacts, archive the OpenSpec
+- [x] 3.4 Complete verify and retrospective artifacts, archive the OpenSpec
       change on the Issue #14 branch, commit, and sync the stack.

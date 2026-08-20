@@ -3,23 +3,23 @@
 ### Requirement: Gap-driven, chronology-anchored outline
 
 A deposition outline SHALL be organized by the still-open element gaps and
-anchored to the locked chronology and the produced record. Each topic MUST tie to
-the element it tests, the exhibit or record cite that grounds it with an approved
-source identifier, and the gap it aims to close. A topic with no element, cite, or
-gap MUST be reported rather than drafted as grounded.
+anchored to the locked chronology and the produced record. Each topic MUST tie
+to the element it tests, the exhibit or record cite that grounds it with an
+approved source identifier, and the gap it aims to close. A topic with no
+element, cite, or gap MUST be reported rather than drafted as grounded.
 
 #### Scenario: Topic ties to element, cite, and gap
 
 - **WHEN** an outline is built from the gap register and the locked chronology
-- **THEN** each topic identifies the element it tests, the exhibit or record cite
-  that grounds it, and the open gap it aims to close
+- **THEN** each topic identifies the element it tests, the exhibit or record
+  cite that grounds it, and the open gap it aims to close
 
 #### Scenario: Ungrounded topic
 
-- **WHEN** a proposed topic has no supporting exhibit, record cite, or identified
-  gap
-- **THEN** the skill reports the missing ground and does not present the topic as
-  record-supported
+- **WHEN** a proposed topic has no supporting exhibit, record cite, or
+  identified gap
+- **THEN** the skill reports the missing ground and does not present the topic
+  as record-supported
 
 ### Requirement: No scripted testimony
 

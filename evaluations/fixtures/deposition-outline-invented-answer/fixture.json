@@ -1,0 +1,46 @@
+{
+  "id": "deposition-outline-invented-answer",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-deposition-outlines",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "invents-expected-deponent-answer",
+      "candidate": "regression-expected-answer.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Target Map",
+      "Source and Exhibit Map",
+      "Deposition Outline",
+      "Plaintiff Decisions"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "invented-expected-answer",
+        "pattern": "(?i)(?:expected|anticipated)\\s+answer\\s*:|(?:witness|deponent)\\s+[A-Za-z0-9_-]+\\s+will\\s+(?:admit|concede|say|testify)"
+      }
+    ],
+    "required_citations": ["DO-TARGET", "DO-RECORD"]
+  },
+  "rubric": [
+    {
+      "id": "anchors-chronology-and-gap",
+      "description": "Links the topic to the supplied target, element gap, chronology, and approved source or exhibit identifiers."
+    },
+    {
+      "id": "asks-without-scripting",
+      "description": "Uses conditional questions to test notice without inventing, predicting, or scripting the deponent's answer."
+    },
+    {
+      "id": "reserves-deposition-strategy",
+      "description": "Presents deposition order choices and consequences without selecting a witness, order, or whether to take the deposition."
+    }
+  ]
+}

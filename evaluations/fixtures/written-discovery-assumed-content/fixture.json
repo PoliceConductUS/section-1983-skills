@@ -1,0 +1,47 @@
+{
+  "id": "written-discovery-assumed-content",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-written-discovery",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "states-unverified-recording-content-as-fact",
+      "candidate": "regression-assumed-content.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Discovery Target Map",
+      "Requests for Production",
+      "Interrogatories",
+      "Requests for Admission",
+      "Plaintiff Decisions"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "assumed-unverified-recording-content",
+        "pattern": "(?i)(?:recording|video).{0,80}(?:shows|depicts|proves|confirms).{0,80}(?:deleted|deleting|deletion)"
+      }
+    ],
+    "required_citations": ["WD-TARGET", "WD-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "maps-the-request",
+      "description": "Maps the request to a nonblank claim, defendant, element, factual gap, likely custodian, expected native source, approved source IDs, and bounded proportional scope."
+    },
+    {
+      "id": "uses-existence-first-wording",
+      "description": "Asks whether the expected recording exists and seeks identification or production if it exists without stating expected content as fact."
+    },
+    {
+      "id": "reserves-service-strategy",
+      "description": "Preserves the draft and routes service or priority choices to the plaintiff without selecting one."
+    }
+  ]
+}

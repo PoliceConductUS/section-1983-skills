@@ -91,7 +91,7 @@ files, or certifies truth, authentication, admissibility, or filing readiness.
   knowledge, unsupported exhibit foundation, and execution before approval. The
   execution fixture also rejects location inference and post-approval edits that
   bypass renewed approval.
-- Fixture tests require the exact intended finding and prove an unrelated rule
-  cannot satisfy the permanent regression.
+- Fixture tests require each exact intended finding and prove an unrelated rule
+  cannot satisfy any permanent regression.
 - Fresh bounded scenarios cover both execution locations, mixed proposition
   classes, a missing foundation, and one unresolved approval.

@@ -22,8 +22,9 @@ approval required before execution.
   discovery expectations separate from firsthand testimony.
 - Require explicit human declarant approval of every retained exact statement
   before execution readiness.
-- Add focused structural tests, five generic synthetic regressions, and fresh
-  public behavior evidence.
+- Add focused structural tests, five generic synthetic fixture families with
+  independently discriminating behavior regressions, and fresh public behavior
+  evidence.
 
 ## Capabilities
 

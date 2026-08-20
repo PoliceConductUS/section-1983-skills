@@ -35,8 +35,9 @@ bridge, and Git Town stacked worktrees.
   also reject a form selected from residence, venue, or custody instead of
   actual execution location and an edit that retains stale approval.
 - Give every fixture bounded generic sources, stable citation IDs, a substantive
-  passing candidate, one behavior-specific permanent regression, and a stable
-  judgment rubric.
+  passing candidate, behavior-specific permanent regressions, and a stable
+  judgment rubric. In the execution fixture, make readiness, form selection, and
+  stale approval fire independently.
 - Add `evaluations/tests/test_declaration_evidence_skill_fixtures.py` to require
   exact target skill, clean passing candidate, exact regression finding and
   location, and unrelated-rule discrimination.

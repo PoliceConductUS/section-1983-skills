@@ -39,7 +39,8 @@ OBLIGATIONS = {
         r"(?:preserved|remain uncertain)"
     ),
     "present recollection": (
-        r"filed text.{0,80}identif(?:y|ies).{0,80}"
+        r"filed text (?:clearly )?identifies "
+        r"(?:it|the allegation|the statement|the assertion) "
         r"as based on plaintiff's present recollection"
     ),
     "unresolved recording": r"recordings.{0,40}(?:available|presently available).{0,40}do not resolve",
@@ -48,7 +49,7 @@ OBLIGATIONS = {
         r"additional recordings (?:are )?produced or located"
     ),
     "fail closed": (
-        r"(?:count is complete only if|(?<!not )(?<!do not )"
+        r"(?:count is complete only if|(?:^|[.!?] |- )"
         r"(?:fail validation|fail packet validation) when)"
     ),
 }
@@ -130,15 +131,21 @@ class RecordedEvidenceContractTest(unittest.TestCase):
                 "filed text identifies the assertion as not based on plaintiff's "
                 "present recollection"
             ),
+            "negated present recollection": (
+                "filed text clearly does not identify the allegation as based on "
+                "plaintiff's present recollection"
+            ),
             "later correction": "assertion is not subject to correction",
             "additional recording": (
                 "additional recordings are not produced or located"
             ),
             "fail closed": "do not fail validation when the route is incomplete",
+            "negated fail closed": "never fail validation when the route is incomplete",
         }
         for obligation, mutation in mutations.items():
             with self.subTest(obligation=obligation):
-                self.assertNotRegex(mutation, OBLIGATIONS[obligation])
+                pattern_id = obligation.removeprefix("negated ")
+                self.assertNotRegex(mutation, OBLIGATIONS[pattern_id])
 
 
 if __name__ == "__main__":

@@ -341,6 +341,10 @@ class DeclarationEvidenceSkillStructureTest(unittest.TestCase):
         skill = required_text(SKILL)
 
         assert_phrases(self, skill, ("approve", "revise", "omit", "pending"))
+        self.assertNotRegex(
+            skill,
+            r"(?is)human\s+declarant\s+approval\s+status.{0,100}\brevised\b",
+        )
         assert_semantics(
             self,
             skill,

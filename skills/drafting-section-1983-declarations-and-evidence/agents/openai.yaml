@@ -1,0 +1,6 @@
+interface:
+  display_name: "Draft §1983 Declarations and Evidence"
+  short_description: "Prepare source-bounded declarations and exhibits"
+  default_prompt:
+    "Use $drafting-section-1983-declarations-and-evidence to prepare an unsigned
+    factual declaration and exhibit-foundation map for summary judgment."

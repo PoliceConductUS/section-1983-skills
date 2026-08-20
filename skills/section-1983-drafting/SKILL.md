@@ -37,26 +37,28 @@ Load each applicable skill once, in this order:
 
 1. Use this skill for routing, deadlines, localization, authority sourcing, and
    writing rules.
-2. Add `drafting-section-1983-complaints` for a complaint, amended complaint, or
+2. Add `drafting-section-1983-declarations-and-evidence` for a factual human
+   declaration or exhibit-foundation preparation supporting summary judgment.
+3. Add `drafting-section-1983-complaints` for a complaint, amended complaint, or
    amendment proffer.
-3. Add `drafting-false-arrest-complaints` when false arrest, probable cause,
+4. Add `drafting-false-arrest-complaints` when false arrest, probable cause,
    arguable probable cause, alternative offenses, seizure timing, or
    incorporated arrest video is material.
-4. Add an assigned-judge skill, such as `drafting-for-judge-scholer`, as a
+5. Add an assigned-judge skill, such as `drafting-for-judge-scholer`, as a
    court-specific overlay.
-5. Add `drafting-section-1983-written-discovery` for requests for production,
+6. Add `drafting-section-1983-written-discovery` for requests for production,
    interrogatories, or requests for admission.
-6. Add `auditing-section-1983-discovery-responses` for a request-by-request
+7. Add `auditing-section-1983-discovery-responses` for a request-by-request
    response, objection, production, and withholding audit.
-7. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
+8. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
    completed discovery-response audit.
-8. Add `auditing-section-1983-privilege-logs` to determine approved log
+9. Add `auditing-section-1983-privilege-logs` to determine approved log
    requirements or audit a supplied privilege log.
-9. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
-   gap-driven deposition questions.
-10. Run `audit-authorities` before treating a filing or clearly-established-law
+10. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
+    gap-driven deposition questions.
+11. Run `audit-authorities` before treating a filing or clearly-established-law
     proposition as verified.
-11. Run `horan-bad-words` on the substantively complete draft and rerun it after
+12. Run `horan-bad-words` on the substantively complete draft and rerun it after
     any material authority-driven revision.
 
 The more specific skill adds requirements. It does not relax this skill,

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "EXE-STATE",
+    "path": "approved-declaration-state.md"
+  },
+  {
+    "id": "EXE-BOUNDARY",
+    "path": "approved-execution-boundary.md"
+  }
+]

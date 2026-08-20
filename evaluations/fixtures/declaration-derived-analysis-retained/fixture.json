@@ -1,0 +1,47 @@
+{
+  "id": "declaration-derived-analysis-retained",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-declarations-and-evidence",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "retains-derived-analysis-in-declaration",
+      "candidate": "regression-retained-analysis.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Statement Classification Ledger",
+      "Draft Declaration",
+      "Exhibit Foundation Map",
+      "Excluded or Separate Material",
+      "Human Approval and Execution Status"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "derived-analysis-retained-in-declaration",
+        "pattern": "(?is)# Draft Declaration(?:(?!# Exhibit Foundation Map).){0,900}I (?:calculated|aggregated|coded|compared)[^.\\n]{0,220}(?:entries|rows|records|units)"
+      }
+    ],
+    "required_citations": ["DAN-RECEIPT", "DAN-LOG"]
+  },
+  "rubric": [
+    {
+      "id": "retains-receipt-fact",
+      "description": "Retains only the supplied firsthand fact that the declarant received the identified log."
+    },
+    {
+      "id": "excludes-derived-comparison",
+      "description": "Classifies the count and comparison as derived analysis and excludes it from every declaration paragraph."
+    },
+    {
+      "id": "preserves-analysis-provenance",
+      "description": "Keeps the identified log source linked to the separately reported analysis."
+    }
+  ]
+}

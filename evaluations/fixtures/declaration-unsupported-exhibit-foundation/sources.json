@@ -1,0 +1,10 @@
+[
+  {
+    "id": "DEF-OBSERVATION",
+    "path": "approved-observation.md"
+  },
+  {
+    "id": "DEF-EXHIBIT-GAP",
+    "path": "approved-exhibit-gap.md"
+  }
+]

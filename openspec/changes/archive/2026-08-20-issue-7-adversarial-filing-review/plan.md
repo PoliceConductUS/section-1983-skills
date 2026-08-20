@@ -55,7 +55,7 @@ skill correction, and rerun the affected scenario in another fresh context.
 ## Task 7: Verify and Archive
 
 Run `npm run validate`, all runtime skill validators, strict OpenSpec JSON
-validation, `git diff --check 8020676..HEAD`, and forbidden-folder checks.
+validation, `git diff --check 52a0a4d..HEAD`, and forbidden-folder checks.
 Produce bridge verification and retrospective artifacts, obtain a fresh whole-
 change review, archive on the Issue #7 branch, replace any generated durable-
 purpose placeholder, check the archive task, rerun validation, commit, and run

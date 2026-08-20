@@ -107,6 +107,24 @@ def valid_registry():
     }
 
 
+def runtime_sourced_registry():
+    registry = valid_registry()
+    skill = registry["skills"][0]
+    skill.update(
+        {
+            "rules_mode": "runtime-sourced",
+            "rationale": "Uses an approved source supplied at runtime.",
+            "output_provenance": {
+                "source_identity": "actual approved source identity used",
+                "checked_date": "actual checked date used",
+            },
+        }
+    )
+    skill.pop("source_ids")
+    skill.pop("jurisdiction_reference")
+    return registry
+
+
 def write_temporary_repository(root, registry=None, policy=None, template=None):
     (root / "skills" / "example-skill" / "references").mkdir(parents=True)
     (root / "governance").mkdir()
@@ -225,12 +243,12 @@ class RepositoryGovernanceTest(unittest.TestCase):
     def test_live_registry_classifies_exactly_the_public_skill_names(self):
         registry_path = REPOSITORY / "governance" / "rules-provenance.json"
         registry = json.loads(read_public_file(registry_path))
-        discovered_names = {
+        discovered_names = [
             path.parent.name for path in (REPOSITORY / "skills").glob("*/SKILL.md")
-        }
-        classified_names = {entry["name"] for entry in registry["skills"]}
+        ]
+        classified_names = [entry["name"] for entry in registry["skills"]]
 
-        self.assertSetEqual(classified_names, discovered_names)
+        self.assertCountEqual(classified_names, discovered_names)
 
     def test_complete_temporary_repository_is_valid(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -239,6 +257,36 @@ class RepositoryGovernanceTest(unittest.TestCase):
             result = run_validator(root)
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_runtime_sourced_entry_with_output_provenance_is_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, registry=runtime_sourced_registry())
+            result = run_validator(root)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_runtime_sourced_entry_requires_actual_source_identity(self):
+        registry = runtime_sourced_registry()
+        registry["skills"][0]["output_provenance"].pop("source_identity")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, registry=registry)
+            result = run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("runtime-source-identity-required", result.stdout + result.stderr)
+
+    def test_runtime_sourced_entry_requires_actual_checked_date(self):
+        registry = runtime_sourced_registry()
+        registry["skills"][0]["output_provenance"].pop("checked_date")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, registry=registry)
+            result = run_validator(root)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("runtime-source-date-required", result.stdout + result.stderr)
 
     def test_skill_entry_mismatch_is_rejected(self):
         self.assert_temporary_repository_error(
@@ -250,6 +298,12 @@ class RepositoryGovernanceTest(unittest.TestCase):
                     "rationale": "No current procedural rules are supplied.",
                 }
             ),
+            "skill-entry-mismatch",
+        )
+
+    def test_duplicate_skill_classification_is_rejected(self):
+        self.assert_temporary_repository_error(
+            lambda registry: registry["skills"].append(dict(registry["skills"][0])),
             "skill-entry-mismatch",
         )
 

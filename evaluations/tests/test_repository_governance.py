@@ -10,6 +10,88 @@ from pathlib import Path
 REPOSITORY = Path(__file__).resolve().parents[2]
 VALIDATOR = REPOSITORY / "scripts" / "validate_governance.py"
 VALID_DATE = "2026-08-20"
+CONTRIBUTION_RULES = (
+    (
+        "stacked story",
+        "Use one story per stacked branch.",
+        "Do not use one story per stacked branch.",
+    ),
+    (
+        "RED before GREEN",
+        "Write the RED failing test before GREEN implementation.",
+        "Write GREEN implementation before the RED failing test.",
+    ),
+    (
+        "green refactor",
+        "Refactor only while the tests remain green.",
+        "Refactor while the tests are failing.",
+    ),
+    (
+        "OpenSpec lifecycle",
+        "Complete OpenSpec design, tasks, verification, retrospective, and archive artifacts.",
+        "Do not complete OpenSpec design, tasks, verification, retrospective, and archive artifacts.",
+    ),
+    (
+        "human legal judgment",
+        "Automation must not silently select plaintiff decisions, litigation strategy, or legal conclusions.",
+        "Automation may silently select plaintiff decisions, litigation strategy, or legal conclusions.",
+    ),
+    (
+        "measurement feedback",
+        "Measurement is feedback, never a verdict.",
+        "Measurement is a verdict.",
+    ),
+    (
+        "measurement limits",
+        "Score deltas and judgment-based evaluations prompt review and do not decide legal quality, filing readiness, or human judgment.",
+        "Score deltas and judgment-based evaluations decide legal quality, filing readiness, and human judgment.",
+    ),
+    (
+        "self-documenting code",
+        "Prefer self-documenting code.",
+        "Do not prefer self-documenting code.",
+    ),
+    (
+        "refactor before comment",
+        "Refactor before adding a comment.",
+        "Do not refactor before adding a comment.",
+    ),
+    (
+        "bounded comment",
+        "A necessary comment is short and clear and references an ADR or recorded decision when practical.",
+        "A necessary comment may be long and unclear and need not reference an ADR or recorded decision.",
+    ),
+    (
+        "full validation",
+        "Run `npm run validate` before release.",
+        "Do not run `npm run validate` before release.",
+    ),
+    (
+        "main is not publication",
+        "A push to `main` is not publication.",
+        "A push to `main` is publication.",
+    ),
+    (
+        "immutable release",
+        "Release only with immutable semantic-version tags.",
+        "Do not use immutable semantic-version tags.",
+    ),
+    (
+        "deterministic enforcement",
+        "The validator checks deterministic boundaries, not subjective prose, comment, test, or legal quality.",
+        "The validator checks subjective prose, comment, test, and legal quality.",
+    ),
+)
+OWNER_LINKS = {
+    "GOVERNANCE.md": "GOVERNANCE.md",
+    "PUBLISHING.md": "PUBLISHING.md",
+}
+DUPLICATED_OWNER_MARKERS = (
+    "## protected legal gates",
+    "## releasing a validated version",
+    "gh workflow run release.yml",
+    "verification, factual and authority source, permission, filing-readiness",
+)
 
 
 def read_public_file(path):
@@ -23,6 +105,44 @@ def assert_semantics(test, text, concepts):
         with test.subTest(concept=label):
             alternatives = "|".join(f"(?:{pattern})" for pattern in patterns)
             test.assertRegex(text, rf"(?is){alternatives}")
+
+
+def normalized(text):
+    return " ".join(text.lower().split())
+
+
+def replace_phrase(text, phrase, replacement):
+    pattern = re.compile(r"\s+".join(re.escape(word) for word in phrase.split()))
+    mutated, count = pattern.subn(replacement, text, count=1)
+    if count != 1:
+        raise AssertionError(f"fixture phrase not found exactly once: {phrase}")
+    return mutated
+
+
+def markdown_links(text):
+    prose = re.sub(r"(?ms)^(`{3,}|~{3,}).*?^\1\s*", "", text)
+    return re.findall(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", prose)
+
+
+def assert_contribution_contract(test, text, root):
+    contract = normalized(text)
+    for label, affirmative, inversion in CONTRIBUTION_RULES:
+        with test.subTest(rule=label):
+            test.assertIn(normalized(affirmative), contract)
+            test.assertNotIn(normalized(inversion), contract)
+    links = markdown_links(text)
+    for label, destination in OWNER_LINKS.items():
+        with test.subTest(owner=label):
+            destinations = [target for link_label, target in links if link_label == label]
+            test.assertTrue(destinations)
+            for target in destinations:
+                test.assertEqual(target, destination)
+                resolved = (root / target).resolve()
+                resolved.relative_to(root.resolve())
+                test.assertTrue(resolved.is_file())
+    for marker in DUPLICATED_OWNER_MARKERS:
+        with test.subTest(duplicated_owner=marker):
+            test.assertNotIn(marker, contract)
 
 
 def referenced_scripts(command):
@@ -84,6 +204,33 @@ def valid_pull_request_template():
 """
 
 
+def valid_contributing_contract():
+    return """# Contributing
+
+Use one story per stacked branch. Write the RED failing test before GREEN
+implementation. Refactor only while the tests remain green. Complete OpenSpec
+design, tasks, verification, retrospective, and archive artifacts.
+
+Automation must not silently select plaintiff decisions, litigation strategy,
+or legal conclusions. Follow [GOVERNANCE.md](GOVERNANCE.md).
+
+Measurement is feedback, never a verdict. Score deltas and judgment-based
+evaluations prompt review and do not decide legal quality, filing readiness, or
+human judgment.
+
+Prefer self-documenting code. Refactor before adding a comment. A necessary
+comment is short and clear and references an ADR or recorded decision when
+practical.
+
+Run `npm run validate` before release. A push to `main` is not publication.
+Release only with immutable semantic-version tags. Follow
+[PUBLISHING.md](PUBLISHING.md).
+
+The validator checks deterministic boundaries, not subjective prose, comment,
+test, or legal quality.
+"""
+
+
 def valid_registry():
     return {
         "version": 1,
@@ -125,7 +272,9 @@ def runtime_sourced_registry():
     return registry
 
 
-def write_temporary_repository(root, registry=None, policy=None, template=None):
+def write_temporary_repository(
+    root, registry=None, policy=None, template=None, contributing=None
+):
     (root / "skills" / "example-skill" / "references").mkdir(parents=True)
     (root / "governance").mkdir()
     (root / ".github").mkdir()
@@ -136,6 +285,12 @@ def write_temporary_repository(root, registry=None, policy=None, template=None):
         f"Checked date: {VALID_DATE}\n"
     )
     (root / "GOVERNANCE.md").write_text(policy or valid_policy())
+    (root / "PUBLISHING.md").write_text(
+        "# Publishing\n\nUse immutable semantic-version tags after validation.\n"
+    )
+    (root / "CONTRIBUTING.md").write_text(
+        contributing if contributing is not None else valid_contributing_contract()
+    )
     (root / ".github" / "pull_request_template.md").write_text(
         template or valid_pull_request_template()
     )
@@ -225,6 +380,57 @@ class RepositoryGovernanceTest(unittest.TestCase):
                 ("explicit human review", (r"explicit.{0,50}(?:human.{0,30})?review",)),
             ),
         )
+
+    def test_public_contribution_contract_preserves_repository_norms(self):
+        contract = read_public_file(REPOSITORY / "CONTRIBUTING.md")
+        assert_contribution_contract(self, contract, REPOSITORY)
+
+    def test_governance_validator_rejects_missing_or_inverted_contract(self):
+        valid = valid_contributing_contract()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_temporary_repository(root, contributing=valid)
+            assert_contribution_contract(self, valid, root)
+
+        mutations = [("missing contract", "# Contributing\n")]
+        mutations.extend(
+            (
+                label,
+                replace_phrase(valid, affirmative, inversion),
+            )
+            for label, affirmative, inversion in CONTRIBUTION_RULES
+        )
+        for label, destination in OWNER_LINKS.items():
+            source = f"[{label}]({destination})"
+            mutations.extend(
+                (
+                    (f"missing {label}", valid.replace(source, label)),
+                    (
+                        f"external {label}",
+                        valid.replace(source, f"[{label}](https://example.com/{label})"),
+                    ),
+                    (
+                        f"traversal {label}",
+                        valid.replace(source, f"[{label}](../{label})"),
+                    ),
+                )
+            )
+        mutations.extend(
+            (f"duplicated owner {marker}", f"{valid}\n{marker}\n")
+            for marker in DUPLICATED_OWNER_MARKERS
+        )
+        for label, contract in mutations:
+            with self.subTest(mutation=label):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, contributing=contract)
+                    result = run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    "contribution-contract-language-missing",
+                    result.stdout + result.stderr,
+                )
 
     def test_validate_reaches_governance_validator(self):
         scripts = json.loads((REPOSITORY / "package.json").read_text())["scripts"]

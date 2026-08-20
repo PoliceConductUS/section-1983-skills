@@ -7,15 +7,18 @@ Triggers on: create an rrd, write rrd for, respond to this motion, opposition pl
 
 # RRD Generator
 
-Create detailed **Response Requirements Documents (RRDs)** that are clear, actionable, and suitable for drafting a motion response **claim-by-claim**.
+Create detailed **Response Requirements Documents (RRDs)** that are clear,
+actionable, and suitable for drafting a motion response **claim-by-claim**.
 
-An RRD is **not** the brief. It is the blueprint: what must be argued, proved, cited, and attached so the final response is tight, checkable, and complete.
+An RRD is **not** the brief. It is the blueprint: what must be argued, proved,
+cited, and attached so the final response is tight, checkable, and complete.
 
 ---
 
 ## The Job
 
-1. Receive the motion claim/argument (or set of arguments) the user must respond to
+1. Receive the motion claim/argument (or set of arguments) the user must respond
+   to
 2. Ask 3–5 essential clarifying questions (with lettered options)
 3. Generate a structured RRD based on answers
 4. Save to `tasks/rrd-[matter-or-motion-name].md`
@@ -31,36 +34,30 @@ Ask only critical questions where the prompt is ambiguous. Focus on:
 - **Posture & Court:** What court/jurisdiction and what motion type?
 - **Targets:** Which specific claims/arguments are being attacked?
 - **Record:** What evidence/record exists and what is admissible at this stage?
-- **Relief & Outcomes:** What exact ruling are we asking for (deny/strike/partial deny/etc.)?
+- **Relief & Outcomes:** What exact ruling are we asking for
+  (deny/strike/partial deny/etc.)?
 - **Constraints:** Deadlines, page limits, local rules, required sections.
 ```
 
 ### Format Questions Like This
 
-1. What is the procedural posture / motion type?
-   A. Rule 12(b)(6) (failure to state a claim)
-   B. Rule 12(b)(1) (jurisdiction)
-   C. Summary judgment (Rule 56)
-   D. Qualified immunity (12(b)(6) or summary judgment)
-   E. Other: [please specify]
+1. What is the procedural posture / motion type? A. Rule 12(b)(6) (failure to
+   state a claim) B. Rule 12(b)(1) (jurisdiction) C. Summary judgment (Rule 56)
+   D. Qualified immunity (12(b)(6) or summary judgment) E. Other: [please
+   specify]
 
-2. What is the court/jurisdiction?
-   A. Federal (U.S. District Court) — specify circuit
-   B. State trial court — specify state
-   C. State appellate court — specify state
-   D. Other: [please specify]
+2. What is the court/jurisdiction? A. Federal (U.S. District Court) — specify
+   circuit B. State trial court — specify state C. State appellate court —
+   specify state D. Other: [please specify]
 
-3. What “record” can we rely on in this response?
-   A. Pleadings only (complaint + exhibits + judicially noticeable materials)
-   B. Pleadings + attachments to the response (declarations/exhibits)
-   C. Full discovery record (depo, interrogatories, admissions)
-   D. Mixed/unsure — treat conservatively
+3. What “record” can we rely on in this response? A. Pleadings only (complaint +
+   exhibits + judicially noticeable materials) B. Pleadings + attachments to the
+   response (declarations/exhibits) C. Full discovery record (depo,
+   interrogatories, admissions) D. Mixed/unsure — treat conservatively
 
-4. What is the desired outcome?
-   A. Deny motion in full
-   B. Deny in part / narrow issues
-   C. Preserve leave to amend / request amendment window
-   D. Procedural win (strike, sanctions, or convert/not convert)
+4. What is the desired outcome? A. Deny motion in full B. Deny in part / narrow
+   issues C. Preserve leave to amend / request amendment window D. Procedural
+   win (strike, sanctions, or convert/not convert)
 
 This lets users reply with “1A, 2A, 3A, 4B” for quick iteration.
 
@@ -145,16 +142,19 @@ For each attacked claim/argument, create a “Response Unit” that is small and
 
 - Every checklist item must be **verifiable**.
 - Prefer “cite X at Y” over “show the court.”
-- If a fact cannot be sourced, mark it as a **gap** and specify how it will be filled.
+- If a fact cannot be sourced, mark it as a **gap** and specify how it will be
+  filled.
 
 ### 5. Standards Library (Reusable)
 
 Centralize the controlling standards likely needed:
 
 - Pleading standards (Twombly/Iqbal equivalents, if applicable)
-- Qualified immunity framework (if applicable): clearly established + violation prongs
+- Qualified immunity framework (if applicable): clearly established + violation
+  prongs
 - Probable cause / arguable probable cause (if applicable)
-- Elements of each substantive claim (e.g., retaliation, false arrest, municipal liability)
+- Elements of each substantive claim (e.g., retaliation, false arrest, municipal
+  liability)
 
 Each entry should include:
 
@@ -166,7 +166,8 @@ Each entry should include:
 ### 6. Evidence & Exhibit Plan
 
 - Exhibit inventory (what you have, what you need)
-- Authentication plan (declaration, stipulation, self-authenticating, judicial notice)
+- Authentication plan (declaration, stipulation, self-authenticating, judicial
+  notice)
 - “Stage gate” note: what can be used at this procedural posture
 
 ### 7. Risk Register (What Could Sink Us)
@@ -206,7 +207,8 @@ The RRD reader may be a junior attorney, paralegal, or AI agent. Therefore:
 - Be explicit and unambiguous
 - Define legal jargon the first time it appears
 - Use numbered requirements for easy cross-reference
-- Use short “Response Units” so each argument can be drafted and checked independently
+- Use short “Response Units” so each argument can be drafted and checked
+  independently
 - Use falsifiable tests so you know when you’re truly “done”
 
 ---
@@ -228,12 +230,14 @@ The RRD reader may be a junior attorney, paralegal, or AI agent. Therefore:
 
 - Motion: Defendant’s Rule 12(b)(6) Motion to Dismiss
 - Posture: Pleadings-only
-- Desired outcome: Deny in full; alternatively preserve leave to amend as to Count IV
+- Desired outcome: Deny in full; alternatively preserve leave to amend as to
+  Count IV
 
 ## Response Objectives
 
 - Keep Count I (First Amendment retaliation) alive past 12(b)(6)
-- Defeat qualified immunity at pleadings stage by alleging violation + clearly established law
+- Defeat qualified immunity at pleadings stage by alleging violation + clearly
+  established law
 - Prevent movant from reframing disputed facts as “undisputed”
 
 ## RU-001: “No Constitutional Violation” (Retaliation)
@@ -242,25 +246,35 @@ The RRD reader may be a junior attorney, paralegal, or AI agent. Therefore:
 
 **Controlling Standard (Required):**
 
-- [ ] Identify elements: protected activity + adverse action + causal connection (retaliatory motive)
-- [ ] Note pleading posture: factual allegations taken as true; plausible inference standard
+- [ ] Identify elements: protected activity + adverse action + causal connection
+      (retaliatory motive)
+- [ ] Note pleading posture: factual allegations taken as true; plausible
+      inference standard
 
 **Record Facts We Must Establish (Required):**
 
-- [ ] F1: Plaintiff engaged in protected recording/criticism — cite: Complaint ¶\_\_
-- [ ] F2: Arrest occurred shortly after protected activity — cite: Complaint ¶\_\_ / timeline
-- [ ] F3: Officer statements support retaliatory motive — cite: BWC timestamp **:**
+- [ ] F1: Plaintiff engaged in protected recording/criticism — cite: Complaint
+      ¶\_\_
+- [ ] F2: Arrest occurred shortly after protected activity — cite: Complaint
+      ¶\_\_ / timeline
+- [ ] F3: Officer statements support retaliatory motive — cite: BWC timestamp
+      **:**
 
 **Counter-Authority (Required):**
 
-- [ ] Case A: Retaliatory arrest analysis post-Nieves (and exceptions if applicable)
-- [ ] Case B: Clearly established principle that arrest in retaliation for protected speech is unlawful absent objective PC (as framed for this circuit)
+- [ ] Case A: Retaliatory arrest analysis post-Nieves (and exceptions if
+      applicable)
+- [ ] Case B: Clearly established principle that arrest in retaliation for
+      protected speech is unlawful absent objective PC (as framed for this
+      circuit)
 
 **Falsifiable Hypothesis / “Done Test” (Required):**
 
-- [ ] H1: If the record shows officer announced intent to “find justification,” then plausible retaliatory motive is adequately pled.
+- [ ] H1: If the record shows officer announced intent to “find justification,”
+      then plausible retaliatory motive is adequately pled.
 - [ ] Verification: BWC clip at **:** + transcript excerpt.
-- [ ] If false: pivot to alternative theory (e.g., lack of PC / unlawful seizure) + preserve amendment.
+- [ ] If false: pivot to alternative theory (e.g., lack of PC / unlawful
+      seizure) + preserve amendment.
 
 **Requested Ruling (Required):**
 
@@ -275,7 +289,8 @@ Before saving the RRD:
 
 - [ ] Asked clarifying questions with lettered options (only where needed)
 - [ ] Built Response Units for each distinct movant argument / attacked element
-- [ ] Each RU contains: controlling standard, record facts, counter-authority, rebuttal logic, falsifiable hypothesis, exhibits needed, requested ruling
+- [ ] Each RU contains: controlling standard, record facts, counter-authority,
+      rebuttal logic, falsifiable hypothesis, exhibits needed, requested ruling
 - [ ] Risks and mitigations are stated plainly
 - [ ] Packaging/compliance checklist is included
 - [ ] Saved to `tasks/rrd-[matter-or-motion-name].md`

@@ -1,11 +1,16 @@
 ---
 name: prd
-description: "Generate a Product Requirements Document (PRD) for a new feature. Use when planning a feature, starting a new project, or when asked to create a PRD. Triggers on: create a prd, write prd for, plan this feature, requirements for, spec out."
+description:
+  "Generate a Product Requirements Document (PRD) for a new feature. Use when
+  planning a feature, starting a new project, or when asked to create a PRD.
+  Triggers on: create a prd, write prd for, plan this feature, requirements for,
+  spec out."
 ---
 
 # PRD Generator
 
-Create detailed Product Requirements Documents that are clear, actionable, and suitable for implementation.
+Create detailed Product Requirements Documents that are clear, actionable, and
+suitable for implementation.
 
 ---
 
@@ -51,7 +56,8 @@ Ask only critical questions where the initial prompt is ambiguous. Focus on:
    D. Just the UI
 ```
 
-This lets users respond with "1A, 2C, 3B" for quick iteration. Remember to indent the options.
+This lets users respond with "1A, 2C, 3B" for quick iteration. Remember to
+indent the options.
 
 ---
 
@@ -94,8 +100,11 @@ Each story should be small enough to implement in one focused session.
 
 **Important:**
 
-- Acceptance criteria must be verifiable, not vague. "Works correctly" is bad. "Button shows confirmation dialog before deleting" is good.
-- **For any story with UI changes:** Always include "Verify in browser using dev-browser skill" as acceptance criteria. This ensures visual verification of frontend work.
+- Acceptance criteria must be verifiable, not vague. "Works correctly" is bad.
+  "Button shows confirmation dialog before deleting" is good.
+- **For any story with UI changes:** Always include "Verify in browser using
+  dev-browser skill" as acceptance criteria. This ensures visual verification of
+  frontend work.
 
 ### 4. Functional Requirements
 
@@ -162,7 +171,9 @@ The PRD reader may be a junior developer or AI agent. Therefore:
 
 ## Introduction
 
-Add priority levels to tasks so users can focus on what matters most. Tasks can be marked as high, medium, or low priority, with visual indicators and filtering to help users manage their workload effectively.
+Add priority levels to tasks so users can focus on what matters most. Tasks can
+be marked as high, medium, or low priority, with visual indicators and filtering
+to help users manage their workload effectively.
 
 ## Goals
 
@@ -175,21 +186,25 @@ Add priority levels to tasks so users can focus on what matters most. Tasks can 
 
 ### US-001: Add priority field to database
 
-**Description:** As a developer, I need to store task priority so it persists across sessions.
+**Description:** As a developer, I need to store task priority so it persists
+across sessions.
 
 **Acceptance Criteria:**
 
-- [ ] Add priority column to tasks table: 'high' | 'medium' | 'low' (default 'medium')
+- [ ] Add priority column to tasks table: 'high' | 'medium' | 'low' (default
+      'medium')
 - [ ] Generate and run migration successfully
 - [ ] Typecheck passes
 
 ### US-002: Display priority indicator on task cards
 
-**Description:** As a user, I want to see task priority at a glance so I know what needs attention first.
+**Description:** As a user, I want to see task priority at a glance so I know
+what needs attention first.
 
 **Acceptance Criteria:**
 
-- [ ] Each task card shows colored priority badge (red=high, yellow=medium, gray=low)
+- [ ] Each task card shows colored priority badge (red=high, yellow=medium,
+      gray=low)
 - [ ] Priority visible without hovering or clicking
 - [ ] Typecheck passes
 - [ ] Verify in browser using dev-browser skill
@@ -208,7 +223,8 @@ Add priority levels to tasks so users can focus on what matters most. Tasks can 
 
 ### US-004: Filter tasks by priority
 
-**Description:** As a user, I want to filter the task list to see only high-priority items when I'm focused.
+**Description:** As a user, I want to filter the task list to see only
+high-priority items when I'm focused.
 
 **Acceptance Criteria:**
 
@@ -220,7 +236,8 @@ Add priority levels to tasks so users can focus on what matters most. Tasks can 
 
 ## Functional Requirements
 
-- FR-1: Add `priority` field to tasks table ('high' | 'medium' | 'low', default 'medium')
+- FR-1: Add `priority` field to tasks table ('high' | 'medium' | 'low', default
+  'medium')
 - FR-2: Display colored priority badge on each task card
 - FR-3: Include priority selector in task edit modal
 - FR-4: Add priority filter dropdown to task list header

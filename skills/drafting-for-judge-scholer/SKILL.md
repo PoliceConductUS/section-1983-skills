@@ -1,24 +1,47 @@
 ---
 name: drafting-for-judge-scholer
-description: Drafts and audits federal civil-rights pleadings and briefs for matters assigned to Judge Karen Gren Scholer using an evidence-coded Section 1983 decision corpus. Use when preparing a complaint, Rule 12 response, qualified-immunity argument, Monell theory, objection, summary-judgment paper, or judge-specific strategy for Judge Scholer.
+description:
+  Drafts and audits federal civil-rights pleadings and briefs for matters
+  assigned to Judge Karen Gren Scholer using an evidence-coded Section 1983
+  decision corpus. Use when preparing a complaint, Rule 12 response,
+  qualified-immunity argument, Monell theory, objection, summary-judgment paper,
+  or judge-specific strategy for Judge Scholer.
 ---
 
 # Drafting for Judge Scholer
 
 ## Role in the skill stack
 
-Use this skill as a judge-specific overlay after the applicable document and claim skills. For a false-arrest complaint, load `section-1983-drafting`, `drafting-section-1983-complaints`, `drafting-false-arrest-complaints`, and then this skill. This skill adds documented Judge Scholer tendencies; it does not replace governing authority, the complaint contract, or the authority-verification gate.
+Use this skill as a judge-specific overlay after the applicable document and
+claim skills. For a false-arrest complaint, load `section-1983-drafting`,
+`drafting-section-1983-complaints`, `drafting-false-arrest-complaints`, and then
+this skill. This skill adds documented Judge Scholer tendencies; it does not
+replace governing authority, the complaint contract, or the
+authority-verification gate.
 
-**REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the judge-specific and authority audits and rerun it after any material revision. Remove unsupported emphasis, legalese, mind-reading, accusation, and rhetoric without deleting controlling terms of art, accurately quoted language, or necessary clearly-established-law distinctions.
+**REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the
+judge-specific and authority audits and rerun it after any material revision.
+Remove unsupported emphasis, legalese, mind-reading, accusation, and rhetoric
+without deleting controlling terms of art, accurately quoted language, or
+necessary clearly-established-law distinctions.
 
 ## Quick start
 
-1. Locate and follow the case strategy file: `strategy.md`, or the highest-numbered `strategy-v*.md`, in the case or workstream folder; ask the user for it if missing. Propose any needed departure as a new strategy version and proceed only per the user's decision — never deviate silently, and never edit a strategy version in place.
+1. Locate and follow the case strategy file: `strategy.md`, or the
+   highest-numbered `strategy-v*.md`, in the case or workstream folder; ask the
+   user for it if missing. Propose any needed departure as a new strategy
+   version and proceed only per the user's decision — never deviate silently,
+   and never edit a strategy version in place.
 2. Read [REFERENCE.md](REFERENCE.md).
-3. Identify the document, posture, challenged claims, requested ruling, and record materials the court may consider.
-4. Apply the repository authority and factual-source gates. Research cases are not citeable merely because they appear in the corpus.
-5. Draft in this order: governing rule → actor-specific facts → element-by-element application → requested ruling.
-6. Ground every point in record facts, permitted inferences, and verified authority so the court has justification and reason to agree; persuasive or rhetorical argument is a small part of the document, if present at all.
+3. Identify the document, posture, challenged claims, requested ruling, and
+   record materials the court may consider.
+4. Apply the repository authority and factual-source gates. Research cases are
+   not citeable merely because they appear in the corpus.
+5. Draft in this order: governing rule → actor-specific facts →
+   element-by-element application → requested ruling.
+6. Ground every point in record facts, permitted inferences, and verified
+   authority so the court has justification and reason to agree; persuasive or
+   rhetorical argument is a small part of the document, if present at all.
 
 ## Evidence hierarchy
 
@@ -26,27 +49,35 @@ Use corpus signals in this order:
 
 1. Scholer's independently reasoned memorandum opinions.
 2. Scholer's independent orders with substantive reasoning.
-3. Scholer orders adopting a magistrate recommendation, clearly labeled as adoption evidence.
-4. Judgments and docket-only entries for outcomes, never for unobserved reasoning.
+3. Scholer orders adopting a magistrate recommendation, clearly labeled as
+   adoption evidence.
+4. Judgments and docket-only entries for outcomes, never for unobserved
+   reasoning.
 
-Never attribute a magistrate judge's wording to Scholer merely because she adopted the recommendation.
+Never attribute a magistrate judge's wording to Scholer merely because she
+adopted the recommendation.
 
 ## Required drafting workflow
 
 ### Rule 12
 
-- Tie each element to concrete pleaded facts: actor, act or omission, time, knowledge, injury, and causal link.
+- Tie each element to concrete pleaded facts: actor, act or omission, time,
+  knowledge, injury, and causal link.
 - Separate facts in the complaint from facts asserted only in briefing.
-- Address incorporated documents, video, and judicially noticeable records accurately.
-- Answer every dispositive argument with authority; flag an unanswered premise before drafting around it.
+- Address incorporated documents, video, and judicially noticeable records
+  accurately.
+- Answer every dispositive argument with authority; flag an unanswered premise
+  before drafting around it.
 
 ### Qualified immunity
 
 - State both prongs.
 - Describe the challenged conduct at the correct level of specificity.
 - Build a fact-to-fact comparison to binding clearly-established-law cases.
-- Use unpublished decisions only for their proper non-binding or illustrative role.
-- For force, divide the encounter into phases and state when threat, flight, or resistance changed.
+- Use unpublished decisions only for their proper non-binding or illustrative
+  role.
+- For force, divide the encounter into phases and state when threat, flight, or
+  resistance changed.
 
 ### Monell
 
@@ -59,14 +90,17 @@ For each separate theory, state:
 5. the particular constitutional injury; and
 6. the direct moving-force mechanism.
 
-Do not combine alternative theories into an omnibus Monell paragraph. Do not treat violated regulations as a municipal policy that caused injury unless the alleged causal policy is independently identified.
+Do not combine alternative theories into an omnibus Monell paragraph. Do not
+treat violated regulations as a municipal policy that caused injury unless the
+alleged causal policy is independently identified.
 
 ### Amendment
 
 - If dismissal is possible, request leave expressly.
 - Identify the curable defect and the facts that can cure it.
 - Explain why amendment is not futile.
-- Warn when an earlier Scholer ruling already identified the same defect; repeated conclusory repleading increases prejudice risk.
+- Warn when an earlier Scholer ruling already identified the same defect;
+  repeated conclusory repleading increases prejudice risk.
 
 ## Final audit
 
@@ -74,9 +108,14 @@ Do not combine alternative theories into an omnibus Monell paragraph. Do not tre
 - Verify every authority, quotation, and pinpoint.
 - Cite every factual assertion to a record source.
 - Remove labels unsupported by factual mechanisms.
-- Confirm every point rests on cited record facts, expressly permitted inferences, or verified authority; cut or rewrite any sentence that cannot be traced to one.
-- Confirm the draft follows the case strategy file and its prescribed audits ran.
+- Confirm every point rests on cited record facts, expressly permitted
+  inferences, or verified authority; cut or rewrite any sentence that cannot be
+  traced to one.
+- Confirm the draft follows the case strategy file and its prescribed audits
+  ran.
 - End each argument with the precise ruling requested.
-- State corpus-derived observations as tendencies or documented examples, never predictions.
-- Run `audit-authorities` before treating any judge-specific or clearly-established-law proposition as filing-ready.
+- State corpus-derived observations as tendencies or documented examples, never
+  predictions.
+- Run `audit-authorities` before treating any judge-specific or
+  clearly-established-law proposition as filing-ready.
 - Run `horan-bad-words` after the last substantive or authority revision.

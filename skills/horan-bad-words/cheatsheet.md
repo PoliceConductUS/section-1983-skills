@@ -13,7 +13,19 @@
 
 ## Top 50 to Scrutinize
 
-Absolute/absolutely; absurd/absurdly; actual/actually; adequate/adequately; almost; always; apparent/apparently; arbitrary/arbitrarily; baseless/baselessly; blatant/blatantly; certainly; clear/clearly; complete/completely; critical/critically; demonstrable/demonstrably; egregious/egregiously; excessive/excessively; false/falsely/fraudulent/fraudulently; frivolous/frivolously; general/generally; genuine/genuinely; gross/grossly; groundless/groundlessly; incredible/incredibly; indeed; indisputable/indisputably/undisputed/undisputedly; literal/literally; many; mere/merely; meritless/meritlessly; mistaken/mistakenly; necessary/necessarily; needless/needlessly; never; obvious/obviously; ostensible/ostensibly; particularly; plain/plainly; rather; readily; really; remarkable/remarkably; seeming/seemingly; serious/seriously; simply; supposed/supposedly; total/totally; undoubted/undoubtedly; very; wholly.
+Absolute/absolutely; absurd/absurdly; actual/actually; adequate/adequately;
+almost; always; apparent/apparently; arbitrary/arbitrarily; baseless/baselessly;
+blatant/blatantly; certainly; clear/clearly; complete/completely;
+critical/critically; demonstrable/demonstrably; egregious/egregiously;
+excessive/excessively; false/falsely/fraudulent/fraudulently;
+frivolous/frivolously; general/generally; genuine/genuinely; gross/grossly;
+groundless/groundlessly; incredible/incredibly; indeed;
+indisputable/indisputably/undisputed/undisputedly; literal/literally; many;
+mere/merely; meritless/meritlessly; mistaken/mistakenly; necessary/necessarily;
+needless/needlessly; never; obvious/obviously; ostensible/ostensibly;
+particularly; plain/plainly; rather; readily; really; remarkable/remarkably;
+seeming/seemingly; serious/seriously; simply; supposed/supposedly;
+total/totally; undoubted/undoubtedly; very; wholly.
 
 ## Fast Replacements
 
@@ -33,7 +45,10 @@ Absolute/absolutely; absurd/absurdly; actual/actually; adequate/adequately; almo
 
 ## Keep When Required
 
-Keep suspect words when they are part of a statute, rule, quotation, doctrine, burden, or standard: arbitrary and capricious, clear and convincing, clear error, clearly established law, facial challenge, frivolous sanctions, material fact, qualified immunity, undue burden, vexatious litigant, willful conduct.
+Keep suspect words when they are part of a statute, rule, quotation, doctrine,
+burden, or standard: arbitrary and capricious, clear and convincing, clear
+error, clearly established law, facial challenge, frivolous sanctions, material
+fact, qualified immunity, undue burden, vexatious litigant, willful conduct.
 
 ## Rewrite Moves
 

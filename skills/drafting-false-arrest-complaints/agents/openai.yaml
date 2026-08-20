@@ -1,4 +1,6 @@
 interface:
   display_name: "False-Arrest Complaint Patterns"
   short_description: "Apply verified complaint-corpus patterns"
-  default_prompt: "Use $drafting-false-arrest-complaints to audit my proposed amended complaint against the verified discovery-qualified corpus patterns."
+  default_prompt:
+    "Use $drafting-false-arrest-complaints to audit my proposed amended
+    complaint against the verified discovery-qualified corpus patterns."

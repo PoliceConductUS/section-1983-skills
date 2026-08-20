@@ -1,7 +1,7 @@
 # Publishing
 
-The skills CLI uses GitHub as its registry. Publishing a skill means
-pushing this repository to GitHub. There is no separate registry step.
+The skills CLI uses GitHub as its registry. Publishing a skill means pushing
+this repository to GitHub. There is no separate registry step.
 
 ## First-time setup
 
@@ -49,4 +49,5 @@ python3 -m unittest discover skills/section-1983-drafting/scripts
 npx skills add . --list
 ```
 
-Before pushing, also run the `skill-creator` runtime's `quick_validate.py` against every `skills/*/` directory that contains `SKILL.md`.
+Before pushing, also run the `skill-creator` runtime's `quick_validate.py`
+against every `skills/*/` directory that contains `SKILL.md`.

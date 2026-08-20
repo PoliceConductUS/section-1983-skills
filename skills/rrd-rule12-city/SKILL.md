@@ -1,19 +1,32 @@
 ---
 name: rrd-rule12-city
-description: "Use when creating a response plan, checklist, or Response Requirements Document for a City or municipality's Rule 12(b)(6) motion in a Section 1983 case, especially when Monell theories, pleading-stage record gating, and the movant's heading order control the response."
+description:
+  "Use when creating a response plan, checklist, or Response Requirements
+  Document for a City or municipality's Rule 12(b)(6) motion in a Section 1983
+  case, especially when Monell theories, pleading-stage record gating, and the
+  movant's heading order control the response."
 ---
 
 # SKILL.md — ~~rrd-rule12-city~~
 
-Create a detailed **Response Requirements Document (RRD)** for a **City/municipality Rule 12(b)(6) Motion to Dismiss** in a §1983 case (Monell).
+Create a detailed **Response Requirements Document (RRD)** for a
+**City/municipality Rule 12(b)(6) Motion to Dismiss** in a §1983 case (Monell).
 
-An RRD is **not** the brief. It is the blueprint: what must be argued, what must be plausibly alleged, what authority must be cited, and what the Rule 12 **record gate** permits.
+An RRD is **not** the brief. It is the blueprint: what must be argued, what must
+be plausibly alleged, what authority must be cited, and what the Rule 12
+**record gate** permits.
 
 ## Non‑negotiables
 
-1. **Preserve movant order:** The response’s **ARGUMENT** section MUST track the city’s motion headings **in the same order** (preferably verbatim).
-2. **Monell element discipline:** Under each heading, organize substance by the **Monell element(s)** attacked (policy/custom, failure to train/supervise/discipline, deliberate indifference/notice, moving force causation, policymaker, etc.).
-3. **Cross‑reference officers response:** Where appropriate, reference the officers response for the underlying constitutional violation; keep the city response focused on Monell.
+1. **Preserve movant order:** The response’s **ARGUMENT** section MUST track the
+   city’s motion headings **in the same order** (preferably verbatim).
+2. **Monell element discipline:** Under each heading, organize substance by the
+   **Monell element(s)** attacked (policy/custom, failure to
+   train/supervise/discipline, deliberate indifference/notice, moving force
+   causation, policymaker, etc.).
+3. **Cross‑reference officers response:** Where appropriate, reference the
+   officers response for the underlying constitutional violation; keep the city
+   response focused on Monell.
 4. **Rule 12 gate:** No extra-record facts; route gaps to amendment.
 
 ---
@@ -26,31 +39,47 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what must
    - mirrors the motion’s heading order
    - breaks work into small Response Units (RUs)
    - maps each heading to Monell elements + required allegations
-4. Save to the repository-defined response path; if none exists, default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+4. Save to the repository-defined response path; if none exists, default to
+   `responses/<response-due-date>/<motion-folder>/rrd.yaml`
 5. Be **idempotent** with deterministic IDs
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
-**Required companion skills:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates Monell pleading sufficiency, identifies an amendment, or specifies an amendment proffer. Apply `drafting-false-arrest-complaints` when the underlying violation turns on false arrest, probable cause, alternative offenses, seizure timing, or incorporated arrest video. Run `audit-authorities` before marking an authority-dependent unit ready.
+**Required companion skills:** Apply `drafting-section-1983-complaints` whenever
+the RRD evaluates Monell pleading sufficiency, identifies an amendment, or
+specifies an amendment proffer. Apply `drafting-false-arrest-complaints` when
+the underlying violation turns on false arrest, probable cause, alternative
+offenses, seizure timing, or incorporated arrest video. Run `audit-authorities`
+before marking an authority-dependent unit ready.
 
-Apply this skill as a municipal overlay on `rrd-rule12`. The base skill controls canonical IDs, common field names, record-gate structure, amendment handoffs, and the total of 3–5 clarifying questions. The fields below add Monell detail; they do not create aliases for base fields.
+Apply this skill as a municipal overlay on `rrd-rule12`. The base skill controls
+canonical IDs, common field names, record-gate structure, amendment handoffs,
+and the total of 3–5 clarifying questions. The fields below add Monell detail;
+they do not create aliases for base fields.
 
-Qualified immunity and its clearly-established-law prong are not municipal defenses. Verify the underlying constitutional rule, but do not import the individual defendant's prong-two burden into the City's Monell analysis.
+Qualified immunity and its clearly-established-law prong are not municipal
+defenses. Verify the underlying constitutional rule, but do not import the
+individual defendant's prong-two burden into the City's Monell analysis.
 
 ---
 
 ## Rule 12 Guardrails (Do Not Violate)
 
-- Treat well‑pleaded complaint facts as true; draw reasonable inferences for plaintiff.
+- Treat well‑pleaded complaint facts as true; draw reasonable inferences for
+  plaintiff.
 - Do not resolve factual disputes.
-- Record gate: complaint + complaint exhibits; judicial notice (existence/filing); incorporation-by-reference where proper.
-- Do not use new facts to “fix” Monell gaps; mark **GAP** and route to amendment. Discovery-controlled details may refine a theory only when known pleaded facts already support its plausible municipal inference.
+- Record gate: complaint + complaint exhibits; judicial notice
+  (existence/filing); incorporation-by-reference where proper.
+- Do not use new facts to “fix” Monell gaps; mark **GAP** and route to
+  amendment. Discovery-controlled details may refine a theory only when known
+  pleaded facts already support its plausible municipal inference.
 
 ---
 
 ## Step 1 — City-Specific Clarifying Questions
 
-Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base question with a narrower question below when useful; do not ask both sets.
+Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base
+question with a narrower question below when useful; do not ask both sets.
 
 1. **Do you have the city motion’s headings/outline to preserve?**  
    A. Yes — I will paste the TOC/headings verbatim  
@@ -71,7 +100,8 @@ Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base que
    C. Pleadings + response-attached exhibits (conversion risk)  
    D. Unsure → treat as A
 
-4. **Do you want to cross-reference the officers response for the underlying violation?**  
+4. **Do you want to cross-reference the officers response for the underlying
+   violation?**  
    A. Yes — cross-reference; keep city brief focused on Monell elements  
    B. No — restate underlying violation analysis here  
    C. Mixed — restate briefly, then cross-reference
@@ -86,7 +116,9 @@ Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base que
 
 ## Step 2 — Deterministic IDs + Idempotence (required, lightweight)
 
-**RU fingerprint:** Use the canonical base recipe. For a City RU, set `defendant_key` to the City, `event_stage` to the injury event stage, and `challenged_conduct` to the identified municipal action or omission.
+**RU fingerprint:** Use the canonical base recipe. For a City RU, set
+`defendant_key` to the City, `event_stage` to the injury event stage, and
+`challenged_conduct` to the identified municipal action or omission.
 
 ```
 ru|<motion_key>|<claim_key>|<defendant_key>|<event_stage>|<challenged_conduct>|<movant_cluster_key>|<attacked_issue_key>
@@ -116,7 +148,8 @@ Headings in order (verbatim if possible).
 
 ### 3) Response Outline Contract (Required)
 
-ARGUMENT headings must mirror the motion outline in the same order and map to RU IDs.
+ARGUMENT headings must mirror the motion outline in the same order and map to RU
+IDs.
 
 ### 4) Monell Theory Map (Required)
 
@@ -224,11 +257,17 @@ response_units:
     user_notes: ""
 ```
 
-Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every proposed cure, including its deterministic ID, proposed complaint version, target section/count and paragraph placement, nonfutility explanation, and GAP status. Set `defendant` to the City, identify the municipal theory in the claim or defect fields, and use the particular injury's event stage. Anticipated discovery cannot replace a presently missing plausible allegation.
+Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every
+proposed cure, including its deterministic ID, proposed complaint version,
+target section/count and paragraph placement, nonfutility explanation, and GAP
+status. Set `defendant` to the City, identify the municipal theory in the claim
+or defect fields, and use the particular injury's event stage. Anticipated
+discovery cannot replace a presently missing plausible allegation.
 
 ### 7) Standards Library
 
-- Monell baseline elements (policy/custom; deliberate indifference; moving force)
+- Monell baseline elements (policy/custom; deliberate indifference; moving
+  force)
 - failure-to-train/supervise standards
 - pleading standards for Monell
 
@@ -237,7 +276,8 @@ Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every propo
 Capture:
 
 - what’s in the complaint
-- which details remain within defendants' control after the complaint states a plausible basis
+- which details remain within defendants' control after the complaint states a
+  plausible basis
 - judicial notice candidates (existence vs truth caution)
 
 ### 9) Risk Register
@@ -257,7 +297,8 @@ Common city risks:
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** repository-defined response path; default to `responses/<response-due-date>/<motion-folder>/`
+- **Location:** repository-defined response path; default to
+  `responses/<response-due-date>/<motion-folder>/`
 - **Filename:** `rrd.yaml`
 
 ---
@@ -267,11 +308,16 @@ Common city risks:
 - [ ] Motion headings captured in order
 - [ ] Response outline mirrors order and maps headings to RU IDs
 - [ ] Monell theory map exists and is element-complete
-- [ ] Each Monell theory separately maps verified elements, pleaded facts, element-specific inferences, and requested result
-- [ ] Each theory separately states the identified path, concrete facts, municipal inference, attribution and notice, particular injury, injury event stage, and moving-force mechanism
-- [ ] Information-and-belief allegations identify known facts, controlled information, custodian, and supported inference
+- [ ] Each Monell theory separately maps verified elements, pleaded facts,
+      element-specific inferences, and requested result
+- [ ] Each theory separately states the identified path, concrete facts,
+      municipal inference, attribution and notice, particular injury, injury
+      event stage, and moving-force mechanism
+- [ ] Information-and-belief allegations identify known facts, controlled
+      information, custodian, and supported inference
 - [ ] Each movant heading has at least one RU
 - [ ] Record gate is explicit for each RU
 - [ ] Deterministic IDs + idempotent merge behavior
 - [ ] Every proposed amendment has a complete `amendment_handoff` entry
-- [ ] Saved to the repository-defined response path, or the documented default when none exists
+- [ ] Saved to the repository-defined response path, or the documented default
+      when none exists

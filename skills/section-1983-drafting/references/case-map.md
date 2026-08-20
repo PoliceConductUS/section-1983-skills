@@ -1,9 +1,9 @@
 # Case map: what happened, what to file, by when
 
-The first question is never "how do I write this" but "which document does
-this event call for, and what is the clock." Federal baselines below;
-local rules can shorten, lengthen, or add requirements, so run the
-localization protocol (`localization.md`) before relying on any deadline.
+The first question is never "how do I write this" but "which document does this
+event call for, and what is the clock." Federal baselines below; local rules can
+shorten, lengthen, or add requirements, so run the localization protocol
+(`localization.md`) before relying on any deadline.
 
 | Event                                                        | Responsive document                             | Federal baseline deadline                                                                         | Reference                     |
 | ------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- |
@@ -18,8 +18,7 @@ localization protocol (`localization.md`) before relying on any deadline.
 
 Two standing rules:
 
-- Silence is the enemy. An unanswered motion is often granted as
-  unopposed, and an unobjected R&R is adopted. When in doubt, file the
-  responsive document or an extension motion.
-- Calendar the deadline the day the triggering paper arrives, before
-  reading it.
+- Silence is the enemy. An unanswered motion is often granted as unopposed, and
+  an unobjected R&R is adopted. When in doubt, file the responsive document or
+  an extension motion.
+- Calendar the deadline the day the triggering paper arrives, before reading it.

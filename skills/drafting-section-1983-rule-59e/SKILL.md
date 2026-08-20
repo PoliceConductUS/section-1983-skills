@@ -1,33 +1,46 @@
 ---
 name: drafting-section-1983-rule-59e
-description: Use when drafting, revising, or auditing a Rule 59(e) filing in a federal Section 1983 case, especially for postjudgment amendment, futility, Rule 12 inferences, qualified immunity, Monell pleading, or appellate-record clarity.
+description:
+  Use when drafting, revising, or auditing a Rule 59(e) filing in a federal
+  Section 1983 case, especially for postjudgment amendment, futility, Rule 12
+  inferences, qualified immunity, Monell pleading, or appellate-record clarity.
 ---
 
 # Drafting Section 1983 Rule 59(e) Filings
 
 ## Purpose
 
-Build one genuine request for district-court relief. When the case strategy makes appellate-record clarity the controlling objective, make the filing self-contained and reviewable without announcing that appeal preparation is its purpose.
+Build one genuine request for district-court relief. When the case strategy
+makes appellate-record clarity the controlling objective, make the filing
+self-contained and reviewable without announcing that appeal preparation is its
+purpose.
 
 Read:
 
-- [references/postjudgment-amendment-contract.md](references/postjudgment-amendment-contract.md) for every postjudgment amendment motion; and
-- [references/appellate-record-contract.md](references/appellate-record-contract.md) when preservation, reviewability, supersession, or an expected denial matters.
+- [references/postjudgment-amendment-contract.md](references/postjudgment-amendment-contract.md)
+  for every postjudgment amendment motion; and
+- [references/appellate-record-contract.md](references/appellate-record-contract.md)
+  when preservation, reviewability, supersession, or an expected denial matters.
 
 ## Required skill stack
 
-Use `section-1983-drafting` first for strategy, localization, sources, and plain language. Read its writing-system reference before drafting.
+Use `section-1983-drafting` first for strategy, localization, sources, and plain
+language. Read its writing-system reference before drafting.
 
 Add when applicable:
 
 - `drafting-section-1983-complaints` for the proposed complaint;
-- `drafting-false-arrest-complaints` for arrest timing, probable cause, alternative offenses, video, or intermediary causation;
+- `drafting-false-arrest-complaints` for arrest timing, probable cause,
+  alternative offenses, video, or intermediary causation;
 - the assigned-judge drafting skill;
-- `studying-rule-59e-decisions` when researching governing cases or judge-specific Rule 59 practice;
+- `studying-rule-59e-decisions` when researching governing cases or
+  judge-specific Rule 59 practice;
 - `audit-authorities` before filing-readiness; and
-- `horan-bad-words` after the substantive and authority work and after each material revision.
+- `horan-bad-words` after the substantive and authority work and after each
+  material revision.
 
-The specific skill adds requirements. It does not relax the case strategy, court rules, source gates, or authority gates.
+The specific skill adds requirements. It does not relax the case strategy, court
+rules, source gates, or authority gates.
 
 ## Controlling objective
 
@@ -40,7 +53,10 @@ A cold reader should be able to identify:
 5. each precise manifest error asserted; and
 6. the full, partial, and claim-specific rulings requested.
 
-Rule 59(e) supplies the vehicle for reopening the judgment. Rule 15(a) supplies the amendment considerations when governing law makes them applicable. Rule 12 supplies the futility test. Present one decisional path without merging those legal functions.
+Rule 59(e) supplies the vehicle for reopening the judgment. Rule 15(a) supplies
+the amendment considerations when governing law makes them applicable. Rule 12
+supplies the futility test. Present one decisional path without merging those
+legal functions.
 
 ## Source and posture gates
 
@@ -52,11 +68,21 @@ Before drafting, identify and read:
 4. objections and their supporting brief;
 5. every amendment request and court instruction about amendment;
 6. the complete proposed amended complaint;
-7. the current strategy, fact lock, claim ledger, gap register, and authority audit;
-8. local rules, standing orders, page limit, conference requirement, and deadline; and
-9. canonical verified sources for every load-bearing authority and record quotation.
+7. the current strategy, fact lock, claim ledger, gap register, and authority
+   audit;
+8. local rules, standing orders, page limit, conference requirement, and
+   deadline; and
+9. canonical verified sources for every load-bearing authority and record
+   quotation.
 
-Do not infer a defect the court did not identify. For a collectively dismissed theory, state that no claim-specific defect was identified when accurate and request a claim-specific ruling.
+Before using material developed or located near the filing deadline, apply the
+evidence-maturity and source-use gate in the postjudgment-amendment contract.
+Do not let a new analysis obscure when its underlying facts or data were
+available.
+
+Do not infer a defect the court did not identify. For a collectively dismissed
+theory, state that no claim-specific defect was identified when accurate and
+request a claim-specific ruling.
 
 ## Relief-first contract
 
@@ -67,7 +93,8 @@ The first paragraph states:
 - the pleading to accept; and
 - narrower alternative relief.
 
-Name the Rule 59(e) ground in the introduction and in the application that establishes it. Do not leave “manifest error” only in the standards section.
+Name the Rule 59(e) ground in the introduction and in the application that
+establishes it. Do not leave “manifest error” only in the standards section.
 
 ## Reviewable error unit
 
@@ -79,33 +106,50 @@ For each asserted error, state:
 4. proposed-pleading location that matters; and
 5. requested ruling.
 
-Develop an underlying merits issue only when it establishes manifest error, answers an identified futility ground, shows the complete pleading is not necessarily futile, or preserves a claim-specific ruling.
+Develop an underlying merits issue only when it establishes manifest error,
+answers an identified futility ground, shows the complete pleading is not
+necessarily futile, or preserves a claim-specific ruling.
 
 ## Division of labor: brief, crosswalk, and Exhibit A
 
-Exhibit A is the primary substantive pleading artifact. The brief should not conduct a substantial narrative merits analysis of every proposed claim and defendant.
+Exhibit A is the primary substantive pleading artifact. The brief should not
+conduct a substantial narrative merits analysis of every proposed claim and
+defendant.
 
-Maintain a complete internal claim-by-defendant futility audit, including both qualified-immunity prongs and each Monell path. In the filed brief:
+Maintain a complete internal claim-by-defendant futility audit, including both
+qualified-immunity prongs and each Monell path. In the filed brief:
 
 1. explain the procedural error;
 2. include a concise ruling-to-pleading crosswalk;
-3. develop only the smallest set of strongest examples needed to show that Exhibit A is not necessarily futile; and
+3. develop only the smallest set of strongest examples needed to show that
+   Exhibit A is not necessarily futile; and
 4. request a claim-specific ruling for every claim denied leave.
 
-Add extended claim analysis only when needed to answer a dispositive defect the court identified and the answer is not apparent from Exhibit A and the crosswalk.
+Add extended claim analysis only when needed to answer a dispositive defect the
+court identified and the answer is not apparent from Exhibit A and the
+crosswalk.
 
 ### Brief-level crosswalk
 
 | Claim or ruling unit | FCR finding or identified defect, with record cite | Exhibit A response, with exact paragraph cites | Requested ruling |
-| --- | --- | --- | --- |
+| -------------------- | -------------------------------------------------- | ---------------------------------------------- | ---------------- |
 
-The crosswalk accounts for every claim for which relief is sought. Separate defendants when the ruling or cure differs; otherwise group them. Direct the court to the complaint's claim and fair-warning units. Do not reproduce the internal element audit, qualified-immunity analysis, factual narrative, or case stack in the table.
+The crosswalk accounts for every claim for which relief is sought. Separate
+defendants when the ruling or cure differs; otherwise group them. Direct the
+court to the complaint's claim and fair-warning units. Do not reproduce the
+internal element audit, qualified-immunity analysis, factual narrative, or case
+stack in the table.
 
-Use one row per count, defendant, and legal theory when the dismissal ground, challenged conduct, cure, immunity treatment, or requested ruling differs. Use a separate row for each Monell path with a different policy or custom, municipal attribution, notice, injury, or moving-force theory. Group only units identical on those fields.
+Use one row per count, defendant, and legal theory when the dismissal ground,
+challenged conduct, cure, immunity treatment, or requested ruling differs. Use a
+separate row for each Monell path with a different policy or custom, municipal
+attribution, notice, injury, or moving-force theory. Group only units identical
+on those fields.
 
 ## Anti-replay gate
 
-Compare the draft with the dismissal responses and objections. Each repeated merits paragraph must perform at least one postjudgment function:
+Compare the draft with the dismissal responses and objections. Each repeated
+merits paragraph must perform at least one postjudgment function:
 
 - establish manifest error;
 - explain the pre-judgment amendment sequence;
@@ -113,7 +157,8 @@ Compare the draft with the dismissal responses and objections. Each repeated mer
 - demonstrate nonfutility through a strongest example; or
 - preserve a requested claim-specific ruling.
 
-Delete repetitions that perform none of those functions. Correctness alone does not justify replay.
+Delete repetitions that perform none of those functions. Correctness alone does
+not justify replay.
 
 ## Amendment-procedure and alternative-ground audit
 
@@ -125,11 +170,19 @@ When the court prescribed a cure method:
 4. acknowledge any implicit denial created by judgment; and
 5. explain why the futility ruling did not test the complete pleading.
 
-Do not call Exhibit A newly discovered merely because it was completed after judgment. Address every apparent Rule 15 ground that could independently support denial, including delay, bad faith, prior cure opportunities, prejudice, and futility. Distinguish a pre-judgment request or court-prescribed procedure from a first request made only after judgment.
+Do not call Exhibit A newly discovered merely because it was completed after
+judgment. Address every apparent Rule 15 ground that could independently support
+denial, including delay, bad faith, prior cure opportunities, prejudice, and
+futility. Distinguish a pre-judgment request or court-prescribed procedure from
+a first request made only after judgment.
 
 ## Corpus evidence gate
 
-Use judge-specific Rule 59 observations only when supported by a current, versioned corpus produced under `studying-rule-59e-decisions`. Identify authorship, posture, denominator, sample limits, and primary source. Treat documented judge practices as drafting information, not authority or prediction. Governing binding authority controls.
+Use judge-specific Rule 59 observations only when supported by a current,
+versioned corpus produced under `studying-rule-59e-decisions`. Identify
+authorship, posture, denominator, sample limits, and primary source. Treat
+documented judge practices as drafting information, not authority or prediction.
+Governing binding authority controls.
 
 ## Requested-ruling branches
 
@@ -137,35 +190,51 @@ The motion, brief, and proposed order request:
 
 1. vacatur, reopening, and filing of Exhibit A;
 2. alternatively, amendment as to every claim not found futile; and
-3. for each denied claim, a claim- and defendant-specific ruling identifying the deficient element or immunity prong.
+3. for each denied claim, a claim- and defendant-specific ruling identifying the
+   deficient element or immunity prong.
 
-Do not characterize claims excluded from a court-directed conformed complaint as voluntarily abandoned.
+Do not characterize claims excluded from a court-directed conformed complaint as
+voluntarily abandoned.
 
-Use one branched proposed order with a compact claim-disposition schedule unless local practice requires separate proposed orders.
+Use one branched proposed order with a compact claim-disposition schedule unless
+local practice requires separate proposed orders.
 
 ## Packet and version contract
 
-Generate the documents required by the court and strategy, commonly the motion, brief, complete proposed complaint, proposed order, appendix, exhibit instructions, accurate conference certificate, and internal audits.
+Generate the documents required by the court and strategy, commonly the motion,
+brief, complete proposed complaint, proposed order, appendix, exhibit
+instructions, accurate conference certificate, and internal audits.
 
-Keep each packet immutable. Create the next numbered folder, carry forward only still-used artifacts, identify unchanged files, and update the manifest and source record. Never overwrite a prior packet.
+Keep each packet immutable. Create the next numbered folder, carry forward only
+still-used artifacts, identify unchanged files, and update the manifest and
+source record. Never overwrite a prior packet.
 
 ## Final review
 
 Reject the packet unless:
 
 1. the opening states the requested result and exact Rule 59 ground;
-2. Rule 59(e), Rule 15(a), and Rule 12 remain one visible but legally distinct chain;
+2. Rule 59(e), Rule 15(a), and Rule 12 remain one visible but legally distinct
+   chain;
 3. the pre-judgment amendment sequence is supported by exact record cites;
 4. Exhibit A is the primary substantive artifact;
 5. every requested claim appears in the concise crosswalk;
-6. narrative nonfutility analysis is limited to the strongest necessary examples;
+6. narrative nonfutility analysis is limited to the strongest necessary
+   examples;
 7. every merits paragraph passes the anti-replay gate;
 8. every apparent independent amendment-denial ground is addressed;
-9. full, partial, and claim-specific relief match across the motion, brief, and order;
+9. full, partial, and claim-specific relief match across the motion, brief, and
+   order;
 10. the appellate-record audit passes when applicable;
-11. every quotation, pinpoint, procedural statement, and authority status is verified;
-12. tables of authorities and rules match the final body;
-13. the writing-system lint and `horan-bad-words` review pass; and
-14. page limit, conference statement, appendix cites, hashes, and manifest are verified.
+11. every quotation, pinpoint, procedural statement, and authority status is
+    verified;
+12. every late-window fact, statistic, record, and timestamp passes the
+    evidence-maturity and source-use gate;
+13. tables of authorities and rules match the final body;
+14. the writing-system lint and `horan-bad-words` review pass; and
+15. page limit, conference statement, appendix cites, hashes, and manifest are
+    verified.
 
-Do not call the packet filing-ready while a load-bearing source, authority, deadline, conference statement, proposed-complaint cross-reference, requested ruling, or supersession effect remains unresolved.
+Do not call the packet filing-ready while a load-bearing source, authority,
+deadline, conference statement, proposed-complaint cross-reference, requested
+ruling, or supersession effect remains unresolved.

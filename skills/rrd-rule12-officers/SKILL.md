@@ -1,20 +1,37 @@
 ---
 name: rrd-rule12-officers
-description: "Use when creating a response plan, checklist, or Response Requirements Document for an officers' Rule 12(b)(6) motion in a Section 1983 case, especially when qualified immunity requires claim-by-claim and officer-by-officer analysis in the movant's heading order."
+description:
+  "Use when creating a response plan, checklist, or Response Requirements
+  Document for an officers' Rule 12(b)(6) motion in a Section 1983 case,
+  especially when qualified immunity requires claim-by-claim and
+  officer-by-officer analysis in the movant's heading order."
 ---
 
 # SKILL.md — rrd-rule12-officers
 
-Create a detailed **Response Requirements Document (RRD)** for an **officers’ Rule 12(b)(6) Motion to Dismiss** in a §1983 case, where **qualified immunity** is commonly raised.
+Create a detailed **Response Requirements Document (RRD)** for an **officers’
+Rule 12(b)(6) Motion to Dismiss** in a §1983 case, where **qualified immunity**
+is commonly raised.
 
-An RRD is **not** the brief. It is the blueprint: what must be argued, what facts must be treated as **plausible**, what authority must be cited, and what the **record gate** permits—so the final response brief is tight, checkable, and complete.
+An RRD is **not** the brief. It is the blueprint: what must be argued, what
+facts must be treated as **plausible**, what authority must be cited, and what
+the **record gate** permits—so the final response brief is tight, checkable, and
+complete.
 
 ## Non‑negotiables
 
-1. **Preserve movant order:** The response’s **ARGUMENT** section MUST track the movant’s headings **in the same order** (preferably verbatim).
-2. **No lumping:** When qualified immunity (QI) is raised, analysis must be **per officer** (prong 1 + prong 2) for every claim/issue where the officer is a movant.
-3. **Rule 12 record gate discipline:** Do not rely on extra-record facts unless clearly permissible or explicitly flagged as conversion risk.
-4. **Video discipline:** Separate **authenticity** from **interpretation**; do not concede interpretation where competing inferences exist. Do **not** concede authenticity unless explicitly instructed — always check `STRATEGY.yaml` for case-specific authenticity posture. Defendants bear burden under FRE 901(a).
+1. **Preserve movant order:** The response’s **ARGUMENT** section MUST track the
+   movant’s headings **in the same order** (preferably verbatim).
+2. **No lumping:** When qualified immunity (QI) is raised, analysis must be
+   **per officer** (prong 1 + prong 2) for every claim/issue where the officer
+   is a movant.
+3. **Rule 12 record gate discipline:** Do not rely on extra-record facts unless
+   clearly permissible or explicitly flagged as conversion risk.
+4. **Video discipline:** Separate **authenticity** from **interpretation**; do
+   not concede interpretation where competing inferences exist. Do **not**
+   concede authenticity unless explicitly instructed — always check
+   `STRATEGY.yaml` for case-specific authenticity posture. Defendants bear
+   burden under FRE 901(a).
 
 ---
 
@@ -26,47 +43,65 @@ An RRD is **not** the brief. It is the blueprint: what must be argued, what fact
    - mirrors the motion’s heading order
    - breaks work into small, checkable “Response Units” (RUs)
    - forces officer-by-officer QI completion where needed
-4. Save to the repository-defined response path; if none exists, default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+4. Save to the repository-defined response path; if none exists, default to
+   `responses/<response-due-date>/<motion-folder>/rrd.yaml`
 5. Be **idempotent**: re-running updates/merges without duplicating RUs
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
-**Required companion skills:** Apply `drafting-section-1983-complaints` whenever the RRD evaluates complaint sufficiency, identifies an amendment, or specifies an amendment proffer. Also apply `drafting-false-arrest-complaints` when probable cause, arguable probable cause, alternative offenses, seizure timing, later alleged resistance, or incorporated arrest video is material. Run `audit-authorities` before marking a qualified-immunity or authority-dependent unit ready.
+**Required companion skills:** Apply `drafting-section-1983-complaints` whenever
+the RRD evaluates complaint sufficiency, identifies an amendment, or specifies
+an amendment proffer. Also apply `drafting-false-arrest-complaints` when
+probable cause, arguable probable cause, alternative offenses, seizure timing,
+later alleged resistance, or incorporated arrest video is material. Run
+`audit-authorities` before marking a qualified-immunity or authority-dependent
+unit ready.
 
-Apply this skill as an officers-specific overlay on `rrd-rule12`. The base skill controls canonical IDs, common field names, record-gate structure, amendment handoffs, and the total of 3–5 clarifying questions. The fields below add officer and qualified-immunity detail; they do not create aliases for base fields.
+Apply this skill as an officers-specific overlay on `rrd-rule12`. The base skill
+controls canonical IDs, common field names, record-gate structure, amendment
+handoffs, and the total of 3–5 clarifying questions. The fields below add
+officer and qualified-immunity detail; they do not create aliases for base
+fields.
 
 ---
 
 ## Rule 12 Guardrails (Do Not Violate)
 
-- Treat well‑pleaded complaint facts as true; draw reasonable inferences for the plaintiff.
+- Treat well‑pleaded complaint facts as true; draw reasonable inferences for the
+  plaintiff.
 - Do not resolve credibility disputes or competing inferences against plaintiff.
 - Identify what the court may consider without conversion:
   - complaint + exhibits attached to complaint
   - judicial notice (typically existence/filing, not truth of disputed facts)
-  - incorporation-by-reference / central documents (referenced + integral + authenticity not disputed)
-- Motion-attached exhibits (video/BWC) defeat pleaded allegations only if they **blatantly contradict** them.
-- If a needed fact is not safely in the Rule 12 record gate, mark it as a **GAP** and route to amendment or later proof.
+  - incorporation-by-reference / central documents (referenced + integral +
+    authenticity not disputed)
+- Motion-attached exhibits (video/BWC) defeat pleaded allegations only if they
+  **blatantly contradict** them.
+- If a needed fact is not safely in the Rule 12 record gate, mark it as a
+  **GAP** and route to amendment or later proof.
 
 ---
 
 ## Step 1 — Officers-Specific Clarifying Questions
 
-Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base question with a narrower question below when useful; do not ask both sets.
+Ask 3–5 questions total across this skill and `rrd-rule12`. Replace a base
+question with a narrower question below when useful; do not ask both sets.
 
 ### Required Questions (use this format)
 
 1. **Do you have the motion’s headings/outline to preserve?**  
    A. Yes — I will paste the Table of Contents / headings verbatim  
-   B. Partial — I will paste the headings I can, and you infer missing structure from the argument map I provide  
-   C. No — build a best-effort outline from the motion summary I provide (higher risk)
+   B. Partial — I will paste the headings I can, and you infer missing structure
+   from the argument map I provide  
+   C. No — build a best-effort outline from the motion summary I provide (higher
+   risk)
 
-2. **What is the record posture we must assume (Rule 12 gate)?**
-   A. Pleadings only (+ judicial notice where proper)
-   B. Pleadings + incorporated/central documents (authenticity not disputed)
-   C. Pleadings + incorporated/central documents (authenticity IS disputed — challenge under FRE 901(a))
-   D. Pleadings + response-attached exhibits (conversion risk acknowledged)
-   E. Unsure → treat as A
+2. **What is the record posture we must assume (Rule 12 gate)?** A. Pleadings
+   only (+ judicial notice where proper) B. Pleadings + incorporated/central
+   documents (authenticity not disputed) C. Pleadings + incorporated/central
+   documents (authenticity IS disputed — challenge under FRE 901(a)) D.
+   Pleadings + response-attached exhibits (conversion risk acknowledged) E.
+   Unsure → treat as A
 
 3. **Is video/BWC in play for this motion?**  
    A. No  
@@ -92,7 +127,8 @@ User can reply like: `1A, 2A, 3B, 4B, 5C`.
 
 ## Step 2 — Deterministic IDs + Idempotence (lightweight but required)
 
-This skill MUST be idempotent. It MUST also generate deterministic IDs so re-runs update existing work instead of duplicating it.
+This skill MUST be idempotent. It MUST also generate deterministic IDs so
+re-runs update existing work instead of duplicating it.
 
 ### Deterministic RU IDs
 
@@ -104,7 +140,8 @@ Each RU gets an ID derived from a stable fingerprint:
 ru|<motion_key>|<claim_key>|<defendant_key>|<event_stage>|<challenged_conduct>|<movant_cluster_key>|<attacked_issue_key>
 ```
 
-Normalize each component: lowercase, trim, collapse spaces, strip punctuation except `-_/`.
+Normalize each component: lowercase, trim, collapse spaces, strip punctuation
+except `-_/`.
 
 Compute:
 
@@ -116,7 +153,8 @@ Compute:
 If `rrd.yaml` exists:
 
 - Match RUs by `id`
-- If exists: update generated fields, preserve `user_notes`, `status`, and any `manual:*` fields
+- If exists: update generated fields, preserve `user_notes`, `status`, and any
+  `manual:*` fields
 - If missing: append as new RU
 - If old RU not regenerated: keep it, mark `status: stale` (do not delete)
 
@@ -149,7 +187,8 @@ motion_outline:
 
 Explicitly states the rule:
 
-- The response brief’s **ARGUMENT** section MUST reproduce `motion_outline[*].heading` in the same order.
+- The response brief’s **ARGUMENT** section MUST reproduce
+  `motion_outline[*].heading` in the same order.
 - Each heading maps to one or more RU IDs.
 
 ```yaml
@@ -284,13 +323,22 @@ response_units:
     user_notes: ""
 ```
 
-For a false-arrest unit, use the canonical linked `seizure_point` and `suspected_offenses[].offense_elements[]` schema in `rrd-rule12`. Complete the contemporaneous, negating, later-only, actual-probable-cause, and arguable-probable-cause fields for each offense element.
+For a false-arrest unit, use the canonical linked `seizure_point` and
+`suspected_offenses[].offense_elements[]` schema in `rrd-rule12`. Complete the
+contemporaneous, negating, later-only, actual-probable-cause, and
+arguable-probable-cause fields for each offense element.
 
-Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every proposed cure, including its deterministic ID, proposed complaint version, target section/count and paragraph placement, clearly-established-law cure, nonfutility explanation, and GAP status. Set `defendant` to the individual officer. A brief assertion or anticipated discovery cannot cure a missing complaint allegation.
+Use the canonical `amendment_handoff[]` object from `rrd-rule12` for every
+proposed cure, including its deterministic ID, proposed complaint version,
+target section/count and paragraph placement, clearly-established-law cure,
+nonfutility explanation, and GAP status. Set `defendant` to the individual
+officer. A brief assertion or anticipated discovery cannot cure a missing
+complaint allegation.
 
 ### 7) Video / BWC Dispute Map (Conditional)
 
-If video is in play, add a map that prevents accidental interpretation concessions.
+If video is in play, add a map that prevents accidental interpretation
+concessions.
 
 ```yaml
 video_dispute_map:
@@ -302,7 +350,9 @@ video_dispute_map:
     defense_video_claim: "..."
     classification: "blatantly_contradicts|ambiguous|supports_plaintiff|supports_defense"
     preserved_inference: "..."
-    drafting_instruction: "Neutral description + plaintiff-favorable inference; do not concede interpretation."
+    drafting_instruction:
+      "Neutral description + plaintiff-favorable inference; do not concede
+      interpretation."
 ```
 
 ### 8) Standards Library
@@ -321,7 +371,8 @@ Inventory of what exists and whether it is usable at Rule 12:
 - complaint + exhibits
 - incorporated documents
 - judicial notice candidates (existence only unless undisputed)
-- video/transcript availability and citation method (timestamps, transcript lines)
+- video/transcript availability and citation method (timestamps, transcript
+  lines)
 
 ### 10) Risk Register
 
@@ -350,7 +401,8 @@ Remaining unknowns that block drafting.
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** repository-defined response path; default to `responses/<response-due-date>/<motion-folder>/`
+- **Location:** repository-defined response path; default to
+  `responses/<response-due-date>/<motion-folder>/`
 - **Filename:** `rrd.yaml`
 
 ---
@@ -361,12 +413,18 @@ Remaining unknowns that block drafting.
 - [ ] `response_outline` preserves the same order and maps headings to RU IDs
 - [ ] Each movant heading has at least one RU
 - [ ] If QI is raised, each relevant RU is officer-specific (no lumping)
-- [ ] Each claim/officer RU states the elements, officer-specific facts, element-specific inference, and requested result
-- [ ] Each individual-capacity RU separately completes QI prong one and prong two for that officer
-- [ ] Each prong-two analysis contains the complete clearly-established-law object and is not `ready` with a filing-critical GAP
-- [ ] Each RU identifies event stage and challenged conduct; false-arrest units include the arrest-decision fields
+- [ ] Each claim/officer RU states the elements, officer-specific facts,
+      element-specific inference, and requested result
+- [ ] Each individual-capacity RU separately completes QI prong one and prong
+      two for that officer
+- [ ] Each prong-two analysis contains the complete clearly-established-law
+      object and is not `ready` with a filing-critical GAP
+- [ ] Each RU identifies event stage and challenged conduct; false-arrest units
+      include the arrest-decision fields
 - [ ] Record gate is explicitly stated for each RU
-- [ ] Video authenticity vs interpretation is separated; interpretation not conceded where disputed
+- [ ] Video authenticity vs interpretation is separated; interpretation not
+      conceded where disputed
 - [ ] Deterministic RU IDs + idempotent merge behavior
 - [ ] Every proposed amendment has a complete `amendment_handoff` entry
-- [ ] Saved to the repository-defined response path, or the documented default when none exists
+- [ ] Saved to the repository-defined response path, or the documented default
+      when none exists

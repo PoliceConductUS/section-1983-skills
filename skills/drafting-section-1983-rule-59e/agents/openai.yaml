@@ -1,4 +1,6 @@
 interface:
   display_name: "Section 1983 Rule 59(e)"
   short_description: "Draft postjudgment amendment motions"
-  default_prompt: "Use $drafting-section-1983-rule-59e to draft or revise a Section 1983 Rule 59(e) filing packet."
+  default_prompt:
+    "Use $drafting-section-1983-rule-59e to draft or revise a Section 1983 Rule
+    59(e) filing packet."

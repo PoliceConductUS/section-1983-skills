@@ -24,7 +24,7 @@
   "denominator": {
     "defined_universe": "A fictional convenience sample from Example District",
     "sampling_method": "convenience",
-    "candidate_count": 2,
+    "candidate_count": 1,
     "coded_pair_count": 1,
     "research_question_complete_count": 0,
     "unresolved_relevant_missingness": 1,

@@ -22,20 +22,17 @@
       "Synthetic motion",
       "Synthetic proposed pleading"
     ],
-    "denominator_definition": "Fictional candidate Rule 59(e) motions visible in an incomplete Example District search"
+    "denominator_definition": "One located fictional Rule 59(e) motion in Example District with incomplete motion-side materials"
   },
   "denominator": {
-    "defined_universe": "Fictional candidate Rule 59(e) motions visible in an incomplete Example District search",
+    "defined_universe": "One located fictional Rule 59(e) motion in Example District with incomplete motion-side materials",
     "sampling_method": "attempted-census",
-    "candidate_count": 3,
+    "candidate_count": 1,
     "coded_pair_count": 1,
     "research_question_complete_count": 0,
     "unresolved_relevant_missingness": 2,
     "completeness_status": "incomplete",
-    "limits": [
-      "Two motion-side documents remain unavailable",
-      "The candidate universe has not closed"
-    ]
+    "limits": ["Two motion-side documents remain unavailable"]
   },
   "decision_records": [
     {

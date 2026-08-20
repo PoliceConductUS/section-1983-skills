@@ -63,11 +63,11 @@ different `record_id` for each stage. Code `decision_type` as one of:
 A recommendation uses `recommendation-only`, identifies a distinct
 recommendation author, and does not attribute final district-court reasoning. An
 adoption-only order uses `adopts-without-additional-reasoning`, identifies the
-adopting judge, and does not claim an independent reasoning author. An
-independently reasoned final decision uses `independent` and identifies its
-reasoning author. Every canonical decision record also requires one controlled
-`retrieval_status` and `coding_confidence` value from the lists below. Every
-stated reason uses a code from the reason-coding list.
+recommendation author and adopting judge, and does not claim an independent
+reasoning author. An independently reasoned final decision uses `independent`
+and identifies its reasoning author. Every canonical decision record also
+requires one controlled `retrieval_status` and `coding_confidence` value from
+the lists below. Every stated reason uses a code from the reason-coding list.
 
 ## Controlled values
 
@@ -161,11 +161,13 @@ metric_type: descriptive
 
 `evidence_level` is `example`, `documented-cluster`, or `tendency`.
 `metric_type` is `descriptive` or `success-rate`. A `tendency` or `success-rate`
-card requires a complete attempted census with zero unresolved relevant
-missingness. A convenience or incomplete corpus may transfer only an `example`
-or `documented-cluster` with explicit limits. A card communicates evidence and
-limits; it does not select litigation strategy or turn association into
-causation or prediction.
+card requires a complete attempted census, zero unresolved relevant missingness,
+and `complete-pair` retrieval status for every coded record. A card may cite
+`complete-pair` or `ruling-complete` source rows; `index-only` and `lead-only`
+rows are not verified card support. A convenience or incomplete corpus may
+transfer only an `example` or `documented-cluster` with explicit limits. A card
+communicates evidence and limits; it does not select litigation strategy or turn
+association into causation or prediction.
 
 ## Motion-design comparison
 
@@ -202,7 +204,9 @@ Every retrieval gap carries a stable `candidate_id`. A document gap uses
 and matches one missing-document object's `gap_id`, record, and document type.
 An unresolved candidate uses `unresolved-candidate` with a null `record_id` and
 does not create a decision record. The denominator's unresolved relevant
-missingness count equals the retrieval-gap inventory. Report the defined
-universe, sampling method, located candidate count, coded motion-disposition
-pair count, research-question-complete count, completeness status, and explicit
-limits in the canonical denominator.
+missingness count equals the retrieval-gap inventory. Its candidate count equals
+the coded motion-disposition pair count plus the number of distinct
+`candidate_id` values on unresolved-candidate gaps with null `record_id`;
+record-linked document gaps add no candidate. Report the defined universe,
+sampling method, research-question-complete count, completeness status, and
+explicit limits in the canonical denominator.

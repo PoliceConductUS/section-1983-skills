@@ -115,7 +115,9 @@ Use the same `motion_id` for every linked recommendation, adoption, or other
 stage. Every retrieval gap identifies its stable candidate. A missing-document
 gap also identifies its decision record and exact document type. An unresolved
 candidate uses `unresolved-candidate` with a null `record_id`; do not fabricate
-a decision record for it.
+a decision record for it. `candidate_count` equals coded motion-disposition
+pairs plus distinct unresolved-candidate IDs; record-linked document gaps do not
+add candidates.
 
 ## Analysis gates
 
@@ -149,8 +151,8 @@ Do not combine materially different strata into a success rate.
 
 - One verified disposition is an **example**.
 - A non-systematic or incomplete group is a **documented cluster**.
-- A **tendency** requires a disclosed denominator, reasonably complete retrieval
-  for the defined universe, consistent coding, and an express missingness limit.
+- A **tendency** requires a disclosed denominator, `complete-pair` retrieval for
+  every coded record, consistent coding, and an express missingness limit.
 - A **drafting rule** requires controlling authority, an express court
   requirement, or repeated comparable decisions supported by reviewed
   motion-disposition pairs.
@@ -177,6 +179,11 @@ denominator, missingness, permitted use, prohibited inference, actual source
 identity, and checked dates. It transfers bounded evidence without selecting a
 legal path or litigation strategy. If the evidence does not support a drafting
 change, say so.
+
+A card may cite `complete-pair` or `ruling-complete` source rows. `index-only`
+and `lead-only` rows are retrieval leads, not verified card support. Every
+`tendency` or `success-rate` corpus requires `complete-pair` status for all
+coded records.
 
 ## Update rule
 

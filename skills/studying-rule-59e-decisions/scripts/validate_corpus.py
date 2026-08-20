@@ -426,6 +426,7 @@ def validate_authorship(record, findings):
         consistent = (
             independence == "adopts-without-additional-reasoning"
             and nonblank(adopting)
+            and nonblank(recommendation)
             and reasoning is None
         )
     elif decision_type == "independently-reasoned-final-decision":
@@ -665,6 +666,13 @@ def validate_references(records, gaps, cards, findings):
                 for value in values:
                     if nonblank(value) and value not in record_ids:
                         findings.append("source-row-reference-invalid")
+                    elif (
+                        field == "source_row_ids"
+                        and nonblank(value)
+                        and record_by_id[value].get("retrieval_status")
+                        in {"lead-only", "index-only"}
+                    ):
+                        findings.append("unverified-card-source")
 
 
 def validate_denominator_semantics(denominator, records, gaps, cards, findings):
@@ -674,6 +682,13 @@ def validate_denominator_semantics(denominator, records, gaps, cards, findings):
     coded_count = denominator.get("coded_pair_count")
     if nonnegative_integer(coded_count) and coded_count != len(motion_ids):
         findings.append("denominator-coded-pair-count-inconsistent")
+    candidate_only_ids = {
+        gap.get("candidate_id")
+        for gap in gaps
+        if gap.get("status") == "unresolved-candidate"
+        and gap.get("record_id") is None
+        and nonblank(gap.get("candidate_id"))
+    }
     unresolved_documents = any(
         isinstance(record.get("missing_documents"), list) and record["missing_documents"]
         for record in records
@@ -683,12 +698,19 @@ def validate_denominator_semantics(denominator, records, gaps, cards, findings):
         findings.append("denominator-missingness-inconsistent")
     candidate_count = denominator.get("candidate_count")
     research_complete_count = denominator.get("research_question_complete_count")
+    if (
+        nonnegative_integer(candidate_count)
+        and nonnegative_integer(coded_count)
+        and candidate_count != coded_count + len(candidate_only_ids)
+    ):
+        findings.append("candidate-inventory-inconsistent")
     complete_universe = (
         denominator.get("completeness_status") == "complete"
         and denominator.get("sampling_method") == "attempted-census"
         and unresolved_count == 0
         and candidate_count == coded_count
         and research_complete_count == coded_count
+        and all(record.get("retrieval_status") == "complete-pair" for record in records)
         and not gaps
         and not unresolved_documents
     )

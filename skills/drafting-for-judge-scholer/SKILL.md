@@ -108,8 +108,8 @@ alleged causal policy is independently identified.
 - If dismissal is possible, request leave expressly.
 - Identify the curable defect and the facts that can cure it.
 - Explain why amendment is not futile.
-- Warn when an earlier Scholer ruling already identified the same defect;
-  repeated conclusory repleading increases prejudice risk.
+- Route Judge Scholer-specific amendment observations through
+  [REFERENCE.md](REFERENCE.md) and apply them only when its source gate is met.
 
 ## Final audit
 

@@ -25,18 +25,32 @@ OBLIGATIONS = {
     "visible event or conduct": (
         r"event or conduct.{0,80}(?:is|must be) visible.{0,40}video"
     ),
-    "verified transcript": r"verified transcript",
+    "verified transcript": (
+        r"(?:statement during a recorded interval (?:must )?appear(?:s)?|"
+        r"statement, verify that the statement appears) in the verified transcript"
+    ),
     "exact quotation": (
         r"exact quotations? (?:must )?match(?:ing)?"
         r"(?: the transcript)? exact(?:ly)?"
     ),
     "bounded paraphrase": r"paraphrase.{0,40}(?:add(?:ing)? no content|may not add content)",
-    "uncertain speaker": r"uncertain speaker attribution.{0,60}(?:preserved|remain uncertain)",
-    "present recollection": r"present recollection",
+    "uncertain speaker": (
+        r"uncertain speaker attribution (?:is |must )?"
+        r"(?:preserved|remain uncertain)"
+    ),
+    "present recollection": (
+        r"filed text.{0,80}identif(?:y|ies).{0,80}"
+        r"as based on plaintiff's present recollection"
+    ),
     "unresolved recording": r"recordings.{0,40}(?:available|presently available).{0,40}do not resolve",
-    "later correction": r"subject to correction",
-    "additional recording": r"additional recordings.{0,40}produced or located",
-    "fail closed": r"(?:complete only if|fail validation|fail packet validation)",
+    "later correction": r"(?:allegation|assertion) is subject to correction",
+    "additional recording": (
+        r"additional recordings (?:are )?produced or located"
+    ),
+    "fail closed": (
+        r"(?:count is complete only if|(?<!not )(?<!do not )"
+        r"(?:fail validation|fail packet validation) when)"
+    ),
 }
 
 
@@ -106,6 +120,21 @@ class RecordedEvidenceContractTest(unittest.TestCase):
         mutations = {
             "visible event or conduct": "event or conduct need not be visible in the video",
             "exact quotation": "exact quotation need not match the transcript exactly",
+            "verified transcript": (
+                "recorded statement must not appear in the verified transcript"
+            ),
+            "uncertain speaker": (
+                "uncertain speaker attribution must not remain uncertain"
+            ),
+            "present recollection": (
+                "filed text identifies the assertion as not based on plaintiff's "
+                "present recollection"
+            ),
+            "later correction": "assertion is not subject to correction",
+            "additional recording": (
+                "additional recordings are not produced or located"
+            ),
+            "fail closed": "do not fail validation when the route is incomplete",
         }
         for obligation, mutation in mutations.items():
             with self.subTest(obligation=obligation):

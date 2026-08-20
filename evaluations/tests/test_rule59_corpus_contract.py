@@ -58,6 +58,22 @@ def validator_output(completed):
     return f"{completed.stdout}{completed.stderr}"
 
 
+def validator_lines(completed):
+    return [line for line in validator_output(completed).splitlines() if line.strip()]
+
+
+def schema_allows_null(contract):
+    if not isinstance(contract, dict):
+        return False
+    value_type = contract.get("type")
+    if value_type == "null" or (isinstance(value_type, list) and "null" in value_type):
+        return True
+    return any(
+        any(schema_allows_null(option) for option in contract.get(keyword, []))
+        for keyword in ("anyOf", "oneOf")
+    )
+
+
 def write_json(directory, name, corpus):
     path = Path(directory) / name
     path.write_text(json.dumps(corpus), encoding="utf-8")
@@ -254,11 +270,15 @@ class Rule59CorpusContractTest(unittest.TestCase):
                 path = FIXTURE_DIRECTORY / name
                 self.assertTrue(path.is_file())
                 completed = run_validator(path)
-                output = validator_output(completed)
-                self.assertEqual(completed.returncode, expected_returncode, output)
+                self.assertEqual(
+                    completed.returncode,
+                    expected_returncode,
+                    validator_output(completed),
+                )
+                expected_lines = ["corpus validation passed"]
                 if finding is not None:
-                    self.assertIn(finding, output)
-                    self.assertNotIn("Traceback", output)
+                    expected_lines = [finding]
+                self.assertEqual(validator_lines(completed), expected_lines)
 
     def test_checked_in_fixtures_are_generic_synthetic_material(self):
         for name in FIXTURE_OUTCOMES:
@@ -546,7 +566,7 @@ class Rule59CorpusContractTest(unittest.TestCase):
         )
 
         self.assertIn("candidate_id", retrieval_gap["required"])
-        self.assertIn("null", record_id["type"])
+        self.assertTrue(schema_allows_null(record_id))
         self.assertIn(
             "unresolved-candidate",
             retrieval_gap["properties"]["status"]["enum"],
@@ -579,6 +599,42 @@ class Rule59CorpusContractTest(unittest.TestCase):
             path = write_json(directory, "candidate-only-gap.json", corpus)
             completed = run_validator(path)
             self.assertEqual(completed.returncode, 0, validator_output(completed))
+
+    def test_gap_scope_requires_candidate_and_document_shapes_to_stay_distinct(self):
+        ordinary_gap = self.fixture("valid-incomplete-example.json")
+        ordinary_gap["retrieval_gaps"][0]["record_id"] = None
+
+        candidate_gap = self.fixture("valid-incomplete-example.json")
+        denominator = candidate_gap["denominator"]
+        denominator["candidate_count"] += 1
+        denominator["unresolved_relevant_missingness"] += 1
+        denominator["limits"].append(
+            "One synthetic candidate docket is included only to test gap scope"
+        )
+        candidate_gap["retrieval_gaps"].append(
+            {
+                "gap_id": "EXAMPLE-CANDIDATE-GAP-SCOPE-003",
+                "record_id": candidate_gap["decision_records"][0]["record_id"],
+                "candidate_id": "EXAMPLE-CANDIDATE-SCOPE-003",
+                "document_type": "candidate docket",
+                "status": "unresolved-candidate",
+                "retrieval_attempts": [
+                    "Reviewed the Example District synthetic candidate index"
+                ],
+                "limit": "The candidate-only gap must not claim a decision record",
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            cases = (
+                ("ordinary-gap-without-record.json", ordinary_gap),
+                ("candidate-gap-with-record.json", candidate_gap),
+            )
+            for name, corpus in cases:
+                with self.subTest(path=name):
+                    self.assert_invalid(
+                        write_json(directory, name, corpus), "gap-scope-inconsistent"
+                    )
 
     def test_incomplete_corpus_rejects_tendency_and_success_rate(self):
         tendency = self.fixture("valid-incomplete-example.json")

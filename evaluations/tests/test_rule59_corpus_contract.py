@@ -131,6 +131,66 @@ class Rule59CorpusContractTest(unittest.TestCase):
             )
         )
 
+    def test_decision_schema_requires_controlled_retrieval_and_reason_fields(self):
+        schema = load_json(DECISION_SCHEMA)
+        decision_records = resolve_local_reference(
+            schema, schema["properties"]["decision_records"]
+        )
+        decision_record = resolve_local_reference(schema, decision_records["items"])
+        disposition = resolve_local_reference(
+            schema, decision_record["properties"]["disposition"]
+        )
+        stated_reasons = resolve_local_reference(
+            schema, disposition["properties"]["stated_reasons"]
+        )
+        reason_item = resolve_local_reference(schema, stated_reasons["items"])
+
+        self.assertTrue(
+            {"retrieval_status", "coding_confidence"}.issubset(
+                decision_record["required"]
+            )
+        )
+        self.assertTrue(
+            {"complete-pair", "ruling-complete", "index-only", "lead-only"}.issubset(
+                decision_record["properties"]["retrieval_status"]["enum"]
+            )
+        )
+        self.assertTrue(
+            {"high", "medium", "low"}.issubset(
+                decision_record["properties"]["coding_confidence"]["enum"]
+            )
+        )
+        self.assertTrue(
+            {
+                "manifest-error-not-shown",
+                "new-evidence-not-shown",
+                "intervening-law-not-shown",
+                "rehash-or-available-before-judgment",
+                "vehicle-or-timing-defect",
+                "rule15-factors",
+                "futility",
+                "delay-bad-faith-or-prejudice",
+                "prior-failure-to-cure",
+                "record-or-inference-error",
+                "correction-does-not-change-result",
+                "other-stated-reason",
+            }.issubset(reason_item["enum"])
+        )
+
+    def test_complete_fixture_uses_controlled_retrieval_and_confidence_values(self):
+        corpus = self.fixture("valid-complete.json")
+
+        for record in corpus["decision_records"]:
+            with self.subTest(record=record["record_id"]):
+                self.assertIn(
+                    record["retrieval_status"],
+                    {"complete-pair", "ruling-complete", "index-only", "lead-only"},
+                )
+                self.assertIn(record["coding_confidence"], {"high", "medium", "low"})
+
+        completed = run_validator(FIXTURE_DIRECTORY / "valid-complete.json")
+        self.assertEqual(completed.returncode, 0, validator_output(completed))
+
     def test_transfer_card_schema_requires_neutral_evidence_and_source_limits(self):
         schema = load_json(TRANSFER_SCHEMA)
 
@@ -163,6 +223,8 @@ class Rule59CorpusContractTest(unittest.TestCase):
             )
         )
         self.assertIn("success-rate", schema["properties"]["metric_type"]["enum"])
+        self.assertTrue(schema["properties"]["source_row_ids"]["uniqueItems"])
+        self.assertTrue(schema["properties"]["disconfirming_row_ids"]["uniqueItems"])
 
     def test_embedded_transfer_cards_match_the_standalone_contract(self):
         decision_schema = load_json(DECISION_SCHEMA)
@@ -291,6 +353,74 @@ class Rule59CorpusContractTest(unittest.TestCase):
             path = write_json(directory, "broken-source-row.json", corpus)
             self.assert_invalid(path, "source-row-reference-invalid")
 
+    def test_unpublished_stated_reason_has_controlled_value_finding(self):
+        corpus = self.fixture("valid-complete.json")
+        corpus["decision_records"][0]["disposition"]["stated_reasons"] = [
+            "unpublished-reason-code"
+        ]
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "unpublished-stated-reason.json", corpus)
+            self.assert_invalid(
+                path,
+                "controlled-value-invalid: decision_records[0].disposition.stated_reasons[0]",
+            )
+
+    def test_related_stages_with_different_motion_ids_have_stable_finding(self):
+        corpus = self.fixture("valid-complete.json")
+        adoption = next(
+            record
+            for record in corpus["decision_records"]
+            if record["decision_type"] == "adoption-only-order"
+        )
+        adoption["motion_id"] = "EXAMPLE-MOTION-UNLINKED"
+        corpus["denominator"]["candidate_count"] = 3
+        corpus["denominator"]["coded_pair_count"] = 3
+        corpus["denominator"]["research_question_complete_count"] = 3
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "related-stage-motion-mismatch.json", corpus)
+            self.assert_invalid(path, "related-stage-motion-inconsistent")
+
+    def test_denominator_missingness_must_match_document_and_gap_inventory(self):
+        corpus = self.fixture("valid-incomplete-example.json")
+        corpus["denominator"]["unresolved_relevant_missingness"] = 1
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "denominator-missingness-mismatch.json", corpus)
+            self.assert_invalid(path, "denominator-missingness-inconsistent")
+
+    def test_missing_document_gap_must_match_the_document_type(self):
+        corpus = self.fixture("valid-incomplete-example.json")
+        corpus["decision_records"][0]["missing_documents"][0]["document_type"] = "reply"
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "missing-gap-document-type-mismatch.json", corpus)
+            self.assert_invalid(path, "missing-gap-entry")
+
+    def test_duplicate_transfer_card_row_ids_have_stable_finding(self):
+        source_rows = self.fixture("valid-complete.json")
+        source_id = source_rows["transfer_cards"][0]["source_row_ids"][0]
+        source_rows["transfer_cards"][0]["source_row_ids"] = [source_id, source_id]
+
+        disconfirming_rows = self.fixture("valid-complete.json")
+        disconfirming_id = disconfirming_rows["decision_records"][0]["record_id"]
+        disconfirming_rows["transfer_cards"][0]["disconfirming_row_ids"] = [
+            disconfirming_id,
+            disconfirming_id,
+        ]
+
+        with tempfile.TemporaryDirectory() as directory:
+            cases = (
+                ("duplicate-source-row.json", source_rows),
+                ("duplicate-disconfirming-row.json", disconfirming_rows),
+            )
+            for name, corpus in cases:
+                with self.subTest(path=name):
+                    self.assert_invalid(
+                        write_json(directory, name, corpus), "duplicate-card-row-id"
+                    )
+
     def test_authorship_stage_contract_rejects_each_invalid_judicial_role(self):
         cases = []
 
@@ -404,6 +534,51 @@ class Rule59CorpusContractTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = write_json(directory, "missing-gap-entry.json", corpus)
             self.assert_invalid(path, "missing-gap-entry")
+
+    def test_retrieval_gap_schema_supports_candidate_only_gaps(self):
+        schema = load_json(DECISION_SCHEMA)
+        retrieval_gaps = resolve_local_reference(
+            schema, schema["properties"]["retrieval_gaps"]
+        )
+        retrieval_gap = resolve_local_reference(schema, retrieval_gaps["items"])
+        record_id = resolve_local_reference(
+            schema, retrieval_gap["properties"]["record_id"]
+        )
+
+        self.assertIn("candidate_id", retrieval_gap["required"])
+        self.assertIn("null", record_id["type"])
+        self.assertIn(
+            "unresolved-candidate",
+            retrieval_gap["properties"]["status"]["enum"],
+        )
+
+    def test_candidate_only_gap_validates_without_a_fabricated_decision_record(self):
+        corpus = self.fixture("valid-incomplete-example.json")
+        denominator = corpus["denominator"]
+        denominator["candidate_count"] += 1
+        denominator["unresolved_relevant_missingness"] += 1
+        denominator["completeness_status"] = "incomplete"
+        denominator["limits"].append(
+            "One synthetic candidate docket remains unresolved without a decision record"
+        )
+        corpus["retrieval_gaps"].append(
+            {
+                "gap_id": "EXAMPLE-CANDIDATE-GAP-003",
+                "record_id": None,
+                "candidate_id": "EXAMPLE-CANDIDATE-003",
+                "document_type": "candidate docket",
+                "status": "unresolved-candidate",
+                "retrieval_attempts": [
+                    "Reviewed the Example District synthetic candidate index"
+                ],
+                "limit": "No decision record is fabricated for the unresolved candidate",
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = write_json(directory, "candidate-only-gap.json", corpus)
+            completed = run_validator(path)
+            self.assertEqual(completed.returncode, 0, validator_output(completed))
 
     def test_incomplete_corpus_rejects_tendency_and_success_rate(self):
         tendency = self.fixture("valid-incomplete-example.json")

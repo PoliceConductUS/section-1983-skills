@@ -145,3 +145,22 @@ revision stage. Create a new version when versioning applies. A new read-only
 quality-control stage must verify the remediated artifact. An internal
 self-check inside an explicitly authorized drafting or revision stage may guide
 edits within that stage, but it is not an independent quality-control result.
+
+Before review, resolve exactly one existing version-specific folder inside the
+designated project boundary. Write exactly one new report under the canonical
+`<version-folder>/audits/` directory. Name it
+`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
+the path exists, fail closed and preserve its bytes. Existing reports are
+immutable and must not be edited, overwritten, replaced, renamed, or deleted.
+Exclude `audits/` from review input unless one exact report is expressly
+designated; write any review of that report to a different new report. If the
+version folder is missing, ambiguous, nonexistent, or outside the designated
+boundary, report output is unavailable and write nowhere else. Reject traversal
+and any `audits/` symlink that resolves outside the canonical audits directory.
+
+The report identifies the audited version, artifact paths and SHA-256
+fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
+identities, and result. Separate failed findings from passing-but-suboptimal
+observations. Recommendations, proposed language, and copy-ready replacements
+for failures or passing-but-suboptimal observations are advisory and do not
+authorize implementation.

@@ -9,11 +9,11 @@
 
 ## 2. GREEN contract
 
-- [ ] 2.1 Add the complete version-local immutable report rule to governance.
-- [ ] 2.2 Add the compact rule to behaviorally affected public skills.
-- [ ] 2.3 Extend governance validation with stable report-contract findings.
-- [ ] 2.4 Run fresh-agent GREEN pressure tests and full validation.
-- [ ] 2.5 Commit and sync the GREEN implementation.
+- [x] 2.1 Add the complete version-local immutable report rule to governance.
+- [x] 2.2 Add the compact rule to behaviorally affected public skills.
+- [x] 2.3 Extend governance validation with stable report-contract findings.
+- [x] 2.4 Run fresh-agent GREEN pressure tests and full validation.
+- [x] 2.5 Commit and sync the GREEN implementation.
 
 ## 3. Review and archive
 

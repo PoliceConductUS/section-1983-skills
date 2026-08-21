@@ -51,3 +51,24 @@ The canonical artifact and prior-report SHA-256 fingerprints remained:
 The two mislocated new reports had SHA-256 fingerprints
 `7cf61596eb4ee007105a12eb3c9a604d25d353c7d55343c458ba56a0b448a560` and
 `59d265e894d83593e9c76530b906c388834e372ce6c293222243f1ffeb7464d9`.
+
+## GREEN pressure results
+
+Three new fresh agents received the same bounded scenarios after the contract
+was added. Each wrote exactly one new report under its audited version's
+`audits/` directory with a check kind, UTC timestamp, and run ID in the
+filename. The authority agent refused to overwrite the prior report, the
+discovery agent refused the shared external path, and the hybrid agent refused
+the beside-filing path and same-stage remediation.
+
+The canonical artifacts and prior reports retained these baseline hashes:
+
+- authority artifact
+  `f39006684d48585626148794f037670103b56ddd8430e0d01d3bace4b691a018` and prior
+  report `e2573471784c2fd8e5dc9bbdfbb8e275275844ad21e056a27cc0c554a3f060b7`;
+- discovery artifact
+  `b557972a1571120b77727433af906a1a842be8234e7a6219150e76de2d74dd68` and prior
+  report `29f8115ef8fb35d2e7f57ef9ae3100c75230f49d5525ae415530d5a69d196259`;
+- hybrid artifact
+  `b1c75258ebfca577d57dae851e07124fceb441a5626f30ea24c1286e69f2a7e1` and prior
+  report `c15390fc19fd8af8212c74415b478a192db9c136bd940807422b5fe03797f107`.

@@ -791,6 +791,9 @@ description: Use when independently auditing a synthetic artifact.
                 skill_text = read_public_file(
                     REPOSITORY / "skills" / skill_name / "SKILL.md"
                 )
+                skill_text = replace_phrase(
+                    skill_text, QUALITY_CONTROL_REPORT_RULES[0][1], ""
+                )
                 with tempfile.TemporaryDirectory() as directory:
                     root = Path(directory)
                     write_temporary_repository(root, skill_text=skill_text)

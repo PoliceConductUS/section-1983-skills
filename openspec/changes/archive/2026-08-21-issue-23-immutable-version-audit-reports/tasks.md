@@ -17,7 +17,8 @@
 
 ## 3. Review and archive
 
-- [ ] 3.1 Independently review the whole story and mutation seams.
-- [ ] 3.2 Correct accepted findings test-first.
-- [ ] 3.3 Record verification and retrospective artifacts.
-- [ ] 3.4 Archive, validate the durable specification, commit, and sync.
+- [x] 3.1 Independently review the whole story and mutation seams.
+- [x] 3.2 Correct accepted findings test-first. No blocking findings were
+      accepted.
+- [x] 3.3 Record verification and retrospective artifacts.
+- [x] 3.4 Archive, validate the durable specification, commit, and sync.

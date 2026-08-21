@@ -144,12 +144,115 @@ QUALITY_CONTROL_RULES = (
         "An internal drafting self-check is an independent quality-control result.",
     ),
 )
+QUALITY_CONTROL_REPORT_RULES = (
+    (
+        "version directory",
+        "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
+        "A quality-control stage may choose any convenient output folder.",
+    ),
+    (
+        "version-local report",
+        "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
+        "A report may be written outside the audited version's `audits/` directory.",
+    ),
+    (
+        "unique filename",
+        "Name it `<check-kind>-<UTC timestamp>-<run-id>.md`.",
+        "Use a stable shared filename for the latest report.",
+    ),
+    (
+        "exclusive creation",
+        "Create the report exclusively; if the path exists, fail closed and preserve its bytes.",
+        "If the path exists, overwrite the prior report.",
+    ),
+    (
+        "immutable reports",
+        "Existing reports are immutable and must not be edited, overwritten, replaced, renamed, or deleted.",
+        "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
+    ),
+    (
+        "report input exclusion",
+        "Exclude `audits/` from review input unless one exact report is expressly designated; write any review of that report to a different new report.",
+        "Include `audits/` in every review and update the report being reviewed.",
+    ),
+    (
+        "unresolved version",
+        "If the version folder is missing, ambiguous, nonexistent, or outside the designated boundary, report output is unavailable and write nowhere else.",
+        "If the version folder cannot be resolved, write the report to a fallback location.",
+    ),
+    (
+        "path confinement",
+        "Reject traversal and any `audits/` symlink that resolves outside the canonical audits directory.",
+        "Follow traversal or an `audits/` symlink outside the canonical audits directory.",
+    ),
+    (
+        "report identity",
+        "The report identifies the audited version, artifact paths and SHA-256 fingerprints, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
+        "The report may omit its audited version, artifact fingerprints, scope, sources, or result.",
+    ),
+    (
+        "separate observations",
+        "Separate failed findings from passing-but-suboptimal observations.",
+        "Combine failed findings and passing-but-suboptimal observations without distinction.",
+    ),
+    (
+        "advisory report content",
+        "Recommendations, proposed language, and copy-ready replacements for failures or passing-but-suboptimal observations are advisory and do not authorize implementation.",
+        "Report recommendations and copy-ready replacements authorize implementation.",
+    ),
+)
 PARAPHRASED_MUTATION_PERMISSIONS = (
     "Despite the contract above, an independent quality-control stage may edit "
     "the reviewed artifact when the user asks to audit and fix.",
     "An independent quality-control stage can edit the reviewed artifact.",
     "An independent quality-control stage may revise the draft under review.",
 )
+PARAPHRASED_REPORT_PERMISSIONS = (
+    "An independent audit may save its report in a shared project folder.",
+    "The latest audit report may replace the previous report.",
+    "Prior audit reports are included in every re-audit.",
+)
+QUALITY_CONTROL_DESCRIPTIONS = (
+    "Use when auditing a synthetic artifact.",
+    "Use when independently auditing a synthetic artifact.",
+    "Use when reviewing a synthetic artifact.",
+    "Use when independently reviewing a synthetic artifact.",
+    "Use when verifying a synthetic artifact.",
+    "Use when evaluating a synthetic artifact.",
+    "Use when checking a synthetic artifact.",
+    "Use when performing quality control on a synthetic artifact.",
+    "Use when assessing quality of a synthetic artifact.",
+    "Use when assessing a synthetic artifact.",
+    "Use when performing an assessment of a synthetic artifact.",
+    "Use when conducting an independent assessment of a synthetic artifact.",
+    "Use when a project-configured checker must run on a synthetic artifact.",
+    "Use for independent auditing of a synthetic artifact.",
+    "Use for independent reviewing of a synthetic artifact.",
+    "Use for independent verification of a synthetic artifact.",
+    "Use for independent evaluating of a synthetic artifact.",
+    "Use for independent checking of a synthetic artifact.",
+    "Use for independent assessment of a synthetic artifact.",
+    "Use for independent review of a synthetic artifact.",
+    "Use for an independent audit of a synthetic artifact.",
+    "This skill independently audits a synthetic artifact.",
+    "This skill independently reviews a synthetic artifact.",
+    "This skill independently verifies a synthetic artifact.",
+    "This skill independently evaluates a synthetic artifact.",
+    "This skill independently checks a synthetic artifact.",
+    "This skill independently assesses a synthetic artifact.",
+    "This skill performs an independent review of a synthetic artifact.",
+)
+LIVE_QUALITY_CONTROL_SKILLS = {
+    "adversarial-filing-review",
+    "audit-authorities",
+    "auditing-section-1983-discovery-responses",
+    "auditing-section-1983-privilege-logs",
+    "drafting-false-arrest-complaints",
+    "drafting-for-judge-scholer",
+    "drafting-section-1983-complaints",
+    "drafting-section-1983-rule-59e",
+    "filing-ci",
+}
 
 
 def read_public_file(path):
@@ -207,6 +310,14 @@ def assert_quality_control_contract(test, text):
     contract = normalized(text)
     for label, affirmative, inversion in QUALITY_CONTROL_RULES:
         with test.subTest(quality_control_rule=label):
+            test.assertIn(normalized(affirmative), contract)
+            test.assertNotIn(normalized(inversion), contract)
+
+
+def assert_quality_control_report_contract(test, text):
+    contract = normalized(text)
+    for label, affirmative, inversion in QUALITY_CONTROL_REPORT_RULES:
+        with test.subTest(quality_control_report_rule=label):
             test.assertIn(normalized(affirmative), contract)
             test.assertNotIn(normalized(inversion), contract)
 
@@ -272,6 +383,26 @@ versioning applies. A new read-only quality-control stage must verify the
 remediated artifact. An internal self-check inside an explicitly authorized
 drafting or revision stage may guide edits within that stage, but it is not an
 independent quality-control result.
+
+Before review, resolve exactly one existing version-specific folder inside the
+designated project boundary. Write exactly one new report under the canonical
+`<version-folder>/audits/` directory. Name it
+`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
+the path exists, fail closed and preserve its bytes. Existing reports are
+immutable and must not be edited, overwritten, replaced, renamed, or deleted.
+Exclude `audits/` from review input unless one exact report is expressly
+designated; write any review of that report to a different new report. If the
+version folder is missing, ambiguous, nonexistent, or outside the designated
+boundary, report output is unavailable and write nowhere else.
+Reject traversal and any `audits/` symlink that resolves outside the canonical
+audits directory.
+
+The report identifies the audited version, artifact paths and SHA-256
+fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
+identities, and result. Separate failed findings from passing-but-suboptimal
+observations. Recommendations, proposed language, and copy-ready replacements
+for failures or passing-but-suboptimal observations are advisory and do not
+authorize implementation.
 """
 
 
@@ -334,6 +465,26 @@ versioning applies. A new read-only quality-control stage must verify the
 remediated artifact. An internal self-check inside an explicitly authorized
 drafting or revision stage may guide edits within that stage, but it is not an
 independent quality-control result.
+
+Before review, resolve exactly one existing version-specific folder inside the
+designated project boundary. Write exactly one new report under the canonical
+`<version-folder>/audits/` directory. Name it
+`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
+the path exists, fail closed and preserve its bytes. Existing reports are
+immutable and must not be edited, overwritten, replaced, renamed, or deleted.
+Exclude `audits/` from review input unless one exact report is expressly
+designated; write any review of that report to a different new report. If the
+version folder is missing, ambiguous, nonexistent, or outside the designated
+boundary, report output is unavailable and write nowhere else.
+Reject traversal and any `audits/` symlink that resolves outside the canonical
+audits directory.
+
+The report identifies the audited version, artifact paths and SHA-256
+fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
+identities, and result. Separate failed findings from passing-but-suboptimal
+observations. Recommendations, proposed language, and copy-ready replacements
+for failures or passing-but-suboptimal observations are advisory and do not
+authorize implementation.
 """
 
 
@@ -481,6 +632,7 @@ class RepositoryGovernanceTest(unittest.TestCase):
             ),
         )
         assert_quality_control_contract(self, policy)
+        assert_quality_control_report_contract(self, policy)
 
     def test_pull_request_template_requires_protected_gate_review(self):
         template = read_public_file(REPOSITORY / ".github" / "pull_request_template.md")
@@ -576,37 +728,7 @@ description: Use when independently auditing a synthetic artifact.
                 )
 
     def test_governance_validator_classifies_quality_control_by_behavior(self):
-        descriptions = (
-            "Use when auditing a synthetic artifact.",
-            "Use when independently auditing a synthetic artifact.",
-            "Use when reviewing a synthetic artifact.",
-            "Use when independently reviewing a synthetic artifact.",
-            "Use when verifying a synthetic artifact.",
-            "Use when evaluating a synthetic artifact.",
-            "Use when checking a synthetic artifact.",
-            "Use when performing quality control on a synthetic artifact.",
-            "Use when assessing quality of a synthetic artifact.",
-            "Use when assessing a synthetic artifact.",
-            "Use when performing an assessment of a synthetic artifact.",
-            "Use when conducting an independent assessment of a synthetic artifact.",
-            "Use when a project-configured checker must run on a synthetic artifact.",
-            "Use for independent auditing of a synthetic artifact.",
-            "Use for independent reviewing of a synthetic artifact.",
-            "Use for independent verification of a synthetic artifact.",
-            "Use for independent evaluating of a synthetic artifact.",
-            "Use for independent checking of a synthetic artifact.",
-            "Use for independent assessment of a synthetic artifact.",
-            "Use for independent review of a synthetic artifact.",
-            "Use for an independent audit of a synthetic artifact.",
-            "This skill independently audits a synthetic artifact.",
-            "This skill independently reviews a synthetic artifact.",
-            "This skill independently verifies a synthetic artifact.",
-            "This skill independently evaluates a synthetic artifact.",
-            "This skill independently checks a synthetic artifact.",
-            "This skill independently assesses a synthetic artifact.",
-            "This skill performs an independent review of a synthetic artifact.",
-        )
-        for description in descriptions:
+        for description in QUALITY_CONTROL_DESCRIPTIONS:
             with self.subTest(description=description):
                 skill = valid_quality_control_skill(description).partition(
                     "\nAn independent quality-control stage"
@@ -621,6 +743,88 @@ description: Use when independently auditing a synthetic artifact.
                     "quality-control-contract-language-missing: example-skill",
                     result.stdout + result.stderr,
                 )
+
+    def test_governance_validator_rejects_missing_or_inverted_quality_control_report_contract(self):
+        valid = valid_quality_control_skill()
+        without_report = valid.partition("\nBefore review, resolve exactly one")[0]
+        mutations = [("missing report contract", without_report)]
+        mutations.extend(
+            (
+                label,
+                replace_phrase(valid, affirmative, inversion),
+            )
+            for label, affirmative, inversion in QUALITY_CONTROL_REPORT_RULES
+        )
+        for label, skill_text in mutations:
+            with self.subTest(mutation=label):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, skill_text=skill_text)
+                    result = run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    "quality-control-report-contract-language-missing: example-skill",
+                    result.stdout + result.stderr,
+                )
+
+    def test_governance_validator_applies_report_contract_to_every_quality_control_behavior(self):
+        for description in QUALITY_CONTROL_DESCRIPTIONS:
+            with self.subTest(description=description):
+                skill = valid_quality_control_skill(description).partition(
+                    "\nBefore review, resolve exactly one"
+                )[0]
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, skill_text=skill)
+                    result = run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    "quality-control-report-contract-language-missing: example-skill",
+                    result.stdout + result.stderr,
+                )
+
+    def test_governance_validator_applies_report_contract_to_live_quality_control_descriptions(self):
+        for skill_name in LIVE_QUALITY_CONTROL_SKILLS:
+            with self.subTest(skill=skill_name):
+                skill_text = read_public_file(
+                    REPOSITORY / "skills" / skill_name / "SKILL.md"
+                )
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, skill_text=skill_text)
+                    result = run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    "quality-control-report-contract-language-missing: example-skill",
+                    result.stdout + result.stderr,
+                )
+
+    def test_governance_validator_rejects_paraphrased_report_boundary_permissions(self):
+        for permission in PARAPHRASED_REPORT_PERMISSIONS:
+            cases = (
+                (
+                    "skill",
+                    {"skill_text": valid_quality_control_skill() + permission},
+                    "quality-control-report-contract-language-missing: example-skill",
+                ),
+                (
+                    "governance",
+                    {"policy": valid_policy() + permission},
+                    "quality-control-report-contract-language-missing: GOVERNANCE.md",
+                ),
+            )
+            for label, changes, finding in cases:
+                with self.subTest(case=label, permission=permission):
+                    with tempfile.TemporaryDirectory() as directory:
+                        root = Path(directory)
+                        write_temporary_repository(root, **changes)
+                        result = run_validator(root)
+
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(finding, result.stdout + result.stderr)
 
     def test_governance_validator_rejects_paraphrased_same_stage_mutation_permission(self):
         for permission in PARAPHRASED_MUTATION_PERMISSIONS:
@@ -689,10 +893,37 @@ description: Use when independently auditing a synthetic artifact.
                     result.stdout + result.stderr,
                 )
 
+    def test_governance_validator_rejects_missing_or_inverted_quality_control_report_policy(self):
+        valid = valid_policy()
+        without_report = valid.partition("\nBefore review, resolve exactly one")[0]
+        mutations = [("missing report contract", without_report)]
+        mutations.extend(
+            (
+                label,
+                replace_phrase(valid, affirmative, inversion),
+            )
+            for label, affirmative, inversion in QUALITY_CONTROL_REPORT_RULES
+        )
+        for label, policy in mutations:
+            with self.subTest(mutation=label):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, policy=policy)
+                    result = run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    "quality-control-report-contract-language-missing: GOVERNANCE.md",
+                    result.stdout + result.stderr,
+                )
+
     def test_non_quality_control_trigger_does_not_require_the_contract(self):
         descriptions = (
             "Use when drafting correspondence from a completed audit report.",
             "Use when revising a draft with an internal self-check.",
+            "Use when drafting from a report stored under audits/.",
+            "Use when preparing copy-ready prose from SHA-256 identified source artifacts.",
+            "Use when revising a versioned filing after validation is complete.",
         )
         for description in descriptions:
             with self.subTest(description=description):

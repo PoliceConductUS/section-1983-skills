@@ -89,23 +89,22 @@ express its functions in concise paragraphs rather than labels or a table.
 
 Record the following fields in this order:
 
-1. Element
-2. Count ID or identifier
-3. Claim
-4. Constitutional source
-5. Defendant
-6. Capacity
-7. Challenged act
-8. Event stage
-9. Governing standard
-10. Standard pinpoint or pincite
-11. Decisive-fact paragraphs
-12. Incorporated paragraphs
-13. Relevant-time knowledge
-14. Application
-15. Injury
-16. Relief
-17. Result
+1. Count ID or identifier (`count_id`)
+2. Claim (`claim`)
+3. Constitutional source (`constitutional_source`)
+4. Defendant (`defendant`)
+5. Capacity (`capacity`)
+6. Challenged act (`challenged_act`)
+7. Event stage (`event_stage`)
+8. Governing standard (`standard`)
+9. Standard pinpoint or pincite (`standard_pincite`)
+10. Decisive-fact paragraphs (`decisive_fact_paragraphs`)
+11. Incorporated paragraphs (`incorporated_paragraphs`)
+12. Relevant-time knowledge (`relevant_time_knowledge`)
+13. Application (`application`)
+14. Injury (`injury`)
+15. Relief (`relief`)
+16. Result (`result`)
 
 Every count must perform the five functions **Element → Decisive Facts →
 Relevant-Time Knowledge → Application → Result** in that order. This is a

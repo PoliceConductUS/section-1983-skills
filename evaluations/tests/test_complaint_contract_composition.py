@@ -435,6 +435,24 @@ class ComplaintContractCompositionTest(unittest.TestCase):
                 install / "skills" / GENERAL_PACKAGE / CANONICAL_MECHANICAL_REFERENCE,
             )
 
+    def test_human_count_field_ids_match_the_machine_handoff(self):
+        human = (
+            SKILLS / GENERAL_PACKAGE / CANONICAL_HUMAN_REFERENCE
+        ).read_text(encoding="utf-8")
+        field_block = re.search(
+            r"Record the following fields in this order:(.*?)"
+            r"Every count must perform",
+            human,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(field_block, "human count-field block is unavailable")
+        if field_block is None:
+            return
+        self.assertEqual(
+            tuple(re.findall(r"`([a-z][a-z0-9_]*)`", field_block.group(1))),
+            REQUIRED_COUNT_FIELDS,
+        )
+
     def test_general_package_routes_to_both_canonical_references_and_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             install = copied_install(directory)
@@ -459,6 +477,25 @@ class ComplaintContractCompositionTest(unittest.TestCase):
             assert_fail_closed(self, workflow)
             self.assertFalse(contains_whole_complaint_skeleton(complaint_text))
             self.assertFalse(has_complete_count_field_list(complaint_text))
+            reference_index = re.sub(
+                r"\s+", " ", workflow.read_text(encoding="utf-8").casefold()
+            )
+            self.assertNotRegex(
+                reference_index,
+                r"references/documents/.{0,160}(?:one|a) "
+                r"(?:federal[- ]baseline )?skeleton.{0,160}complaint\.md",
+            )
+
+    def test_general_skill_has_no_competing_count_function_sequence(self):
+        skill = normalized_text(SKILLS / GENERAL_PACKAGE / "SKILL.md")
+        self.assertIn(
+            "element → decisive facts → relevant-time knowledge → application → result",
+            skill,
+        )
+        self.assertNotRegex(
+            skill,
+            r"element (?:→|->) facts (?:→|->) inference (?:→|->) result",
+        )
 
     def test_false_arrest_loads_general_owner_then_adds_only_a_local_delta(self):
         with tempfile.TemporaryDirectory() as directory:

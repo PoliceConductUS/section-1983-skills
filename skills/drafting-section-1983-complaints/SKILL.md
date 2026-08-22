@@ -198,9 +198,10 @@ application must use this compact sequence:
    probable-cause determination, use-of-force factor, causation link, injury, or
    later decision that changes when the account is corrected.
 
-This sequence supplements **Element -> Facts -> Inference -> Result**. Use it
-compactly within the count even when the supporting facts appear earlier. Do not
-make the court assemble the correction from scattered allegations.
+This sequence supplements the Application within **Element → Decisive Facts →
+Relevant-Time Knowledge → Application → Result**. Use it compactly within the
+count even when the supporting facts appear earlier. Do not make the court
+assemble the correction from scattered allegations.
 
 Example:
 

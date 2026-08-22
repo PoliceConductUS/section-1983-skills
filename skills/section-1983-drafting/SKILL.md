@@ -192,9 +192,9 @@ and keep their required wording.
 - `references/discovery-coordination-contract.md` — shared discovery target,
   proportionality, source, existence, and plaintiff-decision boundaries. Each
   public discovery peer repeats its operative minimum for standalone use.
-- `references/documents/` — one federal-baseline skeleton per document type:
-  complaint.md, mtd-response.md, leave-to-amend.md, extension-motion.md,
-  rr-objection.md, rr-response.md, msj-response.md.
+- `references/documents/` — the complaint route plus federal-baseline skeletons
+  for mtd-response.md, leave-to-amend.md, extension-motion.md, rr-objection.md,
+  rr-response.md, and msj-response.md.
 - `scripts/draft_lint.py` — deterministic linter for the mechanical subset of
   the writing rules. It cannot judge whether a fact is well pleaded; it can only
   catch the form of slop.

@@ -100,3 +100,34 @@ them one positive recipe and one owner rather than add more prohibitions.
 ## Open questions
 
 None. The user approved the ownership split, CaseGraph boundary, and test seam.
+
+## GREEN pressure controls
+
+The same isolated compositions were rerun after implementation.
+
+- The umbrella-only agent reported **complaint contract unavailable**, named the
+  missing general owner and both canonical references, and did not invent the
+  skeleton or count contract. Preserved output SHA-256:
+  `8cdb677067f37f4d19a584d4b9f641fb6a60c3638394eadf30c57bc9ed82a6f5`.
+- The first general-only run exposed a real Markdown/JSON drift: the Markdown
+  called Element a seventeenth record field although the approved JSON treats
+  Element as a count function performed through the governing standard. A RED
+  test now binds the human field identifiers to the sixteen machine fields. The
+  corrected fresh-context run found one owner, one complete human contract, and
+  one stable bounded mechanical handoff with no general-scope gap. Preserved
+  verdict SHA-256:
+  `dac72c5094960707ff2cfdca21e1414269aac159908592d73913931c1a64e4c9`.
+- The first full-stack run exposed two live stale summaries: the umbrella
+  reference index still called its complaint route a skeleton, and the general
+  skill retained an obsolete Element -> Facts -> Inference -> Result sequence.
+  RED tests now reject both. The corrected fresh-context run found one general
+  owner, routing without fallback, universal governance without competing
+  ownership, a specialization-only false-arrest construction delta, and the
+  approved bounded general mechanical interface. Preserved verdict SHA-256:
+  `a082a4f98fb3bc8d2f316a230a3cdb0042e66ec65b13afab0bf82970b4b1319a`.
+
+The pressure review also proposed encoding false-arrest doctrine, Monell
+sufficiency, authority quality, fair-warning analogy, and other legal branches
+in the JSON. That proposal was rejected as outside the approved deterministic
+boundary. Those judgments remain expressly excluded rather than being
+misrepresented as mechanical checks.

@@ -15,10 +15,10 @@
       `drafting-section-1983-complaints`.
 - [x] 2.2 Convert the umbrella complaint reference to routing and fail-closed
       behavior.
-- [ ] 2.3 Rename and narrow the false-arrest reference to specialization-only
+- [x] 2.3 Rename and narrow the false-arrest reference to specialization-only
       deltas and update its skill workflow.
-- [ ] 2.4 Update README composition and the thin external-checker boundary.
-- [ ] 2.5 Run focused GREEN, fresh-agent GREEN pressure, full validation,
+- [x] 2.4 Update README composition and the thin external-checker boundary.
+- [x] 2.5 Run focused GREEN, fresh-agent GREEN pressure, full validation,
       commit, and sync.
 
 ## 3. Review and archive

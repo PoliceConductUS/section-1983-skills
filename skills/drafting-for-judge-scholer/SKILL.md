@@ -51,6 +51,11 @@ necessary clearly-established-law distinctions.
 7. Ground every point in record facts, permitted inferences, and verified
    authority so the court has justification and reason to agree; persuasive or
    rhetorical argument is a small part of the document, if present at all.
+8. After the applicable document and claim skills compose the filing, write one
+   immutable judge-overlay execution receipt under the version's canonical
+   `audits/` directory. If no qualifying support permits a specialized change,
+   record `no judge-specific drafting change` and the bounded reason. The
+   absence of judge-specific prose or a receipt does not prove this overlay ran.
 
 ## Evidence hierarchy
 
@@ -130,6 +135,8 @@ alleged causal policy is independently identified.
 - Run `audit-authorities` before treating any judge-specific or
   clearly-established-law proposition as filing-ready.
 - Run `horan-bad-words` after the last substantive or authority revision.
+- Create the immutable judge-overlay execution receipt only after the filing's
+  judge-specific composition and anti-gaming checks are complete.
 
 ## Independent quality-control stage
 

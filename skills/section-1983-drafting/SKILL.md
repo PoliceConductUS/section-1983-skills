@@ -44,8 +44,8 @@ Load each applicable skill once, in this order:
 4. Add `drafting-false-arrest-complaints` when false arrest, probable cause,
    arguable probable cause, alternative offenses, seizure timing, or
    incorporated arrest video is material.
-5. Add an assigned-judge skill, such as `drafting-for-judge-scholer`, as a
-   court-specific overlay.
+5. Add an assigned-judge overlay, such as `drafting-for-judge-scholer`, after
+   the applicable document and claim skills.
 6. Add `building-litigation-alignment-overlays` before drafting an amended
    complaint, leave-to-amend package, or other filing that should consume actual
    adversary attacks or judicial treatment from the current approved docket
@@ -157,20 +157,26 @@ rhetorical argument is a small part of any document, if present at all.
    repeat it in the drafter's own voice. Audit grounding: confirm every point
    rests on cited facts, permitted inferences, or authority, and run any audits
    the strategy file prescribes.
-9. Self-edit against `references/banned-words.md`, then run the linter:
+9. If an assigned-judge overlay was used, after composition write one immutable
+   judge-overlay execution receipt under the version's canonical `audits/`
+   directory. Use `references/judge-overlay-execution.schema.json` and
+   `scripts/judge_overlay_receipt.py`. A completed degradation records exactly
+   `no judge-specific drafting change` and a bounded reason. The absence of
+   judge-specific prose or a receipt does not prove the overlay ran.
+10. Self-edit against `references/banned-words.md`, then run the linter:
 
-   ```bash
-   python3 scripts/draft_lint.py draft.md
-   ```
+```bash
+python3 scripts/draft_lint.py draft.md
+```
 
-   Score is violations per 100 words. Lint, revise, and lint again. A score
-   delta is editing feedback only, never a merits verdict, legal-sufficiency
-   decision, or filing-readiness decision. Target zero unexempted violations.
-   Reconcile every residual finding exactly once as an unexempted violation, an
-   accurate quotation verified against its approved source, or a controlling
-   term of art supported by the linter exemption record. Repair every unexempted
-   violation. Review paragraph warnings as review heuristics; they do not change
-   the score or establish filing readiness.
+Score is violations per 100 words. Lint, revise, and lint again. A score delta
+is editing feedback only, never a merits verdict, legal-sufficiency decision, or
+filing-readiness decision. Target zero unexempted violations. Reconcile every
+residual finding exactly once as an unexempted violation, an accurate quotation
+verified against its approved source, or a controlling term of art supported by
+the linter exemption record. Repair every unexempted violation. Review paragraph
+warnings as review heuristics; they do not change the score or establish filing
+readiness.
 
 ## The writing system
 
@@ -205,12 +211,17 @@ and keep their required wording.
 - `references/discovery-coordination-contract.md` — shared discovery target,
   proportionality, source, existence, and plaintiff-decision boundaries. Each
   public discovery peer repeats its operative minimum for standalone use.
+- `references/judge-overlay-execution.schema.json` — exact packet contract for
+  one assigned-judge overlay execution against one immutable filing version.
 - `references/documents/` — the complaint route plus federal-baseline skeletons
   for mtd-response.md, leave-to-amend.md, extension-motion.md, rr-objection.md,
   rr-response.md, and msj-response.md.
 - `scripts/draft_lint.py` — deterministic linter for the mechanical subset of
   the writing rules. It cannot judge whether a fact is well pleaded; it can only
   catch the form of slop.
+- `scripts/judge_overlay_receipt.py` — validates one judge-overlay execution
+  packet and writes one exclusive immutable receipt under the audited version's
+  `audits/` directory.
 
 ## What this skill is not for
 

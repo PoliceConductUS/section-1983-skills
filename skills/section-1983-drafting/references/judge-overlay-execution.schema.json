@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/judge-overlay-execution.schema.json",
+  "title": "Judge Overlay Execution Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "audited_version_id",
+    "scope",
+    "approved_source_ids",
+    "artifacts",
+    "overlay",
+    "corpus",
+    "court_conduct_inputs",
+    "transfer_cards",
+    "prohibited_inference_checks",
+    "requested_result"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "audited_version_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "scope": {
+      "$ref": "#/$defs/nonemptyString"
+    },
+    "approved_source_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "overlay": {
+      "$ref": "#/$defs/overlay"
+    },
+    "corpus": {
+      "$ref": "#/$defs/corpus"
+    },
+    "court_conduct_inputs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/conductInput"
+      }
+    },
+    "transfer_cards": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/transferCard"
+      }
+    },
+    "prohibited_inference_checks": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/inferenceCheck"
+      }
+    },
+    "requested_result": {
+      "$ref": "#/$defs/requestedResult"
+    }
+  },
+  "$defs": {
+    "nonemptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^\\S(?:.*\\S)?$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "isoDate": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "validationStatus": {
+      "type": "string",
+      "enum": ["passed", "missing", "stale", "failed", "unavailable"]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relative_path", "sha256"],
+      "properties": {
+        "relative_path": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "overlay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "skill_id",
+        "version",
+        "sha256",
+        "checked_on",
+        "validation_status"
+      ],
+      "properties": {
+        "skill_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "version": {
+          "$ref": "#/$defs/stableId"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "checked_on": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "validation_status": {
+          "$ref": "#/$defs/validationStatus"
+        }
+      }
+    },
+    "corpus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "corpus_id",
+        "version",
+        "sha256",
+        "checked_on",
+        "validation_status"
+      ],
+      "properties": {
+        "corpus_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "version": {
+          "$ref": "#/$defs/stableId"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "checked_on": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "validation_status": {
+          "$ref": "#/$defs/validationStatus"
+        }
+      }
+    },
+    "conductInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "checked_on", "validation_status"],
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "checked_on": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "validation_status": {
+          "$ref": "#/$defs/validationStatus"
+        }
+      }
+    },
+    "transferCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["card_id", "validation_status", "used"],
+      "properties": {
+        "card_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "validation_status": {
+          "$ref": "#/$defs/validationStatus"
+        },
+        "used": {
+          "type": "boolean"
+        }
+      }
+    },
+    "inferenceCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["check_id", "passed"],
+      "properties": {
+        "check_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "draftingChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["change_id", "description", "transfer_card_ids"],
+      "properties": {
+        "change_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "description": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "transfer_card_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        }
+      }
+    },
+    "requestedResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "drafting_changes",
+        "no_change_reason",
+        "failure_class"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["completed", "failed-closed"]
+        },
+        "drafting_changes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/draftingChange"
+          }
+        },
+        "no_change_reason": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/nonemptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "failure_class": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -29,7 +29,7 @@
 - [x] 3.1 Review the whole story for clean-room leaks, output mutation,
       credential exposure, protocol false greens, and scope drift; correct
       accepted Critical or Important findings test-first.
-- [ ] 3.2 Complete verification and retrospective artifacts, archive the
+- [x] 3.2 Complete verification and retrospective artifacts, archive the
       OpenSpec change on this branch, and validate the durable spec.
-- [ ] 3.3 Commit and `git town sync` after every commit; finish with
+- [x] 3.3 Commit and `git town sync` after every commit; finish with
       local/origin parity, a clean worktree, Issue 28 open, and no PR.

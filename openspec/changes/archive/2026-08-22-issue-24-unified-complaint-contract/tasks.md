@@ -23,7 +23,7 @@
 
 ## 3. Review and archive
 
-- [ ] 3.1 Independently review the whole story and realistic mutation seams.
-- [ ] 3.2 Correct accepted findings test-first and re-review once.
-- [ ] 3.3 Record verification and retrospective artifacts.
-- [ ] 3.4 Archive the OpenSpec change on Issue 24, validate, commit, and sync.
+- [x] 3.1 Independently review the whole story and realistic mutation seams.
+- [x] 3.2 Correct accepted findings test-first and re-review once.
+- [x] 3.3 Record verification and retrospective artifacts.
+- [x] 3.4 Archive the OpenSpec change on Issue 24, validate, commit, and sync.

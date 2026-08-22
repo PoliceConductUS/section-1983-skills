@@ -30,8 +30,8 @@
 - [x] 3.1 Review the complete story for role conflation, grouping false greens,
       snapshot drift, review-slice leakage, path/private data, and lifecycle
       ambiguity; correct accepted Critical or Important findings test-first.
-- [ ] 3.2 Complete verification and retrospective artifacts, archive on this
+- [x] 3.2 Complete verification and retrospective artifacts, archive on this
       branch, correct the durable judge-overlay Purpose, and validate both
       durable capabilities.
-- [ ] 3.3 Commit and sync every correction and archive; finish with a clean
+- [x] 3.3 Commit and sync every correction and archive; finish with a clean
       local/origin-equal branch, Issue 29 open, and no PR.

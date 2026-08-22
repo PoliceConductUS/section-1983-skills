@@ -1,0 +1,10 @@
+[
+  {
+    "id": "UP-FACTS",
+    "path": "approved-uncertain-paragraphs.md"
+  },
+  {
+    "id": "UP-BOUNDARY",
+    "path": "approved-pruning-boundary.md"
+  }
+]

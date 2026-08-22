@@ -82,10 +82,13 @@ make the reader assemble an element from unrelated sections.
 
 ## One mapping for every count tuple
 
-Create one count mapping for every claim-defendant-capacity tuple. Two
-defendants on the same claim require two separately complete mappings. The
-mapping is the count-level drafting and audit record; the filed count may
-express its functions in concise paragraphs rather than labels or a table.
+Create one count mapping for every claim-defendant-capacity tuple, then complete
+it separately for each challenged act. Two defendants or two challenged acts on
+the same claim require separately complete mappings. The mapping is the
+count-level drafting and audit record; the filed count may express its functions
+in concise paragraphs rather than labels or a table.
+
+### Canonical claim–defendant–challenged-act checklist
 
 Record the following fields in this order:
 
@@ -96,15 +99,37 @@ Record the following fields in this order:
 5. Capacity (`capacity`)
 6. Challenged act (`challenged_act`)
 7. Event stage (`event_stage`)
-8. Governing standard (`standard`)
+8. Governing element and standard (`standard`)
 9. Standard pinpoint or pincite (`standard_pincite`)
-10. Decisive-fact paragraphs (`decisive_fact_paragraphs`)
+10. Decisive facts (`decisive_fact_paragraphs`)
 11. Incorporated paragraphs (`incorporated_paragraphs`)
 12. Relevant-time knowledge (`relevant_time_knowledge`)
-13. Application (`application`)
+13. Element-specific legal application (`application`)
 14. Injury (`injury`)
 15. Relief (`relief`)
 16. Result (`result`)
+
+When qualified immunity applies to the mapping, also record these conditional
+fields:
+
+1. Event date (`event_date`)
+2. Conduct-specific right or rule (`precise_right`)
+3. Verified binding pre-event authority (`binding_pre_event_authority`)
+4. Authority-audit status (`authority_audit_status`)
+5. Materially similar facts (`materially_similar_facts`)
+6. Material differences (`material_differences`)
+7. Defendant-specific fair warning (`fair_warning`)
+8. Rule-of-orderliness review status (`rule_of_orderliness_review_status`)
+9. Later-history review status (`later_history_review_status`)
+10. Prong one result (`prong_one_result`)
+11. Prong two result (`prong_two_result`)
+
+If a required universal field is missing or unverified, the mapping is
+incomplete. Any missing or unverified conditional qualified-immunity field
+creates an internal filing-critical GAP: do not mark the complaint filing-ready
+and route the GAP to a reserved strategy decision without placing an adverse
+merits assessment in filed text. This checklist does not duplicate the detailed
+authority verification owned by `audit-authorities`.
 
 Every count must perform the five functions **Element → Decisive Facts →
 Relevant-Time Knowledge → Application → Result** in that order. This is a
@@ -179,19 +204,21 @@ surface the recording, the facts may instead support inadequate supervision,
 training, or review. Preserve supported alternatives when discovery-controlled
 facts prevent choosing between them.
 
+### Filed-text candor and no-concession boundary
+
+Filed complaint text may accurately qualify what a source, record, or evidence
+proves and identify a source limitation, unresolved fact, or uncertainty.
+Supported alternative or conditional pleading is permitted. Filed complaint text
+must not describe its own claim, element, fair-warning path, or
+qualified-immunity position as weak, likely to fail, likely barred, or legally
+deficient. Route legal risk, merits, or strength assessment to versioned
+strategy or an internal audit. That route does not permit concealment of
+contrary evidence or authority.
+
 ### Qualified immunity for eligible individual counts
 
-For every qualified-immunity-eligible individual count, record these additional
-fields:
-
-1. Event date
-2. Precise right
-3. Binding pre-event authority
-4. Materially similar facts
-5. Material differences
-6. Fair warning
-7. Prong one result
-8. Prong two result
+For every qualified-immunity-eligible individual mapping, complete the
+conditional qualified-immunity fields in the canonical checklist.
 
 Address each individual defendant and each qualified-immunity prong separately.
 For prong one, state which facts, taken as true, show that defendant violated
@@ -228,6 +255,13 @@ For each eligible claim and defendant, the filed complaint must state:
 4. the materially similar facts and material differences;
 5. why that authority gave the defendant fair warning; and
 6. a conclusion addressing the prong one result and prong two result.
+
+Each distinct complaint-level fair-warning proposition ordinarily uses one
+verified lead binding pre-event authority and the decisive factual comparison.
+Any additional complaint-level authority must perform a separately identified
+job. Full comparison matrices, competing case discussions, later history, and
+unexplained string cites remain in internal work product or a brief. This
+boundary is functional, not a universal numeric maximum.
 
 A case-specific strategy, routing, packet, or instruction to put clearly
 established law only in a brief does not relax this rule. Flag the conflict,

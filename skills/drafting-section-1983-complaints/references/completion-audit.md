@@ -25,8 +25,17 @@ issue, identify the exact defect, the exact proposed cure, where that cure
 appears in the new versioned complaint, and why the cure is not futile. Do not
 use briefing assertions to cure missing complaint allegations.
 
+Inventory every factual paragraph that the draft labels unresolved, unknown,
+unrelated, or non-establishing. Each retained paragraph must identify at least
+one function: an element, an actual defense premise, a material chronology
+function, or a candor/preservation function. A paragraph without a permitted
+function must be removed from filed text or moved to internal chronology.
+
 A count is complete only if:
 
+- [ ] every claim–defendant–challenged-act mapping satisfies all applicable
+      fields and the fail-closed disposition in the canonical checklist in the
+      complaint contract;
 - [ ] the count's Standard states the governing test in the controlling
       authority's own formulation, faithful and not loosely paraphrased, and
       each test, element, factor, or offense element carries its own verified

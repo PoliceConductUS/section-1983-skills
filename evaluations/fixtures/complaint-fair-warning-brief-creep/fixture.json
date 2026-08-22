@@ -1,0 +1,44 @@
+{
+  "id": "complaint-fair-warning-brief-creep",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-complaints",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "uses-unexplained-string-cite",
+      "candidate": "regression-string-cite.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Filed Fair-Warning Unit",
+      "Internal Authority Matrix"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "unexplained-string-cite",
+        "pattern": "(?is)# Filed Fair-Warning Unit(?:(?!# Internal Authority Matrix).){0,2400}\\bCASE-[23]\\b"
+      }
+    ],
+    "required_citations": ["FW-AUTH", "FW-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "uses-one-lead-per-proposition",
+      "description": "Uses LEAD-1 as the verified binding pre-event authority for the supplied fair-warning proposition and gives its decisive factual comparison."
+    },
+    {
+      "id": "identifies-distinct-authority-jobs",
+      "description": "Includes LINK-4 only for its separate necessary precedential-link job and does not add repetitive cases to the filed unit."
+    },
+    {
+      "id": "routes-surplus-analysis-internal",
+      "description": "Keeps CASE-2, CASE-3, and the fuller authority comparison in the internal matrix."
+    }
+  ]
+}

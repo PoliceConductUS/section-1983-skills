@@ -1,0 +1,41 @@
+{
+  "id": "complaint-ambiguous-alternative-offense",
+  "synthetic": true,
+  "target_skill": "drafting-false-arrest-complaints",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "leaves-ambiguous-offense-effect-unresolved",
+      "candidate": "regression-unresolved-effect.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Count-Level Treatment", "Filing-Critical GAP"],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "ambiguous-fact-admitted-or-unresolved-effect",
+        "pattern": "(?is)(?:# Count-Level Treatment(?:(?!# Filing-Critical GAP).){0,2400}(?:plaintiff admits (?:that )?Conduct C occurred|Conduct C\\s+(?:is|was|may be|should be|must be|is treated as|was treated as)\\s+(?:true|established|admitted|having occurred)|(?:no conclusion|conclusion is deferred|effect is deferred|defer(?:red|ring)? (?:the )?(?:effect|analysis|conclusion))|(?:probable|arguable probable) cause.{0,120}(?:remains|is left) unresolved|(?:effect|impact) (?:of )?Conduct C.{0,120}(?:remains|is left) unresolved)|\\A(?!.*# Count-Level Treatment(?:(?!# Filing-Critical GAP).){0,2400}(?:Conduct C.{0,500}does not supply.{0,120}(?:probable|arguable probable) cause.{0,500}\\bZ2\\b|\\bZ2\\b.{0,500}(?:absent|missing).{0,500}Conduct C.{0,500}does not supply.{0,120}(?:probable|arguable probable) cause))(?!.*# Filing-Critical GAP.{0,1600}\\bZ2\\b.{0,500}(?:missing|unresolved|gap|cannot|unable)).*\\Z)"
+      }
+    ],
+    "required_citations": ["AO-RECORD", "AO-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "limits-analysis-to-raised-offense",
+      "description": "Analyzes only Alternative Offense Z, which the approved defense position and ruling actually raise, and does not inventory conceivable offenses."
+    },
+    {
+      "id": "maps-ambiguity-without-admission",
+      "description": "States that the recording does not resolve Conduct C, does not admit C occurred, and maps the possible conduct to Element Z1."
+    },
+    {
+      "id": "completes-effect-or-gap",
+      "description": "Explains at element level why the unresolved fact does not supply probable or arguable probable cause, or records the exact filing-critical GAP preventing that answer."
+    }
+  ]
+}

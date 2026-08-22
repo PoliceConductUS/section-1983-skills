@@ -31,7 +31,7 @@ SECTION_IDS = (
     "jury-demand",
     "signature-block",
 )
-COUNT_CARDINALITY = ("claim", "defendant", "capacity")
+COUNT_CARDINALITY = ("claim", "defendant", "challenged_act")
 REQUIRED_COUNT_FIELDS = (
     "count_id",
     "claim",
@@ -54,9 +54,12 @@ QUALIFIED_IMMUNITY_FIELDS = (
     "event_date",
     "precise_right",
     "binding_pre_event_authority",
+    "authority_audit_status",
     "materially_similar_facts",
     "material_differences",
     "fair_warning",
+    "rule_of_orderliness_review_status",
+    "later_history_review_status",
     "prong_one_result",
     "prong_two_result",
 )
@@ -66,7 +69,7 @@ MECHANICAL_CHECKS = (
     "paragraph-numbering-continuity",
     "count-numbering-continuity",
     "unique-count-id",
-    "claim-defendant-capacity-cardinality",
+    "claim-defendant-challenged-act-cardinality",
     "cross-reference-target",
     "incorporation-target",
     "required-count-field-location",
@@ -324,6 +327,8 @@ def assert_machine_contract(test, path):
     )
     test.assertEqual(tuple(contract["count_cardinality"]), COUNT_CARDINALITY)
     test.assertEqual(tuple(contract["required_count_fields"]), REQUIRED_COUNT_FIELDS)
+    test.assertIn("capacity", contract["required_count_fields"])
+    test.assertNotIn("capacity", contract["count_cardinality"])
     test.assertEqual(
         tuple(contract["conditional_qualified_immunity_fields"]),
         QUALIFIED_IMMUNITY_FIELDS,
@@ -332,6 +337,26 @@ def assert_machine_contract(test, path):
     test.assertEqual(tuple(contract["excluded_judgments"]), EXCLUDED_JUDGMENTS)
     test.assertEqual(tuple(contract["finding_fields"]), FINDING_FIELDS)
     test.assertEqual(contract["hard_failure_exit_status"], "nonzero")
+
+
+def assert_human_machine_qi_fields_align(test, human_path, machine_path):
+    human = human_path.read_text(encoding="utf-8")
+    block = re.search(
+        r"When qualified immunity applies.*?conditional\s+fields:(.*?)"
+        r"If a required universal field",
+        human,
+        re.DOTALL | re.I,
+    )
+    test.assertIsNotNone(block, "human conditional QI field block is unavailable")
+    if block is None:
+        return
+    human_ids = tuple(
+        re.findall(r"`([a-z][a-z0-9_]*)`", block.group(1))
+    )
+    machine = json.loads(machine_path.read_text(encoding="utf-8"))
+    machine_ids = tuple(machine["conditional_qualified_immunity_fields"])
+    test.assertEqual(human_ids, QUALIFIED_IMMUNITY_FIELDS)
+    test.assertEqual(human_ids, machine_ids)
 
 
 def assert_only_canonical_machine_contract(test, skills_directory):
@@ -444,9 +469,15 @@ class ComplaintContractCompositionTest(unittest.TestCase):
     def test_canonical_machine_contract_has_the_literal_public_interface(self):
         with tempfile.TemporaryDirectory() as directory:
             install = copied_install(directory)
+            package = install / "skills" / GENERAL_PACKAGE
             assert_machine_contract(
                 self,
-                install / "skills" / GENERAL_PACKAGE / CANONICAL_MECHANICAL_REFERENCE,
+                package / CANONICAL_MECHANICAL_REFERENCE,
+            )
+            assert_human_machine_qi_fields_align(
+                self,
+                package / CANONICAL_HUMAN_REFERENCE,
+                package / CANONICAL_MECHANICAL_REFERENCE,
             )
 
     def test_human_count_field_ids_match_the_machine_handoff(self):
@@ -455,7 +486,7 @@ class ComplaintContractCompositionTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
         field_block = re.search(
             r"Record the following fields in this order:(.*?)"
-            r"Every count must perform",
+            r"When qualified immunity applies",
             human,
             re.DOTALL,
         )

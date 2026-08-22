@@ -978,6 +978,17 @@ def main(
             if missing:
                 raise ValueError(f"trusted runtime requires {', '.join(missing)}")
             environment = os.environ if environ is None else environ
+            effective_now = now or datetime.now(timezone.utc)
+            effective_run_id = run_id or uuid.uuid4()
+            filename_time, _, normalized_run_id = _run_identity(
+                effective_now,
+                effective_run_id,
+            )
+            report_path = (
+                Path(arguments.version_folder).resolve(strict=True)
+                / "audits"
+                / f"adversarial-filing-review-{filename_time}-{normalized_run_id}.md"
+            )
             result = execute_trusted_review(
                 packet,
                 model=arguments.model,
@@ -987,11 +998,31 @@ def main(
                 artifact_path=arguments.artifact,
                 timeout_seconds=arguments.timeout_seconds,
                 transport=transport,
-                now=now,
-                run_id=run_id,
+                now=effective_now,
+                run_id=effective_run_id,
             )
-            print(json.dumps(result, sort_keys=True))
-            return 0 if result["outcome"] == "completed" else 1
+            if result["outcome"] == "completed":
+                public_result = {
+                    "outcome": "completed",
+                    "report_path": str(report_path),
+                    "dispatch": {
+                        "runtime": "openai-responses-stateless",
+                        "capabilities": [],
+                    },
+                }
+                exit_code = 0
+            else:
+                public_result = {
+                    "outcome": "unavailable",
+                    "report_path": str(report_path),
+                    "error": {
+                        "id": "independent-review-unavailable",
+                        "reason": "independent review unavailable",
+                    },
+                }
+                exit_code = 1
+            print(json.dumps(public_result, sort_keys=True))
+            return exit_code
         command = json.loads(arguments.reviewer_command_json)
         result = launch_review(
             packet,

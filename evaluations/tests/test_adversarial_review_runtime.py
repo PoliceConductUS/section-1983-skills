@@ -617,6 +617,10 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 )
             result = json.loads(stdout.getvalue())
             self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                set(result),
+                {"outcome", "report_path", "dispatch"},
+            )
             self.assertEqual(result["outcome"], "completed")
             self.assertTrue(Path(result["report_path"]).is_file())
             self.assertEqual(
@@ -651,7 +655,13 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             report = Path(unavailable["report_path"]).read_text()
             self.assertNotEqual(unavailable_exit, 0)
             self.assertEqual(unavailable["outcome"], "unavailable")
-            self.assertEqual(unavailable["error"]["id"], "independent-review-unavailable")
+            self.assertEqual(
+                unavailable["error"],
+                {
+                    "id": "independent-review-unavailable",
+                    "reason": "independent review unavailable",
+                },
+            )
             self.assertIn("Independent review unavailable", report)
             self.assertNotIn("## Fatal Defects", report)
             self.assertNotRegex(report.casefold(), r"\bpass(?:ed)?\b")

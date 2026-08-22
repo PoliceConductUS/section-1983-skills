@@ -292,7 +292,11 @@ def assert_fail_closed(test, path):
     test.assertIn("complaint contract unavailable", text)
     test.assertRegex(
         text,
-        r"(?:do not|must not|never) (?:draft|revise|audit|invent|reconstruct|proceed)",
+        r"(?:do not|must not|never)\s+draft,\s+revise,\s+or\s+audit",
+    )
+    test.assertRegex(
+        text,
+        r"(?:do not|must not|never)\s+invent(?:\s+or)?\s+reconstruct",
     )
 
 
@@ -341,6 +345,16 @@ def assert_only_canonical_machine_contract(test, skills_directory):
         contracts,
         (Path(GENERAL_PACKAGE) / CANONICAL_MECHANICAL_REFERENCE,),
     )
+
+
+def assert_false_arrest_delta_has_no_general_machine_fields(test, delta):
+    identifiers = set(REQUIRED_COUNT_FIELDS) | set(QUALIFIED_IMMUNITY_FIELDS)
+    for identifier in re.findall(r"`([a-z][a-z0-9_]*)`", delta):
+        test.assertNotIn(
+            identifier,
+            identifiers,
+            f"false-arrest delta repeats canonical machine field `{identifier}`",
+        )
 
 
 class ComplaintContractCompositionTest(unittest.TestCase):
@@ -486,6 +500,31 @@ class ComplaintContractCompositionTest(unittest.TestCase):
                 r"(?:federal[- ]baseline )?skeleton.{0,160}complaint\.md",
             )
 
+    def test_fail_closed_rejects_drafting_permission_despite_noninvention_rule(self):
+        with tempfile.TemporaryDirectory() as directory:
+            install = copied_install(directory)
+            complaint = (
+                install
+                / "skills"
+                / UMBRELLA_PACKAGE
+                / "references"
+                / "documents"
+                / "complaint.md"
+            )
+            mutated, replacements = re.subn(
+                r"do not draft, revise, or\s+audit the complaint\. Do not\s+"
+                r"invent or reconstruct the missing requirements\.",
+                "may draft, revise, or audit the complaint. Do not invent or "
+                "reconstruct the missing requirements.",
+                complaint.read_text(encoding="utf-8"),
+                count=1,
+                flags=re.I,
+            )
+            self.assertEqual(replacements, 1)
+            complaint.write_text(mutated, encoding="utf-8")
+            with self.assertRaises(AssertionError):
+                assert_fail_closed(self, complaint)
+
     def test_general_skill_has_no_competing_count_function_sequence(self):
         skill = normalized_text(SKILLS / GENERAL_PACKAGE / "SKILL.md")
         self.assertIn(
@@ -534,6 +573,24 @@ class ComplaintContractCompositionTest(unittest.TestCase):
                 delta_text,
                 r"(?im)^#{1,3}\s+(?:count contract|clearly-established-law matrix|monell rule)\b",
             )
+            assert_false_arrest_delta_has_no_general_machine_fields(self, delta_text)
+
+    def test_false_arrest_delta_rejects_one_general_machine_field(self):
+        with tempfile.TemporaryDirectory() as directory:
+            install = copied_install(directory)
+            delta = install / "skills" / FALSE_ARREST_PACKAGE / FALSE_ARREST_DELTA
+            self.assertTrue(delta.is_file(), "false-arrest complaint delta is unavailable")
+            if not delta.is_file():
+                return
+            delta.write_text(
+                delta.read_text(encoding="utf-8") + "\nGeneral field: `count_id`.\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(AssertionError):
+                assert_false_arrest_delta_has_no_general_machine_fields(
+                    self,
+                    delta.read_text(encoding="utf-8"),
+                )
 
     def test_only_the_general_package_may_publish_the_machine_contract(self):
         with tempfile.TemporaryDirectory() as directory:

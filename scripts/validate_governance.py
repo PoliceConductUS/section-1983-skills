@@ -108,6 +108,52 @@ QUALITY_CONTROL_RULES = (
         "An internal drafting self-check is an independent quality-control result.",
     ),
 )
+QUALITY_CONTROL_REPORT_RULES = (
+    (
+        "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
+        "A quality-control stage may choose any convenient output folder.",
+    ),
+    (
+        "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
+        "A report may be written outside the audited version's `audits/` directory.",
+    ),
+    (
+        "Name it `<check-kind>-<UTC timestamp>-<run-id>.md`.",
+        "Use a stable shared filename for the latest report.",
+    ),
+    (
+        "Create the report exclusively; if the path exists, fail closed and preserve its bytes.",
+        "If the path exists, overwrite the prior report.",
+    ),
+    (
+        "Existing reports are immutable and must not be edited, overwritten, replaced, renamed, or deleted.",
+        "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
+    ),
+    (
+        "Exclude `audits/` from review input unless one exact report is expressly designated; write any review of that report to a different new report.",
+        "Include `audits/` in every review and update the report being reviewed.",
+    ),
+    (
+        "If the version folder is missing, ambiguous, nonexistent, or outside the designated boundary, report output is unavailable and write nowhere else.",
+        "If the version folder cannot be resolved, write the report to a fallback location.",
+    ),
+    (
+        "Reject traversal and any `audits/` symlink that resolves outside the canonical audits directory.",
+        "Follow traversal or an `audits/` symlink outside the canonical audits directory.",
+    ),
+    (
+        "The report identifies the audited version, artifact paths and SHA-256 fingerprints, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
+        "The report may omit its audited version, artifact fingerprints, scope, sources, or result.",
+    ),
+    (
+        "Separate failed findings from passing-but-suboptimal observations.",
+        "Combine failed findings and passing-but-suboptimal observations without distinction.",
+    ),
+    (
+        "Recommendations, proposed language, and copy-ready replacements for failures or passing-but-suboptimal observations are advisory and do not authorize implementation.",
+        "Report recommendations and copy-ready replacements authorize implementation.",
+    ),
+)
 QUALITY_CONTROL_TRIGGER = re.compile(
     r"(?:\buse when\b.{0,120}\b(?:independently\s+)?(?:auditing|reviewing|"
     r"verifying|evaluating|checking|assessing|performing quality control|"
@@ -128,6 +174,20 @@ PROHIBITED_QUALITY_CONTROL_PERMISSION = re.compile(
     r"(?:edit|modify|overwrite|correct|regenerate|revise|rewrite|fix|change|mutate)\b"
     r".{0,80}\b(?:artifact|draft|document)\b",
     re.IGNORECASE,
+)
+PROHIBITED_QUALITY_CONTROL_REPORT_PERMISSIONS = (
+    re.compile(
+        r"\bindependent audit.{0,80}\bmay save its report\b.{0,80}\bshared project folder\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\blatest audit report\b.{0,80}\bmay replace\b.{0,80}\bprevious report\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bprior audit reports\b.{0,80}\bincluded\b.{0,80}\bevery re-audit\b",
+        re.IGNORECASE,
+    ),
 )
 
 
@@ -338,6 +398,17 @@ def quality_control_contract_missing(text):
     )
 
 
+def quality_control_report_contract_missing(text):
+    contract = normalized(text)
+    return any(
+        pattern.search(contract) is not None
+        for pattern in PROHIBITED_QUALITY_CONTROL_REPORT_PERMISSIONS
+    ) or any(
+        normalized(affirmative) not in contract or normalized(inversion) in contract
+        for affirmative, inversion in QUALITY_CONTROL_REPORT_RULES
+    )
+
+
 def validate_quality_control_contracts(repository_root):
     errors = []
     try:
@@ -346,14 +417,26 @@ def validate_quality_control_contracts(repository_root):
         return ["quality-control-contract-language-missing: GOVERNANCE.md"]
     if quality_control_contract_missing(policy):
         errors.append("quality-control-contract-language-missing: GOVERNANCE.md")
+    if quality_control_report_contract_missing(policy):
+        errors.append(
+            "quality-control-report-contract-language-missing: GOVERNANCE.md"
+        )
     for path in sorted((repository_root / "skills").glob("*/SKILL.md")):
         try:
             text = path.read_text()
         except OSError:
             errors.append(f"quality-control-contract-unreadable: {path.parent.name}")
             continue
-        if QUALITY_CONTROL_TRIGGER.search(frontmatter_description(text)) and quality_control_contract_missing(text):
-            errors.append(f"quality-control-contract-language-missing: {path.parent.name}")
+        if QUALITY_CONTROL_TRIGGER.search(frontmatter_description(text)):
+            if quality_control_contract_missing(text):
+                errors.append(
+                    f"quality-control-contract-language-missing: {path.parent.name}"
+                )
+            if quality_control_report_contract_missing(text):
+                errors.append(
+                    "quality-control-report-contract-language-missing: "
+                    f"{path.parent.name}"
+                )
     return errors
 
 

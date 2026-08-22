@@ -174,6 +174,31 @@ class AdversarialReviewStructureTest(unittest.TestCase):
             ),
         )
 
+    def test_public_route_uses_the_trusted_runtime_not_caller_asserted_isolation(self):
+        skill = required_text(SKILL)
+        readme = required_text(README)
+
+        for artifact in (skill, readme):
+            with self.subTest(artifact=artifact[:20]):
+                self.assertIn("--trusted-openai", artifact)
+                self.assertRegex(
+                    artifact,
+                    r"(?is)(?:arbitrary|custom|legacy).{0,160}(?:cannot|must fail|untrusted).{0,100}(?:independen|isolat)",
+                )
+                self.assertRegex(
+                    artifact,
+                    r"(?is)(?:immutable|new).{0,80}report.{0,120}audits/",
+                )
+                self.assertRegex(
+                    artifact,
+                    r"(?is)(?:unavailable|provider|credential).{0,180}nonzero",
+                )
+
+        self.assertNotRegex(
+            skill,
+            r"(?is)use\s+`scripts/launch_review\.py`.{0,180}only\s+after.{0,180}(?:caller|host).{0,120}(?:assert|establish)",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

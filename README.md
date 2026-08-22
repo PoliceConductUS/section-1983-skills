@@ -107,6 +107,28 @@ constraints; RRD skills organize motion responses; discovery peers draft or
 audit only their named artifacts; the authority and writing skills are final
 gates, and Filing CI adds a separate configured integrity gate.
 
+### Trusted adversarial-review runtime
+
+Independent adversarial review uses the built-in stateless OpenAI runtime. An
+arbitrary reviewer command or a caller assertion cannot establish independent
+isolation. Set `OPENAI_API_KEY` and an explicit model, build the bounded packet
+required by the skill, and run from the repository root:
+
+```bash
+python3 skills/adversarial-filing-review/scripts/launch_review.py \
+  --trusted-openai \
+  --model "$OPENAI_REVIEW_MODEL" \
+  --project-boundary "$CASE_ROOT" \
+  --version-folder "$VERSION_FOLDER" \
+  --artifact "$CANONICAL_DRAFT" \
+  < "$REVIEW_PACKET"
+```
+
+The host verifies the canonical draft and writes a new immutable report under
+`<version-folder>/audits/`. A missing credential, unavailable provider, or
+invalid response produces an unavailable report and a nonzero exit; it is not a
+completed independent review.
+
 ## Complaint checker boundary
 
 The canonical JSON complaint contract is a thin handoff for an external checker

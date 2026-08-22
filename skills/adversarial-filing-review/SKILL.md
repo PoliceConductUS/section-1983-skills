@@ -31,14 +31,34 @@ The packet contains exactly `draft`, `document_family`, `sources`, `skill`,
 drafting history, redlines, strategy or control conclusions, prior reviews,
 checker output or results, and inherited conversation or session state.
 
-Use `scripts/launch_review.py` with a configured JSON argument array only after
-the host runtime has independently established that it enforces empty reviewer
-capabilities. The launcher validates the complete packet and fingerprints before
-starting a new process in an empty working directory. The reviewer has no
-filesystem, repository, browser, conversation, or provider-session access. If
-the runtime cannot enforce that boundary, report
-`independent review unavailable`. Do not simulate the review in the drafting
-context.
+Use the launcher's built-in trusted OpenAI mode. Supply the model explicitly,
+keep `OPENAI_API_KEY` in the environment, and send the packet through standard
+input. Resolve the project boundary, version folder, and exact canonical draft
+on the host; those paths never enter the reviewer packet.
+
+```bash
+python3 skills/adversarial-filing-review/scripts/launch_review.py \
+  --trusted-openai \
+  --model "$OPENAI_REVIEW_MODEL" \
+  --project-boundary "$CASE_ROOT" \
+  --version-folder "$VERSION_FOLDER" \
+  --artifact "$CANONICAL_DRAFT" \
+  < "$REVIEW_PACKET"
+```
+
+The trusted adapter sends one stateless request with no tools, storage,
+conversation, session continuation, filesystem, repository, or browser access.
+The reviewer has no capabilities beyond the embedded packet. The adapter
+validates the complete packet and fingerprints before dispatch. A configured
+arbitrary command and `--runtime-enforces-empty-capabilities` cannot establish
+independence and must fail closed as `independent review unavailable`. Do not
+use that legacy command seam for an independent review.
+
+On success, the host writes one immutable completed report under the audited
+version's `audits/` directory. Missing credentials, provider failure, or an
+invalid provider response writes only an honest unavailable report when the
+output path is valid and exits nonzero. Do not simulate the review in the
+drafting context or relabel an unavailable result as completed.
 
 ## Apply the attack checklist
 

@@ -149,7 +149,7 @@ class NonMutatingQualityControlTest(unittest.TestCase):
                 skill = (REPOSITORY / "skills" / name / "SKILL.md").read_text()
                 assert_contract(self, skill)
 
-    def test_clean_room_review_rejects_attempted_artifact_and_extra_output_writes(self):
+    def test_clean_room_review_rejects_unproved_command_before_any_write(self):
         launcher = launcher_module()
         with tempfile.TemporaryDirectory() as artifact_directory:
             artifact_root = Path(artifact_directory)
@@ -206,7 +206,7 @@ class NonMutatingQualityControlTest(unittest.TestCase):
             self.assertEqual([path.name for path in artifact_root.iterdir()], [artifact.name])
             self.assertEqual(
                 captured.exception.finding_id,
-                "reviewer-output-boundary-violated",
+                "independent-review-unavailable",
             )
 
 

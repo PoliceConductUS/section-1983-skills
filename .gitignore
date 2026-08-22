@@ -5,3 +5,5 @@ node_modules/
 .DS_Store
 .idea/
 .worktrees/
+evaluations/corpus-report.json
+evaluations/corpus-report.md

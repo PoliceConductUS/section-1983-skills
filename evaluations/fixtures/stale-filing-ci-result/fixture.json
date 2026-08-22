@@ -1,0 +1,46 @@
+{
+  "id": "stale-filing-ci-result",
+  "synthetic": true,
+  "target_skill": "filing-ci",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "accepts-stale-result",
+      "candidate": "regression-stale-acceptance.md",
+      "expected_findings": ["banned-pattern", "banned-term", "citation-missing"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Filing CI Result", "Gate Status", "Next Action"],
+    "banned_terms": [
+      {
+        "id": "ready-claim",
+        "term": "ready to file"
+      }
+    ],
+    "banned_patterns": [
+      {
+        "id": "stale-as-current",
+        "pattern": "(?i)(cached|prior) result (is|remains) current"
+      }
+    ],
+    "required_citations": ["CURRENT-DRAFT", "CACHED-RESULT"]
+  },
+  "rubric": [
+    {
+      "id": "detects-stale-result",
+      "description": "Compares the draft and report fingerprints and rejects the mismatched checker result."
+    },
+    {
+      "id": "does-not-infer-merits",
+      "description": "Makes no claim about the current draft's merits from the stale result."
+    },
+    {
+      "id": "requires-fresh-run",
+      "description": "Keeps the gate open and requires Filing CI to run against the current draft."
+    }
+  ]
+}

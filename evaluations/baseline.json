@@ -1,0 +1,16 @@
+{
+  "fixtures": {
+    "hard-finding-edit-loop": {
+      "minimum_deterministic_pass_count": 1,
+      "minimum_judgment_pass_rates": {}
+    },
+    "stale-filing-ci-result": {
+      "minimum_deterministic_pass_count": 1,
+      "minimum_judgment_pass_rates": {}
+    },
+    "unavailable-checker": {
+      "minimum_deterministic_pass_count": 1,
+      "minimum_judgment_pass_rates": {}
+    }
+  }
+}

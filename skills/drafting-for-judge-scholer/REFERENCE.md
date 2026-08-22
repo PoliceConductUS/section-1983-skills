@@ -1,5 +1,15 @@
 # Judge Scholer evidence reference
 
+Jurisdiction: United States District Court for the Northern District of Texas,
+Judge Karen Gren Scholer.
+
+Authoritative current-procedure sources:
+
+- https://www.txnd.uscourts.gov/local-civil-rules
+- https://www.txnd.uscourts.gov/judge/district-judge-karen-gren-scholer
+
+Checked date: 2026-08-20.
+
 Use the full research roadmap at:
 
 `research-notes/judicial-docket-study-2026-07-24/scholer-drafting-roadmap.md`
@@ -47,3 +57,10 @@ confirm that the authority folder satisfies the repository's `SOURCE.yaml` gate,
 verify the PDF and pinpoint, and check later history. Treat adoption orders as
 evidence of acceptance of a recommendation in that case, not proof of
 independent authorship of its reasoning.
+
+## Amendment observation
+
+When a verified earlier Scholer ruling identified the same defect, repeated
+conclusory repleading increases prejudice risk. Treat this as a sourced
+case-specific observation, not a general prediction or a substitute for the
+underlying decision.

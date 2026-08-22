@@ -61,3 +61,8 @@ Interrogatories, Requests for Admission, reported gaps, and Plaintiff Decisions.
 Do not serve discovery or select service, sequencing, priority, request-cap
 allocation, narrowing, stipulation, or contention timing. Do not invent a rule,
 fact, custodian, source, record, or expected content.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

@@ -183,3 +183,8 @@ Before release, confirm:
 - later history and current rules were checked;
 - quotations and pinpoints were verified from primary artifacts; and
 - every downstream drafting instruction has a transfer card.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

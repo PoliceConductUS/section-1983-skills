@@ -60,3 +60,8 @@ gaps, and Plaintiff Decisions. The skill must not invent a fact, field,
 metadata, or entry; reveal privileged substance; or adjudicate privilege. It
 must not declare waiver. It must not select clawback treatment, accept a
 categorical log, choose a waiver theory, or decide whether to confer or move.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

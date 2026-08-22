@@ -19,12 +19,21 @@ only a complete change that passes the repository tests and skill validation.
    `skills/section-1983-drafting/references/writing-system.md`, including the
    precedence rule: bans stack, and where advice conflicts, ASD-STE100 controls.
 4. Add the skill to the table in `README.md`.
+5. Read [GOVERNANCE.md](GOVERNANCE.md) and add exactly one matching entry to
+   `governance/rules-provenance.json`. Keep its review date and rationale
+   current; bundled-rule entries need approved source IDs and a checked
+   jurisdiction reference, while runtime-sourced entries describe the actual
+   source identity and checked date exposed in their output.
 
 ## Improving a skill
 
 Open an issue first for changes to the writing system or the banned-word
 inventory, since those are shared policy. Fixes to structure references,
 scripts, and tests can go straight to a pull request.
+
+Changes to a protected gate named in [GOVERNANCE.md](GOVERNANCE.md) must name
+the affected gate and rationale in the pull-request template and request
+explicit human review before acceptance.
 
 ## Scripts
 

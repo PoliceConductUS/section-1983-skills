@@ -1,0 +1,212 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "federal-civil-rules",
+      "url": "https://www.uscourts.gov/forms-rules/current-rules-practice-procedure/federal-rules-civil-procedure",
+      "checked_on": "2026-08-20"
+    },
+    {
+      "id": "federal-evidence-rules",
+      "url": "https://www.uscourts.gov/forms-rules/current-rules-practice-procedure/federal-rules-evidence",
+      "checked_on": "2026-08-20"
+    },
+    {
+      "id": "28-usc-1746",
+      "url": "https://uscode.house.gov/view.xhtml?req=%28title%3A28+section%3A1746+edition%3Aprelim%29",
+      "checked_on": "2026-08-20"
+    },
+    {
+      "id": "northern-district-texas-local-rules",
+      "url": "https://www.txnd.uscourts.gov/local-civil-rules",
+      "checked_on": "2026-08-20"
+    },
+    {
+      "id": "judge-scholer-requirements",
+      "url": "https://www.txnd.uscourts.gov/judge/district-judge-karen-gren-scholer",
+      "checked_on": "2026-08-20"
+    }
+  ],
+  "skills": [
+    {
+      "name": "adversarial-filing-review",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Reviews approved case-specific sources supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "audit-authorities",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Audits authorities and source records supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "auditing-section-1983-discovery-responses",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Audits case-specific discovery materials and approved sources at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "auditing-section-1983-privilege-logs",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Audits privilege-log materials and approved sources supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "drafting-false-arrest-complaints",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal civil-procedure drafting guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "drafting-for-judge-scholer",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies a sourced Judge Scholer procedural overlay.",
+      "source_ids": [
+        "federal-civil-rules",
+        "northern-district-texas-local-rules",
+        "judge-scholer-requirements"
+      ],
+      "jurisdiction_reference": "skills/drafting-for-judge-scholer/REFERENCE.md"
+    },
+    {
+      "name": "drafting-section-1983-complaints",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal civil-procedure complaint drafting guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "drafting-section-1983-declarations-and-evidence",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal declaration and evidence guidance.",
+      "source_ids": [
+        "federal-civil-rules",
+        "federal-evidence-rules",
+        "28-usc-1746"
+      ],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "drafting-section-1983-deposition-outlines",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Builds outlines from approved case-specific sources at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "drafting-section-1983-meet-and-confer",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Uses approved case-specific sources and instructions at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "drafting-section-1983-rule-59e",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal civil-procedure postjudgment drafting guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "drafting-section-1983-written-discovery",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Drafts from approved case-specific sources at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "filing-ci",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Validates repository filing artifacts without supplying current rule content."
+    },
+    {
+      "name": "horan-bad-words",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Edits prose without supplying current procedural rule content."
+    },
+    {
+      "name": "rrd",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal civil-procedure response-planning guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "rrd-rule12",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal Rule 12 response-planning guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "rrd-rule12-city",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal Rule 12 municipal response-planning guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "rrd-rule12-officers",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal Rule 12 officer response-planning guidance.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "section-1983-drafting",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Supplies federal civil-procedure drafting foundations.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
+      "name": "studying-rule-59e-decisions",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-20",
+      "rationale": "Studies approved decisions and source records supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    }
+  ]
+}

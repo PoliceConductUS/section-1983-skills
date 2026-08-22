@@ -56,3 +56,8 @@ Return Draft Correspondence, a separate Conference Record, and Plaintiff
 Decisions. The skill must not silently narrow a request or alter the completed
 audit. It must not decide whether or when to send, compromise, move to compel,
 assert waiver, seek fees, seek sanctions, or threaten automatic relief.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.

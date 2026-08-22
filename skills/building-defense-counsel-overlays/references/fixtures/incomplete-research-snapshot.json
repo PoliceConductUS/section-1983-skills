@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "COUNSEL-SNAPSHOT-INCOMPLETE",
+  "version": "v1",
+  "checked_through": "2026-02-10",
+  "research_protocol": {
+    "queries": [
+      {
+        "query_id": "QUERY-1",
+        "query": "synthetic attorney qualified immunity motions",
+        "searched_on": "2026-02-10",
+        "systems": ["official-court", "courtlistener-recap"],
+        "scope": "Three identified pleading-stage matters plus the current case."
+      }
+    ],
+    "deduplication_method": "Docket and source fingerprint.",
+    "coverage_status": "incomplete",
+    "denominator_definition": "All three approved comparable pleading-stage matters identified by QUERY-1.",
+    "candidate_record_count": 4,
+    "retrieved_record_count": 3,
+    "unresolved_record_count": 0,
+    "unavailable_record_count": 1
+  },
+  "attorneys": [
+    {
+      "attorney_id": "ATTY-A",
+      "professional_name": "Attorney Alpha"
+    },
+    {
+      "attorney_id": "ATTY-B",
+      "professional_name": "Attorney Beta"
+    }
+  ],
+  "matters": [
+    {
+      "matter_id": "MATTER-CURRENT",
+      "court": "Example District Court",
+      "docket": "1:26-cv-00001",
+      "posture": "pleading-stage",
+      "represented_party": "Officer Example",
+      "alignment_group_ids": ["GROUP-OFFICER"]
+    },
+    {
+      "matter_id": "MATTER-ONE",
+      "court": "Example Court ONE",
+      "docket": "1:25-cv-00001",
+      "posture": "pleading-stage",
+      "represented_party": "Synthetic Client ONE",
+      "alignment_group_ids": ["HIST-GROUP-ONE"]
+    },
+    {
+      "matter_id": "MATTER-TWO",
+      "court": "Example Court TWO",
+      "docket": "1:25-cv-00002",
+      "posture": "pleading-stage",
+      "represented_party": "Synthetic Client TWO",
+      "alignment_group_ids": ["HIST-GROUP-TWO"]
+    },
+    {
+      "matter_id": "MATTER-THREE",
+      "court": "Example Court THREE",
+      "docket": "1:25-cv-00003",
+      "posture": "pleading-stage",
+      "represented_party": "Synthetic Client THREE",
+      "alignment_group_ids": ["HIST-GROUP-THREE"]
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-BAR-A",
+      "source_role": "bar-directory",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2026-02-01",
+      "actor_ids": ["ATTY-A"],
+      "matter_id": null,
+      "content": "Attorney Alpha is active in the Example Bar and affiliated with Example Defense Firm.",
+      "sha256": "afe214a31e7e6d9bddacb1cbb8448c1d0bd04794842e0da48a5811a571c0803b"
+    },
+    {
+      "source_id": "SRC-APPEARANCE-A",
+      "source_role": "official-court-record",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2026-01-02",
+      "actor_ids": ["ATTY-A", "ATTY-B"],
+      "matter_id": "MATTER-CURRENT",
+      "content": "Attorneys Alpha and Beta appear for Officer Example.",
+      "sha256": "8424a0b13ff3ead1fd1bcc34172abceee3f3cf5df34b455809e9fe98760c651c"
+    },
+    {
+      "source_id": "SRC-MOTION-CURRENT",
+      "source_role": "current-docket-filed-paper",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2026-01-10",
+      "actor_ids": ["ATTY-A", "ATTY-B"],
+      "matter_id": "MATTER-CURRENT",
+      "content": "Signed by Attorney Alpha for the defense team. The motion raises qualified immunity and requests dismissal.",
+      "sha256": "bedeb057597acbec990ae6c668a0f7ff0b913c6de89444f928eb02e2d35d1a39"
+    },
+    {
+      "source_id": "SRC-BRIEF-ONE",
+      "source_role": "official-court-record",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2025-05-01",
+      "actor_ids": ["ATTY-A"],
+      "matter_id": "MATTER-ONE",
+      "content": "Attorney Alpha signed a motion raising qualified immunity and requesting dismissal.",
+      "sha256": "e55e640e199b1156a985ad49837c11f169abaf67977dbf02c1a88b96e25fa477"
+    },
+    {
+      "source_id": "SRC-ORDER-ONE",
+      "source_role": "official-court-record",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2025-06-01",
+      "actor_ids": ["COURT-ONE"],
+      "matter_id": "MATTER-ONE",
+      "content": "The court rejected the qualified-immunity argument at the pleading stage.",
+      "sha256": "1f7e84fcb270dcf302c933b03766295a23c56f574ae56296e546aee876509e17"
+    },
+    {
+      "source_id": "SRC-BRIEF-TWO",
+      "source_role": "courtlistener-recap",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2025-09-01",
+      "actor_ids": ["ATTY-A"],
+      "matter_id": "MATTER-TWO",
+      "content": "Attorney Alpha signed a motion raising qualified immunity and requesting dismissal.",
+      "sha256": "e55e640e199b1156a985ad49837c11f169abaf67977dbf02c1a88b96e25fa477"
+    },
+    {
+      "source_id": "SRC-ORDER-TWO",
+      "source_role": "official-court-record",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2025-10-01",
+      "actor_ids": ["COURT-TWO"],
+      "matter_id": "MATTER-TWO",
+      "content": "The court adopted the qualified-immunity argument at the pleading stage.",
+      "sha256": "22615f74ac7ee517949dbe5904fb7cc887601e2dcfa9512eeb827d68143f65ba"
+    },
+    {
+      "source_id": "SRC-BRIEF-THREE",
+      "source_role": "approved-public-case-artifact",
+      "retrieved_on": "2026-02-10",
+      "source_date": "2025-12-01",
+      "actor_ids": ["ATTY-A"],
+      "matter_id": "MATTER-THREE",
+      "content": "Attorney Alpha signed a motion addressing personal participation instead of qualified immunity.",
+      "sha256": "27798e3f821ab10407578c8df1515dfbc1fdc5aa24cd7f87b43432011e5bcaa2"
+    }
+  ],
+  "gaps": [
+    {
+      "gap_id": "GAP-PACER",
+      "query_ids": ["QUERY-1"],
+      "matter_ids": [],
+      "reason": "fee-gated",
+      "description": "One identified filing is not available from approved public sources; paid PACER retrieval was not authorized."
+    }
+  ]
+}

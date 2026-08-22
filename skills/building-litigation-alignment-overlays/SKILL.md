@@ -121,3 +121,8 @@ edit, revise, or modify a filing or artifact. It does not predict outcomes,
 infer personality, recommend gaming, select a litigation position, or verify
 legal authority. Recommendations are advisory and remediation requires a
 separately authorized drafting stage and a new version when applicable.
+
+Use `building-defense-counsel-overlays` as a separate stage when approved public
+research should supply professional attorney identity or counsel-team behavior.
+The litigation-alignment overlay continues to own current attacks and filing-
+version composition; it does not absorb counsel history or forecasts.

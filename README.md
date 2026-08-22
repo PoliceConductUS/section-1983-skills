@@ -35,6 +35,7 @@ branch name: tags are the immutable release identity.
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `adversarial-filing-review`                       | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.               |
 | `building-litigation-alignment-overlays`          | Immutable docket-derived defendant alignment, adversary attack, plaintiff-response, judicial-treatment, review-plan, and filing-manifest overlays.                         |
+| `building-defense-counsel-overlays`               | Immutable professional defense-attorney identity, counsel-team behavior, court-treatment, and calibrated next-move overlays from approved public sources.                  |
 | `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
 | `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
 | `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
@@ -72,24 +73,27 @@ does not replace source, authority, or court rules.
 7. Add `building-litigation-alignment-overlays` before an amended complaint,
    leave package, or other filing that should consume the current docket's
    actual adversary positions and judicial treatment.
-8. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
+8. Add `building-defense-counsel-overlays` when an actual-adversary review
+   should consume validated professional history for the effective defense team.
+   Keep that material out of the blind common-attack review.
+9. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
    specialization. Those planners hand amendment work back to the applicable
    complaint skills.
-9. For discovery, use `drafting-section-1983-written-discovery`,
-   `auditing-section-1983-discovery-responses`,
-   `drafting-section-1983-meet-and-confer`,
-   `auditing-section-1983-privilege-logs`, or
-   `drafting-section-1983-deposition-outlines` for its named task. The existing
-   drafting entrypoint supplies routing and the shared coordination contract;
-   each peer remains independently usable.
-10. Before treating legal work as filing-ready, run `audit-authorities`,
+10. For discovery, use `drafting-section-1983-written-discovery`,
+    `auditing-section-1983-discovery-responses`,
+    `drafting-section-1983-meet-and-confer`,
+    `auditing-section-1983-privilege-logs`, or
+    `drafting-section-1983-deposition-outlines` for its named task. The existing
+    drafting entrypoint supplies routing and the shared coordination contract;
+    each peer remains independently usable.
+11. Before treating legal work as filing-ready, run `audit-authorities`,
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-11. Run `adversarial-filing-review` in a fresh clean-room context after
+12. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-12. Run `filing-ci` after the applicable prose and authority audits, after each
+13. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.
@@ -174,6 +178,10 @@ transfer, court-conduct, degradation, and anti-gaming method.
 [Manage case overlays](OVERLAYS.md) explains when to create, reuse, refresh,
 rebuild, supersede, validate, and pin judge, litigation-alignment, and later
 counsel overlays.
+
+[Build defense-counsel overlays](COUNSEL_OVERLAYS.md) explains professional
+source hierarchy, attribution, time-bounded counsel teams, evidence strength,
+calibrated forecasts, and counsel-specific lifecycle triggers.
 
 ## Writing system
 

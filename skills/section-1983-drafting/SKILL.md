@@ -50,19 +50,23 @@ Load each applicable skill once, in this order:
    complaint, leave-to-amend package, or other filing that should consume actual
    adversary attacks or judicial treatment from the current approved docket
    snapshot. A stale or failing overlay produces no specialized drafting change.
-7. Add `drafting-section-1983-written-discovery` for requests for production,
+7. Add `building-defense-counsel-overlays` when an actual-adversary review
+   should consume validated professional litigation history for the effective
+   counsel team. Keep every counsel overlay out of the blind common-attack
+   review.
+8. Add `drafting-section-1983-written-discovery` for requests for production,
    interrogatories, or requests for admission.
-8. Add `auditing-section-1983-discovery-responses` for a request-by-request
+9. Add `auditing-section-1983-discovery-responses` for a request-by-request
    response, objection, production, and withholding audit.
-9. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
-   completed discovery-response audit.
-10. Add `auditing-section-1983-privilege-logs` to determine approved log
+10. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
+    completed discovery-response audit.
+11. Add `auditing-section-1983-privilege-logs` to determine approved log
     requirements or audit a supplied privilege log.
-11. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
+12. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
     gap-driven deposition questions.
-12. Run `audit-authorities` before treating a filing or clearly-established-law
+13. Run `audit-authorities` before treating a filing or clearly-established-law
     proposition as verified.
-13. Run `horan-bad-words` on the substantively complete draft and rerun it after
+14. Run `horan-bad-words` on the substantively complete draft and rerun it after
     any material authority-driven revision.
 
 The more specific skill adds requirements. It does not relax this skill,

@@ -925,7 +925,7 @@ def validate_filing_manifest(manifest, overlay, snapshot):
     pin_ids = []
     for index, pin in enumerate(manifest.get("overlays", []) if isinstance(manifest.get("overlays"), list) else []):
         path = f"$.overlays[{index}]"
-        if not _exact(pin, PIN_KEYS) or pin.get("kind") not in ("litigation-alignment", "judge") or not _stable(pin.get("overlay_id")) or not _nonempty(pin.get("version")) or not _sha(pin.get("sha256")) or not _date(pin.get("checked_through")) or not _stable(pin.get("source_snapshot_id")) or not _nonempty(pin.get("source_snapshot_version")) or not _sha(pin.get("source_snapshot_sha256")):
+        if not _exact(pin, PIN_KEYS) or pin.get("kind") not in ("litigation-alignment", "judge", "counsel-identity", "counsel-team") or not _stable(pin.get("overlay_id")) or not _nonempty(pin.get("version")) or not _sha(pin.get("sha256")) or not _date(pin.get("checked_through")) or not _stable(pin.get("source_snapshot_id")) or not _nonempty(pin.get("source_snapshot_version")) or not _sha(pin.get("source_snapshot_sha256")):
             _add(findings, "manifest-structure-invalid", path, "overlay pin is invalid")
             continue
         pin_ids.append((pin["kind"], pin["overlay_id"]))

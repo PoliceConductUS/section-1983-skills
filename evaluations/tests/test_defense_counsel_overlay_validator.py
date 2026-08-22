@@ -47,7 +47,7 @@ def complete_snapshot():
             "bar-directory",
             ["ATTY-A"],
             None,
-            "Attorney Alpha is active in the Example Bar.",
+            "Attorney Alpha is active in the Example Bar and affiliated with Example Defense Firm.",
             "2026-02-01",
         ),
         source(
@@ -572,6 +572,31 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
         wrong_team["team_records"][0]["member_attorney_ids"] = ["ATTY-A", "ATTY-MISSING"]
         update_fingerprints(wrong_team)
         self.assertIn("team-attorney-link-invalid", finding_ids(validator.validate_overlay(wrong_team, snapshot)))
+
+    def test_identity_team_pattern_and_forecast_provenance_is_reconciled(self):
+        validator = load_validator()
+        snapshot = complete_snapshot()
+
+        unknown_appearance = complete_overlay(snapshot)
+        unknown_appearance["identity_records"][0]["appearances"][0]["source_ids"] = ["SRC-MISSING"]
+        update_fingerprints(unknown_appearance)
+        self.assertIn("identity-source-link-invalid", finding_ids(validator.validate_overlay(unknown_appearance, snapshot)))
+
+        wrong_team_source = complete_overlay(snapshot)
+        wrong_team_source["team_records"][0]["source_ids"] = ["SRC-BRIEF-ONE"]
+        update_fingerprints(wrong_team_source)
+        self.assertIn("team-source-link-invalid", finding_ids(validator.validate_overlay(wrong_team_source, snapshot)))
+
+        unrelated_treatment = complete_overlay(snapshot)
+        unrelated_treatment["patterns"][0]["comparable_argument_ids"] = ["ARG-TWO", "ARG-THREE", "ARG-CURRENT"]
+        unrelated_treatment["patterns"][0]["supporting_argument_ids"] = ["ARG-TWO", "ARG-CURRENT"]
+        update_fingerprints(unrelated_treatment)
+        self.assertIn("pattern-evidence-link-invalid", finding_ids(validator.validate_overlay(unrelated_treatment, snapshot)))
+
+        split_sources = complete_overlay(snapshot)
+        split_sources["forecasts"][0]["source_ids"] = ["SRC-BRIEF-ONE"]
+        update_fingerprints(split_sources)
+        self.assertIn("forecast-source-union-invalid", finding_ids(validator.validate_overlay(split_sources, snapshot)))
 
     def test_judicial_treatment_and_current_attacks_remain_linked_not_copied(self):
         validator = load_validator()

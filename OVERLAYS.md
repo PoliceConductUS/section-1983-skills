@@ -10,7 +10,8 @@ roles without replacing governing law or the canonical docket record.
 Maintain one inventory entry for every judge overlay, litigation-alignment
 overlay, individual-attorney identity overlay, counsel-team behavior overlay,
 and filing-version manifest used in the case. The attorney and team overlay
-research rules belong to their counsel-specific guide. This guide owns only the
+research rules belong to the
+[Defense-counsel overlay guide](COUNSEL_OVERLAYS.md). This guide owns only the
 shared lifecycle.
 
 Each entry records a stable overlay ID, kind, immutable version, SHA-256,

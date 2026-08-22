@@ -15,14 +15,14 @@
 
 ## 2. Minimal GREEN
 
-- [ ] 2.1 Add `building-defense-counsel-overlays` with only its required skill,
+- [x] 2.1 Add `building-defense-counsel-overlays` with only its required skill,
       metadata, schemas, validator, and generic fixtures.
-- [ ] 2.2 Add `COUNSEL_OVERLAYS.md`; update README, the drafting router,
+- [x] 2.2 Add `COUNSEL_OVERLAYS.md`; update README, the drafting router,
       `OVERLAYS.md`, governance, filing-manifest kinds, and review composition.
-- [ ] 2.3 Implement exact structure, source, fingerprint, attribution, team,
+- [x] 2.3 Implement exact structure, source, fingerprint, attribution, team,
       linked-ledger, corpus-strength, forecast, override, and review-slice
       validation.
-- [ ] 2.4 Run focused GREEN, public CLI pressure, quick skill validation, full
+- [x] 2.4 Run focused GREEN, public CLI pressure, quick skill validation, full
       validation, corpus, governance, forbidden-folder, comment, private-marker,
       formatting, and diff checks; commit and sync.
 

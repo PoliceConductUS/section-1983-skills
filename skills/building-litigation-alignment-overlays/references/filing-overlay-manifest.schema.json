@@ -77,7 +77,12 @@
       "additionalProperties": false,
       "properties": {
         "kind": {
-          "enum": ["litigation-alignment", "judge"]
+          "enum": [
+            "litigation-alignment",
+            "judge",
+            "counsel-identity",
+            "counsel-team"
+          ]
         },
         "overlay_id": {
           "$ref": "#/$defs/stableId"

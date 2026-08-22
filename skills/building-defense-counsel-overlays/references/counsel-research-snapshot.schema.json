@@ -1,0 +1,193 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/counsel-research-snapshot.schema.json",
+  "title": "Defense-counsel public research snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "snapshot_id": { "$ref": "#/$defs/stableId" },
+    "version": { "$ref": "#/$defs/nonemptyString" },
+    "checked_through": { "$ref": "#/$defs/date" },
+    "research_protocol": { "$ref": "#/$defs/researchProtocol" },
+    "attorneys": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/attorney" }
+    },
+    "matters": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/matter" }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "gaps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gap" }
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "version",
+    "checked_through",
+    "research_protocol",
+    "attorneys",
+    "matters",
+    "sources",
+    "gaps"
+  ],
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "nonemptyString": { "type": "string", "minLength": 1 },
+    "date": { "type": "string", "format": "date" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "idArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "nonemptyIdArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query_id": { "$ref": "#/$defs/stableId" },
+        "query": { "$ref": "#/$defs/nonemptyString" },
+        "searched_on": { "$ref": "#/$defs/date" },
+        "systems": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonemptyString" }
+        },
+        "scope": { "$ref": "#/$defs/nonemptyString" }
+      },
+      "required": ["query_id", "query", "searched_on", "systems", "scope"]
+    },
+    "researchProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "queries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/query" }
+        },
+        "deduplication_method": { "$ref": "#/$defs/nonemptyString" },
+        "coverage_status": { "enum": ["complete", "incomplete"] },
+        "denominator_definition": { "$ref": "#/$defs/nonemptyString" },
+        "candidate_record_count": { "type": "integer", "minimum": 0 },
+        "retrieved_record_count": { "type": "integer", "minimum": 0 },
+        "unresolved_record_count": { "type": "integer", "minimum": 0 },
+        "unavailable_record_count": { "type": "integer", "minimum": 0 }
+      },
+      "required": [
+        "queries",
+        "deduplication_method",
+        "coverage_status",
+        "denominator_definition",
+        "candidate_record_count",
+        "retrieved_record_count",
+        "unresolved_record_count",
+        "unavailable_record_count"
+      ]
+    },
+    "attorney": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attorney_id": { "$ref": "#/$defs/stableId" },
+        "professional_name": { "$ref": "#/$defs/nonemptyString" }
+      },
+      "required": ["attorney_id", "professional_name"]
+    },
+    "matter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "matter_id": { "$ref": "#/$defs/stableId" },
+        "court": { "$ref": "#/$defs/nonemptyString" },
+        "docket": { "$ref": "#/$defs/nonemptyString" },
+        "posture": { "$ref": "#/$defs/nonemptyString" },
+        "represented_party": { "$ref": "#/$defs/nonemptyString" },
+        "alignment_group_ids": { "$ref": "#/$defs/nonemptyIdArray" }
+      },
+      "required": [
+        "matter_id",
+        "court",
+        "docket",
+        "posture",
+        "represented_party",
+        "alignment_group_ids"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": { "$ref": "#/$defs/stableId" },
+        "source_role": {
+          "enum": [
+            "current-docket-filed-paper",
+            "official-court-record",
+            "courtlistener-recap",
+            "bar-directory",
+            "firm-biography",
+            "attorney-publication",
+            "approved-public-case-artifact"
+          ]
+        },
+        "retrieved_on": { "$ref": "#/$defs/date" },
+        "source_date": { "$ref": "#/$defs/date" },
+        "actor_ids": { "$ref": "#/$defs/idArray" },
+        "matter_id": {
+          "anyOf": [{ "$ref": "#/$defs/stableId" }, { "type": "null" }]
+        },
+        "content": { "$ref": "#/$defs/nonemptyString" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "required": [
+        "source_id",
+        "source_role",
+        "retrieved_on",
+        "source_date",
+        "actor_ids",
+        "matter_id",
+        "content",
+        "sha256"
+      ]
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "gap_id": { "$ref": "#/$defs/stableId" },
+        "query_ids": { "$ref": "#/$defs/nonemptyIdArray" },
+        "matter_ids": { "$ref": "#/$defs/idArray" },
+        "reason": {
+          "enum": [
+            "unavailable-public-record",
+            "fee-gated",
+            "identity-uncertain",
+            "coverage-incomplete"
+          ]
+        },
+        "description": { "$ref": "#/$defs/nonemptyString" }
+      },
+      "required": ["gap_id", "query_ids", "matter_ids", "reason", "description"]
+    }
+  }
+}

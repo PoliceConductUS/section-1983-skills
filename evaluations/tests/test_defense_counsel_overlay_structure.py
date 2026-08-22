@@ -99,6 +99,35 @@ class DefenseCounselOverlayStructureTest(unittest.TestCase):
                 self.assertIs(schema.get("additionalProperties"), False)
                 self.assertEqual(set(schema.get("required", [])), fields)
 
+    def test_overlay_schema_publishes_every_nested_record_contract(self):
+        schema = json.loads(
+            text(SKILL / "references" / "defense-counsel-overlay.schema.json")
+        )
+        expected = {
+            "identity_records": "identityRecord",
+            "team_records": "teamRecord",
+            "historical_arguments": "historicalArgument",
+            "judicial_treatments": "judicialTreatment",
+            "current_attack_links": "currentAttackLink",
+            "patterns": "pattern",
+            "forecasts": "forecast",
+            "overrides": "override",
+            "gaps": "overlayGap",
+            "review_slices": "reviewSlice",
+        }
+        for property_name, definition_name in expected.items():
+            with self.subTest(property=property_name):
+                self.assertEqual(
+                    schema["properties"][property_name]["items"],
+                    {"$ref": f"#/$defs/{definition_name}"},
+                )
+                definition = schema["$defs"][definition_name]
+                self.assertIs(definition.get("additionalProperties"), False)
+                self.assertEqual(
+                    set(definition.get("required", [])),
+                    set(definition.get("properties", {})),
+                )
+
     def test_readme_router_governance_and_general_guide_route_the_skill(self):
         readme = text(README)
         router = text(ROUTER)
@@ -117,6 +146,7 @@ class DefenseCounselOverlayStructureTest(unittest.TestCase):
 
     def test_counsel_guide_owns_sources_attribution_lifecycle_and_calibration(self):
         guide = text(COUNSEL_GUIDE)
+        normalized = " ".join(guide.casefold().split())
         for heading in (
             "Professional scope",
             "Source hierarchy and research record",
@@ -149,10 +179,11 @@ class DefenseCounselOverlayStructureTest(unittest.TestCase):
             "new immutable version",
         ):
             with self.subTest(phrase=phrase):
-                self.assertIn(phrase.casefold(), guide.casefold())
+                self.assertIn(phrase.casefold(), normalized)
 
     def test_counsel_guide_keeps_four_layers_and_three_profiles_separate(self):
         guide = text(COUNSEL_GUIDE)
+        normalized = " ".join(guide.split())
         for phrase in (
             "historical counsel arguments",
             "judicial treatment",
@@ -162,14 +193,14 @@ class DefenseCounselOverlayStructureTest(unittest.TestCase):
             "controlling law",
             "defense-counsel profile",
         ):
-            self.assertIn(phrase.casefold(), guide.casefold())
+            self.assertIn(phrase.casefold(), normalized.casefold())
         self.assertRegex(
-            guide,
+            normalized,
             r"(?is)joint(?:ly)? filed.{0,260}(?:team|individual).{0,260}"
             r"(?:direct|supported|source)",
         )
         self.assertRegex(
-            guide,
+            normalized,
             r"(?is)court.{0,180}(?:treatment|rejection|adoption).{0,220}"
             r"(?:not|never|separate).{0,100}counsel",
         )

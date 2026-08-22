@@ -1,0 +1,7 @@
+interface:
+  display_name: Defense Counsel Overlays
+  short_description: Build source-backed professional counsel profiles
+  default_prompt: >-
+    Use $building-defense-counsel-overlays to build or validate an immutable,
+    evidence-coded defense-attorney identity and counsel-team litigation
+    profile.

@@ -95,6 +95,27 @@ the complaint and log the missing proof as a GAP.
 ## Record and video discipline
 
 - Every factual allegation must be traceable to a source or marked as a gap.
+- For every factual allegation about an event during a recorded interval, verify
+  the allegation against the video itself. The event or conduct must be visible
+  in the video unless the filed text clearly identifies the allegation as based
+  on Plaintiff's present recollection, states that the recordings presently
+  available do not resolve the point, and states that the allegation is subject
+  to correction if additional recordings are produced or located. A transcript,
+  report, recollection, or inference does not verify a visual fact.
+- Every quoted, paraphrased, or attributed statement during a recorded interval
+  must appear in the verified transcript. An exact quotation must match the
+  transcript exactly; a paraphrase may not add content; and uncertain speaker
+  attribution must remain uncertain. A statement absent from the transcript may
+  be included only when the filed text clearly identifies it as based on
+  Plaintiff's present recollection, states that the recordings presently
+  available do not resolve the point, and states that the allegation is subject
+  to correction if additional recordings are produced or located.
+- Fail validation when a recorded-event fact is not visible in the video or a
+  recorded statement does not appear in the transcript unless the filed text
+  includes the required present-recollection and unresolved-recording
+  qualification. Never present such an allegation as established by the
+  recording. Otherwise revise the allegation to what the sources establish or
+  record the unsupported proposition as a GAP.
 - Use the complaint as the pleading; do not turn the count into an evidentiary
   appendix.
 - If the repository or case strategy requires dual body-worn-camera timestamps,

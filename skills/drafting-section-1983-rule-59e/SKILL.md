@@ -253,6 +253,20 @@ Maintain a sentence-level appendix-support matrix with these fields:
 
 `brief line or sentence | documentary assertion | docket source and page | every supporting appendix page | status`.
 
+For every assertion about an event during a recorded interval, verify that the
+asserted event or conduct is visible in the video itself. For every quoted,
+paraphrased, or attributed recorded statement, verify that the statement appears
+in the verified transcript; exact quotations must match exactly, paraphrases may
+not add content, and uncertain speaker attribution must remain uncertain. An
+assertion that the available recordings do not verify may pass only when the
+filed text identifies it as based on Plaintiff's present recollection, states
+that the recordings presently available do not resolve the point, and states
+that the assertion is subject to correction if additional recordings are
+produced or located. Never present that recollection-based assertion as
+established by the recording. Fail packet validation when neither the
+recording-verification route nor this express present-recollection route is
+satisfied.
+
 Reject a row when a required appendix citation is missing, when the brief gives
 only a docket citation, when any relied-on source page is absent from the
 appendix, or when the cited appendix page does not support the assertion. Any
@@ -284,17 +298,21 @@ Reject the packet unless:
 10. the appellate-record audit passes when applicable;
 11. every quotation, pinpoint, procedural statement, and authority status is
     verified;
-12. every late-window fact, statistic, record, and timestamp passes the
+12. every assertion about an event or conduct during a recorded interval is
+    visible in the video itself or satisfies the express present-recollection
+    route above, and every quoted, paraphrased, or attributed recorded statement
+    appears in the verified transcript or satisfies that same route;
+13. every late-window fact, statistic, record, and timestamp passes the
     evidence-maturity and source-use gate;
-13. tables of authorities and rules match the final body and contain final,
+14. tables of authorities and rules match the final body and contain final,
     render-verified page references;
-14. every required appendix-page citation passes the bidirectional traceability
+15. every required appendix-page citation passes the bidirectional traceability
     audit;
-15. every required filing-date disclosure, including any generative-AI
+16. every required filing-date disclosure, including any generative-AI
     disclosure, appears in the required place and form;
-16. the writing-system lint and `horan-bad-words` review pass; and
-17. page limit, conference statement, and appendix pagination are verified; and
-18. hashes, manifests, and source records are verified when the project requires
+17. the writing-system lint and `horan-bad-words` review pass; and
+18. page limit, conference statement, and appendix pagination are verified; and
+19. hashes, manifests, and source records are verified when the project requires
     them.
 
 Do not call the packet filing-ready while a load-bearing source, authority,

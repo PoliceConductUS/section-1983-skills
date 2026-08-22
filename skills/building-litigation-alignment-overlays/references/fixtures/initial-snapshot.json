@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "SNAP-INITIAL",
+  "version": "v1",
+  "checked_through": "2026-01-02",
+  "actors": [
+    {
+      "actor_id": "ACT-PLAINTIFF",
+      "actor_type": "plaintiff",
+      "display_label": "Plaintiff Example"
+    },
+    {
+      "actor_id": "ACT-ALPHA",
+      "actor_type": "individual-defendant",
+      "display_label": "Officer Alpha"
+    },
+    {
+      "actor_id": "ACT-BETA",
+      "actor_type": "individual-defendant",
+      "display_label": "Officer Beta"
+    },
+    {
+      "actor_id": "ACT-CITY",
+      "actor_type": "municipality-defendant",
+      "display_label": "Example City"
+    },
+    {
+      "actor_id": "ACT-MAGISTRATE",
+      "actor_type": "magistrate-judge",
+      "display_label": "Magistrate Judge Example"
+    },
+    {
+      "actor_id": "ACT-DISTRICT",
+      "actor_type": "district-judge",
+      "display_label": "District Judge Example"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-COMPLAINT",
+      "docket_entry": "1",
+      "filed_date": "2026-01-02",
+      "document_family": "complaint",
+      "filed_by_actor_ids": ["ACT-PLAINTIFF"],
+      "content": "Synthetic complaint against Officer Alpha, Officer Beta, and Example City.",
+      "sha256": "f42ed1f5423c529b7d2b50a9b8b56eadc9a7092288959bd366221c86c4d45ead"
+    }
+  ]
+}

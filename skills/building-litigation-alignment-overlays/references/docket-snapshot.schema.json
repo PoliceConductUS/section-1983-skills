@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/docket-snapshot.schema.json",
+  "title": "Immutable docket snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "snapshot_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "version": {
+      "$ref": "#/$defs/nonemptyString"
+    },
+    "checked_through": {
+      "$ref": "#/$defs/date"
+    },
+    "actors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/actor"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "version",
+    "checked_through",
+    "actors",
+    "sources"
+  ],
+  "$defs": {
+    "nonemptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actor_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "actor_type": {
+          "enum": [
+            "plaintiff",
+            "individual-defendant",
+            "municipality-defendant",
+            "magistrate-judge",
+            "district-judge",
+            "appellate-court",
+            "other"
+          ]
+        },
+        "display_label": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": ["actor_id", "actor_type", "display_label"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "docket_entry": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "filed_date": {
+          "$ref": "#/$defs/date"
+        },
+        "document_family": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "filed_by_actor_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        },
+        "content": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "source_id",
+        "docket_entry",
+        "filed_date",
+        "document_family",
+        "filed_by_actor_ids",
+        "content",
+        "sha256"
+      ]
+    }
+  }
+}

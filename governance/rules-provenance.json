@@ -69,6 +69,16 @@
       }
     },
     {
+      "name": "building-litigation-alignment-overlays",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-22",
+      "rationale": "Builds overlays from an approved immutable docket snapshot supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
       "name": "drafting-false-arrest-complaints",
       "rules_mode": "bundled-rules-dependent",
       "reviewed_on": "2026-08-20",

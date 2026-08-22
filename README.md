@@ -34,6 +34,7 @@ branch name: tags are the immutable release identity.
 | Skill                                             | Role                                                                                                                                                                       |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `adversarial-filing-review`                       | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.               |
+| `building-litigation-alignment-overlays`          | Immutable docket-derived defendant alignment, adversary attack, plaintiff-response, judicial-treatment, review-plan, and filing-manifest overlays.                         |
 | `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
 | `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
 | `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
@@ -68,24 +69,27 @@ does not replace source, authority, or court rules.
 5. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
    incorporated-video issues, add `drafting-false-arrest-complaints`.
 6. Add `drafting-for-judge-scholer` when Judge Scholer is assigned.
-7. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
+7. Add `building-litigation-alignment-overlays` before an amended complaint,
+   leave package, or other filing that should consume the current docket's
+   actual adversary positions and judicial treatment.
+8. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
    specialization. Those planners hand amendment work back to the applicable
    complaint skills.
-8. For discovery, use `drafting-section-1983-written-discovery`,
+9. For discovery, use `drafting-section-1983-written-discovery`,
    `auditing-section-1983-discovery-responses`,
    `drafting-section-1983-meet-and-confer`,
    `auditing-section-1983-privilege-logs`, or
    `drafting-section-1983-deposition-outlines` for its named task. The existing
    drafting entrypoint supplies routing and the shared coordination contract;
    each peer remains independently usable.
-9. Before treating legal work as filing-ready, run `audit-authorities`, followed
-   by the applicable writing-system pass and the required `horan-bad-words` edit
-   pass. Every drafting skill requires that final pass; rerun it after a
-   material authority-driven revision.
-10. Run `adversarial-filing-review` in a fresh clean-room context after
+10. Before treating legal work as filing-ready, run `audit-authorities`,
+    followed by the applicable writing-system pass and the required
+    `horan-bad-words` edit pass. Every drafting skill requires that final pass;
+    rerun it after a material authority-driven revision.
+11. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-11. Run `filing-ci` after the applicable prose and authority audits, after each
+12. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.
@@ -166,6 +170,10 @@ judge-specific proposition for that issue.
 
 [Create a judge overlay](JUDGE_OVERLAYS.md) explains the reusable corpus,
 transfer, court-conduct, degradation, and anti-gaming method.
+
+[Manage case overlays](OVERLAYS.md) explains when to create, reuse, refresh,
+rebuild, supersede, validate, and pin judge, litigation-alignment, and later
+counsel overlays.
 
 ## Writing system
 

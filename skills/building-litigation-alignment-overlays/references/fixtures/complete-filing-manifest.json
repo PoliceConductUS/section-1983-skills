@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "filing_version_id": "FILING-V1",
+  "artifact_id": "TARGET-FAC",
+  "artifact_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+  "source_snapshot": {
+    "snapshot_id": "SNAP-COMPLETE",
+    "version": "v1",
+    "sha256": "eb485614849995ffeb8765d6521fd93c6c615c31668e93339053f3af07f88d0c",
+    "checked_through": "2026-01-20"
+  },
+  "overlays": [
+    {
+      "kind": "litigation-alignment",
+      "overlay_id": "OVERLAY-COMPLETE",
+      "version": "v1",
+      "sha256": "0761a6b3b676845a41a9541dd1f41e844680db501a231e2a846439ec3b370c0d",
+      "checked_through": "2026-01-20",
+      "validator_result": "passed",
+      "source_snapshot_id": "SNAP-COMPLETE",
+      "source_snapshot_version": "v1",
+      "source_snapshot_sha256": "eb485614849995ffeb8765d6521fd93c6c615c31668e93339053f3af07f88d0c"
+    }
+  ]
+}

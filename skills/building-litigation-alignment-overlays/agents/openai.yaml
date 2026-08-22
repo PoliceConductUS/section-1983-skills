@@ -1,0 +1,6 @@
+interface:
+  display_name: "Litigation-Alignment Overlays"
+  short_description: "Build source-backed case attack and treatment overlays"
+  default_prompt:
+    "Use $building-litigation-alignment-overlays to build or refresh the
+    immutable docket-derived overlays for this filing version."

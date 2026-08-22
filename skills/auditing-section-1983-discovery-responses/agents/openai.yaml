@@ -1,0 +1,6 @@
+interface:
+  display_name: "Audit §1983 Discovery Responses"
+  short_description: "Audit Section 1983 discovery responses"
+  default_prompt:
+    "Use $auditing-section-1983-discovery-responses to audit these discovery
+    responses and objections request by request."

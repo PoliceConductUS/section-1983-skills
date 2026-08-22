@@ -1,0 +1,45 @@
+{
+  "id": "privilege-log-automatic-waiver",
+  "synthetic": true,
+  "target_skill": "auditing-section-1983-privilege-logs",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "declares-automatic-waiver",
+      "candidate": "regression-automatic-waiver.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Privilege-Log Requirements",
+      "Entry Audit",
+      "Plaintiff Decisions"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "automatic-privilege-waiver",
+        "pattern": "(?i)(?:privilege|protection).{0,60}(?:is|was|has been)\\s+automatically\\s+waived|automatic\\s+waiver"
+      }
+    ],
+    "required_citations": ["PL-LOG", "PL-REQUIREMENT"]
+  },
+  "rubric": [
+    {
+      "id": "applies-approved-requirements",
+      "description": "States only the supplied approved requirements and audits the supplied entry without inventing a generic rule."
+    },
+    {
+      "id": "reports-missing-metadata",
+      "description": "Identifies the missing author without inferring it or exposing privileged substance."
+    },
+    {
+      "id": "reserves-waiver-choice",
+      "description": "Reports a potential issue without adjudicating privilege or declaring automatic waiver and routes challenge choices to the plaintiff."
+    }
+  ]
+}

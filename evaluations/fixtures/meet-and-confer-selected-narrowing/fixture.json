@@ -1,0 +1,45 @@
+{
+  "id": "meet-and-confer-selected-narrowing",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-meet-and-confer",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "silently-narrows-served-request",
+      "candidate": "regression-selected-narrowing.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Draft Correspondence",
+      "Conference Record",
+      "Plaintiff Decisions"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "silent-request-narrowing",
+        "pattern": "(?i)(?:RFP|request)\\s*7\\s+(?:is|has been)\\s+narrowed"
+      }
+    ],
+    "required_citations": ["MC-AUDIT", "MC-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "uses-completed-audit",
+      "description": "Drafts neutral request-specific correspondence from the supplied audit without adding or changing a deficiency."
+    },
+    {
+      "id": "keeps-conference-record-factual",
+      "description": "Separates the factual conference record and does not invent consent, opposition, agreement, or a conference event."
+    },
+    {
+      "id": "reserves-narrowing-choice",
+      "description": "Presents preserving and narrowing choices with consequences under PLAINTIFF DECISION REQUIRED without selecting or sending either."
+    }
+  ]
+}

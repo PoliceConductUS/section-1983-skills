@@ -1,0 +1,45 @@
+{
+  "id": "discovery-response-boilerplate-status",
+  "synthetic": true,
+  "target_skill": "auditing-section-1983-discovery-responses",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "accepts-boilerplate-without-production-status",
+      "candidate": "regression-accepted-objection.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Response Audit",
+      "Deficiencies and Requested Cure",
+      "Plaintiff Decisions"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "accepted-boilerplate-without-status",
+        "pattern": "(?i)objection.{0,50}(?:accepted|sustained).{0,120}(?:no responsive (?:records|material) exist|no production (?:is )?required)"
+      }
+    ],
+    "required_citations": ["DR-SERVED", "DR-REQUIREMENT"]
+  },
+  "rubric": [
+    {
+      "id": "preserves-exact-components",
+      "description": "Audits the exact served request, response, and objection separately with stable request and target identifiers."
+    },
+    {
+      "id": "marks-production-status-unclear",
+      "description": "Treats production, existence, search, and withholding status as unclear rather than accepting boilerplate or inferring nonexistence."
+    },
+    {
+      "id": "requests-concrete-clarification",
+      "description": "States a source-supported clarification and preserves challenge, narrowing, and conferral choices for the plaintiff."
+    }
+  ]
+}

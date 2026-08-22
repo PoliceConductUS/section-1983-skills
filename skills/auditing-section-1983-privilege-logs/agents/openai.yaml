@@ -1,0 +1,6 @@
+interface:
+  display_name: "Audit §1983 Privilege Logs"
+  short_description: "Determine and audit privilege-log requirements"
+  default_prompt:
+    "Use $auditing-section-1983-privilege-logs to determine the approved
+    privilege-log requirements and audit this supplied log."

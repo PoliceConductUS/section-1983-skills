@@ -32,6 +32,8 @@ STUDY_REQUIRED = (
     "denominator_definition",
 )
 
+DATE_RANGE_REQUIRED = ("start", "end")
+
 DENOMINATOR_REQUIRED = (
     "defined_universe",
     "sampling_method",
@@ -179,6 +181,13 @@ STATED_REASON_VALUES = {
 
 RETRIEVAL_STATUS_VALUES = {"complete-pair", "ruling-complete", "index-only", "lead-only"}
 CODING_CONFIDENCE_VALUES = {"high", "medium", "low"}
+SAMPLING_METHOD_VALUES = {"attempted-census", "convenience"}
+COMPLETENESS_STATUS_VALUES = {"complete", "incomplete"}
+RULE_SUBSECTION_VALUES = {"59(a)", "59(e)", "59-unspecified"}
+REPRESENTATION_STATUS_VALUES = {"represented", "pro-se", "unknown"}
+GAP_STATUS_VALUES = {"unavailable", "unresolved", "not-found", "unresolved-candidate"}
+EVIDENCE_LEVEL_VALUES = {"example", "documented-cluster", "tendency"}
+METRIC_TYPE_VALUES = {"descriptive", "success-rate"}
 
 
 def nonblank(value):
@@ -279,7 +288,7 @@ def validate_study(study, findings):
                 if nonblank(value) and not iso_date(value):
                     add_malformed(findings, f"study.search_dates[{index}]")
     date_range = study.get("date_range")
-    if validate_object(date_range, "study.date_range", ("start", "end"), findings):
+    if validate_object(date_range, "study.date_range", DATE_RANGE_REQUIRED, findings):
         for field in ("start", "end"):
             if field in date_range and not iso_date(date_range[field]):
                 add_malformed(findings, f"study.date_range.{field}")
@@ -289,9 +298,11 @@ def validate_denominator(denominator, findings):
     if not validate_object(denominator, "denominator", DENOMINATOR_REQUIRED, findings):
         return
     validate_nonblank_fields(denominator, "denominator", ("defined_universe",), findings)
-    if not controlled_value(denominator.get("sampling_method"), {"attempted-census", "convenience"}):
+    if not controlled_value(denominator.get("sampling_method"), SAMPLING_METHOD_VALUES):
         findings.append("controlled-value-invalid: denominator.sampling_method")
-    if not controlled_value(denominator.get("completeness_status"), {"complete", "incomplete"}):
+    if not controlled_value(
+        denominator.get("completeness_status"), COMPLETENESS_STATUS_VALUES
+    ):
         findings.append("controlled-value-invalid: denominator.completeness_status")
     for field in (
         "candidate_count",
@@ -324,9 +335,11 @@ def validate_posture(posture, path, findings):
         ("challenged_disposition", "judgment_status", "motion_type", "case_category"),
         findings,
     )
-    if not controlled_value(posture.get("rule_subsection"), {"59(a)", "59(e)", "59-unspecified"}):
+    if not controlled_value(posture.get("rule_subsection"), RULE_SUBSECTION_VALUES):
         findings.append(f"controlled-value-invalid: {path}.rule_subsection")
-    if not controlled_value(posture.get("representation_status"), {"represented", "pro-se", "unknown"}):
+    if not controlled_value(
+        posture.get("representation_status"), REPRESENTATION_STATUS_VALUES
+    ):
         findings.append(f"controlled-value-invalid: {path}.representation_status")
 
 
@@ -517,9 +530,7 @@ def validate_retrieval_gaps(gaps, findings):
         )
         status = gap.get("status")
         record_id = gap.get("record_id")
-        if not controlled_value(
-            status, {"unavailable", "unresolved", "not-found", "unresolved-candidate"}
-        ):
+        if not controlled_value(status, GAP_STATUS_VALUES):
             findings.append(f"controlled-value-invalid: {path}.status")
         if status == "unresolved-candidate":
             if record_id is not None:
@@ -571,11 +582,9 @@ def validate_transfer_cards(cards, findings):
                     and len(values) != len(set(values))
                 ):
                     findings.append("duplicate-card-row-id")
-        if not controlled_value(
-            card.get("evidence_level"), {"example", "documented-cluster", "tendency"}
-        ):
+        if not controlled_value(card.get("evidence_level"), EVIDENCE_LEVEL_VALUES):
             findings.append(f"controlled-value-invalid: {path}.evidence_level")
-        if not controlled_value(card.get("metric_type"), {"descriptive", "success-rate"}):
+        if not controlled_value(card.get("metric_type"), METRIC_TYPE_VALUES):
             findings.append(f"controlled-value-invalid: {path}.metric_type")
         for field in ("checked_through", "source_checked_date"):
             if field in card and not iso_date(card[field]):

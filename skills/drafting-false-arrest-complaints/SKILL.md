@@ -16,11 +16,23 @@ plaintiff, when, for which suspected offense, based on what contemporaneous
 facts, and which required element those facts did not support.** Prefer decisive
 factual precision over length.
 
-**REQUIRED SKILL ORDER:** Load `section-1983-drafting`, then
-`drafting-section-1983-complaints`, then this skill. This skill owns the
-false-arrest specialization. The other skills own document routing, writing
-rules, and the general complaint contract. Load each once; do not recurse
-between them.
+## Required skill order
+
+Load section-1983-drafting, then drafting-section-1983-complaints, and then this
+skill. Before applying this skill, require drafting-section-1983-complaints to
+read both canonical general references:
+
+- `references/complaint-contract.md`
+- `references/complaint-structure-contract.json`
+
+Then read this skill's local
+[false-arrest complaint delta](references/false-arrest-complaint-delta.md). Load
+each skill once; do not recurse between them.
+
+If drafting-section-1983-complaints or either canonical general reference is
+unavailable, report **complaint contract unavailable** and do not draft, revise,
+or audit the complaint. Do not invent or reconstruct the missing requirements,
+and do not promote this local delta into a replacement general contract.
 
 Before acting, read the current pleading, controlling motions and rulings, claim
 matrix, chronology, gaps, and the canonical sources material to each
@@ -41,8 +53,8 @@ offense elements, or necessary clearly-established-law distinctions.
   comparing a pleading with complaints that obtained or were permitted
   discovery, discussing what “worked,” or citing corpus frequencies and
   examples.
-- Read [references/complaint-contract.md](references/complaint-contract.md) when
-  drafting, revising, outlining, or auditing a complaint.
+- Read the local false-arrest complaint delta named above when drafting,
+  revising, outlining, or auditing a false-arrest complaint.
 
 ## Workflow
 
@@ -62,86 +74,75 @@ offense elements, or necessary clearly-established-law distinctions.
    offense, and each alternative offense actually raised by the defense, a
    ruling, or controlling law, map every element against facts known at the
    seizure moment. Do not inventory merely conceivable offenses.
-4. **Draft the common spine.** Use parties and capacities; jurisdiction and
-   venue; the stage-by-stage facts contract in
-   `references/complaint-contract.md`; separate defendant-specific counts;
-   damages, relief, and jury demand. In each factual paragraph, keep one stage
-   and one material event or closely connected set of circumstances; name the
-   actor, what that actor knew then, and what that actor did.
-5. **Draft each count through the required contract.** Use Element → Decisive
-   Facts → Relevant-Time Knowledge → Application → Result. State the decisive
-   facts, the facts known to each defendant at the seizure or other legally
-   relevant time, and the resulting element-level legal application. Treat this
-   as a functional requirement, not mandatory wording. Use an expressly labeled
-   inference only when a non-obvious inferential bridge would otherwise be
-   unclear. For every individual-capacity claim, establish the right at the
-   required factual specificity and explain, **in the filed complaint text**,
-   how verified, binding, pre-event authority gave that defendant fair warning.
-   This concise fair-warning unit is non-waivable: no case-specific strategy,
-   control, routing, or "clearly-established goes in the brief only" instruction
-   removes it from the complaint (see `drafting-section-1983-complaints` →
-   "Complaint-level clearly-established law is mandatory and non-waivable"). A
-   brief may add authority discussion; it never substitutes for the complaint's
-   unit. A count against a defendant who cannot assert qualified immunity (e.g.,
-   a municipality on a Monell count) is exempt. Use only relevant incorporated
-   paragraphs.
+4. **Apply the false-arrest delta.** Use the canonical general complaint
+   contract for the document and count structure. Add the local delta's
+   stage-by-stage chronology, seizure boundary, offense matrix, actor matrix,
+   warrant, incorporated-material, and compression requirements without
+   restating the general contract.
+5. **Draft the false-arrest application.** For each applicable canonical count
+   mapping, connect the suspected offense and disputed element to the facts
+   known by that defendant at the seizure or other legally relevant time. Apply
+   the delta's offense → element → decisive facts → contemporaneous knowledge →
+   probable-cause sequence. Address alternative or arguable probable cause only
+   when made material by the defense, a controlling ruling, or governing law.
 6. **Prune and compress.** Preserve more decisive facts, not more narrative.
    Remove redundant law, evidentiary appendices, discovery wish lists,
    unsupported labels, immaterial background, omnibus allegations, and claims
    missing a required element or actor-specific causal chain. Move research
    methods, full authority comparisons, and source annotations to internal work
    product when filing rules do not require them.
-7. **Audit against the defense’s actual premises.** Answer probable cause and
-   arguable probable cause, alternative offenses, timing, personal
-   participation, video characterization, clearly established law, intermediary
-   doctrines, and Monell attribution as applicable. Log unsupported propositions
-   as GAPs.
+7. **Audit the false-arrest delta against the defense's actual premises.**
+   Answer probable cause and arguable probable cause, alternative offenses,
+   timing, personal participation, video characterization, warrant or
+   intermediary doctrines, and incorporated-material risk as applicable. Route
+   general qualified-immunity and Monell requirements through the canonical
+   general contract. Log unsupported propositions as GAPs.
 8. **Edit without erasing required law.** Apply the shared writing system and
-   `horan-bad-words`. Preserve controlling terms of art, offense elements,
-   materially necessary distinctions, and the concise fair-warning analysis even
-   when a mechanical linter flags their words.
+   `horan-bad-words`. Preserve controlling terms of art, offense elements, and
+   materially necessary false-arrest distinctions when a mechanical linter flags
+   their words.
 
 ## Required audit output
 
-Produce these sections when auditing rather than drafting:
+Produce these false-arrest-delta sections when auditing rather than drafting.
+Use the canonical general package's audit for the general complaint contract; do
+not restate it here.
 
 If no external comparator is invoked, mark the corpus qualification ledger not
 applicable and classify only the target pleading and controlling rulings. Do not
 invent a comparison.
 
-| Section                                | Required content                                                                                                                                                           |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Corpus qualification ledger            | Complaint version, ruling, claim, defendant, procedural category, affirmative discovery proof, permitted use, limitation                                                   |
-| Complaint spine                        | Missing, misplaced, or overgrown sections                                                                                                                                  |
-| Arrest-decision matrix                 | Defendant, seizure point, offense, element, contemporaneous fact, negating fact, later-only fact, probable-cause and arguable-probable-cause issue, gap                    |
-| Event-stage contamination audit        | Later facts being used to explain or justify an earlier decision                                                                                                           |
-| Participation and causation audit      | Who decided, communicated, joined, restrained, reported, approved, or arrived later                                                                                        |
-| Incorporated-material risk audit       | What each video, report, affidavit, or attachment resolves, obscures, disputes, or risks                                                                                   |
-| Count audit                            | Element → decisive facts → relevant-time knowledge → application → result; non-obvious inference and qualified immunity where applicable                                   |
-| Clearly-established-law matrix         | Claim, defendant, event date, precise right or rule, binding pre-event authority and status, materially similar facts, material differences, fair-warning explanation, gap |
-| Corpus-alignment and compression audit | Decisive facts missing; material to keep, move, combine, or omit                                                                                                           |
-| Gaps                                   | Missing fact, source, authority, identity, duration, or causal link                                                                                                        |
+| Section                                | Required content                                                                                                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contract route                         | Canonical general package and both references available; local delta loaded after them                                                                                    |
+| Corpus qualification ledger            | Complaint version, ruling, claim, defendant, procedural category, affirmative discovery proof, permitted use, limitation                                                  |
+| Arrest-decision matrix                 | Defendant, seizure point, offense, element, contemporaneous fact, negating fact, later-only fact, probable-cause or arguable-probable-cause issue, GAP                    |
+| Event-stage contamination audit        | Later facts being used to explain or justify an earlier decision                                                                                                          |
+| Participation and causation audit      | Who decided, communicated, joined, restrained, reported, approved, or arrived later                                                                                       |
+| Warrant and challenged-account audit   | Contributor, transmission, statement or omission, correction, materiality, intermediary issue, and causal role                                                            |
+| Incorporated-material risk audit       | What each video, report, affidavit, or attachment resolves, obscures, disputes, or risks                                                                                  |
+| False-arrest application audit         | Suspected offense, disputed element, seizure boundary, defendant's arrest-time knowledge, personal act, probable-cause application, alternative-offense issue when raised |
+| Corpus-alignment and compression audit | Decisive false-arrest facts missing; material to keep, move, combine, or omit                                                                                             |
+| GAPs                                   | Missing false-arrest fact, source, authority, identity, time, duration, offense element, or causal link                                                                   |
 
 ## Completion rule
 
-Do not conclude that the complaint follows the corpus-derived pattern unless a
-judge can find the seizure point, decisive facts, each defendant's arrest-time
-knowledge, the resulting offense-element application, each defendant’s
-participation, the factual basis for every non-obvious inference, and the
-claim-by-claim fair-warning explanation without reconstructing the theory from
-scattered allegations. Fail the audit if the complaint uses a later event to
-justify an earlier decision, uses a collective actor label where roles differ,
-states an unsupported motive or credibility label as fact, or incorporates
-material without auditing its whole defense-favorable effect.
+Do not conclude that the false-arrest delta is satisfied unless a judge can find
+the seizure point, decisive arrest-time facts, each defendant's contemporaneous
+knowledge and participation, the resulting offense-element application, the
+basis for every non-obvious inference, and the incorporated-material risks
+without reconstructing the theory from scattered allegations.
 
-**Fail the audit** if any individual-capacity count against a
-qualified-immunity-eligible defendant lacks its concise fair-warning unit in the
-complaint text, or if that unit was omitted, thinned, or routed to a brief,
-control memo, or internal matrix on the strength of a case-specific strategy or
-routing instruction. The brief supplying the analysis for some counts does not
-cure the complaint. Do not mark such a complaint filing-ready; identify the
-defective counts and advise restoring the unit in a later authorized drafting
-stage or log a filing-critical GAP for strategy decision.
+Fail the false-arrest audit if the complaint uses a later event to justify an
+earlier decision, uses a collective actor label where roles differ, states an
+unsupported motive or credibility label as fact, inventories an unraised
+alternative offense, or incorporates material without auditing its complete
+defense-favorable effect.
+
+The canonical general package alone controls general complaint completion,
+including its qualified-immunity and Monell requirements. If that package or
+either canonical reference cannot be verified, report **complaint contract
+unavailable** and do not complete the false-arrest audit from this delta.
 
 ## Independent quality-control stage
 

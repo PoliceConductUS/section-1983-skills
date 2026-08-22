@@ -37,7 +37,7 @@ branch name: tags are the immutable release identity.
 | `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
 | `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
 | `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
-| `drafting-section-1983-complaints`                | General complaint and amended-complaint pleading contract, including defendant-specific facts, qualified immunity, and Monell.                                             |
+| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and external-checker handoff.                                                         |
 | `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
 | `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                             |
 | `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                   |
@@ -90,11 +90,31 @@ does not replace source, authority, or court rules.
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.
 
+For every complaint, `drafting-section-1983-complaints` must read its
+install-local `references/complaint-contract.md` and
+`references/complaint-structure-contract.json` before drafting, revision, or
+audit. If the package or either reference is unavailable, the result is
+**complaint contract unavailable** and complaint work stops; no routing or
+specialization skill supplies a fallback.
+
+For a false-arrest complaint, the required order is `section-1983-drafting`,
+then `drafting-section-1983-complaints` with both canonical references, and then
+`drafting-false-arrest-complaints` with its install-local false-arrest delta.
+
 The ownership boundaries are deliberate: the umbrella routes; complaint skills
 establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; discovery peers draft or
 audit only their named artifacts; the authority and writing skills are final
 gates, and Filing CI adds a separate configured integrity gate.
+
+## Complaint checker boundary
+
+The canonical JSON complaint contract is a thin handoff for an external checker
+such as CaseGraph. It does not execute a checker and does not decide fact truth,
+legal sufficiency, authority fit, material analogy, strategy, or filing
+readiness. CaseGraph implementation remains outside this repository. Filing CI
+may orchestrate only a complete project-configured checker invocation; it does
+not invent an executable, flags, inputs, or output paths.
 
 ## Project inputs and portability
 

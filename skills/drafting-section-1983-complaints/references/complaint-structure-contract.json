@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "owner": "drafting-section-1983-complaints",
+  "sections": [
+    {
+      "id": "caption",
+      "optional": false
+    },
+    {
+      "id": "introduction",
+      "optional": true
+    },
+    {
+      "id": "jurisdiction-and-venue",
+      "optional": false
+    },
+    {
+      "id": "parties",
+      "optional": false
+    },
+    {
+      "id": "statement-of-facts",
+      "optional": false
+    },
+    {
+      "id": "counts",
+      "optional": false
+    },
+    {
+      "id": "prayer-for-relief",
+      "optional": false
+    },
+    {
+      "id": "jury-demand",
+      "optional": false
+    },
+    {
+      "id": "signature-block",
+      "optional": false
+    }
+  ],
+  "count_cardinality": ["claim", "defendant", "capacity"],
+  "required_count_fields": [
+    "count_id",
+    "claim",
+    "constitutional_source",
+    "defendant",
+    "capacity",
+    "challenged_act",
+    "event_stage",
+    "standard",
+    "standard_pincite",
+    "decisive_fact_paragraphs",
+    "incorporated_paragraphs",
+    "relevant_time_knowledge",
+    "application",
+    "injury",
+    "relief",
+    "result"
+  ],
+  "conditional_qualified_immunity_fields": [
+    "event_date",
+    "precise_right",
+    "binding_pre_event_authority",
+    "materially_similar_facts",
+    "material_differences",
+    "fair_warning",
+    "prong_one_result",
+    "prong_two_result"
+  ],
+  "mechanical_checks": [
+    "section-presence",
+    "section-order",
+    "paragraph-numbering-continuity",
+    "count-numbering-continuity",
+    "unique-count-id",
+    "claim-defendant-capacity-cardinality",
+    "cross-reference-target",
+    "incorporation-target",
+    "required-count-field-location"
+  ],
+  "excluded_judgments": [
+    "fact-truth",
+    "legal-sufficiency",
+    "authority-fit",
+    "material-analogy",
+    "strategy",
+    "filing-readiness"
+  ],
+  "finding_fields": [
+    "finding_id",
+    "check_id",
+    "severity",
+    "artifact",
+    "location",
+    "message"
+  ],
+  "hard_failure_exit_status": "nonzero"
+}

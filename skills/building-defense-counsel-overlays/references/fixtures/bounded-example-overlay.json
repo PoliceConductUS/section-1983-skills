@@ -1,0 +1,305 @@
+{
+  "schema_version": "1.0",
+  "overlay_id": "COUNSEL-OVERLAY-INCOMPLETE",
+  "version": "v1",
+  "generated_at": "2026-02-10T12:00:00Z",
+  "source_snapshot": {
+    "snapshot_id": "COUNSEL-SNAPSHOT-INCOMPLETE",
+    "version": "v1",
+    "sha256": "f8d92499595c2442c0a0a2f59b2a5426cdeb9d0a9b90e555261cb899be15b813",
+    "checked_through": "2026-02-10"
+  },
+  "identity_records": [
+    {
+      "identity_id": "IDENTITY-A",
+      "attorney_id": "ATTY-A",
+      "professional_name": "Attorney Alpha",
+      "bar_status": "active",
+      "bar_status_checked_on": "2026-02-10",
+      "firm_affiliations": [
+        {
+          "firm_name": "Example Defense Firm",
+          "start_date": "2025-01-01",
+          "end_date": null,
+          "source_ids": ["SRC-BAR-A"]
+        }
+      ],
+      "appearances": [
+        {
+          "matter_id": "MATTER-CURRENT",
+          "represented_party": "Officer Example",
+          "start_date": "2026-01-02",
+          "end_date": null,
+          "roles": ["signer", "appearance-counsel"],
+          "source_ids": ["SRC-APPEARANCE-A", "SRC-MOTION-CURRENT"]
+        }
+      ],
+      "source_ids": ["SRC-BAR-A", "SRC-APPEARANCE-A", "SRC-MOTION-CURRENT"]
+    },
+    {
+      "identity_id": "IDENTITY-B",
+      "attorney_id": "ATTY-B",
+      "professional_name": "Attorney Beta",
+      "bar_status": "unverified",
+      "bar_status_checked_on": "2026-02-10",
+      "firm_affiliations": [],
+      "appearances": [
+        {
+          "matter_id": "MATTER-CURRENT",
+          "represented_party": "Officer Example",
+          "start_date": "2026-01-02",
+          "end_date": null,
+          "roles": ["appearance-counsel", "listed-counsel"],
+          "source_ids": ["SRC-APPEARANCE-A"]
+        }
+      ],
+      "source_ids": ["SRC-APPEARANCE-A"]
+    }
+  ],
+  "team_records": [
+    {
+      "team_id": "TEAM-CURRENT",
+      "matter_id": "MATTER-CURRENT",
+      "version": "v1",
+      "effective_start": "2026-01-02",
+      "effective_end": null,
+      "member_attorney_ids": ["ATTY-A", "ATTY-B"],
+      "represented_party": "Officer Example",
+      "alignment_group_ids": ["GROUP-OFFICER"],
+      "source_ids": ["SRC-APPEARANCE-A", "SRC-MOTION-CURRENT"]
+    },
+    {
+      "team_id": "TEAM-ONE",
+      "matter_id": "MATTER-ONE",
+      "version": "v1",
+      "effective_start": "2025-01-01",
+      "effective_end": "2025-12-31",
+      "member_attorney_ids": ["ATTY-A"],
+      "represented_party": "Synthetic Client ONE",
+      "alignment_group_ids": ["HIST-GROUP-ONE"],
+      "source_ids": ["SRC-BRIEF-ONE"]
+    },
+    {
+      "team_id": "TEAM-TWO",
+      "matter_id": "MATTER-TWO",
+      "version": "v1",
+      "effective_start": "2025-01-01",
+      "effective_end": "2025-12-31",
+      "member_attorney_ids": ["ATTY-A"],
+      "represented_party": "Synthetic Client TWO",
+      "alignment_group_ids": ["HIST-GROUP-TWO"],
+      "source_ids": ["SRC-BRIEF-TWO"]
+    },
+    {
+      "team_id": "TEAM-THREE",
+      "matter_id": "MATTER-THREE",
+      "version": "v1",
+      "effective_start": "2025-01-01",
+      "effective_end": "2025-12-31",
+      "member_attorney_ids": ["ATTY-A"],
+      "represented_party": "Synthetic Client THREE",
+      "alignment_group_ids": ["HIST-GROUP-THREE"],
+      "source_ids": ["SRC-BRIEF-THREE"]
+    }
+  ],
+  "historical_arguments": [
+    {
+      "argument_id": "ARG-CURRENT",
+      "matter_id": "MATTER-CURRENT",
+      "team_id": "TEAM-CURRENT",
+      "attorney_id": null,
+      "attribution_role": "counsel-team",
+      "source_ids": ["SRC-MOTION-CURRENT"],
+      "source_location": {
+        "source_id": "SRC-MOTION-CURRENT",
+        "page": "1",
+        "heading": "Synthetic argument",
+        "quote": "Signed by Attorney Alpha for the defense team. The motion raises qualified immunity and requests dismissal."
+      },
+      "date": "2026-01-10",
+      "posture": "pleading-stage",
+      "represented_party": "Officer Example",
+      "alignment_group_ids": ["GROUP-OFFICER"],
+      "claim_id": "CLAIM-SEARCH",
+      "challenged_act_id": "ACT-SEARCH",
+      "element_or_defense": "qualified immunity",
+      "qualified_immunity_prong": "prong-one",
+      "requested_relief": "dismissal",
+      "status": "asserted"
+    },
+    {
+      "argument_id": "ARG-ONE",
+      "matter_id": "MATTER-ONE",
+      "team_id": "TEAM-ONE",
+      "attorney_id": "ATTY-A",
+      "attribution_role": "signer",
+      "source_ids": ["SRC-BRIEF-ONE"],
+      "source_location": {
+        "source_id": "SRC-BRIEF-ONE",
+        "page": "1",
+        "heading": "Synthetic argument",
+        "quote": "Attorney Alpha signed a motion raising qualified immunity and requesting dismissal."
+      },
+      "date": "2025-05-01",
+      "posture": "pleading-stage",
+      "represented_party": "Synthetic Client ONE",
+      "alignment_group_ids": ["HIST-GROUP-ONE"],
+      "claim_id": "CLAIM-SEARCH",
+      "challenged_act_id": "ACT-SEARCH",
+      "element_or_defense": "qualified immunity",
+      "qualified_immunity_prong": "prong-one",
+      "requested_relief": "dismissal",
+      "status": "asserted"
+    },
+    {
+      "argument_id": "ARG-TWO",
+      "matter_id": "MATTER-TWO",
+      "team_id": "TEAM-TWO",
+      "attorney_id": "ATTY-A",
+      "attribution_role": "signer",
+      "source_ids": ["SRC-BRIEF-TWO"],
+      "source_location": {
+        "source_id": "SRC-BRIEF-TWO",
+        "page": "1",
+        "heading": "Synthetic argument",
+        "quote": "Attorney Alpha signed a motion raising qualified immunity and requesting dismissal."
+      },
+      "date": "2025-09-01",
+      "posture": "pleading-stage",
+      "represented_party": "Synthetic Client TWO",
+      "alignment_group_ids": ["HIST-GROUP-TWO"],
+      "claim_id": "CLAIM-SEARCH",
+      "challenged_act_id": "ACT-SEARCH",
+      "element_or_defense": "qualified immunity",
+      "qualified_immunity_prong": "prong-one",
+      "requested_relief": "dismissal",
+      "status": "asserted"
+    },
+    {
+      "argument_id": "ARG-THREE",
+      "matter_id": "MATTER-THREE",
+      "team_id": "TEAM-THREE",
+      "attorney_id": "ATTY-A",
+      "attribution_role": "signer",
+      "source_ids": ["SRC-BRIEF-THREE"],
+      "source_location": {
+        "source_id": "SRC-BRIEF-THREE",
+        "page": "1",
+        "heading": "Synthetic argument",
+        "quote": "Attorney Alpha signed a motion addressing personal participation instead of qualified immunity."
+      },
+      "date": "2025-12-01",
+      "posture": "pleading-stage",
+      "represented_party": "Synthetic Client THREE",
+      "alignment_group_ids": ["HIST-GROUP-THREE"],
+      "claim_id": "CLAIM-SEARCH",
+      "challenged_act_id": "ACT-SEARCH",
+      "element_or_defense": "personal participation",
+      "qualified_immunity_prong": null,
+      "requested_relief": "dismissal",
+      "status": "asserted"
+    }
+  ],
+  "judicial_treatments": [
+    {
+      "treatment_id": "TREAT-ONE",
+      "argument_id": "ARG-ONE",
+      "court_actor": "Example Court One",
+      "source_ids": ["SRC-ORDER-ONE"],
+      "source_location": {
+        "source_id": "SRC-ORDER-ONE",
+        "page": "1",
+        "heading": "Synthetic argument",
+        "quote": "The court rejected the qualified-immunity argument at the pleading stage."
+      },
+      "date": "2025-06-01",
+      "treatment": "rejected"
+    },
+    {
+      "treatment_id": "TREAT-TWO",
+      "argument_id": "ARG-TWO",
+      "court_actor": "Example Court Two",
+      "source_ids": ["SRC-ORDER-TWO"],
+      "source_location": {
+        "source_id": "SRC-ORDER-TWO",
+        "page": "1",
+        "heading": "Synthetic argument",
+        "quote": "The court adopted the qualified-immunity argument at the pleading stage."
+      },
+      "date": "2025-10-01",
+      "treatment": "adopted"
+    }
+  ],
+  "current_attack_links": [
+    {
+      "link_id": "LINK-CURRENT",
+      "attack_id": "ATK-CURRENT-QI",
+      "team_id": "TEAM-CURRENT",
+      "alignment_group_id": "GROUP-OFFICER",
+      "claim_id": "CLAIM-SEARCH",
+      "defendant_ids": ["DEF-OFFICER"],
+      "challenged_act_ids": ["ACT-SEARCH"],
+      "source_ids": ["SRC-MOTION-CURRENT"]
+    }
+  ],
+  "patterns": [],
+  "forecasts": [],
+  "overrides": [],
+  "gaps": [
+    {
+      "gap_id": "OVERLAY-GAP-PACER",
+      "source_gap_ids": ["GAP-PACER"],
+      "scope": "Recurring-pattern and forecast strength.",
+      "consequence": "Only bounded examples are available."
+    }
+  ],
+  "ledger_fingerprints": {
+    "identity_records": "66453d74d08ad2d25909782a678b1e021e3969817b9ccb54673b3d9c81d6f8ed",
+    "team_records": "da1a94b06a144db26dd00b9b8afc921955420b653b634fb5b86585593028f2eb",
+    "historical_arguments": "e5a298bd97da6ab915402e209e6b4d9c09ed0ca431088a2bfa91ac210bcee4d9",
+    "judicial_treatments": "f40e0610c6b926127b6812d89300cd900deb3c385ed5d31b56c741ef4c387337",
+    "current_attack_links": "ab26f63ddb31352f3a36b49e8166ff9be7842d0eb1f787d7ad7b91f0b3136603",
+    "patterns": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "forecasts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "overrides": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "gaps": "7b3c89f9444a4f7eda1ed689cc2232e6159e0f30719bff858c5b626dcc238382",
+    "review_slices": "bc43f4363875a2378510cf783a26e7d31f1b9e7cfb56aa328376363cc0d55287"
+  },
+  "review_slices": [
+    {
+      "slice_id": "SLICE-BLIND",
+      "job_id": "JOB-BLIND",
+      "review_kind": "blind-common-attack",
+      "alignment_group_id": "GROUP-OFFICER",
+      "target_artifact_id": "TARGET-AMENDED-COMPLAINT",
+      "team_ids": [],
+      "identity_ids": [],
+      "historical_argument_ids": [],
+      "treatment_ids": [],
+      "current_attack_link_ids": [],
+      "pattern_ids": [],
+      "forecast_ids": [],
+      "common_attack_ids": ["COMMON-QI", "COMMON-ALTERNATIVE-PC"]
+    },
+    {
+      "slice_id": "SLICE-ACTUAL",
+      "job_id": "JOB-ACTUAL",
+      "review_kind": "actual-adversary",
+      "alignment_group_id": "GROUP-OFFICER",
+      "target_artifact_id": "TARGET-AMENDED-COMPLAINT",
+      "team_ids": ["TEAM-CURRENT"],
+      "identity_ids": ["IDENTITY-A", "IDENTITY-B"],
+      "historical_argument_ids": [
+        "ARG-CURRENT",
+        "ARG-ONE",
+        "ARG-TWO",
+        "ARG-THREE"
+      ],
+      "treatment_ids": ["TREAT-ONE", "TREAT-TWO"],
+      "current_attack_link_ids": ["LINK-CURRENT"],
+      "pattern_ids": [],
+      "forecast_ids": [],
+      "common_attack_ids": ["COMMON-QI", "COMMON-ALTERNATIVE-PC"]
+    }
+  ]
+}

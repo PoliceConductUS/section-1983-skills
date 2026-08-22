@@ -100,36 +100,50 @@ Missing response or treatment links MUST use explicit unavailable states.
 ### Requirement: Per-target and per-group independent review plan
 
 The review plan SHALL contain distinct fresh `blind-common-attack` and
-`actual-adversary` jobs. A blind job MUST receive no adversary overlay IDs or
-content. An actual job MUST receive only attacks relevant to its group, claim,
-defendants, and challenged acts for every target artifact and effective group
-with an available actual profile. A motion and proposed amended complaint are
-separate targets and therefore produce four jobs per group.
+`actual-adversary` jobs. A blind job MUST receive no adversary attack, judge,
+attorney, counsel-team, historical behavior, judicial treatment, pattern, or
+forecast overlay ID or content. An actual job MUST receive only current attacks
+and validated counsel-team material relevant to its group, claim, defendants,
+challenged acts, posture, target, and effective date.
+
+A bounded counsel forecast MUST remain separately labeled advisory context. It
+MUST NOT become an actual attack, remove a common attack, suppress the blind
+job, or displace controlling law. A motion and proposed amended complaint remain
+separate targets and therefore produce distinct jobs.
 
 When no adversary filing exists, the plan MUST report
 `actual-adversary-unavailable`, create two distinct blind common-attack jobs,
-and MUST NOT invent an actual-adversary job.
+and MUST NOT invent an actual-adversary or counsel forecast job.
 
-#### Scenario: Leave package contains two target artifacts
+#### Scenario: Relevant counsel profile exists
 
-- **WHEN** one group is reviewed against a leave motion and proposed amended
-  complaint with an available attack profile
-- **THEN** the plan contains four fresh jobs for that group and each blind job
-  contains no adversary overlay material
+- **WHEN** one group has a validated effective counsel-team overlay
+- **THEN** its actual-adversary job receives only that group's relevant counsel
+  slice and its blind job receives no counsel material
+
+#### Scenario: Counsel forecast omits a common attack
+
+- **WHEN** the validated forecast does not identify one common attack
+- **THEN** the blind common-attack job still tests that attack independently
 
 ### Requirement: Filing-version overlay manifest
 
 Each filing version that consumes specialized overlays SHALL pin every consumed
 overlay by kind, stable ID, version, fingerprint, checked-through date,
-validator result, and source snapshot. A failing validator result, mismatched
-snapshot, or stale checked-through date MUST produce no specialized drafting
-change.
+validator result, and source snapshot. Supported kinds SHALL include
+litigation-alignment, judge, counsel-identity, and counsel-team overlays. The
+manifest MUST keep the Judicial Reasoning Profile, controlling-law analysis,
+litigation-alignment groups, individual-attorney identity, counsel-team
+behavior, and user overrides separate.
 
-#### Scenario: Filing manifest pins a stale overlay
+A failing validator result, mismatched snapshot, stale checked-through date, or
+irrelevant counsel-team scope MUST produce no specialized drafting change.
 
-- **WHEN** the current docket snapshot is newer than a pinned overlay snapshot
-- **THEN** validation fails and the filing receives no specialized change from
-  that overlay
+#### Scenario: Filing manifest pins counsel overlays
+
+- **WHEN** a filing uses attorney identity and counsel-team behavior
+- **THEN** it pins those immutable overlays separately from the judge and
+  litigation-alignment overlays and preserves their distinct source snapshots
 
 ### Requirement: Public lifecycle and validation method
 

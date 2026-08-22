@@ -1,0 +1,852 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/defense-counsel-overlay.schema.json",
+  "title": "Defense-counsel litigation profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "overlay_id": {
+      "$ref": "#/$defs/stableId"
+    },
+    "version": {
+      "$ref": "#/$defs/nonemptyString"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_snapshot": {
+      "$ref": "#/$defs/snapshotReference"
+    },
+    "identity_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/identityRecord"
+      }
+    },
+    "team_records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/teamRecord"
+      }
+    },
+    "historical_arguments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/historicalArgument"
+      }
+    },
+    "judicial_treatments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/judicialTreatment"
+      }
+    },
+    "current_attack_links": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/currentAttackLink"
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pattern"
+      }
+    },
+    "forecasts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/forecast"
+      }
+    },
+    "overrides": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/override"
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/overlayGap"
+      }
+    },
+    "ledger_fingerprints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "identity_records": {
+          "$ref": "#/$defs/sha256"
+        },
+        "team_records": {
+          "$ref": "#/$defs/sha256"
+        },
+        "historical_arguments": {
+          "$ref": "#/$defs/sha256"
+        },
+        "judicial_treatments": {
+          "$ref": "#/$defs/sha256"
+        },
+        "current_attack_links": {
+          "$ref": "#/$defs/sha256"
+        },
+        "patterns": {
+          "$ref": "#/$defs/sha256"
+        },
+        "forecasts": {
+          "$ref": "#/$defs/sha256"
+        },
+        "overrides": {
+          "$ref": "#/$defs/sha256"
+        },
+        "gaps": {
+          "$ref": "#/$defs/sha256"
+        },
+        "review_slices": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "identity_records",
+        "team_records",
+        "historical_arguments",
+        "judicial_treatments",
+        "current_attack_links",
+        "patterns",
+        "forecasts",
+        "overrides",
+        "gaps",
+        "review_slices"
+      ]
+    },
+    "review_slices": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reviewSlice"
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "overlay_id",
+    "version",
+    "generated_at",
+    "source_snapshot",
+    "identity_records",
+    "team_records",
+    "historical_arguments",
+    "judicial_treatments",
+    "current_attack_links",
+    "patterns",
+    "forecasts",
+    "overrides",
+    "gaps",
+    "ledger_fingerprints",
+    "review_slices"
+  ],
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "nonemptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "idArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    },
+    "nonemptyIdArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    },
+    "snapshotReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "snapshot_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "version": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "checked_through": {
+          "$ref": "#/$defs/date"
+        }
+      },
+      "required": ["snapshot_id", "version", "sha256", "checked_through"]
+    },
+    "firmAffiliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "firm_name": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "start_date": {
+          "$ref": "#/$defs/date"
+        },
+        "end_date": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        }
+      },
+      "required": ["firm_name", "start_date", "end_date", "source_ids"]
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "matter_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "represented_party": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "start_date": {
+          "$ref": "#/$defs/date"
+        },
+        "end_date": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "signer",
+              "named-author",
+              "oral-advocate",
+              "appearance-counsel",
+              "listed-counsel",
+              "counsel-team"
+            ]
+          }
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        }
+      },
+      "required": [
+        "matter_id",
+        "represented_party",
+        "start_date",
+        "end_date",
+        "roles",
+        "source_ids"
+      ]
+    },
+    "sourceLocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "page": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "heading": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "quote": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": ["source_id", "page", "heading", "quote"]
+    },
+    "missingness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unresolved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unavailable": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["unresolved", "unavailable"]
+    },
+    "identityRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "identity_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "attorney_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "professional_name": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "bar_status": {
+          "enum": ["active", "inactive", "unverified"]
+        },
+        "bar_status_checked_on": {
+          "$ref": "#/$defs/date"
+        },
+        "firm_affiliations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/firmAffiliation"
+          }
+        },
+        "appearances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/appearance"
+          }
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        }
+      },
+      "required": [
+        "identity_id",
+        "attorney_id",
+        "professional_name",
+        "bar_status",
+        "bar_status_checked_on",
+        "firm_affiliations",
+        "appearances",
+        "source_ids"
+      ]
+    },
+    "teamRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "team_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "matter_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "version": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "effective_start": {
+          "$ref": "#/$defs/date"
+        },
+        "effective_end": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "member_attorney_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "represented_party": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "alignment_group_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        }
+      },
+      "required": [
+        "team_id",
+        "matter_id",
+        "version",
+        "effective_start",
+        "effective_end",
+        "member_attorney_ids",
+        "represented_party",
+        "alignment_group_ids",
+        "source_ids"
+      ]
+    },
+    "historicalArgument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "argument_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "matter_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "team_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "attorney_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attribution_role": {
+          "enum": [
+            "signer",
+            "named-author",
+            "oral-advocate",
+            "appearance-counsel",
+            "listed-counsel",
+            "counsel-team"
+          ]
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "source_location": {
+          "$ref": "#/$defs/sourceLocation"
+        },
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "posture": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "represented_party": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "alignment_group_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "claim_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "challenged_act_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "element_or_defense": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "qualified_immunity_prong": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/nonemptyString"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requested_relief": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "status": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": [
+        "argument_id",
+        "matter_id",
+        "team_id",
+        "attorney_id",
+        "attribution_role",
+        "source_ids",
+        "source_location",
+        "date",
+        "posture",
+        "represented_party",
+        "alignment_group_ids",
+        "claim_id",
+        "challenged_act_id",
+        "element_or_defense",
+        "qualified_immunity_prong",
+        "requested_relief",
+        "status"
+      ]
+    },
+    "judicialTreatment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "treatment_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "argument_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "court_actor": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "source_location": {
+          "$ref": "#/$defs/sourceLocation"
+        },
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "treatment": {
+          "enum": [
+            "recommended",
+            "adopted",
+            "rejected",
+            "modified",
+            "superseded",
+            "reversed",
+            "vacated",
+            "unresolved"
+          ]
+        }
+      },
+      "required": [
+        "treatment_id",
+        "argument_id",
+        "court_actor",
+        "source_ids",
+        "source_location",
+        "date",
+        "treatment"
+      ]
+    },
+    "currentAttackLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "link_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "attack_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "team_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "alignment_group_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "claim_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "defendant_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "challenged_act_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        }
+      },
+      "required": [
+        "link_id",
+        "attack_id",
+        "team_id",
+        "alignment_group_id",
+        "claim_id",
+        "defendant_ids",
+        "challenged_act_ids",
+        "source_ids"
+      ]
+    },
+    "pattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pattern_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "pattern_type": {
+          "enum": [
+            "recurring-defense",
+            "court-documented-loss",
+            "cross-case-comparison"
+          ]
+        },
+        "comparable_argument_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "scope": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "selection_method": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coded_record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missingness": {
+          "$ref": "#/$defs/missingness"
+        },
+        "posture": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "supporting_argument_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "contrary_argument_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "treatment_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "conclusion": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "confidence": {
+          "enum": ["low", "moderate", "high"]
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "checked_through": {
+          "$ref": "#/$defs/date"
+        },
+        "limits": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": [
+        "pattern_id",
+        "pattern_type",
+        "comparable_argument_ids",
+        "scope",
+        "selection_method",
+        "denominator",
+        "coded_record_count",
+        "missingness",
+        "posture",
+        "supporting_argument_ids",
+        "contrary_argument_ids",
+        "treatment_ids",
+        "conclusion",
+        "confidence",
+        "source_ids",
+        "checked_through",
+        "limits"
+      ]
+    },
+    "forecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "forecast_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "professional_move": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "pattern_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "comparable_argument_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coded_record_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missingness": {
+          "$ref": "#/$defs/missingness"
+        },
+        "posture": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "supporting_argument_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "contrary_argument_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "confidence": {
+          "enum": ["low", "moderate", "high"]
+        },
+        "source_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "checked_through": {
+          "$ref": "#/$defs/date"
+        },
+        "limits": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": [
+        "forecast_id",
+        "professional_move",
+        "pattern_ids",
+        "comparable_argument_ids",
+        "denominator",
+        "coded_record_count",
+        "missingness",
+        "posture",
+        "supporting_argument_ids",
+        "contrary_argument_ids",
+        "confidence",
+        "source_ids",
+        "checked_through",
+        "limits"
+      ]
+    },
+    "override": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "override_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "instruction_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "action": {
+          "enum": ["include", "exclude"]
+        },
+        "scope": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "affected_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "rationale": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": [
+        "override_id",
+        "instruction_id",
+        "action",
+        "scope",
+        "affected_ids",
+        "rationale"
+      ]
+    },
+    "overlayGap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "gap_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "source_gap_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        },
+        "scope": {
+          "$ref": "#/$defs/nonemptyString"
+        },
+        "consequence": {
+          "$ref": "#/$defs/nonemptyString"
+        }
+      },
+      "required": ["gap_id", "source_gap_ids", "scope", "consequence"]
+    },
+    "reviewSlice": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "slice_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "job_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "review_kind": {
+          "enum": ["blind-common-attack", "actual-adversary"]
+        },
+        "alignment_group_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "target_artifact_id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "team_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "identity_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "historical_argument_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "treatment_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "current_attack_link_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "pattern_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "forecast_ids": {
+          "$ref": "#/$defs/idArray"
+        },
+        "common_attack_ids": {
+          "$ref": "#/$defs/nonemptyIdArray"
+        }
+      },
+      "required": [
+        "slice_id",
+        "job_id",
+        "review_kind",
+        "alignment_group_id",
+        "target_artifact_id",
+        "team_ids",
+        "identity_ids",
+        "historical_argument_ids",
+        "treatment_ids",
+        "current_attack_link_ids",
+        "pattern_ids",
+        "forecast_ids",
+        "common_attack_ids"
+      ]
+    }
+  }
+}

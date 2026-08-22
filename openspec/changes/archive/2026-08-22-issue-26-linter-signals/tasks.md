@@ -19,6 +19,6 @@
 
 - [x] 3.1 Pressure the whole story and correct accepted Critical or Important
       findings test-first.
-- [ ] 3.2 Complete verification and retrospective records, archive, validate,
+- [x] 3.2 Complete verification and retrospective records, archive, validate,
       commit, and sync.
-- [ ] 3.3 Finish clean and origin-equal with Issue 26 open and no PR.
+- [x] 3.3 Finish clean and origin-equal with Issue 26 open and no PR.

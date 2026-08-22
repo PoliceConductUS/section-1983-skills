@@ -27,7 +27,7 @@
 
 ## 3. Review and archive
 
-- [ ] 3.1 Review the complete story for role conflation, grouping false greens,
+- [x] 3.1 Review the complete story for role conflation, grouping false greens,
       snapshot drift, review-slice leakage, path/private data, and lifecycle
       ambiguity; correct accepted Critical or Important findings test-first.
 - [ ] 3.2 Complete verification and retrospective artifacts, archive on this

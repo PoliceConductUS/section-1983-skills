@@ -330,7 +330,7 @@ def validate_snapshot(snapshot):
         if not _exact(actor, ACTOR_KEYS) or not _stable(actor.get("actor_id")):
             _add(findings, "snapshot-structure-invalid", path, "actor is invalid")
             continue
-        if actor["actor_type"] not in ACTOR_TYPES or not _nonempty(actor["display_label"]):
+        if not isinstance(actor["actor_type"], str) or actor["actor_type"] not in ACTOR_TYPES or not _nonempty(actor["display_label"]):
             _add(findings, "snapshot-structure-invalid", path, "actor values are invalid")
         actor_ids.append(actor["actor_id"])
     if len(actor_ids) != len(set(actor_ids)):
@@ -367,6 +367,14 @@ def validate_snapshot(snapshot):
                     "snapshot-source-fingerprint-mismatch",
                     f"{path}.sha256",
                     "source content does not match its fingerprint",
+                )
+        if _date(source.get("filed_date")) and _date(snapshot["checked_through"]):
+            if source["filed_date"] > snapshot["checked_through"]:
+                _add(
+                    findings,
+                    "snapshot-source-after-check-date",
+                    f"{path}.filed_date",
+                    "source filing date cannot be later than the snapshot check date",
                 )
         source_ids.append(source_id)
     if len(source_ids) != len(set(source_ids)):
@@ -415,6 +423,29 @@ def _validate_location(location, source_map, findings, path):
         _add(findings, "source-quote-mismatch", path, "source location or exact quote does not match the snapshot")
 
 
+def _validate_record_provenance(record, source_map, findings, path):
+    location = record.get("source_location")
+    if not isinstance(location, dict):
+        return
+    source_id = location.get("source_id")
+    source = source_map.get(source_id) if _stable(source_id) else None
+    record_source_ids = record.get("source_ids")
+    if not isinstance(record_source_ids, list) or source_id not in record_source_ids:
+        _add(
+            findings,
+            "record-source-link-invalid",
+            f"{path}.source_location.source_id",
+            "located source must be included in the record source IDs",
+        )
+    if source is not None and record.get("date") != source.get("filed_date"):
+        _add(
+            findings,
+            "record-date-mismatch",
+            f"{path}.date",
+            "record date must equal its located source filing date",
+        )
+
+
 def _validate_defendants(overlay, source_ids, findings):
     defendants = overlay.get("defendants")
     if not isinstance(defendants, list) or not defendants:
@@ -430,7 +461,7 @@ def _validate_defendants(overlay, source_ids, findings):
         defendant_id = defendant.get("defendant_id")
         if (
             not _stable(defendant_id)
-            or defendant.get("defendant_type") not in {"individual", "municipality"}
+            or defendant.get("defendant_type") not in ("individual", "municipality")
             or not _nonempty(defendant.get("display_label"))
             or not isinstance(defendant.get("dimensions"), list)
             or not defendant["dimensions"]
@@ -528,7 +559,7 @@ def _validate_overrides(overlay, generated_groups, effective_groups, defendant_m
         if (
             not _stable(override.get("override_id"))
             or not _stable(override.get("instruction_id"))
-            or override.get("action") not in {"add", "exclude", "regroup"}
+            or override.get("action") not in ("add", "exclude", "regroup")
             or not _id_list(override.get("affected_defendant_ids"), nonempty=True)
             or not set(override["affected_defendant_ids"]).issubset(defendant_map)
             or not _id_list(override.get("generated_group_ids"))
@@ -546,7 +577,14 @@ def _validate_overrides(overlay, generated_groups, effective_groups, defendant_m
         _add(findings, "override-provenance-invalid", "$.overrides", "override does not explain changed groups")
 
 
-def _validate_ledgers(overlay, snapshot, effective_groups, defendant_map, findings):
+def _validate_ledgers(
+    overlay,
+    snapshot,
+    effective_groups,
+    defendant_map,
+    dimensions,
+    findings,
+):
     ledgers = overlay.get("ledgers")
     fingerprints = overlay.get("ledger_fingerprints")
     if not _exact(ledgers, LEDGER_NAMES) or not _exact(fingerprints, LEDGER_NAMES):
@@ -580,15 +618,31 @@ def _validate_ledgers(overlay, snapshot, effective_groups, defendant_map, findin
         if not _stable(attack_id) or attack_id in attacks:
             _add(findings, "overlay-duplicate-identifier", path, "attack identifier is invalid or duplicated")
         attacks[attack_id] = attack
-        if attack["status"] not in ATTACK_STATUSES:
+        if not isinstance(attack["status"], str) or attack["status"] not in ATTACK_STATUSES:
             _add(findings, "attack-status-invalid", f"{path}.status", "attack status must be adversary-prefixed")
-        if not _date(attack["date"]) or not _stable(attack["claim_id"]) or not _stable(attack["challenged_act_id"]) or not _nonempty(attack["element_or_defense"]) or not _nonempty(attack["requested_disposition"]) or attack["qualified_immunity_prong"] not in {"prong-one", "prong-two", None}:
+        if not _date(attack["date"]) or not _stable(attack["group_id"]) or not _stable(attack["claim_id"]) or not _id_list(attack["defendant_ids"], nonempty=True) or not _stable(attack["challenged_act_id"]) or not _nonempty(attack["element_or_defense"]) or not _nonempty(attack["requested_disposition"]) or attack["qualified_immunity_prong"] not in ("prong-one", "prong-two", None):
             _add(findings, "attack-structure-invalid", path, "attack values are invalid")
         _validate_source_ids(attack["source_ids"], source_ids, findings, f"{path}.source_ids")
         _validate_location(attack["source_location"], source_map, findings, f"{path}.source_location")
-        group = effective_groups.get(attack["group_id"])
+        _validate_record_provenance(attack, source_map, findings, path)
+        group = effective_groups.get(attack["group_id"]) if _stable(attack["group_id"]) else None
         if group is None or not _id_list(attack["defendant_ids"], nonempty=True) or not set(attack["defendant_ids"]).issubset(set(group.get("member_defendant_ids", []))) or not set(attack["defendant_ids"]).issubset(defendant_map):
             _add(findings, "attack-group-link-invalid", path, "attack must link only to defendants in its effective group")
+        elif any(
+            dimensions.get((defendant_id, group["issue_id"]), {}).get("claim_id")
+            != attack["claim_id"]
+            or dimensions.get((defendant_id, group["issue_id"]), {}).get(
+                "challenged_act_id"
+            )
+            != attack["challenged_act_id"]
+            for defendant_id in attack["defendant_ids"]
+        ):
+            _add(
+                findings,
+                "attack-dimension-link-invalid",
+                path,
+                "attack claim and challenged act must match each defendant issue dimension",
+            )
     responses = {}
     response_records = ledgers.get("plaintiff_responses", {}).get("records", [])
     for index, response in enumerate(response_records if isinstance(response_records, list) else []):
@@ -600,12 +654,13 @@ def _validate_ledgers(overlay, snapshot, effective_groups, defendant_map, findin
         if not _stable(response_id) or response_id in responses:
             _add(findings, "overlay-duplicate-identifier", path, "response identifier is invalid or duplicated")
         responses[response_id] = response
-        if response["coverage"] not in RESPONSE_STATUSES:
+        if not isinstance(response["coverage"], str) or response["coverage"] not in RESPONSE_STATUSES:
             _add(findings, "response-status-invalid", f"{path}.coverage", "response coverage must be plaintiff-prefixed")
-        if response["attack_id"] not in attacks or not _date(response["date"]) or not _nonempty(response["coverage_explanation"]):
+        if not _stable(response["attack_id"]) or response["attack_id"] not in attacks or not _date(response["date"]) or not _nonempty(response["coverage_explanation"]):
             _add(findings, "response-structure-invalid", path, "response linkage or values are invalid")
         _validate_source_ids(response["source_ids"], source_ids, findings, f"{path}.source_ids")
         _validate_location(response["source_location"], source_map, findings, f"{path}.source_location")
+        _validate_record_provenance(response, source_map, findings, path)
     treatments = {}
     treatment_records = ledgers.get("judicial_treatments", {}).get("records", [])
     actor_map = {actor["actor_id"]: actor for actor in snapshot.get("actors", []) if isinstance(actor, dict) and "actor_id" in actor}
@@ -619,22 +674,40 @@ def _validate_ledgers(overlay, snapshot, effective_groups, defendant_map, findin
             _add(findings, "overlay-duplicate-identifier", path, "treatment identifier is invalid or duplicated")
         treatments[treatment_id] = treatment
         role = treatment["judicial_actor_role"]
-        actor = actor_map.get(treatment["judicial_actor_id"])
+        actor = actor_map.get(treatment["judicial_actor_id"]) if _stable(treatment["judicial_actor_id"]) else None
         if (
-            role not in TREATMENTS
+            not isinstance(role, str)
+            or role not in TREATMENTS
+            or not isinstance(treatment["treatment"], str)
             or treatment["treatment"] not in TREATMENTS.get(role, set())
             or actor is None
             or actor.get("actor_type") != role
+            or not isinstance(treatment["reasoning_type"], str)
             or treatment["reasoning_type"] not in REASONING_TYPES
         ):
             _add(findings, "judicial-stage-conflation", path, "judicial actor, role, treatment, and reasoning stage must agree")
-        if treatment["attack_id"] not in attacks or not _id_list(treatment["response_ids"]) or not set(treatment["response_ids"]).issubset(responses) or not _id_list(treatment["related_treatment_ids"]) or not _date(treatment["date"]):
+        if not _stable(treatment["attack_id"]) or treatment["attack_id"] not in attacks or not _id_list(treatment["response_ids"]) or not set(treatment["response_ids"]).issubset(responses) or not _id_list(treatment["related_treatment_ids"]) or not _date(treatment["date"]):
             _add(findings, "treatment-structure-invalid", path, "judicial treatment linkage or values are invalid")
         _validate_source_ids(treatment["source_ids"], source_ids, findings, f"{path}.source_ids")
         _validate_location(treatment["source_location"], source_map, findings, f"{path}.source_location")
+        _validate_record_provenance(treatment, source_map, findings, path)
+        location = treatment["source_location"]
+        located_source = source_map.get(location.get("source_id")) if isinstance(location, dict) else None
+        if located_source is not None and treatment["judicial_actor_id"] not in located_source.get("filed_by_actor_ids", []):
+            _add(
+                findings,
+                "judicial-source-attribution-invalid",
+                path,
+                "judicial treatment source must identify the attributed judicial actor",
+            )
     for treatment_id, treatment in treatments.items():
         path = f"$.ledgers.judicial_treatments.records[{treatment_id}]"
-        related = [treatments.get(value) for value in treatment["related_treatment_ids"]]
+        related_ids = treatment["related_treatment_ids"]
+        related = (
+            [treatments.get(value) for value in related_ids]
+            if _id_list(related_ids)
+            else []
+        )
         if any(value is None for value in related):
             _add(findings, "treatment-structure-invalid", path, "related treatment is unknown")
             continue
@@ -652,7 +725,14 @@ def _validate_ledgers(overlay, snapshot, effective_groups, defendant_map, findin
     return attacks, responses, treatments
 
 
-def _validate_matrix(overlay, attacks, responses, treatments, findings):
+def _validate_matrix(
+    overlay,
+    attacks,
+    responses,
+    treatments,
+    source_ids,
+    findings,
+):
     matrix = overlay.get("issue_matrix")
     if not isinstance(matrix, list):
         _add(findings, "overlay-structure-invalid", "$.issue_matrix", "issue matrix must be an array")
@@ -666,11 +746,33 @@ def _validate_matrix(overlay, attacks, responses, treatments, findings):
         if set(row) != MATRIX_KEYS:
             _add(findings, "matrix-role-contamination", path, "matrix may contain only canonical foreign keys and states")
             continue
-        attack = attacks.get(row["attack_id"])
+        attack = attacks.get(row["attack_id"]) if _stable(row["attack_id"]) else None
         if attack is None or row["attack_id"] in seen_attacks or not _id_list(row["response_ids"]) or not set(row["response_ids"]).issubset(responses) or not _id_list(row["treatment_ids"]) or not set(row["treatment_ids"]).issubset(treatments) or not _id_list(row["current_status_source_ids"], nonempty=True) or not _id_list(row["source_ids"], nonempty=True):
             _add(findings, "matrix-link-invalid", path, "matrix foreign keys are invalid")
             continue
         seen_attacks.add(row["attack_id"])
+        _validate_source_ids(
+            row["current_status_source_ids"],
+            source_ids,
+            findings,
+            f"{path}.current_status_source_ids",
+        )
+        _validate_source_ids(
+            row["source_ids"], source_ids, findings, f"{path}.source_ids"
+        )
+        if any(
+            responses[response_id]["attack_id"] != row["attack_id"]
+            for response_id in row["response_ids"]
+        ) or any(
+            treatments[treatment_id]["attack_id"] != row["attack_id"]
+            for treatment_id in row["treatment_ids"]
+        ):
+            _add(
+                findings,
+                "matrix-link-invalid",
+                path,
+                "matrix responses and treatments must concern the row attack",
+            )
         expected_sources = set(attack["source_ids"]) | set(row["current_status_source_ids"])
         for response_id in row["response_ids"]:
             expected_sources.update(responses[response_id]["source_ids"])
@@ -692,7 +794,7 @@ def _validate_matrix(overlay, attacks, responses, treatments, findings):
 
 def _validate_review_plan(overlay, snapshot, effective_groups, attacks, findings):
     plan = overlay.get("review_plan")
-    if not _exact(plan, REVIEW_PLAN_KEYS) or plan.get("actual_profile_status") not in {"available", "actual-adversary-unavailable"} or not isinstance(plan.get("targets"), list) or not plan["targets"] or not isinstance(plan.get("jobs"), list) or not plan["jobs"]:
+    if not _exact(plan, REVIEW_PLAN_KEYS) or plan.get("actual_profile_status") not in ("available", "actual-adversary-unavailable") or not isinstance(plan.get("targets"), list) or not plan["targets"] or not isinstance(plan.get("jobs"), list) or not plan["jobs"]:
         _add(findings, "review-plan-structure-invalid", "$.review_plan", "review plan is invalid")
         return
     source_map = {source["source_id"]: source for source in snapshot.get("sources", []) if isinstance(source, dict) and "source_id" in source}
@@ -705,6 +807,13 @@ def _validate_review_plan(overlay, snapshot, effective_groups, attacks, findings
         source = source_map.get(target["source_id"])
         if source is None or source["sha256"] != target["sha256"]:
             _add(findings, "review-plan-structure-invalid", path, "review target must pin a snapshot source")
+        elif source["document_family"] != target["document_family"]:
+            _add(
+                findings,
+                "review-target-source-mismatch",
+                path,
+                "review target family must match its pinned snapshot source",
+            )
         targets[target["artifact_id"]] = target
     run_ids = []
     job_ids = []
@@ -718,7 +827,7 @@ def _validate_review_plan(overlay, snapshot, effective_groups, attacks, findings
             canonical_run = str(uuid.UUID(job["run_id"])) == job["run_id"]
         except (ValueError, AttributeError, TypeError):
             canonical_run = False
-        if not _stable(job["job_id"]) or not canonical_run or job["review_kind"] not in {"blind-common-attack", "actual-adversary"} or not _id_list(job["attack_ids"]) or not _id_list(job["source_ids"], nonempty=True) or not _id_list(job["prior_review_ids"]):
+        if not _stable(job["job_id"]) or not canonical_run or not _stable(job["target_artifact_id"]) or not _stable(job["group_id"]) or job["review_kind"] not in ("blind-common-attack", "actual-adversary") or not _id_list(job["attack_ids"]) or not _id_list(job["source_ids"], nonempty=True) or not _id_list(job["prior_review_ids"]):
             _add(findings, "review-plan-structure-invalid", path, "review job values are invalid")
             continue
         target = targets.get(job["target_artifact_id"])
@@ -758,7 +867,7 @@ def _validate_review_plan(overlay, snapshot, effective_groups, attacks, findings
             _add(findings, "review-plan-cardinality-invalid", "$.review_plan.jobs", "available profile requires one blind and one actual job")
     if unavailable and attacks:
         _add(findings, "actual-profile-unavailable-invented", "$.review_plan.actual_profile_status", "an attack ledger cannot be hidden as unavailable")
-    if unavailable and any(source.get("document_family") in RESPONSIVE_FAMILIES for source in snapshot.get("sources", [])):
+    if unavailable and any(isinstance(source.get("document_family"), str) and source.get("document_family") in RESPONSIVE_FAMILIES for source in snapshot.get("sources", [])):
         _add(findings, "actual-profile-unavailable-invented", "$.review_plan.actual_profile_status", "responsive filing exists in the snapshot")
 
 
@@ -778,8 +887,22 @@ def validate_overlay(overlay, snapshot):
         if assignments.get(key) != 1:
             _add(findings, "defendant-group-assignment-invalid", "$.effective_groups", "every defendant issue dimension must belong to exactly one group")
     _validate_overrides(overlay, generated_groups, effective_groups, defendant_map, findings)
-    attacks, responses, treatments = _validate_ledgers(overlay, snapshot, effective_groups, defendant_map, findings)
-    _validate_matrix(overlay, attacks, responses, treatments, findings)
+    attacks, responses, treatments = _validate_ledgers(
+        overlay,
+        snapshot,
+        effective_groups,
+        defendant_map,
+        dimensions,
+        findings,
+    )
+    _validate_matrix(
+        overlay,
+        attacks,
+        responses,
+        treatments,
+        source_ids,
+        findings,
+    )
     _validate_review_plan(overlay, snapshot, effective_groups, attacks, findings)
     return findings
 
@@ -802,7 +925,7 @@ def validate_filing_manifest(manifest, overlay, snapshot):
     pin_ids = []
     for index, pin in enumerate(manifest.get("overlays", []) if isinstance(manifest.get("overlays"), list) else []):
         path = f"$.overlays[{index}]"
-        if not _exact(pin, PIN_KEYS) or pin.get("kind") not in {"litigation-alignment", "judge"} or not _stable(pin.get("overlay_id")) or not _nonempty(pin.get("version")) or not _sha(pin.get("sha256")) or not _date(pin.get("checked_through")) or not _stable(pin.get("source_snapshot_id")) or not _nonempty(pin.get("source_snapshot_version")) or not _sha(pin.get("source_snapshot_sha256")):
+        if not _exact(pin, PIN_KEYS) or pin.get("kind") not in ("litigation-alignment", "judge") or not _stable(pin.get("overlay_id")) or not _nonempty(pin.get("version")) or not _sha(pin.get("sha256")) or not _date(pin.get("checked_through")) or not _stable(pin.get("source_snapshot_id")) or not _nonempty(pin.get("source_snapshot_version")) or not _sha(pin.get("source_snapshot_sha256")):
             _add(findings, "manifest-structure-invalid", path, "overlay pin is invalid")
             continue
         pin_ids.append((pin["kind"], pin["overlay_id"]))

@@ -14,7 +14,7 @@
       "kind": "litigation-alignment",
       "overlay_id": "OVERLAY-COMPLETE",
       "version": "v1",
-      "sha256": "f8dc08d7dfe1353893b67d1787880f8b31bdd5205c4c2b2df22a42ede4c94476",
+      "sha256": "0761a6b3b676845a41a9541dd1f41e844680db501a231e2a846439ec3b370c0d",
       "checked_through": "2026-01-20",
       "validator_result": "passed",
       "source_snapshot_id": "SNAP-COMPLETE",

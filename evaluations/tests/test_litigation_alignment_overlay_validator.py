@@ -481,7 +481,7 @@ def complete_overlay(snapshot=None):
         "artifact_id": "TARGET-FAC",
         "source_id": "SRC-FAC",
         "sha256": fac_source["sha256"],
-        "document_family": "proposed amended complaint",
+        "document_family": "proposed-amended-complaint",
     }
     overlay = {
         "schema_version": "1.0",
@@ -707,6 +707,77 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
             ),
         )
 
+    def test_nested_wrong_json_types_fail_closed_with_stable_findings(self):
+        validator = load_validator()
+
+        invalid_actor = complete_snapshot()
+        invalid_actor["actors"][0]["actor_type"] = []
+        self.assertIn(
+            "snapshot-structure-invalid",
+            finding_ids(validator.validate_snapshot(invalid_actor)),
+        )
+
+        snapshot = complete_snapshot()
+        invalid_attack = complete_overlay(snapshot)
+        invalid_attack["ledgers"]["adversary_attacks"]["records"][0][
+            "group_id"
+        ] = []
+        update_ledger_fingerprints(invalid_attack)
+        self.assertIn(
+            "attack-structure-invalid",
+            finding_ids(validator.validate_overlay(invalid_attack, snapshot)),
+        )
+
+        invalid_response = complete_overlay(snapshot)
+        invalid_response["ledgers"]["plaintiff_responses"]["records"][0][
+            "attack_id"
+        ] = []
+        update_ledger_fingerprints(invalid_response)
+        self.assertIn(
+            "response-structure-invalid",
+            finding_ids(validator.validate_overlay(invalid_response, snapshot)),
+        )
+
+        invalid_treatment = complete_overlay(snapshot)
+        invalid_treatment["ledgers"]["judicial_treatments"]["records"][0][
+            "source_location"
+        ] = []
+        update_ledger_fingerprints(invalid_treatment)
+        self.assertIn(
+            "source-location-invalid",
+            finding_ids(validator.validate_overlay(invalid_treatment, snapshot)),
+        )
+
+        invalid_related = complete_overlay(snapshot)
+        invalid_related["ledgers"]["judicial_treatments"]["records"][1][
+            "related_treatment_ids"
+        ] = [[]]
+        update_ledger_fingerprints(invalid_related)
+        self.assertIn(
+            "treatment-structure-invalid",
+            finding_ids(validator.validate_overlay(invalid_related, snapshot)),
+        )
+
+        invalid_job = complete_overlay(snapshot)
+        invalid_job["review_plan"]["jobs"][0]["group_id"] = []
+        self.assertIn(
+            "review-plan-structure-invalid",
+            finding_ids(validator.validate_overlay(invalid_job, snapshot)),
+        )
+
+        invalid_manifest = complete_manifest(snapshot, complete_overlay(snapshot))
+        invalid_manifest["overlays"][0]["kind"] = []
+        self.assertIn(
+            "manifest-structure-invalid",
+            finding_ids(
+                validator.validate_filing_manifest(
+                    invalid_manifest,
+                    complete_overlay(snapshot),
+                    snapshot,
+                )
+            ),
+        )
+
     def test_identifiers_dates_sources_and_exact_quotes_are_validated(self):
         validator = load_validator()
         snapshot = complete_snapshot()
@@ -743,6 +814,98 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
         self.assertIn(
             "source-quote-mismatch",
             finding_ids(validator.validate_overlay(wrong_quote, snapshot)),
+        )
+
+    def test_records_bind_location_date_issue_and_judicial_authorship(self):
+        validator = load_validator()
+        snapshot = complete_snapshot()
+
+        split_provenance = complete_overlay(snapshot)
+        split_provenance["ledgers"]["adversary_attacks"]["records"][0][
+            "source_ids"
+        ] = ["SRC-FAC"]
+        update_ledger_fingerprints(split_provenance)
+        self.assertIn(
+            "record-source-link-invalid",
+            finding_ids(validator.validate_overlay(split_provenance, snapshot)),
+        )
+
+        wrong_date = complete_overlay(snapshot)
+        wrong_date["ledgers"]["adversary_attacks"]["records"][0]["date"] = (
+            "2026-01-11"
+        )
+        update_ledger_fingerprints(wrong_date)
+        self.assertIn(
+            "record-date-mismatch",
+            finding_ids(validator.validate_overlay(wrong_date, snapshot)),
+        )
+
+        wrong_dimension = complete_overlay(snapshot)
+        wrong_dimension["ledgers"]["adversary_attacks"]["records"][0][
+            "claim_id"
+        ] = "CLAIM-UNRELATED"
+        update_ledger_fingerprints(wrong_dimension)
+        self.assertIn(
+            "attack-dimension-link-invalid",
+            finding_ids(validator.validate_overlay(wrong_dimension, snapshot)),
+        )
+
+        wrong_judicial_author = complete_snapshot()
+        order = next(
+            source
+            for source in wrong_judicial_author["sources"]
+            if source["source_id"] == "SRC-ORDER"
+        )
+        order["filed_by_actor_ids"] = ["ACT-MAGISTRATE"]
+        overlay = complete_overlay(wrong_judicial_author)
+        self.assertIn(
+            "judicial-source-attribution-invalid",
+            finding_ids(
+                validator.validate_overlay(overlay, wrong_judicial_author)
+            ),
+        )
+
+        future_source = complete_snapshot()
+        future_source["sources"][-1]["filed_date"] = "2026-01-21"
+        self.assertIn(
+            "snapshot-source-after-check-date",
+            finding_ids(validator.validate_snapshot(future_source)),
+        )
+
+    def test_matrix_and_review_targets_preserve_exact_source_scope(self):
+        validator = load_validator()
+        snapshot = complete_snapshot()
+
+        wrong_family = complete_overlay(snapshot)
+        wrong_family["review_plan"]["targets"][0]["document_family"] = (
+            "complaint"
+        )
+        self.assertIn(
+            "review-target-source-mismatch",
+            finding_ids(validator.validate_overlay(wrong_family, snapshot)),
+        )
+
+        unknown_status_source = complete_overlay(snapshot)
+        row = unknown_status_source["issue_matrix"][1]
+        row["current_status_source_ids"] = ["SRC-UNKNOWN"]
+        row["source_ids"] = ["SRC-MOTION", "SRC-UNKNOWN"]
+        self.assertIn(
+            "overlay-unknown-source",
+            finding_ids(
+                validator.validate_overlay(unknown_status_source, snapshot)
+            ),
+        )
+
+        cross_attack_response = complete_overlay(snapshot)
+        row = cross_attack_response["issue_matrix"][1]
+        row["response_ids"] = ["RESP-ALPHA"]
+        row["response_state"] = "plaintiff-answered"
+        row["source_ids"] = ["SRC-FAC", "SRC-LEAVE", "SRC-MOTION"]
+        self.assertIn(
+            "matrix-link-invalid",
+            finding_ids(
+                validator.validate_overlay(cross_attack_response, snapshot)
+            ),
         )
 
     def test_snapshot_and_ledger_fingerprints_fail_closed(self):
@@ -1014,7 +1177,7 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
             "artifact_id": "TARGET-LEAVE",
             "source_id": "SRC-LEAVE",
             "sha256": leave["sha256"],
-            "document_family": "leave motion",
+            "document_family": "leave-to-amend-motion",
         }
         offset = len(overlay["review_plan"]["jobs"])
         added = review_jobs(overlay["effective_groups"], attacks, target)

@@ -314,7 +314,7 @@
         "artifact_id": "TARGET-FAC",
         "source_id": "SRC-FAC",
         "sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
-        "document_family": "proposed amended complaint"
+        "document_family": "proposed-amended-complaint"
       }
     ],
     "jobs": [

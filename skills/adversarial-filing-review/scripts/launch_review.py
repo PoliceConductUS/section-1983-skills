@@ -796,7 +796,7 @@ def _write_report(output, markdown):
         report_fd = os.open(
             output["report_path"].name,
             os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
-            0o666,
+            0o600,
             dir_fd=directory_fd,
         )
         with os.fdopen(
@@ -895,7 +895,10 @@ def execute_trusted_review(
         return {
             "outcome": "unavailable",
             "report_path": str(report_path),
-            "error": _error_result(error)["error"],
+            "error": {
+                "id": error.finding_id,
+                "reason": error.reason,
+            },
         }
     receipt = _receipt(validated, output, model, "completed")
     markdown = render_review_markdown(result["review"], receipt)

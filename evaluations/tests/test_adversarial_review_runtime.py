@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import stat
 import tempfile
 import unittest
 import uuid
@@ -446,6 +447,8 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertEqual(result["outcome"], "completed")
             self.assertEqual(Path(result["report_path"]).resolve(), expected.resolve())
             self.assertTrue(expected.is_file())
+            if os.name != "nt":
+                self.assertEqual(stat.S_IMODE(expected.stat().st_mode), 0o600)
             report = expected.read_text()
             self.assertIn("openai-responses-stateless", report)
             self.assertIn("gpt-synthetic", report)
@@ -671,6 +674,40 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertEqual(result["outcome"], "unavailable")
             self.assertNotIn("\n## Forged Result", report)
             self.assertEqual(report.count("## Independent review unavailable"), 1)
+
+    def test_cli_unavailable_result_does_not_disclose_provider_body(self):
+        main = self.trusted_api("main")
+        with tempfile.TemporaryDirectory() as directory:
+            project, version, artifact = self.make_version(directory)
+            provider_secret = packet()["draft"]["content"]
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "--trusted-openai",
+                        "--model",
+                        "gpt-synthetic",
+                        "--project-boundary",
+                        str(project),
+                        "--version-folder",
+                        str(version),
+                        "--artifact",
+                        str(artifact),
+                    ],
+                    input_bytes=json.dumps(packet()).encode("utf-8"),
+                    transport=TransportSpy(body=provider_secret.encode("utf-8")),
+                    environ={"OPENAI_API_KEY": "secret-test-key"},
+                )
+
+            result = json.loads(stdout.getvalue())
+            self.assertNotEqual(exit_code, 0)
+            self.assertEqual(result["outcome"], "unavailable")
+            self.assertEqual(
+                set(result["error"]),
+                {"id", "reason"},
+            )
+            self.assertNotIn(provider_secret, stdout.getvalue())
+            self.assertNotIn("secret-test-key", stdout.getvalue())
 
     def test_legacy_boolean_cannot_establish_command_independence(self):
         with tempfile.TemporaryDirectory() as directory:

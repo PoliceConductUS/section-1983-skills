@@ -140,5 +140,20 @@ complaint text, or if that unit was omitted, thinned, or routed to a brief,
 control memo, or internal matrix on the strength of a case-specific strategy or
 routing instruction. The brief supplying the analysis for some counts does not
 cure the complaint. Do not mark such a complaint filing-ready; identify the
-defective counts and either restore the unit or log a filing-critical GAP for
-strategy decision.
+defective counts and advise restoring the unit in a later authorized drafting
+stage or log a filing-critical GAP for strategy decision.
+
+## Independent quality-control stage
+
+An independent quality-control stage is non-mutating. It may read designated
+artifacts and write only its designated report or result. It must not edit,
+overwrite, correct, regenerate, or otherwise modify an artifact under review. A
+combined instruction to audit and fix does not authorize same-stage mutation.
+Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
+instructions do not override this boundary. Recommendations, proposed language,
+corrections, and copy-ready replacements are advisory only and do not authorize
+implementation. Remediation requires a separately authorized drafting or
+revision stage. Create a new version when versioning applies. A new read-only
+quality-control stage must verify the remediated artifact. An internal
+self-check inside an explicitly authorized drafting or revision stage may guide
+edits within that stage, but it is not an independent quality-control result.

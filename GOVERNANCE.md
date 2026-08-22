@@ -13,6 +13,21 @@ If the source is unavailable or its currency cannot be established, report the
 source gap rather than supplying a proposition from memory or a generic
 substitute.
 
+## Independent quality control
+
+An independent quality-control stage is non-mutating. It may read designated
+artifacts and write only its designated report or result. It must not edit,
+overwrite, correct, regenerate, or otherwise modify an artifact under review. A
+combined instruction to audit and fix does not authorize same-stage mutation.
+Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
+instructions do not override this boundary. Recommendations, proposed language,
+corrections, and copy-ready replacements are advisory only and do not authorize
+implementation. Remediation requires a separately authorized drafting or
+revision stage. Create a new version when versioning applies. A new read-only
+quality-control stage must verify the remediated artifact. An internal
+self-check inside an explicitly authorized drafting or revision stage may guide
+edits within that stage, but it is not an independent quality-control result.
+
 Verification, factual and authority source, permission, filing-readiness,
 judgment-routing, rules-provenance, and tool-ownership are protected gates. Any
 change that weakens, bypasses, removes, or changes a protected gate requires

@@ -1,10 +1,63 @@
-# Evidence-Bounded Overlay Method
+# Judicial Reasoning Profile
 
-A judge overlay is a bounded drafting input built from validated public
-evidence. It is not a prediction, personality profile, strategy file, or renamed
-copy of another judge's conclusions. It supplements governing law and the
-applicable document skill only when the reviewed corpus supports a neutral
-transfer.
+A judge overlay is an evidence-bounded judicial reasoning profile for the
+assigned judge. It stratifies verified decisions by issue, procedural posture,
+governing standard, reasoning authorship, and evidence strength. It is not a
+prediction, personality profile, strategy file, or renamed copy of another
+judge's conclusions. It supplements governing law and the applicable document
+skill only when the reviewed corpus supports a neutral transfer.
+
+Court-specific filing rules, procedures, standing orders, and documented conduct
+requirements are a separate compliance component. They accompany the judicial
+reasoning profile but do not become evidence about how the judge reasons or is
+likely to rule.
+
+[Manage case overlays](OVERLAYS.md) owns the shared immutable lifecycle,
+inventory, precedence, manifest, and reuse rules. This guide adds the judge-
+specific research and invalidation rules.
+
+## Judge-overlay lifecycle
+
+Create the first judge overlay after assignment is verified and before a filing
+first seeks a judge-specific drafting input. Reuse it only while the assignment,
+validated corpus, neutral transfer cards, official procedure and standing order
+sources, prohibited inferences, checked date, and validator result remain
+current.
+
+Create a new immutable version after assignment or reassignment, a changed
+official procedure or standing order, a new or corrected validated corpus or
+transfer card, a stale checked date, a changed prohibited inference, or a failed
+validator result. Preserve and supersede the prior version. Until the new
+version validates, make no judge-specific drafting change.
+
+## Judicial reasoning dimensions
+
+Build the profile issue by issue and procedural posture by procedural posture.
+Code only source-supported observations about:
+
+- **substantive doctrine** and the legal rules the judge applies;
+- **procedural doctrine** and distinctions among pleading, summary judgment,
+  trial, postjudgment, and appellate stages;
+- **reasoning patterns**, including demonstrated analogies, distinctions, and
+  limiting principles;
+- **authority hierarchy** and the authorities used for the relevant proposition;
+- **factual methodology**, including chronology, quotations, record treatment,
+  and relevant-time knowledge;
+- **error sensitivities**, including identified standard, inference,
+  preservation, authority, or internal-consistency defects; and
+- **analytical presentation patterns**, without imitating or mimicking the
+  judge's voice or personality.
+
+Research published opinions and prior orders first. Authenticated public
+articles, speeches, and books authored by the judge may supply bounded context,
+but do not become governing authority. Standing orders and courtroom procedures
+are separate compliance inputs, not proof of a reasoning pattern.
+
+A validated transfer may organize an argument as the judge's established rule,
+the supported facts, and the requested application. It may ask the judge to
+apply the judge's own verified reasoning consistently. It must not state that a
+result is likely, attribute a preference or psychology, or turn a descriptive
+pattern into a prediction.
 
 ## 1. Define the research scope
 

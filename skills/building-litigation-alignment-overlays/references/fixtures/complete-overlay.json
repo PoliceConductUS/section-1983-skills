@@ -1,0 +1,389 @@
+{
+  "schema_version": "1.0",
+  "overlay_id": "OVERLAY-COMPLETE",
+  "version": "v1",
+  "generated_at": "2026-01-20T12:00:00Z",
+  "source_snapshot": {
+    "snapshot_id": "SNAP-COMPLETE",
+    "version": "v1",
+    "sha256": "eb485614849995ffeb8765d6521fd93c6c615c31668e93339053f3af07f88d0c",
+    "checked_through": "2026-01-20"
+  },
+  "previous_version_id": null,
+  "invalidation_events": [],
+  "defendants": [
+    {
+      "defendant_id": "DEF-ALPHA",
+      "defendant_type": "individual",
+      "display_label": "Officer Alpha",
+      "source_ids": ["SRC-COMPLAINT", "SRC-MOTION"],
+      "dimensions": [
+        {
+          "issue_id": "ISSUE-1",
+          "claim_id": "CLAIM-1",
+          "capacity": "individual",
+          "challenged_act_id": "ACT-ALPHA-1",
+          "relevant_time_knowledge_position": "knowledge-disputed",
+          "qualified_immunity_position": "qualified-immunity-prong-one",
+          "requested_relief": "dismissal",
+          "other_material_defense": "none"
+        }
+      ]
+    },
+    {
+      "defendant_id": "DEF-BETA",
+      "defendant_type": "individual",
+      "display_label": "Officer Beta",
+      "source_ids": ["SRC-COMPLAINT", "SRC-MOTION"],
+      "dimensions": [
+        {
+          "issue_id": "ISSUE-1",
+          "claim_id": "CLAIM-1",
+          "capacity": "individual",
+          "challenged_act_id": "ACT-BETA-1",
+          "relevant_time_knowledge_position": "personal-participation-disputed",
+          "qualified_immunity_position": "qualified-immunity-prong-two",
+          "requested_relief": "dismissal",
+          "other_material_defense": "personal-participation"
+        }
+      ]
+    },
+    {
+      "defendant_id": "DEF-CITY",
+      "defendant_type": "municipality",
+      "display_label": "Example City",
+      "source_ids": ["SRC-COMPLAINT", "SRC-MOTION"],
+      "dimensions": [
+        {
+          "issue_id": "ISSUE-1",
+          "claim_id": "CLAIM-MONELL",
+          "capacity": "official",
+          "challenged_act_id": "ACT-POLICY-1",
+          "relevant_time_knowledge_position": "notice-disputed",
+          "qualified_immunity_position": "not-applicable",
+          "requested_relief": "dismissal",
+          "other_material_defense": "moving-force"
+        }
+      ]
+    }
+  ],
+  "generated_groups": [
+    {
+      "group_id": "GROUP-ALPHA",
+      "issue_id": "ISSUE-1",
+      "member_defendant_ids": ["DEF-ALPHA"],
+      "mixed_municipal_alignment_established": false,
+      "source_ids": ["SRC-MOTION"],
+      "basis": "The approved synthetic docket states this issue-specific position.",
+      "uncertainty": null
+    },
+    {
+      "group_id": "GROUP-BETA",
+      "issue_id": "ISSUE-1",
+      "member_defendant_ids": ["DEF-BETA"],
+      "mixed_municipal_alignment_established": false,
+      "source_ids": ["SRC-MOTION"],
+      "basis": "The approved synthetic docket states this issue-specific position.",
+      "uncertainty": null
+    },
+    {
+      "group_id": "GROUP-CITY",
+      "issue_id": "ISSUE-1",
+      "member_defendant_ids": ["DEF-CITY"],
+      "mixed_municipal_alignment_established": false,
+      "source_ids": ["SRC-MOTION"],
+      "basis": "The approved synthetic docket states this issue-specific position.",
+      "uncertainty": null
+    }
+  ],
+  "overrides": [],
+  "effective_groups": [
+    {
+      "group_id": "GROUP-ALPHA",
+      "issue_id": "ISSUE-1",
+      "member_defendant_ids": ["DEF-ALPHA"],
+      "mixed_municipal_alignment_established": false,
+      "source_ids": ["SRC-MOTION"],
+      "basis": "The approved synthetic docket states this issue-specific position.",
+      "uncertainty": null
+    },
+    {
+      "group_id": "GROUP-BETA",
+      "issue_id": "ISSUE-1",
+      "member_defendant_ids": ["DEF-BETA"],
+      "mixed_municipal_alignment_established": false,
+      "source_ids": ["SRC-MOTION"],
+      "basis": "The approved synthetic docket states this issue-specific position.",
+      "uncertainty": null
+    },
+    {
+      "group_id": "GROUP-CITY",
+      "issue_id": "ISSUE-1",
+      "member_defendant_ids": ["DEF-CITY"],
+      "mixed_municipal_alignment_established": false,
+      "source_ids": ["SRC-MOTION"],
+      "basis": "The approved synthetic docket states this issue-specific position.",
+      "uncertainty": null
+    }
+  ],
+  "ledgers": {
+    "adversary_attacks": {
+      "ledger_id": "LEDGER-ATTACKS",
+      "version": "v1",
+      "records": [
+        {
+          "attack_id": "ATK-ALPHA",
+          "source_ids": ["SRC-MOTION"],
+          "source_location": {
+            "source_id": "SRC-MOTION",
+            "docket_entry": "8",
+            "page": "1",
+            "heading": "Synthetic ground",
+            "quote": "Alpha raises qualified immunity."
+          },
+          "date": "2026-01-10",
+          "group_id": "GROUP-ALPHA",
+          "claim_id": "CLAIM-1",
+          "defendant_ids": ["DEF-ALPHA"],
+          "challenged_act_id": "ACT-ALPHA-1",
+          "element_or_defense": "qualified immunity",
+          "qualified_immunity_prong": "prong-one",
+          "requested_disposition": "dismiss the claim",
+          "status": "adversary-asserted"
+        },
+        {
+          "attack_id": "ATK-BETA",
+          "source_ids": ["SRC-MOTION"],
+          "source_location": {
+            "source_id": "SRC-MOTION",
+            "docket_entry": "8",
+            "page": "1",
+            "heading": "Synthetic ground",
+            "quote": "Beta disputes personal participation."
+          },
+          "date": "2026-01-10",
+          "group_id": "GROUP-BETA",
+          "claim_id": "CLAIM-1",
+          "defendant_ids": ["DEF-BETA"],
+          "challenged_act_id": "ACT-BETA-1",
+          "element_or_defense": "personal participation",
+          "qualified_immunity_prong": "prong-two",
+          "requested_disposition": "dismiss the claim",
+          "status": "adversary-asserted"
+        },
+        {
+          "attack_id": "ATK-CITY",
+          "source_ids": ["SRC-MOTION"],
+          "source_location": {
+            "source_id": "SRC-MOTION",
+            "docket_entry": "8",
+            "page": "1",
+            "heading": "Synthetic ground",
+            "quote": "Example City attacks policy causation."
+          },
+          "date": "2026-01-10",
+          "group_id": "GROUP-CITY",
+          "claim_id": "CLAIM-MONELL",
+          "defendant_ids": ["DEF-CITY"],
+          "challenged_act_id": "ACT-POLICY-1",
+          "element_or_defense": "moving force",
+          "qualified_immunity_prong": null,
+          "requested_disposition": "dismiss the claim",
+          "status": "adversary-asserted"
+        }
+      ]
+    },
+    "plaintiff_responses": {
+      "ledger_id": "LEDGER-RESPONSES",
+      "version": "v1",
+      "records": [
+        {
+          "response_id": "RESP-ALPHA",
+          "attack_id": "ATK-ALPHA",
+          "source_ids": ["SRC-LEAVE", "SRC-FAC"],
+          "source_location": {
+            "source_id": "SRC-LEAVE",
+            "docket_entry": "12",
+            "page": "1",
+            "heading": "Synthetic ground",
+            "quote": "Plaintiff requests leave to amend the synthetic complaint."
+          },
+          "date": "2026-01-14",
+          "coverage": "plaintiff-answered",
+          "coverage_explanation": "The motion and proposed amendment address the attack."
+        }
+      ]
+    },
+    "judicial_treatments": {
+      "ledger_id": "LEDGER-TREATMENTS",
+      "version": "v1",
+      "records": [
+        {
+          "treatment_id": "TREAT-MAG",
+          "attack_id": "ATK-ALPHA",
+          "response_ids": ["RESP-ALPHA"],
+          "judicial_actor_id": "ACT-MAGISTRATE",
+          "judicial_actor_role": "magistrate-judge",
+          "source_ids": ["SRC-RECOMMENDATION"],
+          "source_location": {
+            "source_id": "SRC-RECOMMENDATION",
+            "docket_entry": "18",
+            "page": "1",
+            "heading": "Synthetic ground",
+            "quote": "The magistrate judge recommends granting Alpha's first attack."
+          },
+          "date": "2026-01-18",
+          "treatment": "magistrate-judge-recommended-grant",
+          "reasoning_type": "recommendation",
+          "related_treatment_ids": [],
+          "status": "current"
+        },
+        {
+          "treatment_id": "TREAT-DISTRICT",
+          "attack_id": "ATK-ALPHA",
+          "response_ids": ["RESP-ALPHA"],
+          "judicial_actor_id": "ACT-DISTRICT",
+          "judicial_actor_role": "district-judge",
+          "source_ids": ["SRC-ORDER"],
+          "source_location": {
+            "source_id": "SRC-ORDER",
+            "docket_entry": "20",
+            "page": "1",
+            "heading": "Synthetic ground",
+            "quote": "The district judge adopts the recommendation without additional reasoning."
+          },
+          "date": "2026-01-20",
+          "treatment": "district-judge-adopted",
+          "reasoning_type": "adoption-without-independent-reasoning",
+          "related_treatment_ids": ["TREAT-MAG"],
+          "status": "current"
+        }
+      ]
+    }
+  },
+  "ledger_fingerprints": {
+    "adversary_attacks": "b00b1df373343cc4951adb51bef3ad474cdb10485ac4f884e3f13257de784d68",
+    "plaintiff_responses": "6f842399f8b9449411ebe580ed1dac3bcdf6b7ca548475681f229dd010ca9eb7",
+    "judicial_treatments": "496f599a56315fc1862e17439252e7a8ba90c5bb358c15fdb2045028951beeca"
+  },
+  "issue_matrix": [
+    {
+      "row_id": "ROW-ALPHA",
+      "attack_id": "ATK-ALPHA",
+      "response_ids": ["RESP-ALPHA"],
+      "treatment_ids": ["TREAT-MAG", "TREAT-DISTRICT"],
+      "response_state": "plaintiff-answered",
+      "judicial_state": "district-judge-adopted",
+      "current_procedural_status": "district disposition entered",
+      "current_status_source_ids": ["SRC-ORDER"],
+      "source_ids": [
+        "SRC-FAC",
+        "SRC-LEAVE",
+        "SRC-MOTION",
+        "SRC-ORDER",
+        "SRC-RECOMMENDATION"
+      ]
+    },
+    {
+      "row_id": "ROW-BETA",
+      "attack_id": "ATK-BETA",
+      "response_ids": [],
+      "treatment_ids": [],
+      "response_state": "plaintiff-response-unavailable",
+      "judicial_state": "judicial-treatment-unavailable",
+      "current_procedural_status": "attack pending on supplied record",
+      "current_status_source_ids": ["SRC-MOTION"],
+      "source_ids": ["SRC-MOTION"]
+    },
+    {
+      "row_id": "ROW-CITY",
+      "attack_id": "ATK-CITY",
+      "response_ids": [],
+      "treatment_ids": [],
+      "response_state": "plaintiff-response-unavailable",
+      "judicial_state": "judicial-treatment-unavailable",
+      "current_procedural_status": "attack pending on supplied record",
+      "current_status_source_ids": ["SRC-MOTION"],
+      "source_ids": ["SRC-MOTION"]
+    }
+  ],
+  "review_plan": {
+    "actual_profile_status": "available",
+    "targets": [
+      {
+        "artifact_id": "TARGET-FAC",
+        "source_id": "SRC-FAC",
+        "sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "document_family": "proposed amended complaint"
+      }
+    ],
+    "jobs": [
+      {
+        "job_id": "JOB-1",
+        "run_id": "00000000-0000-4000-8000-000000000001",
+        "target_artifact_id": "TARGET-FAC",
+        "target_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "group_id": "GROUP-ALPHA",
+        "review_kind": "blind-common-attack",
+        "attack_ids": [],
+        "source_ids": ["SRC-FAC"],
+        "prior_review_ids": []
+      },
+      {
+        "job_id": "JOB-2",
+        "run_id": "00000000-0000-4000-8000-000000000002",
+        "target_artifact_id": "TARGET-FAC",
+        "target_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "group_id": "GROUP-ALPHA",
+        "review_kind": "actual-adversary",
+        "attack_ids": ["ATK-ALPHA"],
+        "source_ids": ["SRC-FAC", "SRC-MOTION"],
+        "prior_review_ids": []
+      },
+      {
+        "job_id": "JOB-3",
+        "run_id": "00000000-0000-4000-8000-000000000003",
+        "target_artifact_id": "TARGET-FAC",
+        "target_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "group_id": "GROUP-BETA",
+        "review_kind": "blind-common-attack",
+        "attack_ids": [],
+        "source_ids": ["SRC-FAC"],
+        "prior_review_ids": []
+      },
+      {
+        "job_id": "JOB-4",
+        "run_id": "00000000-0000-4000-8000-000000000004",
+        "target_artifact_id": "TARGET-FAC",
+        "target_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "group_id": "GROUP-BETA",
+        "review_kind": "actual-adversary",
+        "attack_ids": ["ATK-BETA"],
+        "source_ids": ["SRC-FAC", "SRC-MOTION"],
+        "prior_review_ids": []
+      },
+      {
+        "job_id": "JOB-5",
+        "run_id": "00000000-0000-4000-8000-000000000005",
+        "target_artifact_id": "TARGET-FAC",
+        "target_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "group_id": "GROUP-CITY",
+        "review_kind": "blind-common-attack",
+        "attack_ids": [],
+        "source_ids": ["SRC-FAC"],
+        "prior_review_ids": []
+      },
+      {
+        "job_id": "JOB-6",
+        "run_id": "00000000-0000-4000-8000-000000000006",
+        "target_artifact_id": "TARGET-FAC",
+        "target_sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586",
+        "group_id": "GROUP-CITY",
+        "review_kind": "actual-adversary",
+        "attack_ids": ["ATK-CITY"],
+        "source_ids": ["SRC-FAC", "SRC-MOTION"],
+        "prior_review_ids": []
+      }
+    ]
+  }
+}

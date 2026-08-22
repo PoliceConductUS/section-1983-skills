@@ -15,13 +15,13 @@
 
 ## 2. Minimal GREEN
 
-- [ ] 2.1 Add `building-litigation-alignment-overlays` with only its required
+- [x] 2.1 Add `building-litigation-alignment-overlays` with only its required
       skill, metadata, schemas, validator, and generic fixtures.
-- [ ] 2.2 Add `OVERLAYS.md`; update README and the drafting router; link and add
+- [x] 2.2 Add `OVERLAYS.md`; update README and the drafting router; link and add
       judge-specific lifecycle triggers in `JUDGE_OVERLAYS.md`.
-- [ ] 2.3 Implement exact structure, canonical fingerprint, linked-record,
+- [x] 2.3 Implement exact structure, canonical fingerprint, linked-record,
       alignment, role, matrix, review-plan, and filing-manifest validation.
-- [ ] 2.4 Run focused GREEN, quick skill validation, full validation, corpus,
+- [x] 2.4 Run focused GREEN, quick skill validation, full validation, corpus,
       governance, forbidden-folder, comment, formatting, and diff checks; commit
       and sync.
 

@@ -13,6 +13,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 README_PATH = REPOSITORY_ROOT / "README.md"
 GUIDE_PATH = REPOSITORY_ROOT / "JUDGE_OVERLAYS.md"
 REQUIRED_GUIDE_TARGETS = {
+    "OVERLAYS.md",
     "skills/drafting-for-judge-scholer/SKILL.md",
     "skills/studying-rule-59e-decisions/references/decision-corpus.schema.json",
     "skills/studying-rule-59e-decisions/references/transfer-card.schema.json",

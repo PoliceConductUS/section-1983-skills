@@ -166,6 +166,15 @@ class LitigationAlignmentOverlayStructureTest(unittest.TestCase):
 
     def test_judge_guide_links_to_general_lifecycle_and_owns_judge_triggers(self):
         judge = text(JUDGE_GUIDE)
+        self.assertRegex(judge, r"(?m)^#\s+Judicial Reasoning Profile\s*$")
+        self.assertRegex(
+            judge,
+            r"(?is)judicial reasoning profile.{0,500}"
+            r"(?:issue|procedural posture).{0,300}(?:authorship|evidence strength)",
+        )
+        normalized_judge = " ".join(judge.casefold().split())
+        self.assertIn("court-specific filing rules", normalized_judge)
+        self.assertIn("separate compliance component", normalized_judge)
         self.assertIn("[Manage case overlays](OVERLAYS.md)", judge)
         for phrase in (
             "assignment",
@@ -177,7 +186,43 @@ class LitigationAlignmentOverlayStructureTest(unittest.TestCase):
             "new immutable version",
         ):
             self.assertIn(phrase.casefold(), judge.casefold())
-        self.assertIn("do not manipulate judicial assignment", judge.casefold())
+        self.assertRegex(
+            judge.casefold(),
+            r"do not manipulate(?: or predict)? judicial assignment",
+        )
+
+    def test_judge_overlay_is_a_judicial_reasoning_profile(self):
+        judge = text(JUDGE_GUIDE)
+        self.assertRegex(judge, r"(?m)^##\s+Judicial reasoning dimensions\s*$")
+        for phrase in (
+            "substantive doctrine",
+            "procedural doctrine",
+            "reasoning patterns",
+            "authority hierarchy",
+            "factual methodology",
+            "error sensitivities",
+            "analytical presentation patterns",
+            "published opinions",
+            "prior orders",
+            "articles",
+            "speeches",
+            "books",
+            "standing orders",
+            "courtroom procedures",
+            "apply the judge's own verified reasoning consistently",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.casefold(), judge.casefold())
+        self.assertRegex(
+            judge,
+            r"(?is)(?:articles|speeches|books).{0,300}"
+            r"(?:not governing authority|(?:do|does) not become governing authority)",
+        )
+        self.assertRegex(
+            judge,
+            r"(?is)(?:writing|presentation).{0,250}"
+            r"(?:without|do not|must not|never).{0,100}(?:imitate|mimic)",
+        )
 
     def test_durable_judge_spec_has_concrete_lifecycle_purpose(self):
         specification = text(JUDGE_SPEC)
@@ -187,6 +232,9 @@ class LitigationAlignmentOverlayStructureTest(unittest.TestCase):
         self.assertIsNotNone(purpose)
         self.assertNotIn("TBD", purpose.group(1))
         self.assertIn("judge overlay", purpose.group(1).casefold())
+        self.assertRegex(
+            purpose.group(1), r"(?is)judicial\s+reasoning\s+profile"
+        )
         self.assertIn("lifecycle", specification.casefold())
 
     def test_public_skill_keeps_counsel_research_and_filing_edits_out_of_scope(self):

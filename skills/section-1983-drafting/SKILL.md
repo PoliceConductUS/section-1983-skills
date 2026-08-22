@@ -46,19 +46,23 @@ Load each applicable skill once, in this order:
    incorporated arrest video is material.
 5. Add an assigned-judge skill, such as `drafting-for-judge-scholer`, as a
    court-specific overlay.
-6. Add `drafting-section-1983-written-discovery` for requests for production,
+6. Add `building-litigation-alignment-overlays` before drafting an amended
+   complaint, leave-to-amend package, or other filing that should consume actual
+   adversary attacks or judicial treatment from the current approved docket
+   snapshot. A stale or failing overlay produces no specialized drafting change.
+7. Add `drafting-section-1983-written-discovery` for requests for production,
    interrogatories, or requests for admission.
-7. Add `auditing-section-1983-discovery-responses` for a request-by-request
+8. Add `auditing-section-1983-discovery-responses` for a request-by-request
    response, objection, production, and withholding audit.
-8. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
+9. Add `drafting-section-1983-meet-and-confer` for correspondence based on a
    completed discovery-response audit.
-9. Add `auditing-section-1983-privilege-logs` to determine approved log
-   requirements or audit a supplied privilege log.
-10. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
+10. Add `auditing-section-1983-privilege-logs` to determine approved log
+    requirements or audit a supplied privilege log.
+11. Add `drafting-section-1983-deposition-outlines` for chronology- and element-
     gap-driven deposition questions.
-11. Run `audit-authorities` before treating a filing or clearly-established-law
+12. Run `audit-authorities` before treating a filing or clearly-established-law
     proposition as verified.
-12. Run `horan-bad-words` on the substantively complete draft and rerun it after
+13. Run `horan-bad-words` on the substantively complete draft and rerun it after
     any material authority-driven revision.
 
 The more specific skill adds requirements. It does not relax this skill,

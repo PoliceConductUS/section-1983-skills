@@ -2,8 +2,11 @@
 
 ## Purpose
 
-TBD - created by archiving change issue-19-judge-overlay-guide. Update Purpose
-after archive.
+Define an evidence-bounded, anti-gaming judge overlay as a judicial reasoning
+profile for the assigned judge. Its authoring and lifecycle method preserves
+source strength, keeps official court requirements separate from reasoning
+evidence, enforces neutral transfer limits, creates immutable versions, and
+fails closed when support is insufficient.
 
 ## Requirements
 
@@ -33,6 +36,28 @@ without adding a judge-specific proposition.
 - **WHEN** a corpus cannot support a claimed cluster or tendency
 - **THEN** the overlay preserves any verified example at its actual strength and
   adds no stronger judge-specific proposition
+
+### Requirement: Judicial reasoning profile scope
+
+The judge overlay SHALL be a judicial reasoning profile for the assigned judge.
+For each supported issue and procedural posture, it SHALL distinguish
+substantive doctrine, procedural doctrine, reasoning patterns, authority
+hierarchy, factual methodology, error sensitivities, and analytical presentation
+patterns. It SHALL use verified public opinions and orders as its primary
+reasoning sources. Public judge-authored articles, speeches, and books MAY
+provide bounded context but MUST NOT become governing authority. Standing orders
+and courtroom procedures SHALL remain separate compliance inputs.
+
+The profile MAY support a request to apply the judge's own verified reasoning
+consistently. It MUST NOT infer psychology or personal preference, imitate the
+judge's voice, or convert descriptive patterns into outcome predictions.
+
+#### Scenario: Prior reasoning supports the current analytical sequence
+
+- **WHEN** verified sources establish the judge's rule, reasoning sequence, and
+  limiting principle for the same issue and posture
+- **THEN** a neutral transfer may organize the supported facts and requested
+  application within that demonstrated method without predicting the result
 
 ### Requirement: Anti-gaming boundary
 

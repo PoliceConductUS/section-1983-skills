@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "snapshot_id": "SNAP-COMPLETE",
+  "version": "v1",
+  "checked_through": "2026-01-20",
+  "actors": [
+    {
+      "actor_id": "ACT-PLAINTIFF",
+      "actor_type": "plaintiff",
+      "display_label": "Plaintiff Example"
+    },
+    {
+      "actor_id": "ACT-ALPHA",
+      "actor_type": "individual-defendant",
+      "display_label": "Officer Alpha"
+    },
+    {
+      "actor_id": "ACT-BETA",
+      "actor_type": "individual-defendant",
+      "display_label": "Officer Beta"
+    },
+    {
+      "actor_id": "ACT-CITY",
+      "actor_type": "municipality-defendant",
+      "display_label": "Example City"
+    },
+    {
+      "actor_id": "ACT-MAGISTRATE",
+      "actor_type": "magistrate-judge",
+      "display_label": "Magistrate Judge Example"
+    },
+    {
+      "actor_id": "ACT-DISTRICT",
+      "actor_type": "district-judge",
+      "display_label": "District Judge Example"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SRC-COMPLAINT",
+      "docket_entry": "1",
+      "filed_date": "2026-01-02",
+      "document_family": "complaint",
+      "filed_by_actor_ids": ["ACT-PLAINTIFF"],
+      "content": "Synthetic complaint against Officer Alpha, Officer Beta, and Example City.",
+      "sha256": "f42ed1f5423c529b7d2b50a9b8b56eadc9a7092288959bd366221c86c4d45ead"
+    },
+    {
+      "source_id": "SRC-MOTION",
+      "docket_entry": "8",
+      "filed_date": "2026-01-10",
+      "document_family": "motion-to-dismiss",
+      "filed_by_actor_ids": ["ACT-ALPHA", "ACT-BETA", "ACT-CITY"],
+      "content": "Alpha raises qualified immunity. Beta disputes personal participation. Example City attacks policy causation.",
+      "sha256": "f0478a07a047832c734ae1a8e9e332133ab0679fcee79135f01a2811a57a7a6e"
+    },
+    {
+      "source_id": "SRC-LEAVE",
+      "docket_entry": "12",
+      "filed_date": "2026-01-14",
+      "document_family": "leave-to-amend-motion",
+      "filed_by_actor_ids": ["ACT-PLAINTIFF"],
+      "content": "Plaintiff requests leave to amend the synthetic complaint.",
+      "sha256": "1ada5d12933942fd5c697e11d6230c59c9be9b94acf9c719249ec5c3d1f76d55"
+    },
+    {
+      "source_id": "SRC-FAC",
+      "docket_entry": "12-1",
+      "filed_date": "2026-01-14",
+      "document_family": "proposed-amended-complaint",
+      "filed_by_actor_ids": ["ACT-PLAINTIFF"],
+      "content": "The proposed amended complaint separately alleges each synthetic challenged act.",
+      "sha256": "62b3f8cd1eb2783e7898996f13084af35de74354e60098f3499a1bd4dd31c586"
+    },
+    {
+      "source_id": "SRC-RECOMMENDATION",
+      "docket_entry": "18",
+      "filed_date": "2026-01-18",
+      "document_family": "magistrate-recommendation",
+      "filed_by_actor_ids": ["ACT-MAGISTRATE"],
+      "content": "The magistrate judge recommends granting Alpha's first attack.",
+      "sha256": "44473d1dd3f01e8a34455b0ca20f7c272851ffbb885c8e60a72b7864514afb6c"
+    },
+    {
+      "source_id": "SRC-ORDER",
+      "docket_entry": "20",
+      "filed_date": "2026-01-20",
+      "document_family": "district-order",
+      "filed_by_actor_ids": ["ACT-DISTRICT"],
+      "content": "The district judge adopts the recommendation without additional reasoning.",
+      "sha256": "1b41767a8d5a6dca968bbb53b3a2dd56897652708c34cc1a7c9b4cd84a9d611c"
+    }
+  ]
+}

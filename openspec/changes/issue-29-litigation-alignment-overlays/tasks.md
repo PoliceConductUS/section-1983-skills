@@ -4,12 +4,12 @@
 
 - [x] 1.1 Record the approved lifecycle, role separation, litigation-alignment,
       review-plan, and documentation ownership decisions.
-- [ ] 1.2 Add structural RED for the public skill, local schemas and validator,
+- [x] 1.2 Add structural RED for the public skill, local schemas and validator,
       README/router routes, general guide, judge lifecycle link, and durable
       Purpose correction.
-- [ ] 1.3 Add validator RED with generic synthetic snapshot, complete overlay,
+- [x] 1.3 Add validator RED with generic synthetic snapshot, complete overlay,
       no-responsive-filing degradation, and filing-manifest fixtures.
-- [ ] 1.4 Prove grouping, role separation, judicial attribution, matrix,
+- [x] 1.4 Prove grouping, role separation, judicial attribution, matrix,
       review-plan, and freshness mutations fail for the intended reasons; review
       and commit RED, then sync.
 

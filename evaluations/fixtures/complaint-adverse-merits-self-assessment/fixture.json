@@ -1,0 +1,41 @@
+{
+  "id": "complaint-adverse-merits-self-assessment",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-complaints",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "volunteers-adverse-merits-assessment",
+      "candidate": "regression-filed-assessment.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Filed Count Excerpt", "Internal Strategy Note"],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "filed-adverse-merits-assessment",
+        "pattern": "(?is)# Filed Count Excerpt(?:(?!# Internal Strategy Note).){0,2400}(?:claim|element|fair-warning|immunity).{0,100}(?:weak|likely to fail|likely barred|legally deficient|probably subject to qualified immunity)"
+      }
+    ],
+    "required_citations": ["CC-FACTS", "CC-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "qualifies-facts-not-claim",
+      "description": "States the supplied source limitation and any supported factual alternative without describing the filed claim, element, fair-warning path, or immunity position as legally weak."
+    },
+    {
+      "id": "keeps-risk-assessment-internal",
+      "description": "Places the supplied adverse merits assessment in the internal strategy note rather than filed text."
+    },
+    {
+      "id": "preserves-candor",
+      "description": "Uses the approved facts and authority accurately without hiding the unresolved fact or adverse internal assessment."
+    }
+  ]
+}

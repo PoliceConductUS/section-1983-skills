@@ -1,0 +1,10 @@
+[
+  {
+    "id": "FW-AUTH",
+    "path": "approved-authority-record.md"
+  },
+  {
+    "id": "FW-BOUNDARY",
+    "path": "approved-fair-warning-boundary.md"
+  }
+]

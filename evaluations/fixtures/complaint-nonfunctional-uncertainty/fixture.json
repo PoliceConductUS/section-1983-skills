@@ -1,0 +1,45 @@
+{
+  "id": "complaint-nonfunctional-uncertainty",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-complaints",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "retains-uncertainty-without-function",
+      "candidate": "regression-retained-uncertainty.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Completion Audit",
+      "Filed Facts",
+      "Internal Chronology"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "retained-uncertainty-without-job",
+        "pattern": "(?is)# Filed Facts(?:(?!# Internal Chronology).){0,2400}(?:unknown color|unrelated building detail|unknown background detail)"
+      }
+    ],
+    "required_citations": ["UP-FACTS", "UP-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "inventories-uncertainty",
+      "description": "Inventories every supplied paragraph labeled unresolved, unknown, unrelated, or non-establishing and records its pleaded function or lack of function."
+    },
+    {
+      "id": "retains-only-functional-uncertainty",
+      "description": "Keeps only uncertainty serving the supplied element, actual-defense, material-chronology, or candor/preservation function in filed text."
+    },
+    {
+      "id": "prunes-or-moves-nonfunctional-detail",
+      "description": "Removes or moves P2, P4, and P6 out of filed text without deleting the necessary source limits in P1, P3, and P5."
+    }
+  ]
+}

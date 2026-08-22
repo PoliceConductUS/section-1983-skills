@@ -2,13 +2,13 @@
 
 ## 1. RED behavior and contract
 
-- [ ] 1.1 Capture fresh-context baseline behavior for adverse merits
+- [x] 1.1 Capture fresh-context baseline behavior for adverse merits
       self-assessment, fair-warning brief creep, nonfunctional uncertain facts,
       and ambiguous-record alternative-offense handling.
-- [ ] 1.2 Add deterministic structure/mutation tests for the four requirements.
-- [ ] 1.3 Add four generic synthetic evaluation fixtures with focused permanent
+- [x] 1.2 Add deterministic structure/mutation tests for the four requirements.
+- [x] 1.3 Add four generic synthetic evaluation fixtures with focused permanent
       regressions and unrelated-rule discrimination.
-- [ ] 1.4 Run focused RED, independently review it, commit, and sync.
+- [x] 1.4 Run focused RED, independently review it, commit, and sync.
 
 ## 2. GREEN instructions
 

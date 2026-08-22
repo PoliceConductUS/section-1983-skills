@@ -66,3 +66,29 @@ Issue 26 separately owns linter exemptions, locations, and brief-creep warnings.
 - Do not implement the CaseGraph checker or change the JSON mechanical handoff.
 - Do not change judge-overlay execution, linter behavior, dependencies,
   workflows, root `docs/`, or `.superpowers/` content.
+
+## Fresh-context RED observations
+
+Each scenario used only the current independently installable package and a
+generic synthetic prompt.
+
+- **Adverse merits assessment:** the general complaint package kept the agent's
+  “prong two contested/likely fails” assessment out of filed text, but the agent
+  reported that the package had no express rule deciding whether an adverse
+  merits assessment belongs in filed text or internal work product.
+- **Fair-warning brief creep:** the agent selected one lead case and one
+  precedential link and moved repetitive cases internal, but reported that the
+  package had no operational authority budget or separate-job rule beyond the
+  existing instruction to remain concise.
+- **Nonfunctional uncertainty:** the agent pruned paragraphs that served no
+  pleaded purpose, but reported that the package had no express ledger over
+  paragraphs labeled unresolved, unknown, unrelated, or non-establishing.
+- **Ambiguous alternative offense:** the false-arrest agent preserved the
+  disputed fact, analyzed the raised offense, and produced a filing-critical
+  GAP, but reported that the package did not expressly join an unresolved
+  incorporated-record fact to count-level probable-cause and arguable-
+  probable-cause analysis or a GAP without admitting the fact.
+
+The current agents often reached a sound result by inference. Issue 25 makes
+those four decisions part of the public contract so a correct result does not
+depend on discretionary reconstruction from distributed instructions.

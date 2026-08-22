@@ -21,7 +21,7 @@
       exclusive immutable report creation, and bounded execution receipts.
 - [x] 2.4 Replace caller-asserted command trust with fail-closed behavior and
       preserve the command seam only as an untrusted/custom-provider boundary.
-- [ ] 2.5 Update the public skill and README usage, then run focused GREEN,
+- [x] 2.5 Update the public skill and README usage, then run focused GREEN,
       behavior pressure, and complete validation.
 
 ## 3. Review and archive

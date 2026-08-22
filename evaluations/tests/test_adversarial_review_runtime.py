@@ -240,11 +240,19 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
     def test_provider_failure_classes_are_stable_bounded_and_secret_free(self):
         run_trusted_review = self.trusted_api("run_trusted_review")
         oversized = b"\xff" + b"x" * 9000
+        credential_echo = (
+            b'{"error":{"message":"Incorrect API key provided: '
+            b'sk-7tTi8***************************************MSFn"}}'
+        )
         response_too_large = b"{" + b" " * 1_100_000 + b"}"
         cases = (
             ("timeout", TransportSpy(error=TimeoutError("slow")), "provider-timeout"),
             ("network", TransportSpy(error=OSError("offline")), "provider-unavailable"),
-            ("http", TransportSpy(status=429, body=oversized), "provider-http-error"),
+            (
+                "http",
+                TransportSpy(status=401, body=credential_echo),
+                "provider-http-error",
+            ),
             (
                 "invalid-json",
                 TransportSpy(body=b"not-json"),
@@ -281,7 +289,12 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 self.assertNotIn("secret-test-key", str(error))
                 self.assertLessEqual(len(getattr(error, "stdout", "")), 8192)
                 self.assertLessEqual(len(getattr(error, "stderr", "")), 8192)
-                if label in {"http", "invalid-utf8"}:
+                if label == "http":
+                    self.assertEqual(error.stdout, "")
+                    self.assertEqual(error.stderr, "")
+                    self.assertNotIn("sk-7tTi8", str(error))
+                    self.assertNotIn("MSFn", str(error))
+                if label == "invalid-utf8":
                     retained = getattr(error, "stdout", "") + getattr(
                         error, "stderr", ""
                     )

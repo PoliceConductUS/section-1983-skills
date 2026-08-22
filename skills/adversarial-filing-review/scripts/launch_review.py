@@ -540,7 +540,6 @@ def run_trusted_review(
         raise ReviewLaunchError(
             "provider-http-error",
             f"Provider returned HTTP {status}",
-            stderr=response_body,
         )
     if len(response_body) > PROVIDER_BODY_LIMIT:
         raise ReviewLaunchError(

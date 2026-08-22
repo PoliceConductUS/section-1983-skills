@@ -4,9 +4,9 @@
 
 - [x] 1.1 Record the approved backward-compatible findings, exact exemptions,
       heuristic thresholds, reconciliation, and non-gating design.
-- [ ] 1.2 Add focused RED for term-of-art false positives, locations, density
+- [x] 1.2 Add focused RED for term-of-art false positives, locations, density
       calibration, score compatibility, and final reconciliation.
-- [ ] 1.3 Review, commit, and sync RED.
+- [x] 1.3 Review, commit, and sync RED.
 
 ## 2. Minimal GREEN
 

@@ -1,11 +1,11 @@
 ## 1. Trusted-runtime RED
 
-- [ ] 1.1 Add public-seam tests for the trusted stateless provider request and
+- [x] 1.1 Add public-seam tests for the trusted stateless provider request and
       prove the current launcher has no such entry point.
-- [ ] 1.2 Add protocol tests for categorized findings, supported corrections,
+- [x] 1.2 Add protocol tests for categorized findings, supported corrections,
       reserved decisions, provider failures, invalid bytes, and bounded
       diagnostics.
-- [ ] 1.3 Add immutable-output tests for artifact hash verification, canonical
+- [x] 1.3 Add immutable-output tests for artifact hash verification, canonical
       version/audits confinement, exclusive creation, collision preservation,
       and unavailable-report honesty.
 - [ ] 1.4 Run and record focused RED; independently review and correct the RED

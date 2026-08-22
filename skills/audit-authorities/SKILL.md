@@ -133,7 +133,6 @@ In competent practice, citation auditing is not "spot checking." It's a
 - **Every key inference** must be tagged as inference and must be reasonable
   under the governing standard.
 - **Every use of precedent** must respect:
-
   - jurisdiction (binding vs persuasive),
   - procedural posture (MTD vs SJ vs trial),
   - standard (plausibility vs summary judgment evidence),
@@ -156,7 +155,6 @@ the sentence they're attached to.
 - **Posture**: where you are procedurally (12(b)(6), 12(c), 56, preliminary
   injunction, etc.).
 - **Holding vs dicta**:
-
   - **Holding** = necessary to the judgment.
   - **Dicta** = not necessary; may still be persuasive but should not be
     represented as binding.
@@ -206,7 +204,6 @@ Before finalizing:
 - Every key authority is not only correct, but **not misleading** in posture and
   scope.
 - Every adverse case is either:
-
   - fairly summarized and distinguished, or
   - acknowledged with limiting language (if it hurts you).
 

@@ -10,14 +10,14 @@
 
 ## 2. Minimal GREEN
 
-- [ ] 2.1 Implement paragraph parsing, location-bearing findings, exemption
+- [x] 2.1 Implement paragraph parsing, location-bearing findings, exemption
       records, and review-only warnings.
-- [ ] 2.2 Update the owning skill and writing-system contracts.
-- [ ] 2.3 Run focused GREEN, review, commit, and sync.
+- [x] 2.2 Update the owning skill and writing-system contracts.
+- [x] 2.3 Run focused GREEN, review, commit, and sync.
 
 ## 3. Review and archive
 
-- [ ] 3.1 Pressure the whole story and correct accepted Critical or Important
+- [x] 3.1 Pressure the whole story and correct accepted Critical or Important
       findings test-first.
 - [ ] 3.2 Complete verification and retrospective records, archive, validate,
       commit, and sync.

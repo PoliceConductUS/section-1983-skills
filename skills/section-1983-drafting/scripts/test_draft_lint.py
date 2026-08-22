@@ -129,6 +129,20 @@ class LintTest(unittest.TestCase):
                 self.assertEqual(report["total"], 0)
                 self.assertNotIn(phrase, EXEMPT_PHRASES)
 
+    def test_repeated_exemptions_have_unique_stable_ids(self):
+        report = self.lint_artifact(
+            "The cases are materially similar and materially similar."
+        )
+
+        exemption_ids = [item["exemption_id"] for item in report["exemptions"]]
+        self.assertEqual(
+            exemption_ids,
+            [
+                "paragraph-1:controlling-term:materially-similar:1",
+                "paragraph-1:controlling-term:materially-similar:2",
+            ],
+        )
+
     def test_findings_identify_artifact_paragraph_and_source_lines(self):
         text = (
             "Officer Doe waited for five minutes.\n"

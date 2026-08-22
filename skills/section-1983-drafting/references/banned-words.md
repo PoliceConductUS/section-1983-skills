@@ -9,14 +9,17 @@ edit the generator inputs, not the lists.
 ## Exemptions (never flag these)
 
 Terms of art keep their required wording even when they contain a banned word.
-Quoted record material and quoted statutory or case text are also exempt.
+Quoted record material and quoted statutory or case text are exempt only after
+the final reconciliation verifies the quotation against its approved source. The
+linter does not make that accuracy finding.
 
-actual damages, actual knowledge, actual malice, clearly erroneous, clearly
-established, deliberate indifference, deliberately indifferent, excessive force,
-false arrest, false imprisonment, final judgment, final policymaker, general
-jurisdiction, genuine dispute, genuine issue, gross negligence, grossly
-negligent, objectively reasonable, objectively unreasonable, punitive damages,
-serious medical need, serious medical needs, under color of state law, void for
+active resistance, actual damages, actual knowledge, actual malice, clearly
+erroneous, clearly established, deliberate indifference, deliberately
+indifferent, excessive force, false arrest, false imprisonment, final judgment,
+final policymaker, general jurisdiction, genuine dispute, genuine issue, gross
+negligence, grossly negligent, materially similar, objectively reasonable,
+objectively unreasonable, punitive damages, reasonably trustworthy, serious
+medical need, serious medical needs, under color of state law, void for
 vagueness
 
 ## Top 50 to avoid [Horan] — 91 forms

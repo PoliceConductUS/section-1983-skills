@@ -8,6 +8,7 @@ cannot judge whether a fact is well pleaded.
 import json
 import re
 import sys
+from pathlib import Path
 
 from banned_terms import BONUS_WORDS, MORE_WORDS, TOP_FIFTY_WORDS
 
@@ -36,6 +37,9 @@ EXEMPT_PHRASES = (
     "final judgment",
     "general jurisdiction",
     "punitive damages",
+    "active resistance",
+    "materially similar",
+    "reasonably trustworthy",
 )
 FORMAL_WORDS = (
     "begin", "begins", "commence", "commences", "initiate", "initiates",
@@ -179,6 +183,14 @@ FORMAL_WORDS_PATTERN = compile_phrase_pattern(FORMAL_WORDS)
 MARKETING_ADJECTIVES_PATTERN = compile_phrase_pattern(MARKETING_ADJECTIVES)
 PHRASAL_VERBS_PATTERN = compile_phrase_pattern(PHRASAL_VERBS)
 HEDGES_PATTERN = compile_phrase_pattern(HEDGES)
+EXEMPT_PATTERN = compile_phrase_pattern(EXEMPT_PHRASES)
+CASE_CITATION_PATTERN = re.compile(
+    r"\b\d+\s+(?:U\.S\.|S\.\s?Ct\.|F\.(?:2d|3d|4th)|"
+    r"F\.\s?Supp\.\s?(?:2d|3d)?|S\.W\.(?:2d|3d))\s+\d+\b",
+    re.IGNORECASE,
+)
+LONG_SENTENCE_DENSITY_THRESHOLD = 2
+CASE_CITATION_DENSITY_THRESHOLD = 4
 
 
 CHECKS = {
@@ -198,8 +210,132 @@ CHECKS = {
 }
 
 
-def lint(text):
-    violations = {name: check(text) for name, check in CHECKS.items()}
+def paragraphs_with_locations(text):
+    paragraphs = []
+    lines = text.splitlines()
+    current = []
+    start_line = None
+
+    for line_number, line in enumerate(lines, start=1):
+        if line.strip():
+            if start_line is None:
+                start_line = line_number
+            current.append(line)
+            continue
+        if current:
+            paragraphs.append(("\n".join(current), start_line, line_number - 1))
+            current = []
+            start_line = None
+
+    if current:
+        paragraphs.append(("\n".join(current), start_line, len(lines)))
+
+    return paragraphs
+
+
+def bounded_excerpt(text, limit=240):
+    compact = " ".join(text.split())
+    if len(compact) <= limit:
+        return compact
+    return compact[: limit - 1].rstrip() + "…"
+
+
+def location_fields(artifact, paragraph_number, start_line, end_line):
+    return {
+        "artifact": artifact,
+        "paragraph": paragraph_number,
+        "start_line": start_line,
+        "end_line": end_line,
+    }
+
+
+def paragraph_findings(paragraphs, artifact):
+    findings = []
+    for paragraph_number, (text, start_line, end_line) in enumerate(
+        paragraphs, start=1
+    ):
+        for check_name, check in CHECKS.items():
+            count = check(text)
+            if not count:
+                continue
+            finding = {
+                "finding_id": f"paragraph-{paragraph_number}:{check_name}",
+                "check": check_name,
+                **location_fields(
+                    artifact, paragraph_number, start_line, end_line
+                ),
+                "count": count,
+                "excerpt": bounded_excerpt(text),
+                "classification": "unexempted_violation",
+            }
+            findings.append(finding)
+    return findings
+
+
+def paragraph_exemptions(paragraphs, artifact):
+    exemptions = []
+    for paragraph_number, (text, start_line, end_line) in enumerate(
+        paragraphs, start=1
+    ):
+        lowered = text.lower().replace("\u2019", "'")
+        occurrences = {}
+        for match in EXEMPT_PATTERN.finditer(lowered):
+            phrase = match.group(0)
+            occurrences[phrase] = occurrences.get(phrase, 0) + 1
+            exemption = {
+                "exemption_id": (
+                    f"paragraph-{paragraph_number}:controlling-term:"
+                    f"{phrase.replace(' ', '-')}:{occurrences[phrase]}"
+                ),
+                **location_fields(
+                    artifact, paragraph_number, start_line, end_line
+                ),
+                "phrase": phrase,
+                "classification": "controlling_term_of_art",
+            }
+            exemptions.append(exemption)
+    return exemptions
+
+
+def paragraph_warnings(paragraphs, artifact):
+    warnings = []
+    for paragraph_number, (text, start_line, end_line) in enumerate(
+        paragraphs, start=1
+    ):
+        observed = (
+            ("long_sentence_density", count_long_sentences(text), LONG_SENTENCE_DENSITY_THRESHOLD),
+            (
+                "case_citation_density",
+                len(CASE_CITATION_PATTERN.findall(text)),
+                CASE_CITATION_DENSITY_THRESHOLD,
+            ),
+        )
+        for check_name, count, threshold in observed:
+            if count < threshold:
+                continue
+            warning = {
+                "warning_id": f"paragraph-{paragraph_number}:{check_name}",
+                "check": check_name,
+                **location_fields(
+                    artifact, paragraph_number, start_line, end_line
+                ),
+                "observed": count,
+                "threshold": threshold,
+                "classification": "review_heuristic",
+            }
+            warnings.append(warning)
+    return warnings
+
+
+def lint(text, artifact="<memory>"):
+    paragraphs = paragraphs_with_locations(text)
+    findings = paragraph_findings(paragraphs, artifact)
+    violations = {
+        name: sum(
+            finding["count"] for finding in findings if finding["check"] == name
+        )
+        for name in CHECKS
+    }
     words = count_words(text) or 1
     total = sum(violations.values())
 
@@ -208,11 +344,14 @@ def lint(text):
         "violations": violations,
         "total": total,
         "total_per_hundred_words": round(total * 100.0 / words, 2),
+        "findings": findings,
+        "exemptions": paragraph_exemptions(paragraphs, artifact),
+        "warnings": paragraph_warnings(paragraphs, artifact),
     }
 
 
 def lint_paths(paths):
-    return {path: lint(open(path).read()) for path in paths}
+    return {path: lint(Path(path).read_text(), artifact=path) for path in paths}
 
 
 def format_report(reports):
@@ -220,7 +359,11 @@ def format_report(reports):
 
 
 def main(arguments):
-    reports = lint_paths(arguments) if arguments else lint(sys.stdin.read())
+    reports = (
+        lint_paths(arguments)
+        if arguments
+        else lint(sys.stdin.read(), artifact="<stdin>")
+    )
     print(format_report(reports))
 
 

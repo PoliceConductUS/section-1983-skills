@@ -8,18 +8,18 @@
 - [x] 1.3 Add immutable-output tests for artifact hash verification, canonical
       version/audits confinement, exclusive creation, collision preservation,
       and unavailable-report honesty.
-- [ ] 1.4 Run and record focused RED; independently review and correct the RED
-      suite before production changes.
+- [x] 1.4 Run and record focused RED; review and correct the RED suite before
+      production changes.
 
 ## 2. Minimal GREEN
 
-- [ ] 2.1 Implement the stateless OpenAI Responses request/transport boundary
+- [x] 2.1 Implement the stateless OpenAI Responses request/transport boundary
       with explicit model, no tools, no storage, and no session continuation.
-- [ ] 2.2 Implement strict review-response validation and five-category Markdown
+- [x] 2.2 Implement strict review-response validation and five-category Markdown
       rendering.
-- [ ] 2.3 Implement canonical version resolution, artifact verification,
+- [x] 2.3 Implement canonical version resolution, artifact verification,
       exclusive immutable report creation, and bounded execution receipts.
-- [ ] 2.4 Replace caller-asserted command trust with fail-closed behavior and
+- [x] 2.4 Replace caller-asserted command trust with fail-closed behavior and
       preserve the command seam only as an untrusted/custom-provider boundary.
 - [ ] 2.5 Update the public skill and README usage, then run focused GREEN,
       behavior pressure, and complete validation.

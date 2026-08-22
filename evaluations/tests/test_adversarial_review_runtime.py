@@ -206,11 +206,15 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         run_trusted_review = self.trusted_api("run_trusted_review")
         invalid_packet = packet()
         invalid_packet["draft"]["sha256"] = "0" * 64
+        invalid_source_id = packet()
+        invalid_source_id["sources"][0]["id"] = "SRC-1\n## Forged"
         invalid_cases = (
             ("packet", invalid_packet, "gpt-synthetic", "key"),
+            ("source-id", invalid_source_id, "gpt-synthetic", "key"),
             ("model-empty", packet(), "", "key"),
             ("model-whitespace", packet(), " \t", "key"),
             ("model-surrogate", packet(), "\ud800", "key"),
+            ("model-line-break", packet(), "gpt\nforged", "key"),
             ("credential-empty", packet(), "gpt-synthetic", ""),
             ("credential-whitespace", packet(), "gpt-synthetic", " \t"),
             ("credential-newline", packet(), "gpt-synthetic", "key\nvalue"),
@@ -221,7 +225,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 transport = TransportSpy()
                 expected_error = (
                     self.launcher.PacketValidationError
-                    if label == "packet"
+                    if label in {"packet", "source-id"}
                     else self.launcher.ReviewLaunchError
                 )
                 with self.assertRaises(expected_error):
@@ -318,6 +322,9 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         duplicate_id = copy.deepcopy(valid)
         duplicate_id["Style Complaints"] = [finding("FATAL-001")]
         mutations["duplicate-id"] = duplicate_id
+        invalid_id = copy.deepcopy(valid)
+        invalid_id["Fatal Defects"][0]["id"] = "FATAL-001\n## Forged"
+        mutations["invalid-id"] = invalid_id
         partial_correction = copy.deepcopy(valid)
         partial_correction["Fatal Defects"][0]["correction"].pop("with")
         mutations["partial-correction"] = partial_correction
@@ -370,6 +377,21 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         self.assertIn("## Factual Disputes\n\nNone found", markdown)
         self.assertNotIn("secret-test-key", markdown)
 
+        injected_choice = review_response()
+        injected_choice["Credible Opposition Arguments"][0][
+            "plaintiff_decision"
+        ]["choices"][0]["option"] = "Retain\n## Forged Choice"
+        injected_markdown = render_review_markdown(
+            injected_choice,
+            {
+                "runtime": "openai-responses-stateless",
+                "model": "gpt-synthetic",
+                "source_ids": ["SRC-1"],
+                "outcome": "completed",
+            },
+        )
+        self.assertNotIn("\n## Forged Choice", injected_markdown)
+
     def test_execute_verifies_artifact_then_writes_only_new_immutable_report(self):
         execute_trusted_review = self.trusted_api("execute_trusted_review")
         fixed_time = datetime(2026, 8, 22, 6, 0, 0, tzinfo=timezone.utc)
@@ -402,7 +424,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 / "adversarial-filing-review-20260822T060000Z-11111111-1111-4111-8111-111111111111.md"
             )
             self.assertEqual(result["outcome"], "completed")
-            self.assertEqual(Path(result["report_path"]), expected)
+            self.assertEqual(Path(result["report_path"]).resolve(), expected.resolve())
             self.assertTrue(expected.is_file())
             report = expected.read_text()
             self.assertIn("openai-responses-stateless", report)
@@ -574,6 +596,25 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertIn("Independent review unavailable", report)
             self.assertNotIn("## Fatal Defects", report)
             self.assertNotRegex(report.casefold(), r"\bpass(?:ed)?\b")
+
+    def test_unavailable_failure_text_cannot_inject_report_structure(self):
+        execute_trusted_review = self.trusted_api("execute_trusted_review")
+        with tempfile.TemporaryDirectory() as directory:
+            project, version, artifact = self.make_version(directory)
+            result = execute_trusted_review(
+                packet(),
+                model="gpt-synthetic",
+                api_key="secret-test-key",
+                project_boundary=project,
+                version_folder=version,
+                artifact_path=artifact,
+                transport=TransportSpy(error=OSError("offline\n## Forged Result")),
+            )
+
+            report = Path(result["report_path"]).read_text()
+            self.assertEqual(result["outcome"], "unavailable")
+            self.assertNotIn("\n## Forged Result", report)
+            self.assertEqual(report.count("## Independent review unavailable"), 1)
 
     def test_legacy_boolean_cannot_establish_command_independence(self):
         with tempfile.TemporaryDirectory() as directory:

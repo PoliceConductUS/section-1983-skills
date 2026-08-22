@@ -1,0 +1,47 @@
+{
+  "id": "adversarial-history-control-leakage",
+  "synthetic": true,
+  "target_skill": "adversarial-filing-review",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "uses-excluded-history-or-control-conclusion",
+      "candidate": "regression-history-leak.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Fatal Defects",
+      "Credible Opposition Arguments",
+      "Factual Disputes",
+      "Discovery Issues",
+      "Style Complaints"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "excluded-review-context",
+        "pattern": "(?i)(drafting history|control memo|prior review|checker output)"
+      }
+    ],
+    "required_citations": ["HISTORY-DRAFT", "HISTORY-CHECKLIST"]
+  },
+  "rubric": [
+    {
+      "id": "uses-only-approved-inputs",
+      "description": "Bases the report only on the canonical draft and approved checklist without invoking drafting history, control conclusions, prior reviews, or checker output."
+    },
+    {
+      "id": "preserves-five-categories",
+      "description": "Keeps all five required categories distinct and explicitly marks every empty category."
+    },
+    {
+      "id": "does-not-certify-readiness",
+      "description": "Does not convert a clean bounded review into a filing-readiness conclusion."
+    }
+  ]
+}

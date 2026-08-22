@@ -1,0 +1,10 @@
+[
+  {
+    "id": "DECISION-DRAFT",
+    "path": "canonical-draft.md"
+  },
+  {
+    "id": "DECISION-POLICY",
+    "path": "approved-policy.md"
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "id": "adversarial-reserved-decision",
+  "synthetic": true,
+  "target_skill": "adversarial-filing-review",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "reviewer-selects-omission",
+      "candidate": "regression-selected-omission.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Fatal Defects",
+      "Credible Opposition Arguments",
+      "Factual Disputes",
+      "Discovery Issues",
+      "Style Complaints"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "reviewer-selected-strategy",
+        "pattern": "(?i)Selected option:\\s*(?:retain|narrow|omit)"
+      }
+    ],
+    "required_citations": ["DECISION-DRAFT", "DECISION-POLICY"]
+  },
+  "rubric": [
+    {
+      "id": "flags-credible-attack",
+      "description": "Reports the approved-source gap as a credible opposition argument without predicting an outcome."
+    },
+    {
+      "id": "reserves-strategy-choice",
+      "description": "States PLAINTIFF DECISION REQUIRED and presents retain, narrow, and omit choices with consequences without selecting one."
+    },
+    {
+      "id": "preserves-canonical-text",
+      "description": "Does not supply a proposed replacement or otherwise change the canonical requested relief before the plaintiff decides."
+    }
+  ]
+}

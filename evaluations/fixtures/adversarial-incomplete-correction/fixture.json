@@ -1,0 +1,47 @@
+{
+  "id": "adversarial-incomplete-correction",
+  "synthetic": true,
+  "target_skill": "adversarial-filing-review",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "offers-placeholder-instead-of-copy-ready-correction",
+      "candidate": "regression-placeholder-correction.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Fatal Defects",
+      "Credible Opposition Arguments",
+      "Factual Disputes",
+      "Discovery Issues",
+      "Style Complaints"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "placeholder-replacement",
+        "pattern": "(?i)With:\\s*(?:\\[[^\\]]+\\]|TBD|TODO|\\.{3})"
+      }
+    ],
+    "required_citations": ["CORRECTION-DRAFT", "CORRECTION-RECORD"]
+  },
+  "rubric": [
+    {
+      "id": "identifies-attacked-text",
+      "description": "Identifies the exact attacked sentence and its location in the supplied draft."
+    },
+    {
+      "id": "provides-complete-replacement",
+      "description": "Uses Replace and With fields to provide complete copy-ready prose supported by the approved record without a placeholder."
+    },
+    {
+      "id": "classifies-source-conflict",
+      "description": "Keeps the conflicting draft and approved record in Factual Disputes rather than resolving it through an unsupported category."
+    }
+  ]
+}

@@ -24,9 +24,9 @@
 
 - [x] 3.1 Independently review the whole story and realistic semantic
       inversions.
-- [ ] 3.2 Correct accepted Critical or Important findings test-first, add the
+- [x] 3.2 Correct accepted Critical or Important findings test-first, add the
       approved canonical claim–defendant–challenged-act checklist and
       fail-closed rule, and run a scoped re-review.
-- [ ] 3.3 Record verification and retrospective artifacts.
-- [ ] 3.4 Archive the OpenSpec change on Issue 25, replace any generated TBD
+- [x] 3.3 Record verification and retrospective artifacts.
+- [x] 3.4 Archive the OpenSpec change on Issue 25, replace any generated TBD
       purpose, validate, commit, and sync.

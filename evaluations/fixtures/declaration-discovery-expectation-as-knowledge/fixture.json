@@ -1,0 +1,47 @@
+{
+  "id": "declaration-discovery-expectation-as-knowledge",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-declarations-and-evidence",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "states-expected-discovery-as-personal-knowledge",
+      "candidate": "regression-expected-discovery.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Statement Classification Ledger",
+      "Draft Declaration",
+      "Exhibit Foundation Map",
+      "Excluded or Separate Material",
+      "Human Approval and Execution Status"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "expected-discovery-stated-as-known",
+        "pattern": "(?is)# Draft Declaration(?:(?!# Exhibit Foundation Map).){0,900}(?:I know|I have personal knowledge)[^.\\n]{0,180}(?:unproduced|expected)[^.\\n]{0,120}(?:recording|video)[^.\\n]{0,120}(?:will|would) (?:show|prove|confirm)"
+      }
+    ],
+    "required_citations": ["DEX-OBSERVATION", "DEX-DISCOVERY"]
+  },
+  "rubric": [
+    {
+      "id": "preserves-firsthand-observation",
+      "description": "Retains the supplied direct observation with its knowledge basis and approved source identifier."
+    },
+    {
+      "id": "excludes-expected-discovery",
+      "description": "Classifies the unproduced recording as a discovery expectation and keeps it out of the declaration."
+    },
+    {
+      "id": "preserves-human-approval-gate",
+      "description": "Returns an unsigned draft with explicit human declarant approval status."
+    }
+  ]
+}

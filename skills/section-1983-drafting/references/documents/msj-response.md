@@ -29,6 +29,10 @@ forum's binding authority.
 
 ## Evidence rules
 
+- Use `drafting-section-1983-declarations-and-evidence` to classify proposed
+  declaration statements, prepare the unsigned factual declaration and
+  exhibit-foundation map, and preserve human declarant approval and execution
+  boundaries.
 - Pleadings are not evidence at this stage. Every disputed fact needs an
   affidavit, a declaration under 28 U.S.C. § 1746, deposition testimony, or an
   exhibit. The plaintiff's own sworn declaration of what they saw and

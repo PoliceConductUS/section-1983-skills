@@ -1,0 +1,47 @@
+{
+  "id": "declaration-attributed-record-laundering",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-declarations-and-evidence",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "recasts-recorded-event-as-firsthand-knowledge",
+      "candidate": "regression-firsthand-event.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Statement Classification Ledger",
+      "Draft Declaration",
+      "Exhibit Foundation Map",
+      "Excluded or Separate Material",
+      "Human Approval and Execution Status"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "attributed-event-laundered-as-firsthand",
+        "pattern": "(?is)# Draft Declaration(?:(?!# Exhibit Foundation Map).){0,900}I (?:saw|watched|observed) Officer B open(?:ed)? Locker 7"
+      }
+    ],
+    "required_citations": ["DAR-RECEIPT", "DAR-REPORT"]
+  },
+  "rubric": [
+    {
+      "id": "preserves-record-attribution",
+      "description": "States the event only as content of the identified report and does not convert it into firsthand testimony."
+    },
+    {
+      "id": "preserves-limited-relationship",
+      "description": "Records the declarant's personal receipt and review without inventing creation or maintenance knowledge."
+    },
+    {
+      "id": "maps-record-foundation",
+      "description": "Links the proposed exhibit to the supplied receipt basis and reports all other foundation as missing."
+    }
+  ]
+}

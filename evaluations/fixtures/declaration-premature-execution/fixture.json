@@ -1,0 +1,65 @@
+{
+  "id": "declaration-premature-execution",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-declarations-and-evidence",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "claims-execution-readiness-while-statement-pending",
+      "candidate": "regression-ready-while-pending.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "selects-domestic-form-from-texas-status",
+      "candidate": "regression-domestic-form-from-texas.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "retains-approval-after-statement-text-changes",
+      "candidate": "regression-stale-approval.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Statement Classification Ledger",
+      "Draft Declaration",
+      "Exhibit Foundation Map",
+      "Excluded or Separate Material",
+      "Human Approval and Execution Status"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "execution-ready-while-pending",
+        "pattern": "(?is)EXE-002:\\s*pending.{0,220}Execution status:\\s*READY"
+      },
+      {
+        "id": "domestic-form-selected-from-residence-venue-custody",
+        "pattern": "(?is)domestic form (?:was )?selected\\s+from.{0,160}(?:residence|venue|custody)"
+      },
+      {
+        "id": "changed-statement-keeps-stale-approval",
+        "pattern": "(?is)EXE-002:\\s*approved.{0,220}(?:earlier|prior).{0,100}(?:wording|text).{0,100}(?:changed|different)"
+      }
+    ],
+    "required_citations": ["EXE-STATE", "EXE-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "selects-form-from-execution-location",
+      "description": "Uses the complete outside-United-States form because the supplied execution location is Montreal, not Texas."
+    },
+    {
+      "id": "resets-changed-statement-approval",
+      "description": "Marks the changed EXE-002 text pending despite approval of its earlier wording."
+    },
+    {
+      "id": "blocks-premature-execution",
+      "description": "Keeps the unsigned declaration blocked while EXE-002 lacks the human declarant's approval of its exact current text."
+    }
+  ]
+}

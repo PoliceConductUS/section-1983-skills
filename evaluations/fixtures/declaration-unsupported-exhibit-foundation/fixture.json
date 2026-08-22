@@ -1,0 +1,47 @@
+{
+  "id": "declaration-unsupported-exhibit-foundation",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-declarations-and-evidence",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "invents-exhibit-authentication-foundation",
+      "candidate": "regression-invented-foundation.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Statement Classification Ledger",
+      "Draft Declaration",
+      "Exhibit Foundation Map",
+      "Excluded or Separate Material",
+      "Human Approval and Execution Status"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "unsupported-exhibit-authentication",
+        "pattern": "(?is)(?:I authenticate Exhibit 2|Exhibit 2 is authentic and is a true and correct copy)"
+      }
+    ],
+    "required_citations": ["DEF-OBSERVATION", "DEF-EXHIBIT-GAP"]
+  },
+  "rubric": [
+    {
+      "id": "retains-supported-observation",
+      "description": "Retains the declarant's bounded firsthand observation without relying on the unsupported file."
+    },
+    {
+      "id": "reports-foundation-gap",
+      "description": "Reports the missing source, creator, receipt, and recognition facts for the proposed exhibit."
+    },
+    {
+      "id": "asks-focused-foundation-prompts",
+      "description": "Asks focused questions without calling the exhibit authentic, accurate, or a true and correct copy."
+    }
+  ]
+}

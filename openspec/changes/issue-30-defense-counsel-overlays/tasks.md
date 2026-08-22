@@ -5,11 +5,11 @@
 - [x] 1.1 Record the approved professional-profile, source, attribution,
       denominator, forecast, review-composition, and documentation-ownership
       decisions.
-- [ ] 1.2 Add structural RED for the public skill, local schemas and validator,
+- [x] 1.2 Add structural RED for the public skill, local schemas and validator,
       routes, governance, counsel guide, general-guide link, and manifest kinds.
-- [ ] 1.3 Add validator RED with complete and incomplete generic synthetic
+- [x] 1.3 Add validator RED with complete and incomplete generic synthetic
       research snapshots, counsel overlays, review slices, and filing pins.
-- [ ] 1.4 Prove attribution, source-role, ledger, denominator, forecast,
+- [x] 1.4 Prove attribution, source-role, ledger, denominator, forecast,
       privacy, override, and blind-review mutations fail for the intended
       reasons; review and commit RED, then sync.
 

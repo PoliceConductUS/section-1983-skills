@@ -7,13 +7,13 @@
 - [x] 1.2 Add deterministic tests for canonical ownership, the mechanical JSON
       contract, install-local links, routing, specialization-only deltas, and
       isolated-package behavior.
-- [ ] 1.3 Run focused RED, independently review the tests, commit, and sync.
+- [x] 1.3 Run focused RED, independently review the tests, commit, and sync.
 
 ## 2. GREEN contract
 
-- [ ] 2.1 Add the canonical human and machine-readable complaint contracts to
+- [x] 2.1 Add the canonical human and machine-readable complaint contracts to
       `drafting-section-1983-complaints`.
-- [ ] 2.2 Convert the umbrella complaint reference to routing and fail-closed
+- [x] 2.2 Convert the umbrella complaint reference to routing and fail-closed
       behavior.
 - [ ] 2.3 Rename and narrow the false-arrest reference to specialization-only
       deltas and update its skill workflow.

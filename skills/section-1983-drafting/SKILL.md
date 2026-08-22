@@ -114,9 +114,15 @@ rhetorical argument is a small part of any document, if present at all.
    authority, a structural problem — do not deviate silently: propose the change
    as the next strategy version and proceed only per the user's decision. Never
    edit a strategy version in place.
-2. Route. For discovery, select the applicable peer skill above and apply
-   `references/discovery-coordination-contract.md`. For a filing, identify the
-   document from the user's request or docket event using
+2. Route. For a complaint, amended complaint, or amendment proffer, before any
+   drafting use the [complaint route](references/documents/complaint.md), load
+   drafting-section-1983-complaints, and require that skill to read both of its
+   canonical references. If the canonical package or either reference cannot be
+   read, report **complaint contract unavailable** and do not draft, revise, or
+   audit the complaint. Do not invent or reconstruct the missing requirements.
+   For discovery, select the applicable peer skill above and apply
+   `references/discovery-coordination-contract.md`. For another filing, identify
+   the document from the user's request or docket event using
    `references/case-map.md`, which maps events to responsive documents and
    federal deadline baselines. When the user asks "what do I file," the case map
    is the answer.
@@ -133,9 +139,11 @@ rhetorical argument is a small part of any document, if present at all.
    source. Never invent a citation.
 6. Gather the facts: who did what to whom, when, where, under what authority.
    Ask for what is missing before drafting.
-7. Draft from the skeleton in `references/documents/<type>.md`. For a document
-   type with no skeleton yet, follow the localization answers and the court's
-   conventions, and apply the writing system in full.
+7. Draft from the selected document skeleton. For a complaint, draft from the
+   canonical references loaded in step 2; the umbrella complaint entry is a
+   route and supplies no fallback skeleton or count contract. For another
+   document type with no skeleton yet, follow the localization answers and the
+   court's conventions, and apply the writing system in full.
 8. Audit every party position under the no-concession default. Remove each
    unapproved concession. Attribute each adverse characterization and do not
    repeat it in the drafter's own voice. Audit grounding: confirm every point

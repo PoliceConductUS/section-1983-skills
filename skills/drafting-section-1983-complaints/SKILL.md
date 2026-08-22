@@ -8,6 +8,22 @@ description:
 
 # Drafting Section 1983 Complaints
 
+## Required complaint contract
+
+Before drafting, revising, or auditing any complaint, amended complaint, or
+amendment proffer, read both install-local canonical references:
+
+- [references/complaint-contract.md](references/complaint-contract.md)
+- [references/complaint-structure-contract.json](references/complaint-structure-contract.json)
+
+The Markdown reference controls the complete general complaint skeleton and
+detailed count contract. The JSON reference is the mechanical handoff for an
+external checker; it is not an executable or a legal judgment.
+
+If either reference cannot be read, report **complaint contract unavailable**
+and do not draft, revise, or audit the complaint. Do not invent or reconstruct
+the missing requirements.
+
 ## Core standard
 
 Draft every count through an **Element → Decisive Facts → Relevant-Time
@@ -36,47 +52,6 @@ is substantively complete and rerun it after any material authority-driven
 revision. Remove unsupported emphasis, legalese, mind-reading, accusation, and
 rhetoric without deleting controlling terms of art, accurately quoted language,
 offense elements, or necessary clearly-established-law distinctions.
-
-## Complaint-level clearly-established law is mandatory and non-waivable
-
-For every individual-capacity count against a defendant who can assert qualified
-immunity, the **filed complaint text itself** must contain a concise,
-defendant-specific fair-warning unit. This is a hard contract term. It is
-satisfied only by allegations that appear in the complaint being filed — never
-by a separate brief, an internal matrix, a strategy or control memo, or a
-promise to supply the analysis later. A brief may **add** authority discussion;
-it can never **substitute** for the complaint's fair-warning unit.
-
-For each such claim and defendant, the complaint states:
-
-1. the right stated at the factual specificity of that defendant's conduct;
-2. the defendant's act, knowledge, and event stage;
-3. verified binding authority decided before the event date;
-4. the materially similar facts and the material differences;
-5. why that authority gave this defendant fair warning; and
-6. a conclusion addressing both qualified-immunity prongs.
-
-**Precedence.** A case-specific strategy, control, routing, packet, or "put the
-clearly-established analysis in the brief only" instruction does **not** relax
-this term. Such an instruction may route the full five-role case stack,
-later-history research, competing-authority discussion, and extended futility
-analysis to the brief and internal audits. It may not remove the concise
-fair-warning unit from the complaint. When a case instruction conflicts with
-this contract, this contract controls: flag the conflict, keep the
-complaint-level unit, and route only the surplus analysis to the brief.
-
-**Rule 8 does not lower this floor.** _Johnson v. City of Shelby_, 574 U.S. 10
-(2014), confirms a complaint need not contain a brief or perfectly state every
-legal theory, but a plaintiff confronting qualified immunity in this circuit
-must plead specific facts supporting liability and defeating immunity with
-corresponding specificity (_Degenhardt_ and _Kelson_, below). A prior
-qualified-immunity ruling or a futility inquiry raises, not lowers, the required
-specificity. The unit is concise, not a brief; it defeats immunity on the face
-of the complaint without turning the pleading into an authority memo.
-
-**Exception.** A count against a defendant who cannot assert qualified immunity
-— for example a municipality or other entity on a Monell count — does not
-require this unit.
 
 ## Immutable versioned drafts
 
@@ -196,131 +171,11 @@ When a claim depends on a challenged statement, omission, characterization, or
 later-added justification, add four fields to the matrix: **statement**,
 **contradiction**, **corrected account**, and **materiality**.
 
-## Required claim-pleading contract
+## Detailed count contract
 
-Every count must perform these functions in this order.
-
-### 1. Standard
-
-State the governing test precisely and attach verified authority **with a
-pinpoint** to the statement of the test — not only to the count as a whole:
-
-> To state a claim for [claim], a plaintiff must allege [elements]. _[Case]_,
-> [vol] [rptr] [first], [pincite] ([court] [year]).
-
-State the test in the controlling authority's own formulation. Do not paraphrase
-it into a looser or broader proposition, and do not state a black-letter rule as
-a bare, uncited sentence. Match the level of generality the disputed element
-requires; a vague rule invites a vague application and understates the fair-
-warning burden.
-
-When the claim runs on a **named multi-factor or multi-prong framework, state
-and cite that framework before applying any facts to it.** Do not apply the
-factors while leaving the test itself unstated. Common examples (verify current
-status and the controlling circuit's formulation for each):
-
-- Excessive force — the _Graham v. Connor_ objective-reasonableness factors
-  (severity of the offense, immediate threat, active resistance or flight).
-- Retaliatory arrest — the protected-activity / adverse-action / but-for-
-  causation elements and the _Nieves v. Bartlett_ probable-cause rule and its
-  narrow exception.
-- Pretrial-detainee conditions or punishment — the _Bell v. Wolfish_ / _Kingsley
-  v. Hendrickson_ punishment standard.
-- Section 1983 conspiracy, failure to intervene, and Monell — state each claim's
-  elements with authority, not as an uncited recital.
-
-Identify the constitutional right, not only Section 1983. Section 1983 requires
-deprivation of a federal right by a person acting under color of state law. When
-the claim turns on a state-law offense, state the offense elements from the
-statute and cite the controlling state-court construction that fixes those
-elements; do not state the offense from memory or as a bare statutory
-paraphrase.
-
-Every legal proposition stating a test, element, factor, or offense element
-carries its own verified pinpoint citation. A bare uncited proposition does not
-satisfy this step, and a citation that appears only later in the count's fair-
-warning or application discussion does not cure a Standard stated without
-authority.
-
-### 2. Defendant-specific facts
-
-Connect pleaded facts to each element:
-
-> Plaintiff alleges that Officer Doe [act and timing]. Compl. ¶¶ **–**.
-> Plaintiff alleges that Officer Roe [different act and timing]. Compl. ¶¶
-> **–**.
-
-Use concrete conduct, words, knowledge, sequence, and omissions. Cite the
-complaint paragraphs containing those facts. Do not substitute labels such as
-“retaliated,” “conspired,” or “ratified” for the facts supporting them.
-
-### 3. Element-specific application
-
-State the application the decisive facts and the defendant's relevant-time
-knowledge support. Name the defendant and the element established or negated.
-For example:
-
-> Before ordering the arrest, Officer Doe observed [decisive facts]. Those
-> then-known facts did not support [the disputed offense element]. No reasonable
-> officer with the same information could have believed probable cause existed.
-
-Use a direct application when it fully states the bridge. Expressly identify a
-reasonable inference when the application depends on an unobserved state of
-mind, agreement, causal mechanism, municipal attribution, or another non-obvious
-inferential step. Do not add a stock phrase such as "These facts support the
-reasonable inference" when the application already performs that work.
-
-When supported facts permit alternatives, plead them expressly:
-
-> If responsible City personnel reviewed the recording and took no corrective
-> action, the facts support deliberate acceptance. If the review system failed
-> to surface the recorded conduct, the facts support inadequate supervision,
-> training, or review.
-
-### 4. Qualified immunity for individuals
-
-Address each officer and each prong separately:
-
-1. Taken as true, which facts show that this officer violated the identified
-   right?
-2. On the event date, what binding authority clearly established the right in
-   the specific factual context?
-
-Do not lump officers. Do not rely on a broad constitutional proposition when a
-fact-specific authority is required.
-
-For each prong-two proposition, create a conduct-to-precedent comparison before
-treating the count as complete:
-
-| Defendant and challenged conduct | Binding case and authority status | Materially similar facts | Material differences | Why the case gave fair warning on the event date |
-| -------------------------------- | --------------------------------- | ------------------------ | -------------------- | ------------------------------------------------ |
-
-The full matrix is internal work product, but a concise result of this
-comparison — the six-part fair-warning unit required by **Complaint-level
-clearly-established law is mandatory and non-waivable**, above — must appear in
-the complaint text for each individual-capacity claim and defendant. Do not
-defer it to the brief.
-
-Use the level of specificity at which the defendant acted. A general right to be
-free from arrest, retaliation, or excessive force is not enough. Identify the
-facts that drive the constitutional rule, including the suspected offense,
-threat, resistance, flight, compliance, force type, duration, warning interval,
-injury, protected activity, probable-cause posture, and event sequence as
-applicable. Explain material differences instead of hiding them. Do not use a
-district-court decision, an unpublished nonprecedential decision, or a
-later-decided case as the source of clearly established law. Such authority may
-be persuasive on method or application only when its status and limited use are
-stated accurately.
-
-### 5. Result
-
-Conclude the count:
-
-> Accepting these facts as true and drawing reasonable inferences in Plaintiff's
-> favor, Plaintiff has stated a [claim] against [defendant].
-
-The conclusion must follow from the element map. It cannot repair a missing
-allegation.
+The ordered count recipe, defendant-specific pleading rules, conditional
+inference rules, qualified-immunity requirements, and Result rule are controlled
+only by [references/complaint-contract.md](references/complaint-contract.md).
 
 ## Compact statement -> contradiction -> correction -> materiality pattern
 

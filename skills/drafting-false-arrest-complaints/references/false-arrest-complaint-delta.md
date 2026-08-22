@@ -61,6 +61,14 @@ controlling state-court construction that fixes those elements. Do not
 paraphrase an offense from memory or state only the statute number. Record the
 statutory citation and construction authority, or a GAP, in the source column.
 
+For each alternative offense actually raised by the defense, a controlling
+ruling, or governing law, identify each incorporated-record fact or conduct that
+remains unresolved or ambiguous and is material to an offense element. Without
+admitting that fact or conduct occurred, map the unresolved fact to the offense
+element and either state the supported element-level reason it does not supply
+probable cause or arguable probable cause or record a filing-critical GAP for
+reserved strategy decision. Do not inventory merely conceivable offenses.
+
 Apply the specialization in this order:
 
 > **Offense → element → decisive facts → contemporaneous knowledge →

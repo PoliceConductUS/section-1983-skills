@@ -179,6 +179,17 @@ surface the recording, the facts may instead support inadequate supervision,
 training, or review. Preserve supported alternatives when discovery-controlled
 facts prevent choosing between them.
 
+### Filed-text candor and no-concession boundary
+
+Filed complaint text may accurately qualify what a source, record, or evidence
+proves and identify a source limitation, unresolved fact, or uncertainty.
+Supported alternative or conditional pleading is permitted. Filed complaint text
+must not describe its own claim, element, fair-warning path, or
+qualified-immunity position as weak, likely to fail, likely barred, or legally
+deficient. Route legal risk, merits, or strength assessment to versioned
+strategy or an internal audit. That route does not permit concealment of
+contrary evidence or authority.
+
 ### Qualified immunity for eligible individual counts
 
 For every qualified-immunity-eligible individual count, record these additional
@@ -228,6 +239,13 @@ For each eligible claim and defendant, the filed complaint must state:
 4. the materially similar facts and material differences;
 5. why that authority gave the defendant fair warning; and
 6. a conclusion addressing the prong one result and prong two result.
+
+Each distinct complaint-level fair-warning proposition ordinarily uses one
+verified lead binding pre-event authority and the decisive factual comparison.
+Any additional complaint-level authority must perform a separately identified
+job. Full comparison matrices, competing case discussions, later history, and
+unexplained string cites remain in internal work product or a brief. This
+boundary is functional, not a universal numeric maximum.
 
 A case-specific strategy, routing, packet, or instruction to put clearly
 established law only in a brief does not relax this rule. Flag the conflict,

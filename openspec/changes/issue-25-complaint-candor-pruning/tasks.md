@@ -12,12 +12,12 @@
 
 ## 2. GREEN instructions
 
-- [ ] 2.1 Add the filed-text no-concession and bounded fair-warning rules to the
+- [x] 2.1 Add the filed-text no-concession and bounded fair-warning rules to the
       canonical general complaint contract.
-- [ ] 2.2 Add the uncertainty-purpose ledger to the completion audit.
-- [ ] 2.3 Add the incorporated-record/actual-alternative-offense rule to the
+- [x] 2.2 Add the uncertainty-purpose ledger to the completion audit.
+- [x] 2.3 Add the incorporated-record/actual-alternative-offense rule to the
       false-arrest delta and workflow.
-- [ ] 2.4 Run focused GREEN, corpus evaluation, fresh-context GREEN pressure,
+- [x] 2.4 Run focused GREEN, corpus evaluation, fresh-context GREEN pressure,
       full validation, commit, and sync.
 
 ## 3. Review and archive

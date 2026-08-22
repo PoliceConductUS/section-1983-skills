@@ -98,6 +98,33 @@ SECTION_HEADINGS = (
     "jury demand",
     "signature block",
 )
+HUMAN_COUNT_REQUIREMENTS = (
+    r"\belement\b",
+    r"\bcount (?:id|identifier)\b",
+    r"\bclaim\b",
+    r"\bconstitutional source\b",
+    r"\bdefendant\b",
+    r"\bcapacity\b",
+    r"\bchallenged act\b",
+    r"\bevent stage\b",
+    r"\b(?:governing )?standard\b",
+    r"\b(?:standard )?(?:pinpoint|pincite)\b",
+    r"\bdecisive[- ]fact paragraphs?\b",
+    r"\bincorporated paragraphs?\b",
+    r"\brelevant[- ]time knowledge\b",
+    r"\bapplication\b",
+    r"\binjury\b",
+    r"\brelief\b",
+    r"\bresult\b",
+    r"\bevent date\b",
+    r"\bprecise right\b",
+    r"\bbinding pre[- ]event authority\b",
+    r"\bmaterially similar facts\b",
+    r"\bmaterial differences\b",
+    r"\bfair warning\b",
+    r"\bprong (?:one|1) result\b",
+    r"\bprong (?:two|2) result\b",
+)
 
 
 def normalized_label(value):
@@ -188,17 +215,21 @@ def is_external_destination(destination):
     )
 
 
+def local_destination(destination):
+    return destination.split("#", 1)[0].split("?", 1)[0]
+
+
 def assert_install_local_links(test, package_directory):
     package_root = package_directory.resolve()
     for markdown_path in package_directory.rglob("*.md"):
         for destination in markdown_destinations(markdown_path.read_text(encoding="utf-8")):
-            target = destination.split("#", 1)[0].split("?", 1)[0]
-            if is_external_destination(target):
+            if is_external_destination(destination):
                 continue
+            target = local_destination(destination)
             test.assertFalse(Path(target).is_absolute(), "absolute local path")
             test.assertFalse(re.match(r"^[A-Za-z]:[\\/]", target), "drive path")
             test.assertNotIn("..", Path(target).parts, "traversal")
-            resolved = (markdown_path.parent / target).resolve()
+            resolved = (markdown_path if not target else markdown_path.parent / target).resolve()
             test.assertTrue(
                 resolved.is_relative_to(package_root),
                 "symlink or target escapes isolated package",
@@ -208,9 +239,9 @@ def assert_install_local_links(test, package_directory):
 
 def local_markdown_routes(path):
     return tuple(
-        destination.split("#", 1)[0].split("?", 1)[0]
+        local_destination(destination)
         for destination in markdown_destinations(path.read_text(encoding="utf-8"))
-        if destination.endswith(".md")
+        if local_destination(destination).endswith(".md")
     )
 
 
@@ -231,6 +262,29 @@ def has_complete_count_field_list(markdown):
 
 def normalized_text_value(value):
     return re.sub(r"\s+", " ", without_code_examples(value)).casefold()
+
+
+def assert_human_contract(test, path):
+    test.assertTrue(path.is_file(), "canonical human complaint contract is unavailable")
+    if not path.is_file():
+        return
+    text = normalized_text(path)
+    position = 0
+    for heading in SECTION_HEADINGS:
+        match = re.search(re.escape(heading), text[position:])
+        test.assertIsNotNone(match, f"missing ordered human section: {heading}")
+        if match is None:
+            return
+        position += match.end()
+    test.assertRegex(text, r"(?:introduction.{0,80}optional|optional.{0,80}introduction)")
+    test.assertRegex(
+        text,
+        r"one (?:count )?mapping (?:for|per) (?:every|each) "
+        r"claim[- ]defendant[- ]capacity tuple",
+    )
+    for requirement in HUMAN_COUNT_REQUIREMENTS:
+        with test.subTest(requirement=requirement):
+            test.assertRegex(text, requirement)
 
 
 def assert_fail_closed(test, path):
@@ -302,8 +356,10 @@ class ComplaintContractCompositionTest(unittest.TestCase):
             package = Path(directory) / "package"
             package.mkdir()
             for name in ("inline.md", "reference.md", "shortcut.md", "html.md"):
-                (package / name).write_text("ok\n", encoding="utf-8")
+                (package / name).write_text("# Anchor\n", encoding="utf-8")
             markdown = """[inline](inline.md)
+[fragment](inline.md#anchor)
+[self](#local-anchor)
 [external](https://example.com)
 [reference][ref]
 [shortcut]
@@ -322,11 +378,15 @@ class ComplaintContractCompositionTest(unittest.TestCase):
 [ignored](missing.md)
 ~~~
     [ignored](missing.md)
+
+# Local anchor
 """
             self.assertEqual(
                 markdown_destinations(markdown),
                 [
                     "inline.md",
+                    "inline.md#anchor",
+                    "#local-anchor",
                     "https://example.com",
                     "reference.md",
                     "html.md",
@@ -340,6 +400,10 @@ class ComplaintContractCompositionTest(unittest.TestCase):
             )
             (package / "navigation.md").write_text(markdown, encoding="utf-8")
             assert_install_local_links(self, package)
+            self.assertEqual(
+                local_markdown_routes(package / "navigation.md").count("inline.md"),
+                2,
+            )
             for destination in (
                 "/tmp/file.md",
                 "../escape.md",
@@ -376,10 +440,7 @@ class ComplaintContractCompositionTest(unittest.TestCase):
             install = copied_install(directory)
             package = install / "skills" / GENERAL_PACKAGE
             skill = package / "SKILL.md"
-            self.assertTrue(
-                (package / CANONICAL_HUMAN_REFERENCE).is_file(),
-                "canonical human complaint contract is unavailable",
-            )
+            assert_human_contract(self, package / CANONICAL_HUMAN_REFERENCE)
             self.assertIn(CANONICAL_HUMAN_REFERENCE, local_markdown_routes(skill))
             self.assertIn(CANONICAL_MECHANICAL_REFERENCE, markdown_destinations(skill.read_text(encoding="utf-8")))
             assert_fail_closed(self, skill)

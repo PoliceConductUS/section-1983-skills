@@ -32,7 +32,7 @@
       drift, denominator inflation, forecast certainty, cross-group leakage,
       personal data, malformed input, and lifecycle ambiguity; correct accepted
       Critical or Important findings test-first.
-- [ ] 3.2 Complete verification and retrospective artifacts, archive on this
+- [x] 3.2 Complete verification and retrospective artifacts, archive on this
       branch, and validate both durable capabilities.
-- [ ] 3.3 Commit and sync every correction and archive; finish with a clean
+- [x] 3.3 Commit and sync every correction and archive; finish with a clean
       local/origin-equal branch, Issue 30 open, and no PR.

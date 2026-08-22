@@ -505,6 +505,40 @@ def finding_ids(findings):
 
 
 class DefenseCounselOverlayValidatorTest(unittest.TestCase):
+    def test_schema_required_fields_match_validator_record_keys(self):
+        validator = load_validator()
+        snapshot_schema = json.loads(
+            (SKILL / "references" / "counsel-research-snapshot.schema.json").read_text()
+        )
+        overlay_schema = json.loads(
+            (SKILL / "references" / "defense-counsel-overlay.schema.json").read_text()
+        )
+        snapshot_pairs = {
+            "query": validator.QUERY_KEYS,
+            "attorney": validator.ATTORNEY_KEYS,
+            "matter": validator.MATTER_KEYS,
+            "source": validator.SOURCE_KEYS,
+            "gap": validator.SNAPSHOT_GAP_KEYS,
+        }
+        overlay_pairs = {
+            "identityRecord": validator.IDENTITY_KEYS,
+            "teamRecord": validator.TEAM_KEYS,
+            "historicalArgument": validator.ARGUMENT_KEYS,
+            "judicialTreatment": validator.TREATMENT_KEYS,
+            "currentAttackLink": validator.ATTACK_LINK_KEYS,
+            "pattern": validator.PATTERN_KEYS,
+            "forecast": validator.FORECAST_KEYS,
+            "override": validator.OVERRIDE_KEYS,
+            "overlayGap": validator.OVERLAY_GAP_KEYS,
+            "reviewSlice": validator.SLICE_KEYS,
+        }
+        for name, keys in snapshot_pairs.items():
+            with self.subTest(schema="snapshot", record=name):
+                self.assertEqual(set(snapshot_schema["$defs"][name]["required"]), keys)
+        for name, keys in overlay_pairs.items():
+            with self.subTest(schema="overlay", record=name):
+                self.assertEqual(set(overlay_schema["$defs"][name]["required"]), keys)
+
     def test_complete_and_incomplete_public_corpora_validate_at_declared_strength(self):
         validator = load_validator()
         snapshot = complete_snapshot()
@@ -531,6 +565,59 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
         duplicate["identity_records"].append(copy.deepcopy(duplicate["identity_records"][0]))
         update_fingerprints(duplicate)
         self.assertIn("overlay-duplicate-identifier", finding_ids(validator.validate_overlay(duplicate, snapshot)))
+
+    def test_invalid_snapshot_stops_overlay_semantics_without_traceback(self):
+        validator = load_validator()
+        invalid = complete_snapshot()
+        invalid["research_protocol"] = []
+        self.assertIn(
+            "snapshot-invalid-for-overlay",
+            finding_ids(validator.validate_overlay(complete_overlay(), invalid)),
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            snapshot_path = root / "snapshot.json"
+            overlay_path = root / "overlay.json"
+            snapshot_path.write_text(json.dumps(invalid))
+            overlay_path.write_text(json.dumps(complete_overlay()))
+            result = subprocess.run(
+                [sys.executable, str(VALIDATOR), str(snapshot_path), str(overlay_path)],
+                cwd=REPOSITORY,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        self.assertNotEqual(result.returncode, 0)
+        payload = json.loads(result.stdout)
+        self.assertIn("snapshot-invalid-for-overlay", finding_ids(payload["findings"]))
+
+    def test_unhashable_nested_values_fail_closed_across_record_types(self):
+        validator = load_validator()
+        snapshot = complete_snapshot()
+        mutations = (
+            ("identity", ("identity_records", 0, "appearances", 0, "matter_id"), "identity-structure-invalid"),
+            ("team", ("team_records", 0, "matter_id"), "team-structure-invalid"),
+            ("argument-role", ("historical_arguments", 0, "attribution_role"), "argument-structure-invalid"),
+            ("argument-source", ("historical_arguments", 1, "source_ids", 0), "overlay-structure-invalid"),
+            ("treatment", ("judicial_treatments", 0, "treatment"), "treatment-structure-invalid"),
+            ("pattern-type", ("patterns", 0, "pattern_type"), "pattern-structure-invalid"),
+            ("pattern-source", ("patterns", 0, "source_ids", 0), "overlay-structure-invalid"),
+            ("forecast-confidence", ("forecasts", 0, "confidence"), "forecast-evidence-incomplete"),
+            ("forecast-source", ("forecasts", 0, "source_ids", 0), "overlay-structure-invalid"),
+        )
+        for name, path, expected in mutations:
+            with self.subTest(field=name):
+                overlay = complete_overlay(snapshot)
+                target = overlay
+                for part in path[:-1]:
+                    target = target[part]
+                target[path[-1]] = []
+                update_fingerprints(overlay)
+                self.assertIn(
+                    expected,
+                    finding_ids(validator.validate_overlay(overlay, snapshot)),
+                )
 
     def test_source_hash_date_role_and_quote_integrity_are_enforced(self):
         validator = load_validator()
@@ -586,6 +673,16 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
         wrong_team_source["team_records"][0]["source_ids"] = ["SRC-BRIEF-ONE"]
         update_fingerprints(wrong_team_source)
         self.assertIn("team-source-link-invalid", finding_ids(validator.validate_overlay(wrong_team_source, snapshot)))
+
+        expired_team = complete_overlay(snapshot)
+        expired_team["team_records"][0]["effective_end"] = "2026-01-05"
+        update_fingerprints(expired_team)
+        self.assertIn("team-source-link-invalid", finding_ids(validator.validate_overlay(expired_team, snapshot)))
+
+        wrong_attack_source = complete_overlay(snapshot)
+        wrong_attack_source["current_attack_links"][0]["source_ids"] = ["SRC-BRIEF-ONE"]
+        update_fingerprints(wrong_attack_source)
+        self.assertIn("current-attack-source-link-invalid", finding_ids(validator.validate_overlay(wrong_attack_source, snapshot)))
 
         unrelated_treatment = complete_overlay(snapshot)
         unrelated_treatment["patterns"][0]["comparable_argument_ids"] = ["ARG-TWO", "ARG-THREE", "ARG-CURRENT"]
@@ -777,6 +874,72 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["findings"][0]["id"], "input-file-malformed-json")
+
+    def test_public_cli_validates_counsel_pins_in_filing_manifest(self):
+        snapshot = complete_snapshot()
+        overlay = complete_overlay(snapshot)
+        pins = [
+            {
+                "kind": kind,
+                "overlay_id": overlay["overlay_id"],
+                "version": overlay["version"],
+                "sha256": canonical_sha256(overlay),
+                "checked_through": snapshot["checked_through"],
+                "validator_result": "passed",
+                "source_snapshot_id": snapshot["snapshot_id"],
+                "source_snapshot_version": snapshot["version"],
+                "source_snapshot_sha256": canonical_sha256(snapshot),
+            }
+            for kind in ("counsel-identity", "counsel-team")
+        ]
+        manifest = {
+            "schema_version": "1.0",
+            "filing_version_id": "FILING-V1",
+            "artifact_id": "TARGET-V1",
+            "artifact_sha256": "1" * 64,
+            "source_snapshot": {
+                "snapshot_id": "DOCKET-SNAPSHOT-1",
+                "version": "v1",
+                "sha256": "2" * 64,
+                "checked_through": "2026-02-10",
+            },
+            "overlays": pins,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            snapshot_path = root / "snapshot.json"
+            overlay_path = root / "overlay.json"
+            manifest_path = root / "manifest.json"
+            snapshot_path.write_text(json.dumps(snapshot))
+            overlay_path.write_text(json.dumps(overlay))
+            manifest_path.write_text(json.dumps(manifest))
+            command = [
+                sys.executable,
+                str(VALIDATOR),
+                str(snapshot_path),
+                str(overlay_path),
+                "--filing-manifest",
+                str(manifest_path),
+            ]
+            passing = subprocess.run(
+                command,
+                cwd=REPOSITORY,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(passing.returncode, 0, passing.stderr)
+            manifest["overlays"][1]["checked_through"] = "2026-02-09"
+            manifest_path.write_text(json.dumps(manifest))
+            stale = subprocess.run(
+                command,
+                cwd=REPOSITORY,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        self.assertNotEqual(stale.returncode, 0)
+        self.assertIn("counsel-pin-stale", finding_ids(json.loads(stale.stdout)["findings"]))
 
 
 if __name__ == "__main__":

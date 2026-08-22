@@ -141,7 +141,8 @@ The filing-version manifest pins the Judicial Reasoning Profile, litigation-
 alignment overlay, individual-attorney identity overlay, and counsel-team
 behavior overlay separately. Apply controlling law independently. A stale,
 irrelevant, mismatched, or failing overlay produces no specialized drafting
-change.
+change. Pass that manifest to the counsel validator so both counsel pins are
+checked against the exact research snapshot and overlay fingerprint.
 
 ## Create, reuse, refresh, rebuild, and supersede
 

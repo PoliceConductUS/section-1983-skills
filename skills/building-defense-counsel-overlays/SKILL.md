@@ -93,7 +93,8 @@ replace, remove, or displace any common attack or the independent blind review.
 Run:
 
 ```bash
-python3 scripts/validate_counsel_overlays.py SNAPSHOT_JSON OVERLAY_JSON
+python3 scripts/validate_counsel_overlays.py SNAPSHOT_JSON OVERLAY_JSON \
+  --filing-manifest FILING_MANIFEST_JSON
 ```
 
 Pin counsel identity and counsel team as separate overlay kinds in the filing-

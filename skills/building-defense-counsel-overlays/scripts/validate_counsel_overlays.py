@@ -261,6 +261,14 @@ PIN_KEYS = {
     "source_snapshot_version",
     "source_snapshot_sha256",
 }
+MANIFEST_KEYS = {
+    "schema_version",
+    "filing_version_id",
+    "artifact_id",
+    "artifact_sha256",
+    "source_snapshot",
+    "overlays",
+}
 LEDGER_NAMES = {
     "identity_records",
     "team_records",
@@ -361,6 +369,14 @@ def _string_list(value, nonempty=False):
     )
 
 
+def _one_of(value, choices):
+    return isinstance(value, str) and value in choices
+
+
+def _safe_id_set(value):
+    return set(value) if _id_list(value) else set()
+
+
 def _duplicate_ids(records, key):
     values = [record.get(key) for record in records if isinstance(record, dict)]
     return len(values) != len(set(value for value in values if _stable(value)))
@@ -440,7 +456,7 @@ def validate_snapshot(snapshot):
         sources = []
     for index, item in enumerate(sources):
         path = f"$.sources[{index}]"
-        if not _exact(item, SOURCE_KEYS) or not _stable(item.get("source_id")) or item.get("source_role") not in SOURCE_ROLES or not _date(item.get("retrieved_on")) or not _date(item.get("source_date")) or not _id_list(item.get("actor_ids")) or not (item.get("matter_id") is None or _stable(item.get("matter_id"))) or not _nonempty(item.get("content")) or not _sha(item.get("sha256")):
+        if not _exact(item, SOURCE_KEYS) or not _stable(item.get("source_id")) or not _one_of(item.get("source_role"), SOURCE_ROLES) or not _date(item.get("retrieved_on")) or not _date(item.get("source_date")) or not _id_list(item.get("actor_ids")) or not (item.get("matter_id") is None or _stable(item.get("matter_id"))) or not _nonempty(item.get("content")) or not _sha(item.get("sha256")):
             _add(findings, "snapshot-structure-invalid", path, "source is invalid")
             continue
         if item["matter_id"] is not None and item["matter_id"] not in matter_ids:
@@ -457,7 +473,7 @@ def validate_snapshot(snapshot):
         gaps = []
     query_ids = {item.get("query_id") for item in queries if isinstance(item, dict)}
     for index, gap in enumerate(gaps):
-        if not _exact(gap, SNAPSHOT_GAP_KEYS) or not _stable(gap.get("gap_id")) or not _id_list(gap.get("query_ids"), nonempty=True) or not _id_list(gap.get("matter_ids")) or gap.get("reason") not in SNAPSHOT_GAP_REASONS or not _nonempty(gap.get("description")):
+        if not _exact(gap, SNAPSHOT_GAP_KEYS) or not _stable(gap.get("gap_id")) or not _id_list(gap.get("query_ids"), nonempty=True) or not _id_list(gap.get("matter_ids")) or not _one_of(gap.get("reason"), SNAPSHOT_GAP_REASONS) or not _nonempty(gap.get("description")):
             _add(findings, "snapshot-structure-invalid", f"$.gaps[{index}]", "gap is invalid")
             continue
         if not set(gap["query_ids"]).issubset(query_ids) or not set(gap["matter_ids"]).issubset(matter_ids):
@@ -511,7 +527,7 @@ def _validate_identity(records, attorneys, matters, sources, findings):
             if not firm_sources.issubset(sources) or any(record["attorney_id"] not in sources[source_id]["actor_ids"] or firm["firm_name"] not in sources[source_id]["content"] for source_id in firm_sources if source_id in sources):
                 _add(findings, "identity-source-link-invalid", f"{path}.firm_affiliations[{firm_index}]", "firm affiliation is not supported by its sources")
         for appearance_index, appearance in enumerate(record["appearances"]):
-            if not _exact(appearance, APPEARANCE_KEYS) or appearance.get("matter_id") not in matters or not _nonempty(appearance.get("represented_party")) or not _date(appearance.get("start_date")) or not (appearance.get("end_date") is None or _date(appearance.get("end_date"))) or not _string_list(appearance.get("roles"), nonempty=True) or not set(appearance.get("roles", [])).issubset(ATTRIBUTION_ROLES) or not _id_list(appearance.get("source_ids"), nonempty=True):
+            if not _exact(appearance, APPEARANCE_KEYS) or not _stable(appearance.get("matter_id")) or appearance.get("matter_id") not in matters or not _nonempty(appearance.get("represented_party")) or not _date(appearance.get("start_date")) or not (appearance.get("end_date") is None or _date(appearance.get("end_date"))) or not _string_list(appearance.get("roles"), nonempty=True) or not set(appearance.get("roles", [])).issubset(ATTRIBUTION_ROLES) or not _id_list(appearance.get("source_ids"), nonempty=True):
                 _add(findings, "identity-structure-invalid", f"{path}.appearances[{appearance_index}]", "appearance is invalid")
                 continue
             appearance_sources = set(appearance["source_ids"])
@@ -530,7 +546,7 @@ def _validate_teams(records, attorneys, matters, sources, findings):
     teams = {}
     for index, record in enumerate(records if isinstance(records, list) else []):
         path = f"$.team_records[{index}]"
-        if not _exact(record, TEAM_KEYS) or not _stable(record.get("team_id")) or record.get("matter_id") not in matters or not _nonempty(record.get("version")) or not _date(record.get("effective_start")) or not (record.get("effective_end") is None or _date(record.get("effective_end"))) or not _id_list(record.get("member_attorney_ids"), nonempty=True) or not _nonempty(record.get("represented_party")) or not _id_list(record.get("alignment_group_ids"), nonempty=True):
+        if not _exact(record, TEAM_KEYS) or not _stable(record.get("team_id")) or not _stable(record.get("matter_id")) or record.get("matter_id") not in matters or not _nonempty(record.get("version")) or not _date(record.get("effective_start")) or not (record.get("effective_end") is None or _date(record.get("effective_end"))) or not _id_list(record.get("member_attorney_ids"), nonempty=True) or not _nonempty(record.get("represented_party")) or not _id_list(record.get("alignment_group_ids"), nonempty=True):
             _add(findings, "team-structure-invalid", path, "team record is invalid")
             continue
         if not set(record["member_attorney_ids"]).issubset(attorneys):
@@ -539,7 +555,7 @@ def _validate_teams(records, attorneys, matters, sources, findings):
         if record["represented_party"] != matter["represented_party"] or not set(record["alignment_group_ids"]).issubset(set(matter["alignment_group_ids"])):
             _add(findings, "team-matter-link-invalid", path, "team party or group does not match its matter")
         team_source_ids = _validate_source_ids(record.get("source_ids"), sources, findings, f"{path}.source_ids")
-        if any(sources[source_id]["matter_id"] != record["matter_id"] or not set(sources[source_id]["actor_ids"]).intersection(record["member_attorney_ids"]) for source_id in team_source_ids if source_id in sources):
+        if any(sources[source_id]["matter_id"] != record["matter_id"] or not set(sources[source_id]["actor_ids"]).intersection(record["member_attorney_ids"]) or sources[source_id]["source_date"] < record["effective_start"] or (record["effective_end"] is not None and sources[source_id]["source_date"] > record["effective_end"]) for source_id in team_source_ids if source_id in sources):
             _add(findings, "team-source-link-invalid", f"{path}.source_ids", "team sources must match the matter and a team member")
         teams[record["team_id"]] = record
     if not isinstance(records, list):
@@ -566,7 +582,7 @@ def _validate_arguments(records, attorneys, matters, teams, sources, findings):
     arguments = {}
     for index, record in enumerate(records if isinstance(records, list) else []):
         path = f"$.historical_arguments[{index}]"
-        valid = _exact(record, ARGUMENT_KEYS) and _stable(record.get("argument_id")) and _stable(record.get("matter_id")) and record.get("matter_id") in matters and _stable(record.get("team_id")) and record.get("team_id") in teams and (record.get("attorney_id") is None or (_stable(record.get("attorney_id")) and record.get("attorney_id") in attorneys)) and record.get("attribution_role") in ATTRIBUTION_ROLES and _date(record.get("date")) and all(_nonempty(record.get(key)) for key in ("posture", "represented_party", "claim_id", "challenged_act_id", "element_or_defense", "requested_relief", "status")) and (record.get("qualified_immunity_prong") is None or _nonempty(record.get("qualified_immunity_prong"))) and _id_list(record.get("alignment_group_ids"), nonempty=True)
+        valid = _exact(record, ARGUMENT_KEYS) and _stable(record.get("argument_id")) and _stable(record.get("matter_id")) and record.get("matter_id") in matters and _stable(record.get("team_id")) and record.get("team_id") in teams and (record.get("attorney_id") is None or (_stable(record.get("attorney_id")) and record.get("attorney_id") in attorneys)) and _one_of(record.get("attribution_role"), ATTRIBUTION_ROLES) and _date(record.get("date")) and all(_nonempty(record.get(key)) for key in ("posture", "represented_party", "claim_id", "challenged_act_id", "element_or_defense", "requested_relief", "status")) and (record.get("qualified_immunity_prong") is None or _nonempty(record.get("qualified_immunity_prong"))) and _id_list(record.get("alignment_group_ids"), nonempty=True)
         if not valid:
             _add(findings, "argument-structure-invalid", path, "historical argument is invalid")
             continue
@@ -595,7 +611,7 @@ def _validate_treatments(records, arguments, sources, findings):
     treatments = {}
     for index, record in enumerate(records if isinstance(records, list) else []):
         path = f"$.judicial_treatments[{index}]"
-        if not _exact(record, TREATMENT_KEYS) or not _stable(record.get("treatment_id")) or not _stable(record.get("argument_id")) or not _nonempty(record.get("court_actor")) or not _date(record.get("date")) or record.get("treatment") not in TREATMENTS:
+        if not _exact(record, TREATMENT_KEYS) or not _stable(record.get("treatment_id")) or not _stable(record.get("argument_id")) or not _nonempty(record.get("court_actor")) or not _date(record.get("date")) or not _one_of(record.get("treatment"), TREATMENTS):
             _add(findings, "treatment-structure-invalid", path, "judicial treatment is invalid")
             continue
         source_ids = _validate_source_ids(record.get("source_ids"), sources, findings, f"{path}.source_ids")
@@ -617,9 +633,12 @@ def _validate_attack_links(records, teams, sources, findings):
         if not _exact(record, ATTACK_LINK_KEYS) or not all(_stable(record.get(key)) for key in ("link_id", "attack_id", "team_id", "alignment_group_id", "claim_id")) or record.get("team_id") not in teams or not _id_list(record.get("defendant_ids"), nonempty=True) or not _id_list(record.get("challenged_act_ids"), nonempty=True):
             _add(findings, "current-attack-structure-invalid", path, "current attack link is invalid")
             continue
-        _validate_source_ids(record.get("source_ids"), sources, findings, f"{path}.source_ids")
+        link_source_ids = _validate_source_ids(record.get("source_ids"), sources, findings, f"{path}.source_ids")
         if record["alignment_group_id"] not in teams[record["team_id"]]["alignment_group_ids"]:
             _add(findings, "current-attack-team-link-invalid", path, "current attack group does not match counsel team")
+        team = teams[record["team_id"]]
+        if not link_source_ids.issubset(set(team["source_ids"])) or any(sources[source_id]["matter_id"] != team["matter_id"] or sources[source_id]["source_role"] not in BEHAVIOR_SOURCE_ROLES for source_id in link_source_ids if source_id in sources):
+            _add(findings, "current-attack-source-link-invalid", f"{path}.source_ids", "current attack sources must match the effective team and matter")
         links[record["link_id"]] = record
     if not isinstance(records, list):
         _add(findings, "overlay-structure-invalid", "$.current_attack_links", "current attack links must be a list")
@@ -638,7 +657,7 @@ def _validate_patterns(records, snapshot, arguments, treatments, sources, findin
     protocol = snapshot.get("research_protocol", {})
     for index, record in enumerate(records if isinstance(records, list) else []):
         path = f"$.patterns[{index}]"
-        valid = _exact(record, PATTERN_KEYS) and _stable(record.get("pattern_id")) and record.get("pattern_type") in PATTERN_TYPES and _id_list(record.get("comparable_argument_ids"), nonempty=True) and all(_nonempty(record.get(key)) for key in ("scope", "selection_method", "posture", "conclusion", "limits")) and _nonnegative_int(record.get("denominator")) and _nonnegative_int(record.get("coded_record_count")) and _id_list(record.get("supporting_argument_ids"), nonempty=True) and _id_list(record.get("contrary_argument_ids"), nonempty=True) and _id_list(record.get("treatment_ids")) and record.get("confidence") in CONFIDENCE and _date(record.get("checked_through"))
+        valid = _exact(record, PATTERN_KEYS) and _stable(record.get("pattern_id")) and _one_of(record.get("pattern_type"), PATTERN_TYPES) and _id_list(record.get("comparable_argument_ids"), nonempty=True) and all(_nonempty(record.get(key)) for key in ("scope", "selection_method", "posture", "conclusion", "limits")) and _nonnegative_int(record.get("denominator")) and _nonnegative_int(record.get("coded_record_count")) and _id_list(record.get("supporting_argument_ids"), nonempty=True) and _id_list(record.get("contrary_argument_ids"), nonempty=True) and _id_list(record.get("treatment_ids")) and _one_of(record.get("confidence"), CONFIDENCE) and _date(record.get("checked_through"))
         if not valid:
             _add(findings, "pattern-structure-invalid", path, "pattern is invalid")
             continue
@@ -656,13 +675,15 @@ def _validate_patterns(records, snapshot, arguments, treatments, sources, findin
             for argument_id in comparable
             if argument_id in arguments
             for source_id in arguments[argument_id]["source_ids"]
+            if _stable(source_id)
         }.union(
             source_id
             for treatment_id in record["treatment_ids"]
             if treatment_id in treatments
             for source_id in treatments[treatment_id]["source_ids"]
+            if _stable(source_id)
         )
-        if set(record.get("source_ids", [])) != expected_sources:
+        if _safe_id_set(record.get("source_ids")) != expected_sources:
             _add(findings, "pattern-source-union-invalid", f"{path}.source_ids", "pattern source IDs must equal the linked evidence union")
         if record["denominator"] != len(comparable) or record["coded_record_count"] != len(comparable) or record["denominator"] != protocol.get("candidate_record_count"):
             _add(findings, "pattern-denominator-invalid", path, "pattern denominator must equal the declared complete comparable set")
@@ -687,7 +708,7 @@ def _validate_forecasts(records, snapshot, patterns, arguments, sources, finding
     protocol = snapshot.get("research_protocol", {})
     for index, record in enumerate(records if isinstance(records, list) else []):
         path = f"$.forecasts[{index}]"
-        valid = _exact(record, FORECAST_KEYS) and _stable(record.get("forecast_id")) and _nonempty(record.get("professional_move")) and _id_list(record.get("pattern_ids"), nonempty=True) and _id_list(record.get("comparable_argument_ids"), nonempty=True) and _nonnegative_int(record.get("denominator")) and _nonnegative_int(record.get("coded_record_count")) and _nonempty(record.get("posture")) and _id_list(record.get("supporting_argument_ids"), nonempty=True) and _id_list(record.get("contrary_argument_ids"), nonempty=True) and record.get("confidence") in CONFIDENCE and _date(record.get("checked_through")) and _nonempty(record.get("limits"))
+        valid = _exact(record, FORECAST_KEYS) and _stable(record.get("forecast_id")) and _nonempty(record.get("professional_move")) and _id_list(record.get("pattern_ids"), nonempty=True) and _id_list(record.get("comparable_argument_ids"), nonempty=True) and _nonnegative_int(record.get("denominator")) and _nonnegative_int(record.get("coded_record_count")) and _nonempty(record.get("posture")) and _id_list(record.get("supporting_argument_ids"), nonempty=True) and _id_list(record.get("contrary_argument_ids"), nonempty=True) and _one_of(record.get("confidence"), CONFIDENCE) and _date(record.get("checked_through")) and _nonempty(record.get("limits"))
         if not valid:
             _add(findings, "forecast-evidence-incomplete", path, "forecast evidence is incomplete")
             continue
@@ -705,8 +726,9 @@ def _validate_forecasts(records, snapshot, patterns, arguments, sources, finding
             for argument_id in comparable
             if argument_id in arguments
             for source_id in arguments[argument_id]["source_ids"]
+            if _stable(source_id)
         }
-        if set(record.get("source_ids", [])) != expected_sources:
+        if _safe_id_set(record.get("source_ids")) != expected_sources:
             _add(findings, "forecast-source-union-invalid", f"{path}.source_ids", "forecast source IDs must equal the comparable argument source union")
         if record["denominator"] != len(comparable) or record["coded_record_count"] != len(comparable) or record["denominator"] != protocol.get("candidate_record_count") or protocol.get("coverage_status") != "complete" or (missingness and any(missingness.values())):
             _add(findings, "forecast-evidence-incomplete", path, "forecast requires the complete declared corpus")
@@ -784,6 +806,14 @@ def _validate_slices(records, identities, teams, arguments, treatments, links, p
 
 def validate_overlay(overlay, snapshot):
     findings = []
+    if validate_snapshot(snapshot):
+        return [
+            _finding(
+                "snapshot-invalid-for-overlay",
+                "$.source_snapshot",
+                "overlay semantics require a valid source snapshot",
+            )
+        ]
     if not _exact(overlay, OVERLAY_KEYS):
         _add(findings, "overlay-structure-invalid", "$", "overlay must contain the exact required fields")
         return findings
@@ -861,6 +891,24 @@ def validate_filing_pins(pins, overlay, snapshot):
     return findings
 
 
+def validate_filing_manifest(manifest, overlay, snapshot):
+    if not _exact(manifest, MANIFEST_KEYS) or manifest.get("schema_version") != "1.0" or not _stable(manifest.get("filing_version_id")) or not _stable(manifest.get("artifact_id")) or not _sha(manifest.get("artifact_sha256")) or not _exact(manifest.get("source_snapshot"), SNAPSHOT_REFERENCE_KEYS) or not isinstance(manifest.get("overlays"), list):
+        return [
+            _finding(
+                "counsel-manifest-structure-invalid",
+                "$",
+                "filing manifest must contain the exact required structure",
+            )
+        ]
+    counsel_pins = [
+        pin
+        for pin in manifest["overlays"]
+        if isinstance(pin, dict)
+        and pin.get("kind") in ("counsel-identity", "counsel-team")
+    ]
+    return validate_filing_pins(counsel_pins, overlay, snapshot)
+
+
 def _load(path):
     try:
         return json.loads(Path(path).read_bytes().decode("utf-8")), None
@@ -874,6 +922,7 @@ def _parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("snapshot")
     parser.add_argument("overlay")
+    parser.add_argument("--filing-manifest")
     return parser
 
 
@@ -882,9 +931,16 @@ def main(argv=None):
     snapshot, snapshot_error = _load(arguments.snapshot)
     overlay, overlay_error = _load(arguments.overlay)
     findings = [item for item in (snapshot_error, overlay_error) if item]
+    manifest = None
+    if arguments.filing_manifest:
+        manifest, manifest_error = _load(arguments.filing_manifest)
+        if manifest_error:
+            findings.append(manifest_error)
     if not findings:
         findings.extend(validate_snapshot(snapshot))
         findings.extend(validate_overlay(overlay, snapshot))
+        if manifest is not None:
+            findings.extend(validate_filing_manifest(manifest, overlay, snapshot))
     result = {"findings": findings, "passed": not findings}
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     return 0 if result["passed"] else 1

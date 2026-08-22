@@ -28,7 +28,7 @@
 
 ## 3. Review and archive
 
-- [ ] 3.1 Review the complete story for attribution false greens, source-role
+- [x] 3.1 Review the complete story for attribution false greens, source-role
       drift, denominator inflation, forecast certainty, cross-group leakage,
       personal data, malformed input, and lifecycle ambiguity; correct accepted
       Critical or Important findings test-first.

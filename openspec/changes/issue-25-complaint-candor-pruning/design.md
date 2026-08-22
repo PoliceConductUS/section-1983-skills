@@ -31,6 +31,27 @@ governing proposition or necessary precedential link. The full comparison, later
 history, competing cases, and string cite stay in the internal matrix or brief.
 The boundary is functional rather than a universal numeric maximum.
 
+### Canonical tuple checklist and authority-audit boundary
+
+One checklist in the complaint contract owns the field names for every
+claim–defendant–challenged-act tuple. Its universal layer joins decisive facts,
+the defendant's relevant-time knowledge, and the resulting element-specific
+application. Its conditional qualified-immunity layer joins event date and
+stage, conduct-specific right, verified binding pre-event authority,
+authority-audit status, factual similarities and differences, defendant-
+specific fair warning, rule-of-orderliness and later-history review status, and
+separate prong results.
+
+The complaint package owns only that interface and its fail-closed completion
+rule. `audit-authorities` continues to own case identity, publication and
+binding-status verification, precedential force, pinpoints, later history,
+rule-of-orderliness analysis, and approval procedure. Missing or unverified
+qualified-immunity fields create an internal filing-critical GAP and block
+filing-ready status; they do not authorize a filed adverse merits assessment.
+The existing non-executable JSON handoff mirrors the checklist's tuple
+cardinality and machine field names so the human and mechanical interfaces do
+not drift; it does not implement the authority audit.
+
 ### Purpose-based pruning
 
 The completion audit consumes the filed draft's own uncertainty labels. Each
@@ -60,6 +81,9 @@ offenses or select a concession.
   accepted output must preserve factual candor, avoid adverse merits
   self-assessment, keep authority bounded, prune nonfunctional uncertainty, and
   fail closed on unresolved offense effects.
+- Mutation tests require the canonical tuple fields and prove that incomplete
+  authority-audit status fails closed without copying the detailed audit
+  procedure into the complaint package.
 
 ## Risks
 

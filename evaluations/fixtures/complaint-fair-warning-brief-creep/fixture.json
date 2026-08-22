@@ -22,7 +22,7 @@
     "banned_patterns": [
       {
         "id": "unexplained-string-cite",
-        "pattern": "(?is)# Filed Fair-Warning Unit(?:(?!# Internal Authority Matrix).){0,2400}LEAD-1;\\s*CASE-2;\\s*CASE-3"
+        "pattern": "(?is)# Filed Fair-Warning Unit(?:(?!# Internal Authority Matrix).){0,2400}\\bCASE-[23]\\b"
       }
     ],
     "required_citations": ["FW-AUTH", "FW-BOUNDARY"]

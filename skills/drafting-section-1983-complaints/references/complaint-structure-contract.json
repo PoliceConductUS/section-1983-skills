@@ -39,7 +39,7 @@
       "optional": false
     }
   ],
-  "count_cardinality": ["claim", "defendant", "capacity"],
+  "count_cardinality": ["claim", "defendant", "challenged_act"],
   "required_count_fields": [
     "count_id",
     "claim",
@@ -62,9 +62,12 @@
     "event_date",
     "precise_right",
     "binding_pre_event_authority",
+    "authority_audit_status",
     "materially_similar_facts",
     "material_differences",
     "fair_warning",
+    "rule_of_orderliness_review_status",
+    "later_history_review_status",
     "prong_one_result",
     "prong_two_result"
   ],
@@ -74,7 +77,7 @@
     "paragraph-numbering-continuity",
     "count-numbering-continuity",
     "unique-count-id",
-    "claim-defendant-capacity-cardinality",
+    "claim-defendant-challenged-act-cardinality",
     "cross-reference-target",
     "incorporation-target",
     "required-count-field-location"

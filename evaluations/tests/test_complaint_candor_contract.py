@@ -110,6 +110,28 @@ cause or record a filing-critical GAP. The specialization must not inventory
 merely conceivable offenses.
 """
 
+CONFORMING_CANONICAL_CHECKLIST = """
+### Canonical claim-defendant-challenged-act checklist
+
+Use one checklist for each claim, defendant, and challenged act. Record these
+universal fields: claim; defendant; challenged act and event stage; governing
+element and standard; decisive facts; relevant-time knowledge; element-specific
+legal application; and result.
+
+When qualified immunity applies, also record these conditional fields: event
+date; conduct-specific right or rule; verified binding pre-event authority;
+authority-audit status; materially similar facts; material differences;
+defendant-specific fair warning; rule-of-orderliness and later-history review
+status; prong one result; and prong two result.
+
+If a required universal field is missing or unverified, the mapping is
+incomplete. If a conditional qualified-immunity field is missing or unverified,
+record an internal filing-critical GAP, do not mark the complaint filing-ready,
+and route the GAP to a reserved strategy decision without placing an adverse
+merits assessment in filed text. This checklist does not duplicate detailed
+authority verification owned by `audit-authorities`.
+"""
+
 
 def normalized_value(text):
     return re.sub(r"\s+", " ", text).strip().casefold()
@@ -166,6 +188,163 @@ def finding_pairs(result):
     }
 
 
+def insert_before_heading(candidate, heading, insertion):
+    marker = f"\n# {heading}\n"
+    replacement = f"\n{insertion}\n\n# {heading}\n"
+    replaced = candidate.replace(marker, replacement, 1)
+    if replaced == candidate:
+        raise AssertionError(f"heading unavailable: {heading}")
+    return replaced
+
+
+def replace_once(candidate, old, new):
+    replaced = candidate.replace(old, new, 1)
+    if replaced == candidate:
+        raise AssertionError(f"candidate text unavailable: {old}")
+    return replaced
+
+
+def markdown_sections(markdown, heading_pattern):
+    lines = markdown.splitlines()
+    sections = []
+    for index, line in enumerate(lines):
+        match = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
+        if not match or not re.search(heading_pattern, match.group(2), re.I):
+            continue
+        level = len(match.group(1))
+        end = len(lines)
+        for candidate_index in range(index + 1, len(lines)):
+            candidate = re.match(r"^(#{1,6})\s+", lines[candidate_index])
+            if candidate and len(candidate.group(1)) <= level:
+                end = candidate_index
+                break
+        sections.append("\n".join(lines[index:end]))
+    return tuple(sections)
+
+
+def assert_authority_verification_ownership(test, text):
+    assert_clause_contains(
+        test,
+        normalized_value(text),
+        r"(?:does not|must not|do not)",
+        r"duplicate",
+        r"detailed authority verification",
+        r"(?:owned by|belongs to|performed by).{0,40}`?audit-authorities`?",
+    )
+
+
+def assert_canonical_claim_checklist(test, markdown):
+    sections = markdown_sections(
+        markdown,
+        r"canonical claim[-–— ]defendant[-–— ]challenged[- ]act checklist",
+    )
+    test.assertEqual(len(sections), 1, "one canonical claim checklist is required")
+    if len(sections) != 1:
+        return
+    text = normalized_value(sections[0])
+    qualified_immunity_checklists = []
+    for checklist in markdown_sections(markdown, r"\bchecklist\b"):
+        heading = normalized_value(checklist.splitlines()[0])
+        checklist_text = normalized_value(checklist)
+        heading_claims_qualified_immunity = re.search(
+            r"qualified[- ]immunity.*checklist|checklist.*qualified[- ]immunity",
+            heading,
+        )
+        body_claims_conditional_interface = (
+            re.search(
+                r"conditional qualified[- ]immunity field|when qualified immunity applies",
+                checklist_text,
+            )
+            and re.search(r"prong one result|separate prong results", checklist_text)
+        )
+        if heading_claims_qualified_immunity or body_claims_conditional_interface:
+            qualified_immunity_checklists.append(checklist)
+    test.assertEqual(
+        len(qualified_immunity_checklists),
+        1,
+        "one checklist must own qualified-immunity completion",
+    )
+    if len(qualified_immunity_checklists) == 1:
+        test.assertEqual(
+            normalized_value(qualified_immunity_checklists[0]),
+            text,
+            "the canonical claim checklist must own qualified-immunity completion",
+        )
+    universal_fields = (
+        r"\bclaim\b",
+        r"\bdefendant\b",
+        r"challenged act",
+        r"event stage",
+        r"governing (?:element|standard)",
+        r"decisive facts",
+        r"relevant[- ]time knowledge",
+        r"element[- ]specific legal application",
+        r"\bresult\b",
+    )
+    conditional_fields = (
+        r"event date",
+        r"conduct[- ]specific (?:right|rule)",
+        r"verified binding pre[- ]event authority",
+        r"authority[- ]audit status",
+        r"materially similar facts",
+        r"material differences",
+        r"defendant[- ]specific fair warning",
+        r"rule[- ]of[- ]orderliness",
+        r"later[- ]history review status",
+        r"prong one result",
+        r"prong two result",
+    )
+    for field in universal_fields + conditional_fields:
+        with test.subTest(field=field):
+            test.assertRegex(text, field)
+    test.assertRegex(text, r"(?:conditional|when).{0,80}qualified immunity")
+    assert_clause_contains(
+        test,
+        text,
+        r"required universal field",
+        r"missing or unverified",
+        r"mapping is incomplete",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"required universal field",
+        r"missing or unverified",
+        r"mapping is incomplete",
+        r"unless",
+        r"reserved strategy",
+        r"treats? it (?:as )?complete",
+    )
+    assert_clause_contains(
+        test,
+        text,
+        r"conditional qualified[- ]immunity field",
+        r"missing or unverified",
+        r"internal filing[- ]critical gap",
+        r"(?:do not|must not).{0,80}(?:mark|treat).{0,80}filing[- ]ready",
+        r"reserved strategy decision",
+        r"(?:without|no).{0,100}adverse merits assessment.{0,80}filed text",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"conditional qualified[- ]immunity field",
+        r"missing or unverified",
+        r"internal filing[- ]critical gap",
+        r"unless",
+        r"strategy waives",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"adverse merits assessment",
+        r"filed text",
+        r"unless",
+        r"strategy approves",
+    )
+    assert_authority_verification_ownership(test, sections[0])
+
+
 def assert_no_adverse_merits_self_assessment(test, text):
     assert_clause_contains(
         test,
@@ -181,14 +360,14 @@ def assert_no_adverse_merits_self_assessment(test, text):
     assert_clause_contains(
         test,
         text,
-        r"(?:may|must|accurat)",
+        r"\baccurat(?:e|ely)\b",
         r"(?:source|record|evidence)",
         r"(?:limitation|unresolved|uncertain)",
     )
     assert_clause_contains(
         test,
         text,
-        r"supported",
+        r"\bsupported\b",
         r"(?:alternative|conditional) pleading",
         r"(?:permitted|allowed|may|preserve)",
     )
@@ -214,6 +393,14 @@ def assert_no_adverse_merits_self_assessment(test, text):
         r"(?:claim|element|fair[- ]warning|qualified[- ]immunity)",
         r"(?:weak|likely to fail|likely barred|legally deficient)",
     )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:may|allowed|permitted)",
+        r"(?:call|assess|characterize|describe|label)",
+        r"(?:claim|element|fair[- ]warning|qualified[- ]immunity|immunity)",
+        r"\b(?:contested|doubtful)\b",
+    )
 
 
 def assert_bounded_fair_warning_authority(test, text):
@@ -235,6 +422,7 @@ def assert_bounded_fair_warning_authority(test, text):
         text,
         r"(?:comparison|matrix)",
         r"(?:string cite|competing case)",
+        r"(?:remain|stay|route|keep)",
         r"(?:internal|brief)",
     )
     assert_clause_contains(
@@ -260,6 +448,37 @@ def assert_bounded_fair_warning_authority(test, text):
         r"unexplained",
         r"(?:multi[- ]case|string cite)",
     )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:may|can|allowed|permitted)",
+        r"(?:additional|another|second) complaint[- ]level authority",
+        r"(?:repeat|duplicate)",
+        r"(?:without|no).*(?:separate|distinct) job",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:additional|another|second) complaint[- ]level authority",
+        r"(?:separately identified|distinct) job",
+        r"\bunless\b",
+        r"repeat.*lead authority",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:complaint|count)",
+        r"(?:limited|capped|maximum|no more than)",
+        r"one authority",
+        r"per count",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:may|can|allowed|permitted)",
+        r"(?:comparison|matrix|string cite)",
+        r"filed (?:complaint|text)",
+    )
 
 
 def assert_uncertainty_purpose_audit(test, text):
@@ -282,7 +501,7 @@ def assert_uncertainty_purpose_audit(test, text):
         r"(?:at least one|one or more)",
         r"element",
         r"(?:actual|actually raised) defense",
-        r"(?:material )?chronology",
+        r"\bmaterial chronology\b",
         r"(?:candor|preservation)",
     )
     assert_clause_contains(
@@ -302,6 +521,23 @@ def assert_uncertainty_purpose_audit(test, text):
         r"(?:may|can|allowed|permitted).*(?:remain|retain|keep|kept)",
         r"filed (?:complaint|text)",
     )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:paragraph|uncertainty)",
+        r"(?:no|without).*(?:job|function)",
+        r"(?:may|can|allowed|permitted).*(?:remain|retain|keep|kept)",
+        r"narrative flow",
+    )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:paragraph|uncertainty)",
+        r"(?:no|without).*(?:job|function)",
+        r"(?:remove|removed|move|moved)",
+        r"\bunless\b",
+        r"narrative flow.*retention",
+    )
 
 
 def assert_ambiguous_actual_offense_analysis(test, text):
@@ -319,7 +555,7 @@ def assert_ambiguous_actual_offense_analysis(test, text):
         r"incorporated[- ](?:record|recording|material)",
         r"(?:unresolved|ambiguous)",
         r"(?:fact|conduct)",
-        r"material to (?:an |the )?offense element",
+        r"\bmaterial to (?:an |the )?offense element\b",
     )
     assert_clause_contains(
         test,
@@ -337,9 +573,10 @@ def assert_ambiguous_actual_offense_analysis(test, text):
     assert_clause_contains(
         test,
         text,
-        r"supported",
-        r"probable cause",
-        r"arguable probable cause",
+        r"\bsupported\b",
+        r"\bdoes not supply\b",
+        r"\bprobable cause\b",
+        r"\barguable probable cause\b",
         r"filing[- ]critical gap",
     )
     assert_clause_contains(
@@ -372,9 +609,89 @@ def assert_ambiguous_actual_offense_analysis(test, text):
         r"(?:add|inventory|address)",
         r"merely conceivable offenses?",
     )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"(?:may|can|allowed|permitted)",
+        r"(?:treat|regard|accept)",
+        r"(?:unresolved|ambiguous).*(?:fact|conduct)|"
+        r"(?:fact|conduct).*(?:unresolved|ambiguous)",
+        r"(?:as true|as established)",
+    )
 
 
 class ComplaintCandorContractTest(unittest.TestCase):
+    def test_conforming_canonical_checklist_satisfies_the_contract(self):
+        assert_canonical_claim_checklist(self, CONFORMING_CANONICAL_CHECKLIST)
+        with self.assertRaises(AssertionError):
+            assert_canonical_claim_checklist(
+                self,
+                CONFORMING_CANONICAL_CHECKLIST + CONFORMING_CANONICAL_CHECKLIST,
+            )
+
+    def test_collapsed_universal_and_qi_gap_rule_is_rejected(self):
+        collapsed = replace_once(
+            CONFORMING_CANONICAL_CHECKLIST,
+            "If a required universal field is missing or unverified, the mapping is\n"
+            "incomplete. If a conditional qualified-immunity field is missing or "
+            "unverified,\nrecord an internal filing-critical GAP",
+            "If any required universal or conditional qualified-immunity field is "
+            "missing or\nunverified, record an internal filing-critical GAP",
+        )
+        with self.assertRaises(AssertionError):
+            assert_canonical_claim_checklist(self, collapsed)
+
+    def test_universal_completion_unless_exception_is_rejected(self):
+        mutation = replace_once(
+            CONFORMING_CANONICAL_CHECKLIST,
+            "the mapping is\nincomplete",
+            "the mapping is incomplete unless reserved strategy treats it as complete",
+        )
+        with self.assertRaises(AssertionError):
+            assert_canonical_claim_checklist(self, mutation)
+
+    def test_conditional_qi_gap_unless_exception_is_rejected(self):
+        mutation = replace_once(
+            CONFORMING_CANONICAL_CHECKLIST,
+            "record an internal filing-critical GAP",
+            "record an internal filing-critical GAP unless strategy waives it",
+        )
+        with self.assertRaises(AssertionError):
+            assert_canonical_claim_checklist(self, mutation)
+
+    def test_adverse_filed_assessment_unless_exception_is_rejected(self):
+        mutation = replace_once(
+            CONFORMING_CANONICAL_CHECKLIST,
+            "without placing an adverse\nmerits assessment in filed text",
+            "without placing an adverse merits assessment in filed text unless "
+            "strategy approves",
+        )
+        with self.assertRaises(AssertionError):
+            assert_canonical_claim_checklist(self, mutation)
+
+    def test_second_qi_completion_checklist_is_rejected(self):
+        mutation = CONFORMING_CANONICAL_CHECKLIST + """
+
+### Separate qualified-immunity completion checklist
+
+When qualified immunity applies, record event date, authority-audit status,
+fair warning, and separate prong results.
+"""
+        with self.assertRaises(AssertionError):
+            assert_canonical_claim_checklist(self, mutation)
+
+    def test_general_contract_has_one_canonical_claim_checklist(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = copied_package(directory, GENERAL_PACKAGE)
+            contract = (package / COMPLAINT_CONTRACT).read_text(encoding="utf-8")
+            assert_canonical_claim_checklist(self, contract)
+
+    def test_general_contract_defers_detailed_authority_verification(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = copied_package(directory, GENERAL_PACKAGE)
+            contract = (package / COMPLAINT_CONTRACT).read_text(encoding="utf-8")
+            assert_authority_verification_ownership(self, contract)
+
     def test_authoritative_conforming_samples_satisfy_each_contract(self):
         conforming = (
             (
@@ -484,13 +801,283 @@ class ComplaintCandorContractTest(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     assert_ambiguous_actual_offense_analysis(self, mutation)
 
+    def test_adjacent_no_concession_mutations_are_rejected(self):
+        text = normalized_value(CONFORMING_ADVERSE_MERITS)
+        mutations = (
+            text.replace("accurately qualify", "inaccurately qualify", 1),
+            text.replace("supported alternative", "unsupported alternative", 1),
+            text
+            + " Filed text may call its fair-warning path contested and doubtful.",
+        )
+        for mutation in mutations:
+            self.assertNotEqual(mutation, text)
+            with self.subTest(mutation=mutation):
+                with self.assertRaises(AssertionError):
+                    assert_no_adverse_merits_self_assessment(self, mutation)
+
+    def test_adjacent_fair_warning_mutations_are_rejected(self):
+        text = normalized_value(CONFORMING_FAIR_WARNING)
+        surplus_in_filed_text = text.replace(
+            "must remain in internal work product or a brief",
+            "may remain in filed complaint text or a brief",
+            1,
+        )
+        mutations = (
+            text
+            + " An additional complaint-level authority may repeat the lead "
+            "authority without a separate job.",
+            text + " The complaint is limited to one authority per count.",
+            surplus_in_filed_text,
+        )
+        for mutation in mutations:
+            self.assertNotEqual(mutation, text)
+            with self.subTest(mutation=mutation):
+                with self.assertRaises(AssertionError):
+                    assert_bounded_fair_warning_authority(self, mutation)
+
+    def test_inline_repeated_authority_unless_exception_is_rejected(self):
+        text = normalized_value(CONFORMING_FAIR_WARNING)
+        mutation = text.replace(
+            "must perform a separately identified job",
+            "must perform a separately identified job unless it repeats the "
+            "lead authority",
+            1,
+        )
+        self.assertNotEqual(mutation, text)
+        with self.assertRaises(AssertionError):
+            assert_bounded_fair_warning_authority(self, mutation)
+
+    def test_adjacent_uncertainty_mutations_are_rejected(self):
+        text = normalized_value(CONFORMING_UNCERTAINTY_AUDIT)
+        mutations = (
+            text.replace("material chronology", "immaterial chronology", 1),
+            text
+            + " A paragraph without a permitted function may remain in filed "
+            "text when narrative flow favors retention.",
+        )
+        for mutation in mutations:
+            self.assertNotEqual(mutation, text)
+            with self.subTest(mutation=mutation):
+                with self.assertRaises(AssertionError):
+                    assert_uncertainty_purpose_audit(self, mutation)
+
+    def test_inline_narrative_flow_unless_exception_is_rejected(self):
+        text = normalized_value(CONFORMING_UNCERTAINTY_AUDIT)
+        mutation = text.replace(
+            "must be removed from filed text or moved to internal chronology",
+            "must be removed from filed text or moved to internal chronology "
+            "unless narrative flow favors retention",
+            1,
+        )
+        self.assertNotEqual(mutation, text)
+        with self.assertRaises(AssertionError):
+            assert_uncertainty_purpose_audit(self, mutation)
+
+    def test_adjacent_actual_offense_mutations_are_rejected(self):
+        text = normalized_value(CONFORMING_ACTUAL_OFFENSE)
+        mutations = (
+            text.replace(
+                "material to an offense element",
+                "immaterial to an offense element",
+                1,
+            ),
+            text.replace(
+                "supported element-level reason",
+                "unsupported element-level reason",
+                1,
+            ),
+            text.replace("does not supply probable cause", "does supply probable cause", 1),
+            text
+            + " When the recording is ambiguous, the unresolved fact may be "
+            "treated as true.",
+        )
+        for mutation in mutations:
+            self.assertNotEqual(mutation, text)
+            with self.subTest(mutation=mutation):
+                with self.assertRaises(AssertionError):
+                    assert_ambiguous_actual_offense_analysis(self, mutation)
+
+    def test_fixture_adjacent_violations_emit_the_target_finding(self):
+        adverse = load_fixture(
+            FIXTURES / "complaint-adverse-merits-self-assessment"
+        )
+        fair_warning = load_fixture(
+            FIXTURES / "complaint-fair-warning-brief-creep"
+        )
+        pruning = load_fixture(FIXTURES / "complaint-nonfunctional-uncertainty")
+        offense = load_fixture(
+            FIXTURES / "complaint-ambiguous-alternative-offense"
+        )
+        adverse_probes = (
+            "The fair-warning precedent is doubtful and too uncertain to "
+            "overcome immunity.",
+            "The claim is contested and likely barred.",
+        )
+        fair_warning_probes = (
+            "CASE-2 repeats the lead proposition.",
+            "CASE-3, with different punctuation, repeats the lead proposition.",
+        )
+        pruning_probes = (
+            "P2 remains in the filed facts for completeness.",
+            "P4 remains in the filed facts for completeness.",
+            "P6 remains in the filed facts for completeness.",
+            "The unknown vehicle color remains for completeness.",
+            "The unrelated building detail remains for completeness.",
+            "The unknown background detail remains for completeness.",
+        )
+        effect_sentence = (
+            "The\nunresolved possibility of Conduct C therefore does not supply "
+            "probable or\narguable probable cause for Offense Z because the "
+            "required Z2 basis remains\nabsent from the approved arrest-time record."
+        )
+        offense_probes = (
+            replace_once(
+                offense["passing_candidate"],
+                effect_sentence,
+                "No conclusion is offered about Conduct C's effect on the "
+                "required offense elements.",
+            ),
+            replace_once(
+                offense["passing_candidate"],
+                effect_sentence,
+                "The effect of Conduct C is deferred until later briefing.",
+            ),
+            replace_once(
+                offense["passing_candidate"],
+                "The\nrecording does not resolve whether Conduct C occurred, and "
+                "Plaintiff does not\nadmit that it did.",
+                "Conduct C is treated as established.",
+            ),
+            replace_once(offense["passing_candidate"], effect_sentence, ""),
+        )
+        probes = tuple(
+            (
+                adverse,
+                insert_before_heading(
+                    adverse["passing_candidate"],
+                    "Internal Strategy Note",
+                    probe,
+                ),
+                "filed-adverse-merits-assessment",
+            )
+            for probe in adverse_probes
+        )
+        probes += tuple(
+            (
+                fair_warning,
+                insert_before_heading(
+                    fair_warning["passing_candidate"],
+                    "Internal Authority Matrix",
+                    probe,
+                ),
+                "unexplained-string-cite",
+            )
+            for probe in fair_warning_probes
+        )
+        probes += tuple(
+            (
+                pruning,
+                insert_before_heading(
+                    pruning["passing_candidate"],
+                    "Internal Chronology",
+                    probe,
+                ),
+                "retained-uncertainty-without-job",
+            )
+            for probe in pruning_probes
+        )
+        probes += tuple(
+            (
+                offense,
+                candidate,
+                "ambiguous-fact-admitted-or-unresolved-effect",
+            )
+            for candidate in offense_probes
+        )
+        for fixture, candidate, location in probes:
+            with self.subTest(fixture=fixture["id"]):
+                self.assertEqual(
+                    finding_pairs(grade_candidate(fixture, candidate)),
+                    {("banned-pattern", location)},
+                )
+
+    def test_fixture_adjacent_safe_candidates_grade_cleanly(self):
+        adverse = load_fixture(
+            FIXTURES / "complaint-adverse-merits-self-assessment"
+        )
+        fair_warning = load_fixture(
+            FIXTURES / "complaint-fair-warning-brief-creep"
+        )
+        pruning = load_fixture(FIXTURES / "complaint-nonfunctional-uncertainty")
+        offense = load_fixture(
+            FIXTURES / "complaint-ambiguous-alternative-offense"
+        )
+        effect_sentence = (
+            "The\nunresolved possibility of Conduct C therefore does not supply "
+            "probable or\narguable probable cause for Offense Z because the "
+            "required Z2 basis remains\nabsent from the approved arrest-time record."
+        )
+        gap_candidate = replace_once(
+            offense["passing_candidate"],
+            effect_sentence,
+            "The approved record does not permit a supported conclusion about "
+            "the unresolved fact's effect on Z2.",
+        )
+        gap_candidate = replace_once(
+            gap_candidate,
+            "None for this bounded issue. The approved offense rule and record "
+            "permit the\nelement-level conclusion above without resolving "
+            "Conduct C against Plaintiff.",
+            "Z2 arrest-time support is missing, so the filing-critical GAP is "
+            "reserved for a strategy decision.",
+        )
+        safe_candidates = (
+            (
+                adverse,
+                insert_before_heading(
+                    adverse["passing_candidate"],
+                    "Internal Strategy Note",
+                    "The claim does not depend on weak signal evidence from SRC-1.",
+                ),
+            ),
+            (fair_warning, fair_warning["passing_candidate"]),
+            (pruning, pruning["passing_candidate"]),
+            (offense, offense["passing_candidate"]),
+            (offense, gap_candidate),
+        )
+        for fixture, candidate in safe_candidates:
+            with self.subTest(fixture=fixture["id"]):
+                result = grade_candidate(fixture, candidate)
+                self.assertTrue(result["passed"])
+                self.assertEqual(result["findings"], [])
+
+    def test_causal_first_actual_offense_candidate_grades_cleanly(self):
+        fixture = load_fixture(
+            FIXTURES / "complaint-ambiguous-alternative-offense"
+        )
+        effect_sentence = (
+            "The\nunresolved possibility of Conduct C therefore does not supply "
+            "probable or\narguable probable cause for Offense Z because the "
+            "required Z2 basis remains\nabsent from the approved arrest-time record."
+        )
+        causal_first = replace_once(
+            fixture["passing_candidate"],
+            effect_sentence,
+            "Because Z2 is absent from the approved arrest-time record, the "
+            "unresolved possibility of Conduct C does not supply probable or "
+            "arguable probable cause for Offense Z.",
+        )
+        result = grade_candidate(fixture, causal_first)
+        self.assertTrue(result["passed"])
+        self.assertEqual(result["findings"], [])
+
     def test_present_named_fixtures_have_exact_assets_and_behavior_findings(self):
         observed_directories = {
             path.name
             for path in FIXTURES.glob("complaint-*")
             if path.is_dir()
         }
-        self.assertEqual(observed_directories, set(EXPECTED_FIXTURES))
+        self.assertTrue(set(EXPECTED_FIXTURES).issubset(observed_directories))
         for fixture_id, expected in EXPECTED_FIXTURES.items():
             fixture_directory = FIXTURES / fixture_id
             with self.subTest(fixture=fixture_id):

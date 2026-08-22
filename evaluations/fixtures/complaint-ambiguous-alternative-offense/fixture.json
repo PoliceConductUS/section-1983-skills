@@ -19,7 +19,7 @@
     "banned_patterns": [
       {
         "id": "ambiguous-fact-admitted-or-unresolved-effect",
-        "pattern": "(?is)# Count-Level Treatment(?:(?!# Filing-Critical GAP).){0,2400}(?:plaintiff admits (?:that )?Conduct C occurred|(?:probable|arguable probable) cause.{0,120}(?:remains|is left) unresolved|(?:effect|impact) (?:of )?Conduct C.{0,120}(?:remains|is left) unresolved)"
+        "pattern": "(?is)(?:# Count-Level Treatment(?:(?!# Filing-Critical GAP).){0,2400}(?:plaintiff admits (?:that )?Conduct C occurred|Conduct C\\s+(?:is|was|may be|should be|must be|is treated as|was treated as)\\s+(?:true|established|admitted|having occurred)|(?:no conclusion|conclusion is deferred|effect is deferred|defer(?:red|ring)? (?:the )?(?:effect|analysis|conclusion))|(?:probable|arguable probable) cause.{0,120}(?:remains|is left) unresolved|(?:effect|impact) (?:of )?Conduct C.{0,120}(?:remains|is left) unresolved)|\\A(?!.*# Count-Level Treatment(?:(?!# Filing-Critical GAP).){0,2400}(?:Conduct C.{0,500}does not supply.{0,120}(?:probable|arguable probable) cause.{0,500}\\bZ2\\b|\\bZ2\\b.{0,500}(?:absent|missing).{0,500}Conduct C.{0,500}does not supply.{0,120}(?:probable|arguable probable) cause))(?!.*# Filing-Critical GAP.{0,1600}\\bZ2\\b.{0,500}(?:missing|unresolved|gap|cannot|unable)).*\\Z)"
       }
     ],
     "required_citations": ["AO-RECORD", "AO-BOUNDARY"]

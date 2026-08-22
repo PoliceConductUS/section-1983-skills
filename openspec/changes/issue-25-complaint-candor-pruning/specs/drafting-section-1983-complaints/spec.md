@@ -51,6 +51,47 @@ separately identified complaint-level proposition.
 - **THEN** the complaint identifies that distinct job rather than adding an
   unexplained string cite
 
+### Requirement: One canonical tuple checklist governs count completion
+
+The complaint contract MUST define one canonical checklist for every
+claim–defendant–challenged-act tuple. The universal fields MUST be the claim,
+defendant, challenged act and event stage, governing element or standard,
+decisive facts, facts known to the defendant at the legally relevant time,
+resulting element-specific legal application, and result. For every
+qualified-immunity-eligible individual-capacity tuple, the same checklist MUST
+also require the event date; conduct-specific right or rule; verified binding
+pre-event authority; authority-audit status; materially similar facts; material
+differences; defendant-specific fair warning; rule-of-orderliness and later-
+history review status; and separate prong-one and prong-two results.
+
+The complaint contract MUST own these field names and the completion rule, but
+MUST NOT duplicate the detailed authority-verification procedure owned by
+`audit-authorities`. A missing or unverified universal field makes the tuple
+incomplete. A missing or unverified qualified-immunity field creates an internal
+filing-critical GAP, blocks filing-ready status, and routes the issue for a
+reserved strategy decision without adding an adverse merits assessment to filed
+text.
+
+The install-local mechanical handoff MUST use the same tuple cardinality and
+machine-readable field names. Capacity remains a required tuple field, but it
+MUST NOT replace challenged act in the tuple cardinality. The handoff remains a
+non-executable interface and MUST NOT claim to perform the authority audit.
+
+#### Scenario: Universal application bridge is incomplete
+
+- **WHEN** a count states decisive facts but omits the defendant's relevant-time
+  knowledge or the resulting element-specific application
+- **THEN** the tuple remains incomplete and the complaint cannot be marked
+  filing-ready
+
+#### Scenario: Fair-warning verification is incomplete
+
+- **WHEN** a qualified-immunity-eligible tuple lacks verified authority status
+  or completed rule-of-orderliness and later-history review
+- **THEN** the internal record contains a filing-critical GAP, filing-ready
+  status is blocked, and the filed complaint does not volunteer an adverse
+  merits assessment
+
 ### Requirement: Uncertain factual paragraphs perform a pleaded function
 
 The completion audit MUST inventory every factual paragraph the draft labels

@@ -19,7 +19,7 @@
     "banned_patterns": [
       {
         "id": "filed-adverse-merits-assessment",
-        "pattern": "(?is)# Filed Count Excerpt(?:(?!# Internal Strategy Note).){0,2400}(?:claim|element|fair-warning|immunity).{0,100}(?:weak|likely to fail|likely barred|legally deficient|probably subject to qualified immunity)"
+        "pattern": "(?is)# Filed Count Excerpt(?:(?!# Internal Strategy Note).){0,2400}(?:(?:\\bclaim\\b|\\belement\\b|\\bfair-warning(?:\\s+(?:path|precedent))?\\b|\\b(?:qualified-)?immunity(?: position)?\\b)(?:(?![.!?]).){0,100}(?:\\bis\\b|\\bappears\\b|\\bseems\\b|\\bremains\\b|\\bmay be\\b|\\btoo\\b)(?:(?![.!?]).){0,100}(?:\\bweak\\b|\\bdoubtful\\b|\\bcontested\\b|likely to fail|likely barred|legally deficient|too uncertain to overcome immunity)|probably subject to qualified immunity)"
       }
     ],
     "required_citations": ["CC-FACTS", "CC-BOUNDARY"]

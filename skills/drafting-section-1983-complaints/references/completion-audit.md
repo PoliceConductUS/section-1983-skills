@@ -33,6 +33,9 @@ function must be removed from filed text or moved to internal chronology.
 
 A count is complete only if:
 
+- [ ] every claim–defendant–challenged-act mapping satisfies all applicable
+      fields and the fail-closed disposition in the canonical checklist in the
+      complaint contract;
 - [ ] the count's Standard states the governing test in the controlling
       authority's own formulation, faithful and not loosely paraphrased, and
       each test, element, factor, or offense element carries its own verified

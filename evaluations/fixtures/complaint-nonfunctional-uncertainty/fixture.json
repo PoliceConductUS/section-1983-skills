@@ -23,7 +23,7 @@
     "banned_patterns": [
       {
         "id": "retained-uncertainty-without-job",
-        "pattern": "(?is)# Filed Facts(?:(?!# Internal Chronology).){0,2400}(?:unknown color|unrelated building detail|unknown background detail)"
+        "pattern": "(?is)# Filed Facts(?:(?!# Internal Chronology).){0,2400}(?:\\bP[246]\\b|(?:unknown\\s+)?vehicle(?:'s)?[- ]color|vehicle(?:'s)?.{0,24}unknown color|unrelated building detail|unknown background detail)"
       }
     ],
     "required_citations": ["UP-FACTS", "UP-BOUNDARY"]

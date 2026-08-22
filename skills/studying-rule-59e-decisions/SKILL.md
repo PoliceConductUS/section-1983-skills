@@ -18,6 +18,15 @@ unless the motion and relevant record are also reviewed.
 Read [references/corpus-contract.md](references/corpus-contract.md) before
 beginning a study or adding a corpus conclusion to another skill.
 
+Use
+[references/decision-corpus.schema.json](references/decision-corpus.schema.json)
+for every published or transferred corpus and
+[references/transfer-card.schema.json](references/transfer-card.schema.json) for
+standalone downstream transfers. Before release, run
+`python3 scripts/validate_corpus.py <corpus.json>` from the installed skill
+directory. CSV, YAML, and databases remain valid working formats, but they must
+export canonical JSON that passes the validator before publication or transfer.
+
 ## Required companion skill
 
 Use `audit-authorities` for every legal proposition, quotation, pinpoint,
@@ -82,7 +91,8 @@ retrieval date, and artifact hash when the repository requires hashes.
 
 ## Coding rules
 
-Code the fields and controlled values in the corpus contract. At minimum record:
+Code the fields and controlled values in the corpus contract and canonical
+schema. At minimum record:
 
 - assigned judge, reasoning author, recommendation author, and adopting judge;
 - whether the ruling contains independent reasoning, adopts another judge's
@@ -95,11 +105,19 @@ Code the fields and controlled values in the corpus contract. At minimum record:
   procedural disposition, administrative-only action, withdrawn, or unresolved;
 - stated reasons and outcome-changing reason;
 - standard of review and appellate result; and
-- retrieval completeness and open gaps.
+- controlled retrieval status, coding confidence, and open gaps.
 
 Do not attribute a magistrate judge's reasoning to the district judge merely
 because the district judge adopted it. A consent-case final order by a
 magistrate judge is different from a recommendation.
+
+Use the same `motion_id` for every linked recommendation, adoption, or other
+stage. Every retrieval gap identifies its stable candidate. A missing-document
+gap also identifies its decision record and exact document type. An unresolved
+candidate uses `unresolved-candidate` with a null `record_id`; do not fabricate
+a decision record for it. `candidate_count` equals coded motion-disposition
+pairs plus distinct unresolved-candidate IDs; record-linked document gaps do not
+add candidates.
 
 ## Analysis gates
 
@@ -133,8 +151,8 @@ Do not combine materially different strata into a success rate.
 
 - One verified disposition is an **example**.
 - A non-systematic or incomplete group is a **documented cluster**.
-- A **tendency** requires a disclosed denominator, reasonably complete retrieval
-  for the defined universe, consistent coding, and an express missingness limit.
+- A **tendency** requires a disclosed denominator, `complete-pair` retrieval for
+  every coded record, consistent coding, and an express missingness limit.
 - A **drafting rule** requires controlling authority, an express court
   requirement, or repeated comparable decisions supported by reviewed
   motion-disposition pairs.
@@ -156,9 +174,16 @@ Produce:
 7. transfer cards stating exactly what, if anything, another drafting skill may
    use.
 
-Each transfer card must identify the source rows, evidence level, supported
-instruction, limits, and expiration or update date. If the evidence does not
-support a drafting change, say so.
+Each neutral transfer card must identify its source rows, evidence level,
+denominator, missingness, permitted use, prohibited inference, actual source
+identity, and checked dates. It transfers bounded evidence without selecting a
+legal path or litigation strategy. If the evidence does not support a drafting
+change, say so.
+
+A card may cite `complete-pair` or `ruling-complete` source rows. `index-only`
+and `lead-only` rows are retrieval leads, not verified card support. Every
+`tendency` or `success-rate` corpus requires `complete-pair` status for all
+coded records.
 
 ## Update rule
 
@@ -182,7 +207,8 @@ Before release, confirm:
 - governing law and judge examples remain separate;
 - later history and current rules were checked;
 - quotations and pinpoints were verified from primary artifacts; and
-- every downstream drafting instruction has a transfer card.
+- every downstream drafting instruction has a neutral transfer card; and
+- the canonical JSON export passes `scripts/validate_corpus.py`.
 
 ## Output provenance
 

@@ -3,6 +3,15 @@
 Use this contract for a reproducible study of Rule 59(e) dispositions and
 postjudgment amendment practice.
 
+CSV, YAML, and databases may be used while researching. Publication and
+downstream transfer require a versioned canonical JSON export that conforms to
+[decision-corpus.schema.json](decision-corpus.schema.json) and passes
+`python3 ../scripts/validate_corpus.py <corpus.json>` from this directory. Use
+[transfer-card.schema.json](transfer-card.schema.json) when transferring a card
+without the corpus. These schemas document the public format; the validator is
+skill-specific and does not certify legal accuracy or implement a general JSON
+Schema engine.
+
 ## Study manifest
 
 Record:
@@ -25,7 +34,8 @@ Record:
 
 ## Evidence-ledger fields
 
-Use CSV, YAML, or a database with these fields:
+Use the canonical schema fields in JSON exports. A working CSV, YAML file, or
+database may use equivalent columns or relations:
 
 | Group              | Fields                                                                                                                                  |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,6 +49,25 @@ Use CSV, YAML, or a database with these fields:
 | Appeal             | `appeal_taken`, `review_standard`, `appellate_result`, `later_history_checked_through`                                                  |
 | Sources            | `docket_index_source`, `motion_source`, `response_source`, `reply_source`, `proposed_pleading_source`, `ruling_source`, `appeal_source` |
 | Quality            | `retrieval_status`, `missing_documents`, `coding_confidence`, `notes`                                                                   |
+
+Each canonical decision record represents one motion-disposition pair or a
+linked judicial stage. Use the same stable `motion_id` for related stages and a
+different `record_id` for each stage. Code `decision_type` as one of:
+
+- `recommendation`;
+- `adoption-only-order`;
+- `independently-reasoned-final-decision`;
+- `consent-final-decision`; or
+- `outcome-only-order`.
+
+A recommendation uses `recommendation-only`, identifies a distinct
+recommendation author, and does not attribute final district-court reasoning. An
+adoption-only order uses `adopts-without-additional-reasoning`, identifies the
+recommendation author and adopting judge, and does not claim an independent
+reasoning author. An independently reasoned final decision uses `independent`
+and identifies its reasoning author. Every canonical decision record also
+requires one controlled `retrieval_status` and `coding_confidence` value from
+the lists below. Every stated reason uses a code from the reason-coding list.
 
 ## Controlled values
 
@@ -107,28 +136,38 @@ Code the court's stated reasons without converting them into broader holdings:
 Quote only verified language. Otherwise summarize and cite the page or docket
 paragraph.
 
-## Finding card
+## Neutral transfer card
 
-Every finding transferred to a drafting skill or case strategy must state:
+Every finding transferred downstream must use this neutral shape:
 
 ```yaml
-finding_id: R59-F-001
+card_id: R59-CARD-001
 proposition: ""
 universe: ""
 numerator: 0
 denominator: 0
 date_range: ""
-source_rows: []
+source_row_ids: []
 evidence_level: example
 missingness: ""
-disconfirming_rows: []
+disconfirming_row_ids: []
 permitted_use: ""
 prohibited_inference: ""
 checked_through: "YYYY-MM-DD"
+actual_source_identity: ""
+source_checked_date: "YYYY-MM-DD"
+metric_type: descriptive
 ```
 
-`evidence_level` is `example`, `documented-cluster`, `tendency`,
-`express-requirement`, or `binding-rule`.
+`evidence_level` is `example`, `documented-cluster`, or `tendency`.
+`metric_type` is `descriptive` or `success-rate`. A `tendency` or `success-rate`
+card requires a complete attempted census, zero unresolved relevant missingness,
+and `complete-pair` retrieval status for every coded record. A card may cite
+`complete-pair` or `ruling-complete` source rows; `index-only` and `lead-only`
+rows are not verified card support. A convenience or incomplete corpus may
+transfer only an `example` or `documented-cluster` with explicit limits. A card
+communicates evidence and limits; it does not select litigation strategy or turn
+association into causation or prediction.
 
 ## Motion-design comparison
 
@@ -159,3 +198,15 @@ End every study with:
 4. missing motion, response, ruling, pleading, and appellate artifacts;
 5. excluded cases by reason; and
 6. whether the defined universe supports examples, a cluster, or a tendency.
+
+Every retrieval gap carries a stable `candidate_id`. A document gap uses
+`unavailable`, `unresolved`, or `not-found`, identifies a non-null `record_id`,
+and matches one missing-document object's `gap_id`, record, and document type.
+An unresolved candidate uses `unresolved-candidate` with a null `record_id` and
+does not create a decision record. The denominator's unresolved relevant
+missingness count equals the retrieval-gap inventory. Its candidate count equals
+the coded motion-disposition pair count plus the number of distinct
+`candidate_id` values on unresolved-candidate gaps with null `record_id`;
+record-linked document gaps add no candidate. Report the defined universe,
+sampling method, research-question-complete count, completeness status, and
+explicit limits in the canonical denominator.

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/rule59-transfer-card-v1.json",
+  "title": "Rule 59 neutral transfer card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "card_id",
+    "proposition",
+    "universe",
+    "numerator",
+    "denominator",
+    "date_range",
+    "source_row_ids",
+    "evidence_level",
+    "missingness",
+    "disconfirming_row_ids",
+    "permitted_use",
+    "prohibited_inference",
+    "checked_through",
+    "actual_source_identity",
+    "source_checked_date",
+    "metric_type"
+  ],
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "universe": {
+      "type": "string",
+      "minLength": 1
+    },
+    "numerator": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "denominator": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "date_range": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_row_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence_level": {
+      "type": "string",
+      "enum": ["example", "documented-cluster", "tendency"]
+    },
+    "missingness": {
+      "type": "string",
+      "minLength": 1
+    },
+    "disconfirming_row_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "permitted_use": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prohibited_inference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checked_through": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "actual_source_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_checked_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "metric_type": {
+      "type": "string",
+      "enum": ["descriptive", "success-rate"]
+    }
+  }
+}

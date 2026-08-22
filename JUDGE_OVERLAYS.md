@@ -144,7 +144,23 @@ A prohibited inference or no qualifying support produces no judge-specific
 drafting change. The drafting skill does not expose private strategy and does
 not select a litigation path.
 
-## 7. Apply the degradation clause
+## 7. Record execution
+
+After the applicable document and claim skills compose the filing, validate one
+execution packet against
+`skills/section-1983-drafting/references/judge-overlay-execution.schema.json`
+and write its receipt with
+`skills/section-1983-drafting/scripts/judge_overlay_receipt.py`.
+
+The writer verifies the frozen artifact fingerprints and creates one exclusive,
+immutable Markdown receipt under the audited version's canonical `audits/`
+directory. It must not edit or modify the filing or any artifact under review.
+Missing, stale, invalid or failed, and unavailable required inputs fail closed
+with no drafting change. A completed degradation records
+`no judge-specific drafting change` and its bounded reason. The absence of
+judge-specific prose or an execution receipt does not prove the overlay ran.
+
+## 8. Apply the degradation clause
 
 A thin or incomplete corpus adds no judge-specific proposition. Preserve a
 verified example only at example strength. Report the missing source, incomplete

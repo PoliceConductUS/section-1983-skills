@@ -26,7 +26,7 @@
 
 ## 3. Review and archive
 
-- [ ] 3.1 Review the whole story for clean-room leaks, output mutation,
+- [x] 3.1 Review the whole story for clean-room leaks, output mutation,
       credential exposure, protocol false greens, and scope drift; correct
       accepted Critical or Important findings test-first.
 - [ ] 3.2 Complete verification and retrospective artifacts, archive the

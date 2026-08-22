@@ -10,6 +10,7 @@ import unittest
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest import mock
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -109,11 +110,12 @@ def review_response():
     }
 
 
-def provider_body(response=None):
+def provider_body(response=None, status="completed"):
     text = json.dumps(response or review_response(), ensure_ascii=False)
     return json.dumps(
         {
             "id": "resp_synthetic",
+            "status": status,
             "output": [
                 {
                     "type": "message",
@@ -266,6 +268,11 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             (
                 "missing-output",
                 TransportSpy(body=b'{"output": []}'),
+                "provider-response-incomplete",
+            ),
+            (
+                "incomplete-status",
+                TransportSpy(body=provider_body(status="incomplete")),
                 "provider-response-incomplete",
             ),
             (
@@ -540,6 +547,33 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 self.assertEqual(transport.calls, [])
                 self.assertEqual(list(outside.iterdir()), [])
 
+            with tempfile.TemporaryDirectory() as directory:
+                project, version, artifact = self.make_version(directory)
+                outside = Path(directory) / "race-outside"
+                outside.mkdir()
+                audits = version / "audits"
+                original_mkdir = Path.mkdir
+
+                def replace_created_audits(path, *args, **kwargs):
+                    result = original_mkdir(path, *args, **kwargs)
+                    if path.name == audits.name:
+                        path.rmdir()
+                        path.symlink_to(outside, target_is_directory=True)
+                    return result
+
+                with mock.patch.object(Path, "mkdir", replace_created_audits):
+                    with self.assertRaises(self.launcher.ReviewLaunchError):
+                        execute_trusted_review(
+                            packet(),
+                            model="gpt-synthetic",
+                            api_key="secret-test-key",
+                            project_boundary=project,
+                            version_folder=version,
+                            artifact_path=artifact,
+                            transport=TransportSpy(),
+                        )
+                self.assertEqual(list(outside.iterdir()), [])
+
         with tempfile.TemporaryDirectory() as directory:
             project, version, artifact = self.make_version(directory)
             transport = TransportSpy()
@@ -582,6 +616,15 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual(result["outcome"], "completed")
             self.assertTrue(Path(result["report_path"]).is_file())
+            self.assertEqual(
+                result["dispatch"],
+                {
+                    "capabilities": [],
+                    "runtime": "openai-responses-stateless",
+                },
+            )
+            self.assertNotIn(packet()["draft"]["content"], stdout.getvalue())
+            self.assertNotIn(packet()["sources"][0]["content"], stdout.getvalue())
 
             unavailable_stdout = io.StringIO()
             with contextlib.redirect_stdout(unavailable_stdout):

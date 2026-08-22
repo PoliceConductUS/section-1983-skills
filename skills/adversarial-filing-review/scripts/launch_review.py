@@ -465,6 +465,11 @@ def _extract_review(provider_response, approved_source_ids, raw_body):
             "Provider response must be a JSON object",
             stdout=raw_body,
         )
+    if provider_response.get("status") != "completed":
+        raise ReviewLaunchError(
+            "provider-response-incomplete",
+            "Provider response status was not completed",
+        )
     output = provider_response.get("output")
     if not isinstance(output, list):
         raise ReviewLaunchError(
@@ -780,13 +785,27 @@ def _prepare_output(
 
 
 def _write_report(output, markdown):
+    directory_fd = None
+    report_fd = None
     try:
         output["audits"].mkdir(parents=False, exist_ok=True)
-        with output["report_path"].open(
-            "x",
+        directory_fd = os.open(
+            output["audits"],
+            os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+        )
+        report_fd = os.open(
+            output["report_path"].name,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+            0o666,
+            dir_fd=directory_fd,
+        )
+        with os.fdopen(
+            report_fd,
+            "w",
             encoding="utf-8",
             newline="\n",
         ) as stream:
+            report_fd = None
             stream.write(markdown)
     except FileExistsError as error:
         raise ReviewLaunchError(
@@ -798,6 +817,11 @@ def _write_report(output, markdown):
             "review-output-unavailable",
             f"review report could not be written: {error}",
         ) from error
+    finally:
+        if report_fd is not None:
+            os.close(report_fd)
+        if directory_fd is not None:
+            os.close(directory_fd)
     return output["report_path"]
 
 
@@ -879,7 +903,10 @@ def execute_trusted_review(
     return {
         "outcome": "completed",
         "report_path": str(report_path),
-        "dispatch": result["dispatch"],
+        "dispatch": {
+            "runtime": result["dispatch"]["runtime"],
+            "capabilities": result["dispatch"]["capabilities"],
+        },
     }
 
 

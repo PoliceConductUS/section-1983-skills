@@ -157,15 +157,20 @@ rhetorical argument is a small part of any document, if present at all.
    repeat it in the drafter's own voice. Audit grounding: confirm every point
    rests on cited facts, permitted inferences, or authority, and run any audits
    the strategy file prescribes.
-9. Self-edit against `references/banned-words.md`, then run the linter and
-   repair every violation:
+9. Self-edit against `references/banned-words.md`, then run the linter:
 
    ```bash
    python3 scripts/draft_lint.py draft.md
    ```
 
-   Score is violations per 100 words. Lint, revise, lint again; target zero
-   banned words.
+   Score is violations per 100 words. Lint, revise, and lint again. A score
+   delta is editing feedback only, never a merits verdict, legal-sufficiency
+   decision, or filing-readiness decision. Target zero unexempted violations.
+   Reconcile every residual finding exactly once as an unexempted violation, an
+   accurate quotation verified against its approved source, or a controlling
+   term of art supported by the linter exemption record. Repair every unexempted
+   violation. Review paragraph warnings as review heuristics; they do not change
+   the score or establish filing readiness.
 
 ## The writing system
 

@@ -149,16 +149,19 @@ not select a litigation path.
 After the applicable document and claim skills compose the filing, validate one
 execution packet against
 `skills/section-1983-drafting/references/judge-overlay-execution.schema.json`
-and write its receipt with
+and produce its receipt with
 `skills/section-1983-drafting/scripts/judge_overlay_receipt.py`.
 
-The writer verifies the frozen artifact fingerprints and creates one exclusive,
-immutable Markdown receipt under the audited version's canonical `audits/`
-directory. It must not edit or modify the filing or any artifact under review.
-Missing, stale, invalid or failed, and unavailable required inputs fail closed
-with no drafting change. A completed degradation records
-`no judge-specific drafting change` and its bounded reason. The absence of
-judge-specific prose or an execution receipt does not prove the overlay ran.
+The processor receives the declared `filing`, `judge-corpus`, and
+`court-conduct` role roots. A required filing target selects one canonical
+relative file inside `filing`. The processor verifies the frozen filing artifact
+fingerprints and returns deterministic receipt bytes plus one output-relative
+path. It must not edit or modify the filing or any artifact under review. Only
+the trusted host may publish the receipt through `OutputRun`. Missing, stale,
+invalid or failed, and unavailable required inputs fail closed with no drafting
+change. A completed degradation records `no judge-specific drafting change` and
+its bounded reason. The absence of judge-specific prose or an execution receipt
+does not prove the overlay ran.
 
 ## 8. Apply the degradation clause
 

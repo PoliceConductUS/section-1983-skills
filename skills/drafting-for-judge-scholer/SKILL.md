@@ -60,11 +60,14 @@ necessary clearly-established-law distinctions.
 7. Ground every point in record facts, permitted inferences, and verified
    authority so the court has justification and reason to agree; persuasive or
    rhetorical argument is a small part of the document, if present at all.
-8. After the applicable document and claim skills compose the filing, write one
-   immutable judge-overlay execution receipt under the version's canonical
-   `audits/` directory. If no qualifying support permits a specialized change,
-   record `no judge-specific drafting change` and the bounded reason. The
-   absence of judge-specific prose or a receipt does not prove this overlay ran.
+8. After the applicable document and claim skills compose the filing, select the
+   required filing target inside the declared `filing` role root and use the
+   declared `judge-corpus` and `court-conduct` role roots. The packaged
+   processor returns immutable receipt bytes and one output-relative path; only
+   the trusted host may publish them through `OutputRun`. If no qualifying
+   support permits a specialized change, record
+   `no judge-specific drafting change` and the bounded reason. The absence of
+   judge-specific prose or a receipt does not prove this overlay ran.
 
 ## Evidence hierarchy
 

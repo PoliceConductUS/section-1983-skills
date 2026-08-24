@@ -166,10 +166,13 @@ rhetorical argument is a small part of any document, if present at all.
    repeat it in the drafter's own voice. Audit grounding: confirm every point
    rests on cited facts, permitted inferences, or authority, and run any audits
    the strategy file prescribes.
-9. If an assigned-judge overlay was used, after composition write one immutable
-   judge-overlay execution receipt under the version's canonical `audits/`
-   directory. Use `references/judge-overlay-execution.schema.json` and
-   `scripts/judge_overlay_receipt.py`. A completed degradation records exactly
+9. If an assigned-judge overlay was used, after composition select the required
+   filing target inside the declared `filing` role root and use the declared
+   `judge-corpus` and `court-conduct` role roots. Validate
+   `references/judge-overlay-execution.schema.json` with
+   `scripts/judge_overlay_receipt.py`. The processor returns receipt bytes and
+   one output-relative path; only the trusted host may publish them through
+   `OutputRun`. A completed degradation records exactly
    `no judge-specific drafting change` and a bounded reason. The absence of
    judge-specific prose or a receipt does not prove the overlay ran.
 10. Self-edit against `references/banned-words.md`, then run the linter:
@@ -228,9 +231,9 @@ and keep their required wording.
 - `scripts/draft_lint.py` — deterministic linter for the mechanical subset of
   the writing rules. It cannot judge whether a fact is well pleaded; it can only
   catch the form of slop.
-- `scripts/judge_overlay_receipt.py` — validates one judge-overlay execution
-  packet and writes one exclusive immutable receipt under the audited version's
-  `audits/` directory.
+- `scripts/judge_overlay_receipt.py` — validates one folder-scoped judge-overlay
+  execution packet and returns deterministic receipt bytes for trusted-host
+  publication.
 
 ## What this skill is not for
 

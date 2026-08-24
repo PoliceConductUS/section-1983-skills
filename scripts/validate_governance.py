@@ -276,40 +276,44 @@ QUALITY_CONTROL_RULES = (
 )
 QUALITY_CONTROL_REPORT_RULES = (
     (
-        "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
-        "A quality-control stage may choose any convenient output folder.",
+        "Before review, an independent quality-control stage must select exactly one artifact through its declared input roles and target policy.",
+        "An independent quality-control stage may select an artifact outside its declared input roles or target policy.",
     ),
     (
-        "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
-        "A report may be written outside the audited version's `audits/` directory.",
+        "It must propose exactly one unique append-immutable output-relative report beneath the caller-declared output folder.",
+        "It may propose a mutable or non-unique report outside the caller-declared output folder.",
     ),
     (
-        "Name it `<check-kind>-<UTC timestamp>-<run-id>.md`.",
-        "Use a stable shared filename for the latest report.",
+        "A missing, ambiguous, nonexistent, or out-of-role target must fail closed without a fallback write.",
+        "A missing, ambiguous, nonexistent, or out-of-role target may use a fallback write.",
     ),
     (
-        "Create the report exclusively; if the path exists, fail closed and preserve its bytes.",
-        "If the path exists, overwrite the prior report.",
+        "The report path must reject absolute paths, traversal, symlink escapes, and existing destinations.",
+        "The report path may be absolute, traverse, follow symlink escapes, or replace an existing destination.",
+    ),
+    (
+        "Only the trusted host may publish the report through the shared output boundary.",
+        "The skill or helper may publish the report directly.",
+    ),
+    (
+        "Prior quality-control reports must not become implicit input.",
+        "Prior quality-control reports may become implicit input.",
+    ),
+    (
+        "A report may be reviewed only when that exact report is expressly present in a declared input role and selected consistently with the reviewing skill's target policy.",
+        "A report may be reviewed from ambient output without a declared input role or target.",
+    ),
+    (
+        "The reviewing stage must propose a different new append-immutable report for trusted-host publication.",
+        "The reviewing stage may update or replace the report under review.",
     ),
     (
         "Existing reports are immutable and must not be edited, overwritten, replaced, renamed, or deleted.",
         "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
     ),
     (
-        "Exclude `audits/` from review input unless one exact report is expressly designated; write any review of that report to a different new report.",
-        "Include `audits/` in every review and update the report being reviewed.",
-    ),
-    (
-        "If the version folder is missing, ambiguous, nonexistent, or outside the designated boundary, report output is unavailable and write nowhere else.",
-        "If the version folder cannot be resolved, write the report to a fallback location.",
-    ),
-    (
-        "Reject traversal and any `audits/` symlink that resolves outside the canonical audits directory.",
-        "Follow traversal or an `audits/` symlink outside the canonical audits directory.",
-    ),
-    (
-        "The report identifies the audited version, artifact paths and SHA-256 fingerprints, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
-        "The report may omit its audited version, artifact fingerprints, scope, sources, or result.",
+        "The report identifies the logical input roles and hashes, selected target path and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
+        "The report may omit its logical input roles, target fingerprint, scope, sources, or result.",
     ),
     (
         "Separate failed findings from passing-but-suboptimal observations.",
@@ -370,6 +374,20 @@ PROHIBITED_QUALITY_CONTROL_REPORT_PERMISSIONS = (
     ),
     re.compile(
         r"\bprior audit reports\b.{0,80}\bincluded\b.{0,80}\bevery re-audit\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bresolve exactly one existing version-specific folder\b.{0,80}"
+        r"\bdesignated project boundary\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bwrite exactly one new report\b.{0,100}"
+        r"`?<version-folder>/audits/`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bexclude `?audits/`? from review input\b",
         re.IGNORECASE,
     ),
 )

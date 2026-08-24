@@ -26,5 +26,5 @@
 
 - [x] 4.1 Run focused and whole-repository verification and complete review.
 - [x] 4.2 Record verification and retrospective evidence and archive the change.
-- [ ] 4.3 Push the verified archive commit and mark the PR ready without closing
+- [x] 4.3 Push the verified archive commit and mark the PR ready without closing
       the issue or PR.

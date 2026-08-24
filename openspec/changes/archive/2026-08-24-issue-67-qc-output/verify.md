@@ -82,3 +82,9 @@ deletion.
 The archive commit, exact remote parity, GitHub validation, and draft-to-ready
 transition remain controller-owned final steps. PR #76 and Issue #67 remain
 open.
+
+## Final readiness
+
+Archive commit `358f134` was pushed, PR #76 resolved to that exact head, and its
+GitHub `Validate` check passed. The PR was then marked ready for review. PR #76
+and Issue #67 remain open under the close-on-merge policy.

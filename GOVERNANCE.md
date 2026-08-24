@@ -60,6 +60,12 @@ rationale and request explicit human review before acceptance. The canonical
 folder-execution protocol is
 [FOLDER_SCOPED_EXECUTION.md](FOLDER_SCOPED_EXECUTION.md).
 
+Every public skill links to an install-local folder contract that fixes its
+ordered input roles, target policy, internet policy, and append-immutable output
+mode. Repository validation compares each contract with the approved skill
+matrix. Composing skills does not combine their contracts or enlarge either
+skill's filesystem or network authority.
+
 This repository retains public skill instructions and repository-specific
 validation or evaluation support. General-purpose executable tooling for rule
 retrieval, citation verification, evidence processing, filing inspection, or

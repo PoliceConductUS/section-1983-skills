@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "horan-bad-words",
+  "input_roles": ["filing"],
+  "target": { "policy": "required", "roles": ["filing"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

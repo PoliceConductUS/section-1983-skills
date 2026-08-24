@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.validate_governance import APPROVED_FOLDER_CONTRACTS
+
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 VALIDATOR = REPOSITORY / "scripts" / "validate_governance.py"
@@ -478,7 +480,7 @@ def valid_quality_control_skill(
     description="Use when independently auditing a synthetic artifact.",
 ):
     return f"""---
-name: example-skill
+name: filing-ci
 description: {description}
 ---
 
@@ -520,13 +522,15 @@ authorize implementation.
 """
 
 
-def valid_folder_scope_skill():
-    return """---
-name: example-skill
+def valid_folder_scope_skill(name="filing-ci"):
+    return f"""---
+name: {name}
 description: Use when preparing a synthetic artifact.
 ---
 
 # Example skill
+
+[Folder contract](references/folder-contract.json)
 
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
@@ -536,6 +540,7 @@ case material if the host cannot enforce the filesystem and network boundary.
 
 
 def valid_registry():
+    fixture_skill = "filing-ci"
     return {
         "version": 1,
         "sources": [
@@ -547,13 +552,23 @@ def valid_registry():
         ],
         "skills": [
             {
-                "name": "example-skill",
+                "name": fixture_skill,
                 "rules_mode": "bundled-rules-dependent",
                 "reviewed_on": VALID_DATE,
                 "rationale": "Contains current federal procedural rule content.",
                 "source_ids": ["federal-rules"],
-                "jurisdiction_reference": "skills/example-skill/references/jurisdiction.md",
-            }
+                "jurisdiction_reference": f"skills/{fixture_skill}/references/jurisdiction.md",
+            },
+            *(
+                {
+                    "name": name,
+                    "rules_mode": "rules-independent",
+                    "reviewed_on": VALID_DATE,
+                    "rationale": "Contains no current procedural rule content.",
+                }
+                for name in sorted(APPROVED_FOLDER_CONTRACTS)
+                if name != fixture_skill
+            ),
         ],
     }
 
@@ -584,13 +599,20 @@ def write_temporary_repository(
     contributing=None,
     skill_text=None,
 ):
-    (root / "skills" / "example-skill" / "references").mkdir(parents=True)
     (root / "governance").mkdir()
     (root / ".github").mkdir()
-    (root / "skills" / "example-skill" / "SKILL.md").write_text(
-        skill_text or valid_folder_scope_skill()
+    for name, contract in APPROVED_FOLDER_CONTRACTS.items():
+        package = root / "skills" / name
+        (package / "references").mkdir(parents=True)
+        (package / "SKILL.md").write_text(valid_folder_scope_skill(name))
+        (package / "references" / "folder-contract.json").write_text(
+            json.dumps(contract)
+        )
+    fixture_package = root / "skills" / "filing-ci"
+    (fixture_package / "SKILL.md").write_text(
+        skill_text or valid_folder_scope_skill("filing-ci")
     )
-    (root / "skills" / "example-skill" / "references" / "jurisdiction.md").write_text(
+    (fixture_package / "references" / "jurisdiction.md").write_text(
         "Jurisdiction: Example District\n"
         "Authoritative source: https://www.uscourts.gov\n"
         f"Checked date: {VALID_DATE}\n"
@@ -780,7 +802,7 @@ class RepositoryGovernanceTest(unittest.TestCase):
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "folder-scope-contract-language-missing: example-skill",
+                    "folder-scope-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -792,7 +814,7 @@ class RepositoryGovernanceTest(unittest.TestCase):
     def test_governance_validator_rejects_missing_or_inverted_quality_control_contract(self):
         valid = valid_quality_control_skill()
         mutations = [("missing contract", """---
-name: example-skill
+name: filing-ci
 description: Use when independently auditing a synthetic artifact.
 ---
 
@@ -814,7 +836,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-contract-language-missing: example-skill",
+                    "quality-control-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -831,7 +853,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-contract-language-missing: example-skill",
+                    "quality-control-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -855,7 +877,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -872,7 +894,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -892,7 +914,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -902,7 +924,7 @@ description: Use when independently auditing a synthetic artifact.
                 (
                     "skill",
                     {"skill_text": valid_quality_control_skill() + permission},
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                 ),
                 (
                     "governance",
@@ -926,7 +948,7 @@ description: Use when independently auditing a synthetic artifact.
                 (
                     "skill",
                     {"skill_text": valid_quality_control_skill() + permission},
-                    "quality-control-contract-language-missing: example-skill",
+                    "quality-control-contract-language-missing: filing-ci",
                 ),
                 (
                     "governance",
@@ -948,14 +970,14 @@ description: Use when independently auditing a synthetic artifact.
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             write_temporary_repository(root, skill_text=valid_quality_control_skill())
-            skill_path = root / "skills" / "example-skill" / "SKILL.md"
+            skill_path = root / "skills" / "filing-ci" / "SKILL.md"
             skill_path.unlink()
             skill_path.mkdir()
             result = run_validator(root)
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(
-            "quality-control-contract-unreadable: example-skill",
+            "quality-control-contract-unreadable: filing-ci",
             result.stdout + result.stderr,
         )
 
@@ -1167,7 +1189,7 @@ description: Use when independently auditing a synthetic artifact.
             result = run_validator(root)
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("bundled-source-required: example-skill", result.stdout + result.stderr)
+        self.assertIn("bundled-source-required: filing-ci", result.stdout + result.stderr)
 
     def test_unknown_source_id_is_rejected(self):
         registry = valid_registry()
@@ -1178,7 +1200,7 @@ description: Use when independently auditing a synthetic artifact.
             result = run_validator(root)
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("unknown-source-id: example-skill", result.stdout + result.stderr)
+        self.assertIn("unknown-source-id: filing-ci", result.stdout + result.stderr)
 
     def test_insecure_source_url_is_rejected(self):
         self.assert_temporary_repository_error(

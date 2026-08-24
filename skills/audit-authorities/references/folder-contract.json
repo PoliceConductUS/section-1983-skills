@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "audit-authorities",
+  "input_roles": ["filing", "authorities"],
+  "target": { "policy": "required", "roles": ["filing"] },
+  "internet": "authorized",
+  "output": { "mode": "append-immutable" }
+}

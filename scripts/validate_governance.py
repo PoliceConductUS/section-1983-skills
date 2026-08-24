@@ -7,6 +7,172 @@ from urllib.parse import urlparse
 
 
 MODES = {"rules-independent", "runtime-sourced", "bundled-rules-dependent"}
+FOLDER_CONTRACT_FIELDS = {
+    "version",
+    "skill",
+    "input_roles",
+    "target",
+    "internet",
+    "output",
+}
+SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def folder_contract(skill, input_roles, target_policy, target_roles, internet):
+    return {
+        "version": 1,
+        "skill": skill,
+        "input_roles": input_roles,
+        "target": {"policy": target_policy, "roles": target_roles},
+        "internet": internet,
+        "output": {"mode": "append-immutable"},
+    }
+
+
+APPROVED_FOLDER_CONTRACTS = {
+    "adversarial-filing-review": folder_contract(
+        "adversarial-filing-review",
+        ["filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "authorized",
+    ),
+    "audit-authorities": folder_contract(
+        "audit-authorities",
+        ["filing", "authorities"],
+        "required",
+        ["filing"],
+        "authorized",
+    ),
+    "auditing-section-1983-discovery-responses": folder_contract(
+        "auditing-section-1983-discovery-responses",
+        ["served-discovery", "responses", "production", "authorities"],
+        "optional",
+        ["served-discovery", "responses"],
+        "disabled",
+    ),
+    "auditing-section-1983-privilege-logs": folder_contract(
+        "auditing-section-1983-privilege-logs",
+        ["privilege-log", "served-discovery", "authorities"],
+        "optional",
+        ["privilege-log"],
+        "disabled",
+    ),
+    "building-defense-counsel-overlays": folder_contract(
+        "building-defense-counsel-overlays",
+        ["research-snapshot", "case-record"],
+        "required",
+        ["research-snapshot"],
+        "disabled",
+    ),
+    "building-litigation-alignment-overlays": folder_contract(
+        "building-litigation-alignment-overlays",
+        ["docket-snapshot", "filing"],
+        "required",
+        ["docket-snapshot"],
+        "disabled",
+    ),
+    "drafting-false-arrest-complaints": folder_contract(
+        "drafting-false-arrest-complaints",
+        ["record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-for-judge-scholer": folder_contract(
+        "drafting-for-judge-scholer",
+        ["filing", "judge-corpus", "court-conduct"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-section-1983-complaints": folder_contract(
+        "drafting-section-1983-complaints",
+        ["record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-section-1983-declarations-and-evidence": folder_contract(
+        "drafting-section-1983-declarations-and-evidence",
+        ["record", "authorities"],
+        "optional",
+        ["record"],
+        "disabled",
+    ),
+    "drafting-section-1983-deposition-outlines": folder_contract(
+        "drafting-section-1983-deposition-outlines",
+        ["record", "authorities", "discovery"],
+        "optional",
+        ["record"],
+        "disabled",
+    ),
+    "drafting-section-1983-meet-and-confer": folder_contract(
+        "drafting-section-1983-meet-and-confer",
+        ["discovery-audit", "served-discovery", "authorities", "conference-record"],
+        "required",
+        ["discovery-audit"],
+        "disabled",
+    ),
+    "drafting-section-1983-rule-59e": folder_contract(
+        "drafting-section-1983-rule-59e",
+        ["record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-section-1983-written-discovery": folder_contract(
+        "drafting-section-1983-written-discovery",
+        ["record", "authorities", "claim-map"],
+        "optional",
+        ["claim-map"],
+        "disabled",
+    ),
+    "filing-ci": folder_contract(
+        "filing-ci", ["filing", "authorities"], "required", ["filing"], "disabled"
+    ),
+    "horan-bad-words": folder_contract(
+        "horan-bad-words", ["filing"], "required", ["filing"], "disabled"
+    ),
+    "rrd": folder_contract(
+        "rrd", ["motion", "record", "authorities"], "required", ["motion"], "disabled"
+    ),
+    "rrd-rule12": folder_contract(
+        "rrd-rule12",
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
+    "rrd-rule12-city": folder_contract(
+        "rrd-rule12-city",
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
+    "rrd-rule12-officers": folder_contract(
+        "rrd-rule12-officers",
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
+    "section-1983-drafting": folder_contract(
+        "section-1983-drafting",
+        ["record", "authorities", "strategy", "filing"],
+        "optional",
+        ["filing"],
+        "authorized",
+    ),
+    "studying-rule-59e-decisions": folder_contract(
+        "studying-rule-59e-decisions",
+        ["decisions", "authorities"],
+        "optional",
+        ["decisions"],
+        "authorized",
+    ),
+}
 CONTRIBUTION_RULES = (
     (
         "Use one story per stacked branch.",
@@ -487,6 +653,93 @@ def validate_folder_scope_contracts(repository_root):
     return errors
 
 
+def validate_folder_contract_document(document, expected_skill):
+    if not isinstance(document, dict) or set(document) != FOLDER_CONTRACT_FIELDS:
+        return ["invalid-folder-contract-shape"]
+
+    errors = []
+    if type(document.get("version")) is not int or document.get("version") != 1:
+        errors.append("invalid-folder-contract-version")
+    if document.get("skill") != expected_skill:
+        errors.append("skill-folder-contract-mismatch")
+
+    roles = document.get("input_roles")
+    if (
+        not isinstance(roles, list)
+        or not roles
+        or any(not isinstance(role, str) or not SAFE_ROLE.fullmatch(role) for role in roles)
+        or len(roles) != len(set(roles))
+    ):
+        errors.append("invalid-folder-contract-input-roles")
+
+    target = document.get("target")
+    target_valid = isinstance(target, dict) and set(target) == {"policy", "roles"}
+    if target_valid:
+        policy = target["policy"]
+        target_roles = target["roles"]
+        target_valid = (
+            policy in {"required", "optional", "none"}
+            and isinstance(target_roles, list)
+            and all(
+                isinstance(role, str) and SAFE_ROLE.fullmatch(role)
+                for role in target_roles
+            )
+            and len(target_roles) == len(set(target_roles))
+            and isinstance(roles, list)
+            and all(role in roles for role in target_roles)
+            and ((policy == "none" and not target_roles) or (policy != "none" and target_roles))
+        )
+    if not target_valid:
+        errors.append("invalid-folder-contract-target")
+
+    if document.get("internet") not in {"disabled", "authorized"}:
+        errors.append("invalid-folder-contract-internet")
+    if document.get("output") != {"mode": "append-immutable"}:
+        errors.append("invalid-folder-contract-output")
+
+    expected = APPROVED_FOLDER_CONTRACTS.get(expected_skill)
+    if expected is not None and document != expected:
+        errors.append("skill-folder-contract-mismatch")
+    return list(dict.fromkeys(errors))
+
+
+def validate_skill_folder_contracts(repository_root):
+    errors = []
+    entrypoints = sorted((repository_root / "skills").glob("*/SKILL.md"))
+    discovered = {entrypoint.parent.name for entrypoint in entrypoints}
+    approved = set(APPROVED_FOLDER_CONTRACTS)
+    errors.extend(
+        f"approved-skill-folder-contract-missing: {skill}"
+        for skill in sorted(approved - discovered)
+    )
+    errors.extend(
+        f"unapproved-skill-folder-contract: {skill}"
+        for skill in sorted(discovered - approved)
+    )
+    for entrypoint in entrypoints:
+        skill = entrypoint.parent.name
+        contract_path = entrypoint.parent / "references" / "folder-contract.json"
+        if not contract_path.is_file():
+            errors.append(f"skill-folder-contract-missing: {skill}")
+            continue
+        try:
+            document = json.loads(contract_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            errors.append(f"skill-folder-contract-unreadable: {skill}")
+            continue
+        errors.extend(
+            f"{finding}: {skill}"
+            for finding in validate_folder_contract_document(document, skill)
+        )
+        try:
+            entrypoint_text = entrypoint.read_text().lower()
+        except OSError:
+            entrypoint_text = ""
+        if "[folder contract](references/folder-contract.json)" not in entrypoint_text:
+            errors.append(f"skill-folder-contract-link-missing: {skill}")
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
@@ -495,6 +748,7 @@ def validate_repository(repository_root):
     errors.extend(validate_contribution_contract(repository_root))
     errors.extend(validate_quality_control_contracts(repository_root))
     errors.extend(validate_folder_scope_contracts(repository_root))
+    errors.extend(validate_skill_folder_contracts(repository_root))
     return errors
 
 

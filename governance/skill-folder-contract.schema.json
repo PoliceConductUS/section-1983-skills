@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/skill-folder-contract.schema.json",
+  "title": "Skill folder contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "skill",
+    "input_roles",
+    "target",
+    "internet",
+    "output"
+  ],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "skill": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "input_roles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "roles"],
+      "properties": {
+        "policy": { "enum": ["required", "optional", "none"] },
+        "roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        }
+      }
+    },
+    "internet": { "enum": ["disabled", "authorized"] },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": { "mode": { "const": "append-immutable" } }
+    }
+  }
+}

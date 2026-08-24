@@ -333,6 +333,31 @@ class SkillFolderContractsTest(unittest.TestCase):
             findings = validate_skill_folder_contracts(root)
             self.assertIn("unapproved-skill-folder-contract: unknown-skill", findings)
 
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            unknown = root / "skills" / "unknown-skill"
+            (unknown / "references").mkdir(parents=True)
+            (unknown / "SKILL.md").write_text(
+                "# Unknown\n\n[Folder contract](references/folder-contract.json)\n"
+            )
+            (unknown / "references" / "folder-contract.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "skill": "unknown-skill",
+                        "input_roles": ["filing"],
+                        "target": {"policy": "required", "roles": ["filing"]},
+                        "internet": "disabled",
+                        "output": {"mode": "append-immutable"},
+                    }
+                )
+            )
+            findings = validate_skill_folder_contracts(root)
+            self.assertIn("unapproved-skill-folder-contract: unknown-skill", findings)
+            self.assertIn(
+                "approved-skill-folder-contract-missing: filing-ci", findings
+            )
+
     def test_each_isolated_package_retains_its_contract_and_local_link(self):
         for skill in CONTRACTS:
             with self.subTest(skill=skill), tempfile.TemporaryDirectory() as directory:

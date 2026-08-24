@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "drafting-section-1983-deposition-outlines",
+  "input_roles": ["record", "authorities", "discovery"],
+  "target": { "policy": "optional", "roles": ["record"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

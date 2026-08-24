@@ -3,7 +3,7 @@
 ## 1. Design and stack
 
 - [x] 1.1 Record the folder-backed FilingPacket design and implementation plan.
-- [ ] 1.2 Push the design and open a draft PR stacked on Issue #67.
+- [x] 1.2 Push the design and open a draft PR stacked on Issue #67.
 
 ## 2. Manifest and fixtures
 

@@ -51,9 +51,9 @@
   `openspec/changes/archive/2026-08-24-issue-69-folder-scoped-docs/`
 - Modify durable spec: `openspec/specs/case-workspace-start-guide/spec.md`
 
-- [ ] Review links, terminology, flow order, invocation consistency, operation
+- [x] Review links, terminology, flow order, invocation consistency, operation
       ownership, synthetic scope, and Issue #71 boundary.
-- [ ] Correct accepted Critical or Important findings test-first and rerun
+- [x] Correct accepted Critical or Important findings test-first and rerun
       review.
 - [ ] Complete tasks, write evidence, archive with repository-local OpenSpec,
       remove ignored SDD scratch after review, and run fresh `npm run validate`.

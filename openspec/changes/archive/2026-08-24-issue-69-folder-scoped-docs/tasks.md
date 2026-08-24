@@ -20,7 +20,7 @@
 
 ## 3. Review and archive
 
-- [ ] 3.1 Independently review links, flow completeness, role/output
+- [x] 3.1 Independently review links, flow completeness, role/output
       consistency, synthetic examples, contract ownership, and obsolete
       terminology; correct accepted Important findings test-first.
 - [ ] 3.2 Write verification and retrospective evidence, archive the change,

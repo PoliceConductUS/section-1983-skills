@@ -12,11 +12,13 @@ import stat
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, BinaryIO
+from urllib.parse import urlsplit
 
 from scripts.validate_folder_invocation import ValidatedInvocation
 
 
 _RUN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_SKILL_VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _FAILURE_VALUE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _MODES = frozenset({"append-immutable", "fresh-regenerable"})
@@ -89,7 +91,24 @@ def _new_staging_file(staging_fd: int, prefix: str, error_code: str) -> tuple[st
     _fail(error_code)
 
 
-def _publish_record(staging_fd: int, run_fd: int, name: str, contents: bytes) -> None:
+def _entry_exists(directory_fd: int, name: str) -> bool:
+    try:
+        os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+    except FileNotFoundError:
+        return False
+    except OSError:
+        return True
+    return True
+
+
+def _publish_record(
+    staging_fd: int,
+    run_fd: int,
+    name: str,
+    contents: bytes,
+    *,
+    on_visible=None,
+) -> None:
     staging_name, descriptor = _new_staging_file(staging_fd, "receipt", "receipt-unavailable")
     linked = False
     try:
@@ -109,9 +128,14 @@ def _publish_record(staging_fd: int, run_fd: int, name: str, contents: bytes) ->
                 follow_symlinks=False,
             )
             linked = True
+            if on_visible is not None:
+                on_visible()
             os.fsync(run_fd)
             os.unlink(staging_name, dir_fd=staging_fd)
+            os.fsync(staging_fd)
         except OSError:
+            if on_visible is not None and _entry_exists(run_fd, name):
+                on_visible()
             _fail("receipt-unavailable")
     finally:
         if not linked:
@@ -171,6 +195,27 @@ def _normalize_internet_sources(value: Any) -> tuple[dict[str, Any], ...]:
         sha256 = source["sha256"]
         if not isinstance(identity, str) or not identity:
             _fail("invalid-internet-source")
+        if identity_field == "url":
+            if (
+                len(identity) > 2048
+                or "\\" in identity
+                or any(ord(character) < 33 or ord(character) > 126 for character in identity)
+            ):
+                _fail("invalid-internet-source")
+            try:
+                parsed_url = urlsplit(identity)
+                invalid_url = (
+                    parsed_url.scheme not in {"http", "https"}
+                    or not parsed_url.netloc
+                    or not parsed_url.hostname
+                    or parsed_url.username is not None
+                    or parsed_url.password is not None
+                )
+                parsed_url.port
+            except (TypeError, ValueError):
+                _fail("invalid-internet-source")
+            if invalid_url:
+                _fail("invalid-internet-source")
         if not isinstance(retrieved_at, str) or not (
             retrieved_at.endswith("Z") or retrieved_at.endswith("+00:00")
         ):
@@ -380,6 +425,8 @@ class OutputRun:
             _fail("invalid-run-id")
         if not isinstance(mode, str) or mode not in _MODES:
             _fail("invalid-run-mode")
+        if not isinstance(skill_version, str) or _SKILL_VERSION.fullmatch(skill_version) is None:
+            _fail("invalid-skill-version")
 
         input_manifest_bytes = _canonical_json(input_manifest, "invalid-input-manifest")
         input_manifest_sha256 = hashlib.sha256(input_manifest_bytes).hexdigest()
@@ -520,6 +567,11 @@ class OutputRun:
             except OSError:
                 self._incomplete_artifacts.append({**artifact, "phase": "staging-cleanup"})
                 _fail("staging-incomplete")
+            try:
+                os.fsync(self._staging_fd)
+            except OSError:
+                self._incomplete_artifacts.append({**artifact, "phase": "staging-cleanup"})
+                _fail("staging-incomplete")
 
             return dict(artifact)
         finally:
@@ -540,8 +592,24 @@ class OutputRun:
                     pass
 
     def _internet_status(self) -> dict[str, Any]:
-        used = any(artifact.get("internet_sources") for artifact in self._artifacts)
+        used = any(
+            artifact.get("internet_sources")
+            for artifact in (*self._artifacts, *self._incomplete_artifacts)
+        )
         return {"policy": self.invocation.internet, "used": used}
+
+    def _seal(self) -> None:
+        self._terminal = True
+
+    def _close_descriptors(self) -> None:
+        for descriptor_name in ("_staging_fd", "_run_fd", "_root_fd"):
+            descriptor = getattr(self, descriptor_name, -1)
+            if descriptor >= 0:
+                try:
+                    os.close(descriptor)
+                except OSError:
+                    pass
+                setattr(self, descriptor_name, -1)
 
     def _receipt(self, status: str) -> dict[str, Any]:
         return {
@@ -564,18 +632,29 @@ class OutputRun:
 
         receipt = self._receipt("success")
         receipt_bytes = _canonical_json(receipt, "receipt-unavailable")
-        _publish_record(self._staging_fd, self._run_fd, _MANIFEST_NAME, receipt_bytes)
         try:
-            os.unlink(_INCOMPLETE_NAME, dir_fd=self._run_fd)
-        except OSError:
-            _fail("receipt-unavailable")
-        try:
-            os.fsync(self._run_fd)
-        except OSError:
-            _restore_incomplete(self._run_fd, self._incomplete_bytes)
-            _fail("receipt-unavailable")
+            _publish_record(
+                self._staging_fd,
+                self._run_fd,
+                _MANIFEST_NAME,
+                receipt_bytes,
+                on_visible=self._seal,
+            )
+            try:
+                os.unlink(_INCOMPLETE_NAME, dir_fd=self._run_fd)
+            except OSError:
+                _fail("receipt-unavailable")
+            try:
+                os.fsync(self._run_fd)
+            except OSError:
+                _restore_incomplete(self._run_fd, self._incomplete_bytes)
+                _fail("receipt-unavailable")
+        except OutputError:
+            if self._terminal:
+                self._close_descriptors()
+            raise
 
-        self._terminal = True
+        self._close_descriptors()
         return receipt
 
     def fail(self, code: str, phase: str) -> dict[str, Any]:
@@ -598,16 +677,20 @@ class OutputRun:
             key=lambda artifact: (artifact["path"], artifact["phase"]),
         )
         receipt_bytes = _canonical_json(receipt, "receipt-unavailable")
-        _publish_record(self._staging_fd, self._run_fd, _FAILURE_NAME, receipt_bytes)
-        self._terminal = True
+        try:
+            _publish_record(
+                self._staging_fd,
+                self._run_fd,
+                _FAILURE_NAME,
+                receipt_bytes,
+                on_visible=self._seal,
+            )
+        except OutputError:
+            if self._terminal:
+                self._close_descriptors()
+            raise
+        self._close_descriptors()
         return receipt
 
     def __del__(self):
-        for descriptor_name in ("_staging_fd", "_run_fd", "_root_fd"):
-            descriptor = getattr(self, descriptor_name, -1)
-            if descriptor >= 0:
-                try:
-                    os.close(descriptor)
-                except OSError:
-                    pass
-                setattr(self, descriptor_name, -1)
+        self._close_descriptors()

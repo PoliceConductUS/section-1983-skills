@@ -51,8 +51,7 @@
       "$ref": "#/$defs/identifier"
     },
     "skill_version": {
-      "type": "string",
-      "minLength": 1
+      "$ref": "#/$defs/skillVersion"
     },
     "status": {
       "enum": ["success", "failure"]
@@ -99,6 +98,12 @@
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
     },
+    "skillVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$"
+    },
     "internetSource": {
       "type": "object",
       "additionalProperties": false,
@@ -106,7 +111,10 @@
       "properties": {
         "url": {
           "type": "string",
-          "minLength": 1
+          "format": "uri",
+          "minLength": 1,
+          "maxLength": 2048,
+          "pattern": "^(?=[\\x21-\\x7E]{1,2048}$)(?!.*\\\\)https?://(?![^/?#]*@)[^/?#]+(?:[/?#].*)?$"
         },
         "identity": {
           "type": "string",

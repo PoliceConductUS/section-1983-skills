@@ -691,6 +691,7 @@ class SkillOutputWriterTest(unittest.TestCase):
         receipt = self.run_directory(run_id) / "manifest.json"
         self.assertEqual(receipt.read_bytes(), expected_bytes)
         self.assertEqual(returned, json.loads(expected_bytes))
+        self.assertFalse(os.path.lexists(self.run_directory(run_id) / "incomplete.json"))
         self.assertFalse(os.path.lexists(self.run_directory(run_id) / "failure.json"))
 
     def test_success_terminal_state_rejects_later_writes_and_transitions(self):
@@ -869,7 +870,13 @@ class SkillOutputWriterTest(unittest.TestCase):
             mode="append-immutable",
             input_manifest=input_manifest,
         )
-        url_source_without_context = self.valid_internet_source()
+        supplied_url_source_without_context = self.valid_internet_source(
+            retrieved_at="2026-08-24T12:34:56+00:00"
+        )
+        normalized_url_source_without_context = {
+            **supplied_url_source_without_context,
+            "retrieved_at": "2026-08-24T12:34:56Z",
+        }
         identity_source_with_context = {
             "identity": "courtlistener:opinion:12345",
             "retrieved_at": "2026-08-24T13:45:00Z",
@@ -880,7 +887,7 @@ class SkillOutputWriterTest(unittest.TestCase):
         run.write(
             "reports/web.md",
             b"web\n",
-            internet_sources=(url_source_without_context, identity_source_with_context),
+            internet_sources=(supplied_url_source_without_context, identity_source_with_context),
         )
         manifest = run.complete()
 
@@ -892,7 +899,7 @@ class SkillOutputWriterTest(unittest.TestCase):
                     "path": "reports/web.md",
                     "sha256": "4ded89b3f9f03689b7032b92a091e742e1205e2a54277e52b32498d9fcdf3642",
                     "size": 4,
-                    "internet_sources": [url_source_without_context, identity_source_with_context],
+                    "internet_sources": [normalized_url_source_without_context, identity_source_with_context],
                 }
             ],
         )
@@ -919,6 +926,44 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertNotIn("internet_sources", manifest["artifacts"][0])
         self.assertTrue((output_root / "reports" / "local.md").is_file())
 
+    def test_failed_run_retains_internet_sources_and_derives_used(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "authorized-failure-root",
+            internet="authorized",
+        )
+        run = OutputRun.start(
+            invocation,
+            run_id="authorized-failure-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        supplied_source = self.valid_internet_source(
+            retrieved_at="2026-08-24T12:34:56+00:00"
+        )
+        run.write(
+            "reports/internet-before-failure.md",
+            b"internet-derived bytes\n",
+            internet_sources=(supplied_source,),
+        )
+
+        failure = run.fail("later-step-failed", "analysis")
+
+        self.assertEqual(failure["status"], "failure")
+        self.assertEqual(failure["internet"], {"policy": "authorized", "used": True})
+        self.assertEqual(
+            failure["artifacts"][0]["internet_sources"],
+            [
+                {
+                    **supplied_source,
+                    "retrieved_at": "2026-08-24T12:34:56Z",
+                }
+            ],
+        )
+        self.assertFalse(
+            os.path.lexists(output_root / ".skill-runs" / "authorized-failure-run" / "manifest.json")
+        )
+
     def test_authorized_internet_rejects_invalid_source_records_before_publication(self):
         invocation, input_manifest, output_root = self.make_relocated_invocation(
             "invalid-internet-root",
@@ -937,10 +982,24 @@ class SkillOutputWriterTest(unittest.TestCase):
             ("missing-identity", {key: value for key, value in valid.items() if key != "url"}),
             ("both-identities", {**valid, "identity": "source:123"}),
             ("empty-url", {**valid, "url": ""}),
+            ("non-string-url", {**valid, "url": 7}),
+            (
+                "empty-identity",
+                {**{key: value for key, value in valid.items() if key != "url"}, "identity": ""},
+            ),
+            (
+                "non-string-identity",
+                {**{key: value for key, value in valid.items() if key != "url"}, "identity": 7},
+            ),
             ("missing-retrieval-time", {key: value for key, value in valid.items() if key != "retrieved_at"}),
-            ("non-utc-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34:56+00:00"}),
+            ("non-string-retrieval-time", {**valid, "retrieved_at": 7}),
+            ("naive-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34:56"}),
+            ("nonzero-offset-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34:56-05:00"}),
             ("invalid-retrieval-time", {**valid, "retrieved_at": "2026-02-30T12:34:56Z"}),
             ("missing-hash", {key: value for key, value in valid.items() if key != "sha256"}),
+            ("non-string-hash", {**valid, "sha256": 7}),
+            ("short-hash", {**valid, "sha256": "a" * 63}),
+            ("long-hash", {**valid, "sha256": "a" * 65}),
             ("uppercase-hash", {**valid, "sha256": "A" * 64}),
             ("invalid-hash", {**valid, "sha256": "g" * 64}),
             ("empty-context", {**valid, "request_context": ""}),
@@ -1024,6 +1083,38 @@ class SkillOutputWriterTest(unittest.TestCase):
         )
         self.assertEqual(self.snapshot_path(failure_path), failure_before)
 
+    def test_complete_uses_stable_run_directory_after_path_rename_and_replacement(self):
+        run_id = "stable-success-receipt-run"
+        run = self.start_run(run_id)
+        original_run_directory = self.run_directory(run_id)
+        opened_run_directory = original_run_directory.parent / "renamed-success-run"
+        original_run_directory.rename(opened_run_directory)
+        original_run_directory.mkdir()
+
+        returned = run.complete()
+
+        self.assertEqual(returned["status"], "success")
+        self.assertTrue((opened_run_directory / "manifest.json").is_file())
+        self.assertFalse(os.path.lexists(opened_run_directory / "incomplete.json"))
+        self.assertEqual(list(original_run_directory.iterdir()), [])
+
+    def test_fail_uses_stable_run_directory_after_path_rename_and_symlink_replacement(self):
+        run_id = "stable-failure-receipt-run"
+        run = self.start_run(run_id)
+        original_run_directory = self.run_directory(run_id)
+        opened_run_directory = original_run_directory.parent / "renamed-failure-run"
+        outside = self.root / "outside-run-replacement"
+        outside.mkdir()
+        original_run_directory.rename(opened_run_directory)
+        original_run_directory.symlink_to(outside, target_is_directory=True)
+
+        returned = run.fail("stream-failed", "artifact-write")
+
+        self.assertEqual(returned["status"], "failure")
+        self.assertTrue((opened_run_directory / "failure.json").is_file())
+        self.assertFalse(os.path.lexists(opened_run_directory / "manifest.json"))
+        self.assertEqual(list(outside.iterdir()), [])
+
     def test_terminal_success_publication_and_sync_failures_never_report_success(self):
         publication_run_id = "receipt-publication-failure-run"
         publication_run = self.start_run(publication_run_id)
@@ -1056,8 +1147,26 @@ class SkillOutputWriterTest(unittest.TestCase):
             side_effect=fail_terminal_directory_sync,
         ):
             self.assert_error(sync_run.complete, "receipt-unavailable")
-        self.assertFalse(os.path.lexists(self.run_directory(sync_run_id) / "manifest.json"))
+        self.assertTrue((self.run_directory(sync_run_id) / "manifest.json").is_file())
         self.assertTrue((self.run_directory(sync_run_id) / "incomplete.json").is_file())
+
+        cleanup_run_id = "receipt-cleanup-failure-run"
+        cleanup_run = self.start_run(cleanup_run_id)
+        original_unlink = os.unlink
+
+        def fail_incomplete_cleanup(path, *args, **kwargs):
+            if path == "incomplete.json":
+                raise OSError("injected incomplete cleanup /private/case-material")
+            return original_unlink(path, *args, **kwargs)
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "unlink",
+            side_effect=fail_incomplete_cleanup,
+        ):
+            self.assert_error(cleanup_run.complete, "receipt-unavailable")
+        self.assertTrue((self.run_directory(cleanup_run_id) / "manifest.json").is_file())
+        self.assertTrue((self.run_directory(cleanup_run_id) / "incomplete.json").is_file())
 
     def test_incomplete_artifacts_block_success_and_are_recorded_in_failure_receipts(self):
         destination_sync_run_id = "honest-destination-sync-run"

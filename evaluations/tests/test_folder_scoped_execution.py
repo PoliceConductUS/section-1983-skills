@@ -214,7 +214,7 @@ class FolderScopedExecutionTest(unittest.TestCase):
 
         self.assertEqual(
             resolve_input_path(invocation, "record", "exhibits/image.bin"),
-            self.record_root / "exhibits" / "image.bin",
+            (self.record_root / "exhibits" / "image.bin").resolve(),
         )
         for role, path in (
             ("record", "/etc/passwd"),
@@ -230,7 +230,7 @@ class FolderScopedExecutionTest(unittest.TestCase):
         invocation = validate_invocation(self.envelope())
 
         resolved = resolve_output_path(invocation, "drafts/result.md")
-        self.assertEqual(resolved, self.output_root / "drafts" / "result.md")
+        self.assertEqual(resolved, (self.output_root / "drafts" / "result.md").resolve())
         self.assertFalse(resolved.exists())
         for path in ("/tmp/result.md", "../result.md"):
             with self.subTest(path=path):

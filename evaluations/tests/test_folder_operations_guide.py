@@ -49,13 +49,16 @@ SAFETY_OBLIGATIONS = {
 }
 FORBIDDEN_SAFETY_CONTRADICTIONS = {
     "source classification": (
-        r"(?<!without )\bconvert(?:ing)? an allegation or inference into a fact"
+        r"\b(?:may|can|should|must|is allowed to) convert"
+        r" an allegation or inference into a fact"
     ),
     "human approval": (
         r"(?:no|without) actual user approval.{0,120}"
         r"protected decision.{0,120}`?status: approved`?"
     ),
-    "immutable inputs": r"(?<!never )\boverwrite immutable inputs",
+    "immutable inputs": (
+        r"\b(?:may|can|should|must|is allowed to) overwrite immutable inputs"
+    ),
     "configured validation": r"run (?:guessed|unconfigured|any) validation commands",
     "filing ready": (
         r"\b(?:workspace|artifact|output|report|packet) (?:is|are) filing-ready\b"
@@ -157,7 +160,8 @@ class FolderOperationsGuideTest(unittest.TestCase):
     def setUpClass(cls):
         cls.readme = README_PATH.read_text(encoding="utf-8")
         cls.guide = GUIDE_PATH.read_text(encoding="utf-8") if GUIDE_PATH.exists() else ""
-        cls.normalized = " ".join(cls.guide.split())
+        cls.prose = prose_markdown(cls.guide)
+        cls.normalized = " ".join(cls.prose.split())
         cls.normalized_lower = cls.normalized.lower()
 
     def test_readme_links_exactly_once_to_confined_install_local_guide(self):
@@ -186,12 +190,22 @@ class FolderOperationsGuideTest(unittest.TestCase):
             confined_repository_path("../outside/FOLDER_OPERATIONS.md")
 
     def test_first_hour_flow_is_complete_and_ordered(self):
-        positions = [self.guide.find(heading) for heading in FIRST_HOUR_HEADINGS]
+        positions = [self.prose.find(heading) for heading in FIRST_HOUR_HEADINGS]
         self.assertNotIn(-1, positions)
         self.assertEqual(positions, sorted(positions))
         for heading in FIRST_HOUR_HEADINGS:
             with self.subTest(heading=heading):
-                self.assertTrue(markdown_section(self.guide, heading).strip())
+                self.assertTrue(markdown_section(self.prose, heading).strip())
+
+    def test_fenced_markdown_decoys_cannot_supply_headings_or_prose(self):
+        decoy = "```markdown\n" + "\n".join(FIRST_HOUR_HEADINGS) + "\n"
+        decoy += "trusted host hashes manifests folder-backed filing packet\n```\n"
+        prose = prose_markdown(decoy)
+        for heading in FIRST_HOUR_HEADINGS:
+            with self.subTest(heading=heading):
+                self.assertEqual(markdown_section(prose, heading), "")
+        self.assertNotIn("trusted host", prose)
+        self.assertEqual(operation_units(prose), [])
 
     def test_each_first_hour_step_contains_its_own_required_actions(self):
         requirements = {
@@ -202,10 +216,9 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 r"\bauthorities\b",
             ),
             FIRST_HOUR_HEADINGS[1]: (
-                re.escape(CALLER_ROOT_TOKENS[0]),
-                re.escape(CALLER_ROOT_TOKENS[1]),
-                re.escape(CALLER_ROOT_TOKENS[2]),
-                r"version",
+                r"\bcanonical\b",
+                r"\bversion 1\b",
+                r"\binvocation\b",
             ),
             FIRST_HOUR_HEADINGS[2]: (
                 re.escape("scripts/validate_folder_invocation.py"),
@@ -217,8 +230,8 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 r"(?:no universal (?:skill )?runner|does not (?:provide|invent).{0,40}universal)",
             ),
             FIRST_HOUR_HEADINGS[4]: (
-                re.escape(CALLER_ROOT_TOKENS[0]),
-                re.escape(CALLER_ROOT_TOKENS[1]),
+                r"\brecord\b",
+                r"\bauthorities\b",
                 r"\b(?:sha-256|hash(?:es)?)\b",
                 r"\bunchanged\b",
             ),
@@ -226,16 +239,31 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 re.escape(CALLER_ROOT_TOKENS[2]),
                 r"\bartifact",
                 re.escape(".skill-runs/<run-id>/manifest.json"),
-                r"manifest(?:\.json)?.{0,100}\bvalid|\bvalid.{0,100}manifest",
                 re.escape(".skill-runs/<run-id>/incomplete.json"),
-                r"incomplete(?:\.json)?.{0,100}\babsent|\babsence.{0,100}incomplete",
             ),
         }
         for heading, patterns in requirements.items():
-            section = " ".join(markdown_section(self.guide, heading).split()).lower()
+            section = " ".join(markdown_section(self.prose, heading).split()).lower()
             for pattern in patterns:
                 with self.subTest(heading=heading, pattern=pattern):
                     self.assertRegex(section, pattern.lower())
+
+    def test_terminal_verification_uses_affirmative_success_semantics(self):
+        section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[5]).split()
+        ).lower()
+        self.assertRegex(section, r"manifest\.json`? (?:validates\b|is valid\b)")
+        self.assertNotRegex(
+            section,
+            r"manifest\.json.{0,40}\b(?:not valid|invalid)\b|"
+            r"\b(?:not valid|invalid)\b.{0,40}manifest\.json",
+        )
+        self.assertRegex(section, r"incomplete\.json`? is absent\b")
+        self.assertNotRegex(
+            section,
+            r"incomplete\.json.{0,40}\b(?:not absent|present)\b|"
+            r"\b(?:not absent|present)\b.{0,40}incomplete\.json",
+        )
 
     def test_canonical_invocation_fixture_conforms_to_the_real_validator(self):
         blocks = version_one_json_blocks(self.guide)
@@ -294,7 +322,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
 
     def test_logical_roles_are_stable_while_caller_folders_are_configurable(self):
         selection = " ".join(
-            markdown_section(self.guide, FIRST_HOUR_HEADINGS[0]).split()
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[0]).split()
         ).lower()
         self.assertIn("record", selection)
         self.assertIn("authorities", selection)
@@ -338,7 +366,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
             if destination.startswith("skills/")
         ]
 
-        units = operation_units(self.guide)
+        units = operation_units(self.prose)
         for operation, expected_owner in OPERATION_OWNERS.items():
             with self.subTest(operation=operation):
                 matching_units = [
@@ -395,7 +423,9 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 self.assertNotIn(private_marker, self.guide.lower())
 
     def test_current_onboarding_docs_reject_obsolete_runtime_terminology(self):
-        current_onboarding = "\n".join((self.readme, self.guide))
+        current_onboarding = "\n".join(
+            (prose_markdown(self.readme), self.prose)
+        )
         for term, pattern in OBSOLETE_TERMINOLOGY.items():
             with self.subTest(term=term):
                 self.assertNotRegex(current_onboarding.lower(), pattern)
@@ -417,6 +447,24 @@ class FolderOperationsGuideTest(unittest.TestCase):
         for contradiction, pattern in FORBIDDEN_SAFETY_CONTRADICTIONS.items():
             with self.subTest(contradiction=contradiction):
                 self.assertNotRegex(self.normalized_lower, pattern)
+
+    def test_safety_contradiction_patterns_allow_prohibitions_and_reject_permissions(self):
+        pattern_cases = {
+            "source classification": (
+                "do not convert an allegation or inference into a fact",
+                "may convert an allegation or inference into a fact",
+            ),
+            "immutable inputs": (
+                "cannot overwrite immutable inputs",
+                "is allowed to overwrite immutable inputs",
+            ),
+        }
+        for obligation, (safe, unsafe) in pattern_cases.items():
+            pattern = FORBIDDEN_SAFETY_CONTRADICTIONS[obligation]
+            with self.subTest(obligation=obligation, statement="prohibition"):
+                self.assertNotRegex(safe, pattern)
+            with self.subTest(obligation=obligation, statement="permission"):
+                self.assertRegex(unsafe, pattern)
 
     def test_install_is_pinned_to_one_immutable_release(self):
         sources = remote_install_sources(self.guide)

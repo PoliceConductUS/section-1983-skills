@@ -156,7 +156,7 @@ def _publish_record(
                 _unlink_and_sync(staging_fd, staging_name, "receipt-unavailable")
             except OutputError:
                 pass
-        if on_visible is not None and _entry_exists(run_fd, name):
+        if on_visible is not None and (linked or _entry_exists(run_fd, name)):
             on_visible()
 
 

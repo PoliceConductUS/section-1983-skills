@@ -1,10 +1,12 @@
 import json
+import hashlib
 import re
 import tempfile
 import unittest
 from pathlib import Path, PurePosixPath
 
-from scripts.validate_folder_invocation import validate_invocation
+from scripts.skill_output_writer import OutputRun
+from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -378,6 +380,119 @@ class FolderOperationsGuideTest(unittest.TestCase):
             r"publish.{0,160}logical input manifest.{0,160}"
             r"canonical output protocol.{0,120}explicit output",
         )
+
+    def test_persisted_manifest_uses_the_writer_fingerprint_bytes(self):
+        section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[2]).split()
+        ).lower()
+        self.assertRegex(
+            section,
+            r"parse.{0,120}(?:validator )?stdout.{0,120}json.{0,120}"
+            r"(?:object|in memory)",
+        )
+        self.assertRegex(
+            section,
+            r"canonical.{0,80}compact.{0,80}utf-8.{0,80}sorted-key json",
+        )
+        self.assertRegex(
+            section,
+            r"publish.{0,120}(?:those|the same|exact canonical).{0,80}"
+            r"canonical bytes",
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            record_root = root / "record"
+            authorities_root = root / "authorities"
+            output_root = root / "output"
+            for folder in (record_root, authorities_root, output_root):
+                folder.mkdir()
+            target = record_root / "selected.md"
+            target_bytes = b"selected target\n"
+            target.write_bytes(target_bytes)
+            (authorities_root / "case.txt").write_bytes(b"authority\n")
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "synthetic-folder-audit",
+                    "inputs": [
+                        {"role": "record", "root": str(record_root)},
+                        {"role": "authorities", "root": str(authorities_root)},
+                    ],
+                    "output": {"root": str(output_root)},
+                    "target": {"role": "record", "path": "selected.md"},
+                    "runtime": {
+                        "max_seconds": 900,
+                        "max_input_bytes": 104857600,
+                    },
+                    "internet": "disabled",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            input_manifest = build_input_manifest(invocation)
+            canonical_manifest_bytes = json.dumps(
+                input_manifest,
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            ).encode("utf-8")
+            input_manifest_sha256 = hashlib.sha256(
+                canonical_manifest_bytes
+            ).hexdigest()
+            inventory = {
+                "input_manifest_sha256": input_manifest_sha256,
+                "schema_version": 1,
+                "target": {
+                    "path": "selected.md",
+                    "role": "record",
+                    "sha256": hashlib.sha256(target_bytes).hexdigest(),
+                    "size": len(target_bytes),
+                },
+            }
+            inventory_bytes = json.dumps(
+                inventory,
+                ensure_ascii=False,
+                allow_nan=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            ).encode("utf-8")
+
+            run = OutputRun.start(
+                invocation,
+                run_id="guide-manifest-run",
+                skill_version="1",
+                mode="fresh-regenerable",
+                input_manifest=input_manifest,
+            )
+            manifest_artifact = run.write(
+                "metadata/logical-input-manifest.json", canonical_manifest_bytes
+            )
+            run.write("reports/example-inventory.json", inventory_bytes)
+            receipt = run.complete()
+
+            persisted_manifest = (
+                output_root / "metadata" / "logical-input-manifest.json"
+            ).read_bytes()
+            persisted_inventory = json.loads(
+                (output_root / "reports" / "example-inventory.json").read_bytes()
+            )
+            self.assertEqual(persisted_manifest, canonical_manifest_bytes)
+            self.assertEqual(
+                hashlib.sha256(persisted_manifest).hexdigest(),
+                receipt["input_manifest_sha256"],
+            )
+            self.assertEqual(
+                manifest_artifact["sha256"], receipt["input_manifest_sha256"]
+            )
+            self.assertEqual(
+                persisted_inventory["input_manifest_sha256"],
+                receipt["input_manifest_sha256"],
+            )
 
     def test_fixture_defines_a_determinate_synthetic_host_operation(self):
         blocks = version_one_json_blocks(self.guide)

@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -243,6 +244,21 @@ class FolderScopedExecutionTest(unittest.TestCase):
         with self.subTest(path_kind="output"):
             with self.assertRaises(InvocationError):
                 resolve_output_path(invocation, backslash_path)
+
+    def test_schema_relative_path_pattern_uses_forward_slashes_only(self):
+        schema = json.loads(
+            (Path(__file__).resolve().parents[2] / "governance" / "folder-invocation.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        pattern = schema["$defs"]["relativePath"]["pattern"]
+
+        for path in ("draft.md", "drafts/result.md"):
+            with self.subTest(path=path):
+                self.assertIsNotNone(re.fullmatch(pattern, path))
+        for path in ("dir\\file", "dir\\..\\secret", "/etc/passwd", "../outside.txt"):
+            with self.subTest(path=path):
+                self.assertIsNone(re.fullmatch(pattern, path))
 
     def test_resolves_only_existing_confined_input_children(self):
         invocation = validate_invocation(self.envelope())

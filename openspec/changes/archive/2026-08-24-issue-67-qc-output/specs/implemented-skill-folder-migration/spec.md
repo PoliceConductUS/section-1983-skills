@@ -2,7 +2,7 @@
 
 ## MODIFIED Requirements
 
-### Requirement: Every public skill exposes one exact folder contract
+### Requirement: Every public skill carries an exact folder contract
 
 Every public skill MUST link to a schema-valid install-local folder contract
 with exactly its approved ordered role set, target policy and target roles,

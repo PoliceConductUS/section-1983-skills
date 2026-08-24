@@ -9,22 +9,16 @@ after archive.
 
 ### Requirement: Every public skill carries an exact folder contract
 
-Every public skill package SHALL contain `references/folder-contract.json`. The
-contract MUST be a strict version-1 object containing the exact public skill
-name, a nonempty ordered array of unique safe input-role names, one target
-policy and its allowed roles, an internet policy of `disabled` or `authorized`,
-and output mode `append-immutable`. The invocation MUST contain exactly the
-contract's ordered role set and policy values. A skill stack MUST NOT silently
-union contracts or enlarge one skill's filesystem or network authority.
+Every public skill MUST link to a schema-valid install-local folder contract
+with exactly its approved ordered role set, target policy and target roles,
+internet policy, and `append-immutable` output mode:
 
-The approved contracts are:
-
-| Skill                                             | Input roles in exact order                                                | Target                                        | Internet   |
+| Skill                                             | Ordered input roles                                                       | Target policy and roles                       | Internet   |
 | ------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------- | ---------- |
 | `adversarial-filing-review`                       | `filing`, `approved-sources`                                              | required in `filing`                          | authorized |
 | `audit-authorities`                               | `filing`, `authorities`                                                   | required in `filing`                          | authorized |
-| `auditing-section-1983-discovery-responses`       | `served-discovery`, `responses`, `production`, `authorities`              | optional in `served-discovery` or `responses` | disabled   |
-| `auditing-section-1983-privilege-logs`            | `privilege-log`, `served-discovery`, `authorities`                        | optional in `privilege-log`                   | disabled   |
+| `auditing-section-1983-discovery-responses`       | `served-discovery`, `responses`, `production`, `authorities`              | required in `served-discovery` or `responses` | disabled   |
+| `auditing-section-1983-privilege-logs`            | `privilege-log`, `served-discovery`, `authorities`                        | required in `privilege-log`                   | disabled   |
 | `building-defense-counsel-overlays`               | `research-snapshot`, `case-record`                                        | required in `research-snapshot`               | disabled   |
 | `building-litigation-alignment-overlays`          | `docket-snapshot`, `filing`                                               | required in `docket-snapshot`                 | disabled   |
 | `drafting-false-arrest-complaints`                | `record`, `authorities`, `filing`                                         | optional in `filing`                          | disabled   |
@@ -44,13 +38,20 @@ The approved contracts are:
 | `section-1983-drafting`                           | `record`, `authorities`, `strategy`, `filing`                             | optional in `filing`                          | authorized |
 | `studying-rule-59e-decisions`                     | `decisions`, `authorities`                                                | optional in `decisions`                       | authorized |
 
-#### Scenario: Independently installed skill is invoked
+The contract object MUST contain no additional fields. Every role listed by the
+contract MUST appear exactly once and in order in the invocation. A required
+target MUST be present in an allowed target role; an optional target MAY be
+omitted for non-targeted behavior but MUST use an allowed role when present; a
+`none` target policy MUST reject a target. A composed workflow MUST validate
+each skill independently and MUST NOT union role, target, internet, or output
+authority across skills.
 
-- **WHEN** a trusted host loads one public skill without repository-root files
-- **THEN** the package supplies its complete exact role, target, internet, and
-  append-immutable output contract
-- **AND** missing, extra, reordered, or mismatched authority fails before case
-  material is read
+#### Scenario: A quality-control-only skill omits its primary target
+
+- **WHEN** a discovery-response or privilege-log audit invocation omits its
+  required primary target
+- **THEN** installed-skill validation reports `contract-target` before reading
+  case material or publishing a report
 
 ### Requirement: Trusted host owns roots and persistence
 

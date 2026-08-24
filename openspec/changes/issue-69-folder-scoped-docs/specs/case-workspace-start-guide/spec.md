@@ -1,5 +1,14 @@
 # case-workspace-start-guide Delta Specification
 
+## RENAMED Requirements
+
+- FROM: `### Requirement: Discoverable install-local workspace guide`
+- TO: `### Requirement: Discoverable install-local folder operations guide`
+- FROM: `### Requirement: Portable first-hour artifact roles`
+- TO: `### Requirement: Portable first-hour folder invocation`
+- FROM: `### Requirement: Missing material remains explicit`
+- TO: `### Requirement: Missing or inaccessible material remains explicit`
+
 ## MODIFIED Requirements
 
 ### Requirement: Discoverable install-local folder operations guide
@@ -55,6 +64,20 @@ or unavailable state and SHALL NOT be presented as completed or filing-ready.
   undeclared-path denial, or the declared network policy
 - **THEN** execution stops before case material is read
 
+### Requirement: Generic documentation-only scope
+
+The guide SHALL use generic synthetic examples and SHALL NOT add a workspace
+template, companion repository, scaffolding skill, adapter, agent runner, or
+scaffolding script.
+
+#### Scenario: Guide is installed publicly
+
+- **WHEN** a stranger reads the guide
+- **THEN** it contains no private case, judge, attorney, municipality, filing,
+  or machine-specific data
+
+## ADDED Requirements
+
 ### Requirement: Product-independent folder-backed artifacts
 
 The guide SHALL map filing packet inputs to a versioned drafting or audit
@@ -73,15 +96,3 @@ required by the skills contract.
   output folder
 - **THEN** the skill uses only the folder invocation and does not require that
   product's repository, history, identifiers, graph, or adapter at runtime
-
-### Requirement: Generic documentation-only scope
-
-The guide SHALL use generic synthetic examples and SHALL NOT add a workspace
-template, companion repository, scaffolding skill, adapter, agent runner, or
-scaffolding script.
-
-#### Scenario: Guide is installed publicly
-
-- **WHEN** a stranger reads the guide
-- **THEN** it contains no private case, judge, attorney, municipality, filing,
-  or machine-specific data

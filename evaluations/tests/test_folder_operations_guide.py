@@ -35,6 +35,32 @@ OPERATION_OWNERS = {
     "research corpus": "skills/studying-rule-59e-decisions/SKILL.md",
     "isolated role run": "skills/adversarial-filing-review/SKILL.md",
 }
+OPERATION_CONTRACTS = {
+    "folder-backed filing packet": (
+        "filing packet inputs",
+        "versioned drafting or audit output",
+    ),
+    "immutable qc report": (
+        "filing or discovery inputs",
+        "immutable qc report",
+    ),
+    "profile package": (
+        "public sources and approved identity records",
+        "profile package",
+    ),
+    "research corpus": (
+        "verified authorities and decisions",
+        "research corpus",
+    ),
+    "isolated role run": (
+        "selected role package",
+        "isolated review report",
+    ),
+}
+SHARED_CONTRACT_OWNERS = {
+    "FOLDER_SCOPED_EXECUTION.md": ("invocation", "isolation"),
+    "SKILL_OUTPUT_PERSISTENCE.md": ("output", "receipt production"),
+}
 SAFETY_OBLIGATIONS = {
     "source classification": (
         r"without converting an allegation or inference into a fact"
@@ -243,6 +269,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
             FIRST_HOUR_HEADINGS[5]: (
                 re.escape(CALLER_ROOT_TOKENS[2]),
                 r"\bartifact",
+                re.escape("reports/example-inventory.json"),
                 re.escape(".skill-runs/<run-id>/manifest.json"),
                 re.escape(".skill-runs/<run-id>/incomplete.json"),
             ),
@@ -325,6 +352,43 @@ class FolderOperationsGuideTest(unittest.TestCase):
             self.assertLessEqual(validated.runtime["max_seconds"], 3600)
             self.assertLessEqual(validated.runtime["max_input_bytes"], 1_073_741_824)
 
+    def test_fixture_defines_a_determinate_synthetic_host_operation(self):
+        blocks = version_one_json_blocks(self.guide)
+        self.assertEqual(len(blocks), 1)
+        invocation = json.loads(blocks[0])
+
+        with self.subTest(requirement="synthetic fixture skill"):
+            self.assertEqual(invocation.get("skill"), "synthetic-folder-audit")
+        with self.subTest(requirement="no unmigrated public skill fixture"):
+            self.assertNotEqual(invocation.get("skill"), "section-1983-drafting")
+
+        section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[3]).split()
+        ).lower()
+        requirements = {
+            "named operation": r"synthetic host-conformance operation",
+            "declared target read": (
+                r"input-read-only.{0,120}read.{0,120}(?:declared )?target"
+            ),
+            "exact output": re.escape("reports/example-inventory.json"),
+            "canonical output publication": (
+                r"publish.{0,120}canonical output protocol"
+            ),
+            "network denied": r"(?:no network|does not use (?:the )?network)",
+            "not installed": r"not an installed public skill",
+            "no migration claim": (
+                r"does not claim.{0,120}(?:public-skill migration|"
+                r"public skill.{0,60}(?:migrated|folder-native))"
+            ),
+            "execution unavailable": (
+                r"cannot provide.{0,120}exact operation.{0,120}"
+                r"report `?execution unavailable`?.{0,60}stop"
+            ),
+        }
+        for requirement, pattern in requirements.items():
+            with self.subTest(requirement=requirement):
+                self.assertRegex(section, pattern)
+
     def test_logical_roles_are_stable_while_caller_folders_are_configurable(self):
         selection = " ".join(
             markdown_section(self.prose, FIRST_HOUR_HEADINGS[0]).split()
@@ -380,12 +444,54 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 self.assertGreaterEqual(len(matching_units), 1)
                 for unit in matching_units:
                     self.assertIn(f"]({expected_owner})", unit)
+                    normalized_unit = " ".join(unit.split()).lower()
+                    for required_phrase in OPERATION_CONTRACTS[operation]:
+                        self.assertIn(required_phrase, normalized_unit)
 
         for destination in set(skill_destinations):
             with self.subTest(destination=destination):
                 resolved = confined_repository_path(destination)
                 self.assertTrue(resolved.is_file())
                 self.assertEqual(resolved.name, "SKILL.md")
+
+    def test_shared_folder_contract_owners_are_linked_once_and_confined(self):
+        destinations = [destination for _label, destination in markdown_links(self.guide)]
+        units = operation_units(self.prose)
+        for destination, ownership_terms in SHARED_CONTRACT_OWNERS.items():
+            with self.subTest(destination=destination):
+                self.assertEqual(destinations.count(destination), 1)
+                resolved = confined_repository_path(destination)
+                self.assertTrue(resolved.is_file())
+                owner_units = [
+                    unit for unit in units if f"]({destination})" in unit
+                ]
+                self.assertEqual(len(owner_units), 1)
+                normalized_unit = " ".join(owner_units[0].split()).lower()
+                for ownership_term in ownership_terms:
+                    self.assertIn(ownership_term, normalized_unit)
+
+    def test_readme_requires_folder_operation_hashes_and_run_manifests(self):
+        portability = " ".join(
+            markdown_section(self.readme, "## Project inputs and portability").split()
+        ).lower()
+        with self.subTest(requirement="mandatory folder receipts"):
+            self.assertRegex(
+                portability,
+                r"logical input hashes and run manifests (?:are|required|must)"
+                r".{0,80}(?:every|all) folder-scoped operation",
+            )
+        with self.subTest(requirement="extra packet controls remain separate"):
+            self.assertRegex(
+                portability,
+                r"project-specific (?:extra|additional) packet controls"
+                r".{0,100}optional.{0,100}separate",
+            )
+        with self.subTest(requirement="folder receipts are not optional"):
+            self.assertNotRegex(
+                portability,
+                r"(?:logical input hashes|run manifests|manifests, hashes)"
+                r".{0,120}(?:apply only|optional|when the .{0,30}project)",
+            )
 
     def test_reproducibility_is_folder_native_and_does_not_require_git(self):
         for term in (

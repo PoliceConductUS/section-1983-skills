@@ -9,6 +9,13 @@ description:
 
 # SKILL.md — rrd-rule12
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 Generate a **Response Requirements Document (RRD)** that functions as the
 drafting blueprint for an opposition/response to a **Rule 12 motion to dismiss**
 (especially **Rule 12(b)(6)**) in §1983 cases.

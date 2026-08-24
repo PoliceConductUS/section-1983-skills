@@ -7,6 +7,13 @@ description: >-
 
 # Drafting Section 1983 Declarations and Evidence
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 Prepare an unsigned factual declaration from the human declarant's supplied
 personal knowledge and approved sources. Keep record attribution, analysis,
 inference, legal conclusions, and expected discovery visible instead of turning

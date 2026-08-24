@@ -7,6 +7,13 @@ description: >-
 
 # Auditing Section 1983 Privilege Logs
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 Determine source-bounded privilege-log requirements and audit supplied entries
 without inventing metadata, exposing substance, or adjudicating privilege.
 

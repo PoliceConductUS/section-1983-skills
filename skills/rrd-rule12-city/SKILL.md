@@ -9,6 +9,13 @@ description:
 
 # SKILL.md — ~~rrd-rule12-city~~
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 Create a detailed **Response Requirements Document (RRD)** for a
 **City/municipality Rule 12(b)(6) Motion to Dismiss** in a §1983 case (Monell).
 

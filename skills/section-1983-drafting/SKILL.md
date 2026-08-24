@@ -19,6 +19,13 @@ description:
 
 # section-1983-drafting
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 Draft litigation documents in Section 1983 cases that read like a dispassionate
 factual record, not like advocacy theater and not like AI slop. The theory of
 this skill: adjectives and adverbs tell; facts show. A judge reading "Officer

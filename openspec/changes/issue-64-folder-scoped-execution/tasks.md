@@ -1,25 +1,25 @@
 ## 1. Folder invocation RED
 
-- [ ] 1.1 Add public-seam tests for envelope validation, canonical roots,
+- [x] 1.1 Add public-seam tests for envelope validation, canonical roots,
       duplicate roles, root containment, target traversal, and symlink escape.
-- [ ] 1.2 Add tests for deterministic logical manifests across different
+- [x] 1.2 Add tests for deterministic logical manifests across different
       absolute roots and rejection of external symlink content.
-- [ ] 1.3 Run and record focused RED caused only by the missing folder contract.
+- [x] 1.3 Run and record focused RED caused only by the missing folder contract.
 
 ## 2. Minimal folder contract GREEN
 
-- [ ] 2.1 Add the public JSON schema and standard-library conformance validator.
-- [ ] 2.2 Add canonical documentation for the invocation, path, manifest, and
+- [x] 2.1 Add the public JSON schema and standard-library conformance validator.
+- [x] 2.2 Add canonical documentation for the invocation, path, manifest, and
       trusted-host enforcement boundaries.
-- [ ] 2.3 Run focused GREEN and refactor only while tests remain green.
+- [x] 2.3 Run focused GREEN and refactor only while tests remain green.
 
 ## 3. Independently installable governance RED/GREEN
 
-- [ ] 3.1 Add governance tests proving every public skill must carry the compact
+- [x] 3.1 Add governance tests proving every public skill must carry the compact
       folder boundary and inverted permissions fail closed.
-- [ ] 3.2 Extend governance validation and contribution review for the protected
+- [x] 3.2 Extend governance validation and contribution review for the protected
       folder gate.
-- [ ] 3.3 Add the compact boundary to every public `SKILL.md` and run focused
+- [x] 3.3 Add the compact boundary to every public `SKILL.md` and run focused
       GREEN, discovery, formatting, and governance validation.
 
 ## 4. Review and archive

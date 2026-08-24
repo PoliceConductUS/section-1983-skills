@@ -1021,13 +1021,10 @@ description: Use when independently auditing a synthetic artifact.
         )
         for description in descriptions:
             with self.subTest(description=description):
-                skill = f"""---
-name: example-skill
-description: {description}
----
-
-# Example skill
-"""
+                skill = valid_folder_scope_skill().replace(
+                    "description: Use when preparing a synthetic artifact.",
+                    f"description: {description}",
+                )
                 with tempfile.TemporaryDirectory() as directory:
                     root = Path(directory)
                     write_temporary_repository(root, skill_text=skill)

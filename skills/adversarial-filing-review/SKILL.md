@@ -9,6 +9,13 @@ description: >-
 
 # Adversarial Filing Review
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 ## Purpose
 
 Run a read-only clean-room attack on one canonical draft. The reviewer receives

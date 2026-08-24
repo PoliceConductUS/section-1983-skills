@@ -81,6 +81,31 @@ QUALITY_CONTROL_RULES = (
     ),
 )
 
+EXPLICIT_OUTPUT_RULES = (
+    "An independent quality-control stage must select exactly one artifact "
+    "through its declared input roles and target policy.",
+    "It must propose exactly one unique append-immutable output-relative report "
+    "beneath the caller-declared output folder.",
+    "A missing, ambiguous, nonexistent, or out-of-role target must fail closed "
+    "without a fallback write.",
+    "The report path must reject absolute paths, traversal, symlink escapes, and "
+    "existing destinations.",
+    "Only the trusted host may publish the report through the shared output "
+    "boundary.",
+    "Prior quality-control reports must not become implicit input.",
+    "A report may be reviewed only when that exact report is expressly present "
+    "in a declared input role and selected consistently with the reviewing "
+    "skill's target policy.",
+    "The reviewing stage must propose a different new append-immutable report "
+    "for trusted-host publication.",
+)
+OBSOLETE_REPORT_RULES = (
+    "resolve exactly one existing version-specific folder",
+    "designated project boundary",
+    "`<version-folder>/audits/`",
+    "canonical audits directory",
+)
+
 
 def normalized(text):
     return " ".join(text.casefold().split())
@@ -124,6 +149,18 @@ def assert_contract(test, text):
             test.assertNotIn(normalized(inversion), contract)
 
 
+def assert_explicit_output_contract(test, text):
+    contract = normalized(text)
+    missing = [rule for rule in EXPLICIT_OUTPUT_RULES if normalized(rule) not in contract]
+    obsolete = [
+        rule for rule in OBSOLETE_REPORT_RULES if normalized(rule) in contract
+    ]
+    test.assertEqual(
+        {"missing": [], "obsolete": []},
+        {"missing": missing, "obsolete": obsolete},
+    )
+
+
 def launcher_module():
     specification = importlib.util.spec_from_file_location(
         "quality_control_adversarial_launcher",
@@ -148,6 +185,20 @@ class NonMutatingQualityControlTest(unittest.TestCase):
             with self.subTest(skill=name):
                 skill = (REPOSITORY / "skills" / name / "SKILL.md").read_text()
                 assert_contract(self, skill)
+
+    def test_governance_uses_explicit_output_instead_of_project_shaped_reports(self):
+        governance = (REPOSITORY / "GOVERNANCE.md").read_text()
+
+        assert_contract(self, governance)
+        assert_explicit_output_contract(self, governance)
+
+    def test_each_quality_control_skill_carries_the_explicit_output_contract(self):
+        self.assertSetEqual(discovered_quality_control_skills(), QUALITY_CONTROL_SKILLS)
+        for name in sorted(QUALITY_CONTROL_SKILLS):
+            with self.subTest(skill=name):
+                skill = (REPOSITORY / "skills" / name / "SKILL.md").read_text()
+                assert_contract(self, skill)
+                assert_explicit_output_contract(self, skill)
 
     def test_clean_room_review_rejects_unproved_command_before_any_write(self):
         launcher = launcher_module()

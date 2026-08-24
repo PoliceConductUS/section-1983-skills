@@ -1,24 +1,21 @@
 import copy
 import hashlib
 import importlib.util
-import json
-import os
-import subprocess
-import sys
+import inspect
+import shutil
 import tempfile
 import unittest
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from scripts.skill_output_writer import OutputError, OutputRun
+from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
+
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = (
-    ROOT
-    / "skills"
-    / "section-1983-drafting"
-    / "scripts"
-    / "judge_overlay_receipt.py"
-)
+PACKAGE = ROOT / "skills" / "section-1983-drafting"
+SCRIPT = PACKAGE / "scripts" / "judge_overlay_receipt.py"
 ANTI_GAMING_CHECKS = (
     "assignment-manipulation",
     "preference-exploitation",
@@ -90,88 +87,168 @@ def packet(artifact_bytes=b"Frozen filing bytes."):
     }
 
 
+def load_module(path=SCRIPT, name=None):
+    specification = importlib.util.spec_from_file_location(
+        name or f"judge_overlay_receipt_{uuid.uuid4().hex}",
+        path,
+    )
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module
+
+
+def tree_bytes(root):
+    return {
+        path.relative_to(root).as_posix(): path.read_bytes()
+        for path in root.rglob("*")
+        if path.is_file()
+    }
+
+
 class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.module = None
-        if SCRIPT.is_file():
-            spec = importlib.util.spec_from_file_location("judge_overlay_receipt", SCRIPT)
-            cls.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(cls.module)
+        cls.module = load_module() if SCRIPT.is_file() else None
 
     def api(self, name):
         self.assertIsNotNone(self.module, f"missing public receipt module: {SCRIPT}")
         self.assertTrue(hasattr(self.module, name), f"missing public API: {name}")
         return getattr(self.module, name)
 
-    def make_version(self, directory, artifact_bytes=b"Frozen filing bytes."):
-        project = Path(directory, "project")
-        version = project / "versions" / "v21"
-        version.mkdir(parents=True)
-        artifact = version / "filing.md"
-        artifact.write_bytes(artifact_bytes)
-        companion = version / "source-map.json"
-        companion.write_text('{"frozen":true}')
-        return project, version, artifact
+    def make_roles(self, directory, artifact_bytes=b"Frozen filing bytes."):
+        root = Path(directory) / "invocation"
+        filing = root / "filing"
+        judge_corpus = root / "judge-corpus"
+        court_conduct = root / "court-conduct"
+        output = root / "output"
+        for path in (filing, judge_corpus, court_conduct, output):
+            path.mkdir(parents=True, exist_ok=True)
+        (filing / "filing.md").write_bytes(artifact_bytes)
+        (judge_corpus / "corpus.json").write_text('{"validated":true}\n')
+        (court_conduct / "conduct.json").write_text('{"approved":true}\n')
+        return filing, judge_corpus, court_conduct, output
 
-    def execute(self, project, version, value):
-        return self.api("execute_receipt")(
-            value,
-            project_boundary=project,
-            version_folder=version,
-            now=FIXED_TIME,
-            run_id=FIXED_RUN,
+    def execute(self, value, filing, judge_corpus, court_conduct, **overrides):
+        arguments = {
+            "filing_root": filing,
+            "judge_corpus_root": judge_corpus,
+            "court_conduct_root": court_conduct,
+            "filing_target": "filing.md",
+            "now": FIXED_TIME,
+            "run_id": FIXED_RUN,
+        }
+        arguments.update(overrides)
+        return self.api("execute_receipt")(value, **arguments)
+
+    def invocation(self, filing, judge_corpus, court_conduct, output):
+        return validate_invocation(
+            {
+                "version": 1,
+                "skill": "drafting-for-judge-scholer",
+                "inputs": [
+                    {"role": "filing", "root": str(filing)},
+                    {"role": "judge-corpus", "root": str(judge_corpus)},
+                    {"role": "court-conduct", "root": str(court_conduct)},
+                ],
+                "output": {"root": str(output)},
+                "target": {"role": "filing", "path": "filing.md"},
+                "runtime": {"max_seconds": 60, "max_input_bytes": 1_048_576},
+                "internet": "disabled",
+                "isolation": {
+                    "inputs": "read-only",
+                    "output": "read-write",
+                    "undeclared": "none",
+                },
+            }
         )
 
     def test_complete_packet_validates_without_mutation(self):
         value = packet()
         before = copy.deepcopy(value)
-
         validated = self.api("validate_packet")(value)
-
         self.assertEqual(validated, before)
         self.assertEqual(value, before)
 
-    def test_completed_no_change_writes_one_immutable_version_local_receipt(self):
+    def test_folder_api_replaces_project_version_and_output_authority(self):
+        parameters = set(inspect.signature(self.api("execute_receipt")).parameters)
+        required = {
+            "filing_root",
+            "judge_corpus_root",
+            "court_conduct_root",
+            "filing_target",
+        }
+        forbidden = {
+            "project_boundary",
+            "version_folder",
+            "output_root",
+            "output_path",
+            "audits",
+        }
+        self.assertEqual(
+            {"missing": set(), "forbidden": set()},
+            {"missing": required - parameters, "forbidden": forbidden & parameters},
+        )
+
+    def test_completed_no_change_returns_deterministic_host_publishable_receipt(self):
         with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
+            filing, corpus, conduct, output = self.make_roles(directory)
             before = {
-                path: path.read_bytes()
-                for path in version.rglob("*")
-                if path.is_file()
+                "filing": tree_bytes(filing),
+                "judge-corpus": tree_bytes(corpus),
+                "court-conduct": tree_bytes(conduct),
             }
-
-            result = self.execute(project, version, packet())
-
-            expected = (
-                version
-                / "audits"
-                / "judge-overlay-execution-20260822T083000Z-11111111-1111-4111-8111-111111111111.md"
+            first = self.execute(packet(), filing, corpus, conduct)
+            second = self.execute(packet(), filing, corpus, conduct)
+            self.assertEqual(first, second)
+            self.assertEqual(first["outcome"], "no-judge-specific-drafting-change")
+            self.assertIsNone(first["failure_class"])
+            self.assertEqual(
+                first["artifact_path"],
+                "reports/judge-overlay-execution-20260822T083000Z-11111111-1111-4111-8111-111111111111.md",
             )
-            self.assertEqual(result["outcome"], "no-judge-specific-drafting-change")
-            self.assertIsNone(result["failure_class"])
-            self.assertEqual(Path(result["report_path"]).resolve(), expected.resolve())
-            report = expected.read_text()
+            self.assertIsInstance(first["report_bytes"], bytes)
+            report = first["report_bytes"].decode("utf-8")
             self.assertIn("no judge-specific drafting change", report)
             self.assertIn("No qualifying support permits a judge-specific proposition.", report)
-            self.assertIn("drafting-for-judge-example", report)
-            self.assertIn("CORPUS-EXAMPLE-1", report)
-            self.assertIn("COURT-SOURCE-1", report)
-            self.assertIn("CARD-EXAMPLE-1", report)
-            self.assertIn(sha256_bytes(artifact.read_bytes()), report)
-            self.assertNotRegex(report, r"(?im)^result:\s*pass(?:ed)?\s*$")
-            for path, content in before.items():
-                self.assertEqual(path.read_bytes(), content)
+            self.assertIn("filing.md", report)
+            self.assertNotIn(str(filing), report)
+            self.assertEqual(list(output.iterdir()), [])
             self.assertEqual(
-                sorted(
-                    path.relative_to(version).as_posix()
-                    for path in version.rglob("*")
-                    if path.is_file() and path not in before
-                ),
-                [expected.relative_to(version).as_posix()],
+                {
+                    "filing": tree_bytes(filing),
+                    "judge-corpus": tree_bytes(corpus),
+                    "court-conduct": tree_bytes(conduct),
+                },
+                before,
             )
 
-    def test_supported_change_requires_and_records_used_neutral_card(self):
+            invocation = self.invocation(filing, corpus, conduct, output)
+            manifest = build_input_manifest(invocation)
+            run = OutputRun.start(
+                invocation,
+                run_id="judge-overlay-run",
+                skill_version="1",
+                mode="append-immutable",
+                input_manifest=manifest,
+            )
+            run.write(first["artifact_path"], first["report_bytes"])
+            receipt = run.complete()
+            self.assertEqual(receipt["status"], "success")
+            self.assertEqual(receipt["internet"], {"policy": "disabled", "used": False})
+            self.assertEqual((output / first["artifact_path"]).read_bytes(), first["report_bytes"])
+
+            collision = OutputRun.start(
+                invocation,
+                run_id="judge-overlay-collision-run",
+                skill_version="1",
+                mode="append-immutable",
+                input_manifest=manifest,
+            )
+            with self.assertRaises(OutputError) as captured:
+                collision.write(first["artifact_path"], first["report_bytes"])
+            self.assertEqual(captured.exception.code, "output-collision")
+
+    def test_supported_change_records_only_used_neutral_cards(self):
         value = packet()
         value["transfer_cards"][0]["used"] = True
         value["requested_result"] = {
@@ -187,17 +264,15 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
             "failure_class": None,
         }
         with tempfile.TemporaryDirectory() as directory:
-            project, version, _ = self.make_version(directory)
+            filing, corpus, conduct, _ = self.make_roles(directory)
+            result = self.execute(value, filing, corpus, conduct)
+        self.assertEqual(result["outcome"], "judge-specific-drafting-change")
+        report = result["report_bytes"].decode("utf-8")
+        self.assertIn("CHANGE-1", report)
+        self.assertIn("CARD-EXAMPLE-1", report)
+        self.assertNotIn("no judge-specific drafting change", report)
 
-            result = self.execute(project, version, value)
-
-            self.assertEqual(result["outcome"], "judge-specific-drafting-change")
-            report = Path(result["report_path"]).read_text()
-            self.assertIn("CHANGE-1", report)
-            self.assertIn("CARD-EXAMPLE-1", report)
-            self.assertNotIn("no judge-specific drafting change", report)
-
-    def test_nonpassing_required_inputs_write_stable_failed_closed_receipts(self):
+    def test_nonpassing_inputs_return_stable_failed_closed_receipts(self):
         mutations = (
             ("overlay-missing", ("overlay", "validation_status"), "missing"),
             ("overlay-stale", ("overlay", "validation_status"), "stale"),
@@ -223,18 +298,15 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
                     target = target[key]
                 target[path[-1]] = status
                 with tempfile.TemporaryDirectory() as directory:
-                    project, version, _ = self.make_version(directory)
-                    result = self.execute(project, version, value)
+                    filing, corpus, conduct, _ = self.make_roles(directory)
+                    result = self.execute(value, filing, corpus, conduct)
+                self.assertEqual(result["outcome"], "failed-closed")
+                self.assertEqual(result["failure_class"], expected_class)
+                report = result["report_bytes"].decode("utf-8")
+                self.assertIn(expected_class, report)
+                self.assertNotIn("## Drafting Changes\n\n- ", report)
 
-                    self.assertEqual(result["outcome"], "failed-closed")
-                    self.assertEqual(result["failure_class"], expected_class)
-                    report = Path(result["report_path"]).read_text()
-                    self.assertIn("failed-closed", report)
-                    self.assertIn(expected_class, report)
-                    self.assertNotRegex(report, r"(?im)^result:\s*pass(?:ed)?\s*$")
-                    self.assertNotIn("## Drafting Changes\n\n- ", report)
-
-    def test_every_anti_gaming_check_is_exactly_once_and_true(self):
+    def test_anti_gaming_checks_are_exactly_once_and_true(self):
         cases = {}
         missing = packet()
         missing["prohibited_inference_checks"].pop()
@@ -250,21 +322,16 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
         unknown = packet()
         unknown["prohibited_inference_checks"][0]["check_id"] = "personality-optimization"
         cases["unknown"] = unknown
-
         for label, value in cases.items():
-            with self.subTest(case=label):
-                with tempfile.TemporaryDirectory() as directory:
-                    project, version, _ = self.make_version(directory)
-                    result = self.execute(project, version, value)
+            with self.subTest(case=label), tempfile.TemporaryDirectory() as directory:
+                filing, corpus, conduct, _ = self.make_roles(directory)
+                result = self.execute(value, filing, corpus, conduct)
+                self.assertEqual(result["outcome"], "failed-closed")
+                self.assertEqual(result["failure_class"], "prohibited-inference-check-failed")
 
-                    self.assertEqual(result["outcome"], "failed-closed")
-                    self.assertEqual(
-                        result["failure_class"], "prohibited-inference-check-failed"
-                    )
-
-    def test_unsupported_change_fails_closed(self):
-        value = packet()
-        value["requested_result"] = {
+    def test_unsupported_change_and_fingerprint_mismatch_fail_closed(self):
+        unsupported = packet()
+        unsupported["requested_result"] = {
             "status": "completed",
             "drafting_changes": [
                 {
@@ -276,140 +343,108 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
             "no_change_reason": None,
             "failure_class": None,
         }
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, _ = self.make_version(directory)
+        mismatched = packet()
+        mismatched["artifacts"][0]["sha256"] = "f" * 64
+        for value, expected in (
+            (unsupported, "drafting-change-unsupported"),
+            (mismatched, "artifact-fingerprint-mismatch"),
+        ):
+            with self.subTest(failure_class=expected), tempfile.TemporaryDirectory() as directory:
+                filing, corpus, conduct, _ = self.make_roles(directory)
+                before = tree_bytes(filing)
+                result = self.execute(value, filing, corpus, conduct)
+                self.assertEqual(result["outcome"], "failed-closed")
+                self.assertEqual(result["failure_class"], expected)
+                self.assertEqual(tree_bytes(filing), before)
 
-            result = self.execute(project, version, value)
-
-            self.assertEqual(result["outcome"], "failed-closed")
-            self.assertEqual(result["failure_class"], "drafting-change-unsupported")
-
-    def test_artifact_fingerprint_mismatch_fails_closed_without_editing_artifact(self):
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            value = packet()
-            value["artifacts"][0]["sha256"] = "f" * 64
-            original = artifact.read_bytes()
-
-            result = self.execute(project, version, value)
-
-            self.assertEqual(result["outcome"], "failed-closed")
-            self.assertEqual(result["failure_class"], "artifact-fingerprint-mismatch")
-            self.assertEqual(artifact.read_bytes(), original)
-            report = Path(result["report_path"]).read_text()
-            self.assertIn("Expected SHA-256", report)
-            self.assertIn("Actual SHA-256", report)
-
-    def test_invalid_version_or_artifact_path_writes_no_report(self):
+    def test_roots_targets_and_packet_artifacts_are_canonical_and_confined(self):
         receipt_error = self.api("ReceiptError")
         with tempfile.TemporaryDirectory() as directory:
-            project, version, _ = self.make_version(directory)
-            outside = Path(directory, "outside", "v1")
-            outside.mkdir(parents=True)
-            outside.joinpath("filing.md").write_bytes(b"Frozen filing bytes.")
-            path_cases = (
-                ("outside-version", outside, packet()),
-                (
-                    "absolute-artifact",
-                    version,
-                    {
-                        **packet(),
-                        "artifacts": [
-                            {
-                                "relative_path": str(version / "filing.md"),
-                                "sha256": sha256_bytes(b"Frozen filing bytes."),
-                            }
-                        ],
-                    },
-                ),
-                (
-                    "traversal-artifact",
-                    version,
-                    {
-                        **packet(),
-                        "artifacts": [
-                            {
-                                "relative_path": "../filing.md",
-                                "sha256": sha256_bytes(b"Frozen filing bytes."),
-                            }
-                        ],
-                    },
-                ),
-                (
-                    "audits-artifact",
-                    version,
-                    {
-                        **packet(),
-                        "artifacts": [
-                            {
-                                "relative_path": "audits/prior.md",
-                                "sha256": sha256_bytes(b"prior"),
-                            }
-                        ],
-                    },
-                ),
-            )
-            for label, selected_version, value in path_cases:
-                with self.subTest(case=label):
-                    with self.assertRaises(receipt_error):
-                        self.execute(project, selected_version, value)
-            self.assertFalse((version / "audits").exists())
-            self.assertFalse((outside / "audits").exists())
+            root = Path(directory)
+            filing, corpus, conduct, output = self.make_roles(directory)
+            outside = root / "outside.md"
+            outside.write_bytes(b"Frozen filing bytes.")
+            (filing / "linked.md").symlink_to(outside)
+            file_root = root / "not-a-root.txt"
+            file_root.write_text("not a directory")
+            for overrides in (
+                {"judge_corpus_root": root / "missing"},
+                {"court_conduct_root": file_root},
+            ):
+                with self.subTest(overrides=overrides), self.assertRaises(receipt_error):
+                    self.execute(packet(), filing, corpus, conduct, **overrides)
+            for target in (
+                None,
+                "",
+                "/filing.md",
+                "../filing.md",
+                "./filing.md",
+                "folder//filing.md",
+                "filing.md/",
+                "linked.md",
+                "missing.md",
+            ):
+                with self.subTest(target=target), self.assertRaises(receipt_error):
+                    self.execute(packet(), filing, corpus, conduct, filing_target=target)
+            for relative_path in (
+                str((filing / "filing.md").resolve()),
+                "../filing.md",
+                "./filing.md",
+                "folder//filing.md",
+                "filing.md/",
+                "audits/prior.md",
+                "linked.md",
+            ):
+                value = packet()
+                value["artifacts"][0]["relative_path"] = relative_path
+                with self.subTest(relative_path=relative_path), self.assertRaises(receipt_error):
+                    self.execute(value, filing, corpus, conduct)
+            self.assertEqual(list(output.iterdir()), [])
 
-    @unittest.skipIf(os.name == "nt", "symlink confinement is POSIX-specific")
-    def test_audits_symlink_escape_and_collision_preserve_existing_bytes(self):
-        receipt_error = self.api("ReceiptError")
+    def test_processor_runs_from_isolated_package_without_root_imports(self):
         with tempfile.TemporaryDirectory() as directory:
-            project, version, _ = self.make_version(directory)
-            outside = Path(directory, "outside-audits")
-            outside.mkdir()
-            (version / "audits").symlink_to(outside, target_is_directory=True)
-
-            with self.assertRaises(receipt_error):
-                self.execute(project, version, packet())
-
-            self.assertEqual(list(outside.iterdir()), [])
-
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, _ = self.make_version(directory)
-            audits = version / "audits"
-            audits.mkdir()
-            collision = (
-                audits
-                / "judge-overlay-execution-20260822T083000Z-11111111-1111-4111-8111-111111111111.md"
+            isolated = Path(directory) / "section-1983-drafting"
+            shutil.copytree(PACKAGE, isolated)
+            isolated_script = isolated / "scripts" / "judge_overlay_receipt.py"
+            source = isolated_script.read_text()
+            self.assertNotRegex(source, r"(?m)^\s*(?:from|import)\s+scripts(?:\.|\s)")
+            module = load_module(isolated_script, "isolated_judge_overlay_receipt")
+            filing, corpus, conduct, _ = self.make_roles(directory)
+            result = module.execute_receipt(
+                packet(),
+                filing_root=filing,
+                judge_corpus_root=corpus,
+                court_conduct_root=conduct,
+                filing_target="filing.md",
+                now=FIXED_TIME,
+                run_id=FIXED_RUN,
             )
-            collision.write_text("immutable prior receipt")
+        self.assertIsInstance(result["report_bytes"], bytes)
 
-            with self.assertRaises(receipt_error):
-                self.execute(project, version, packet())
-
-            self.assertEqual(collision.read_text(), "immutable prior receipt")
-
-    def test_no_invocation_writes_no_receipt_but_cli_invocation_does(self):
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, _ = self.make_version(directory)
-            self.assertFalse((version / "audits").exists())
-
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--project-boundary",
-                    str(project),
-                    "--version-folder",
-                    str(version),
-                ],
-                input=json.dumps(packet()),
-                text=True,
-                capture_output=True,
-            )
-
-            self.assertEqual(result.returncode, 0, result.stderr)
-            response = json.loads(result.stdout)
-            self.assertEqual(
-                response["outcome"], "no-judge-specific-drafting-change"
-            )
-            self.assertTrue(Path(response["report_path"]).is_file())
+    def test_cli_exposes_only_declared_folder_authority(self):
+        parser = self.api("_parser")()
+        options = {
+            option
+            for action in parser._actions
+            for option in action.option_strings
+        }
+        required = {
+            "--filing-root",
+            "--judge-corpus-root",
+            "--court-conduct-root",
+            "--filing-target",
+        }
+        forbidden = {
+            "--project-boundary",
+            "--version-folder",
+            "--output-root",
+            "--output-path",
+            "--audits",
+        }
+        self.assertEqual(
+            {"missing": set(), "forbidden": set()},
+            {"missing": required - options, "forbidden": forbidden & options},
+        )
 
 
 if __name__ == "__main__":

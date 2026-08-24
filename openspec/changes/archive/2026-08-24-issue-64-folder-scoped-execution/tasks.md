@@ -24,10 +24,10 @@
 
 ## 4. Review and archive
 
-- [ ] 4.1 Review schema, resolver, manifest, symlink, read-only declaration,
+- [x] 4.1 Review schema, resolver, manifest, symlink, read-only declaration,
       network policy, and independently installable skill coverage; correct
       accepted Critical or Important findings test-first.
-- [ ] 4.2 Complete verification and retrospective artifacts, archive the
+- [x] 4.2 Complete verification and retrospective artifacts, archive the
       OpenSpec change on this branch, and validate the durable specs.
-- [ ] 4.3 Run `npm run validate`, verify a clean worktree and origin parity,
+- [x] 4.3 Run `npm run validate`, verify a clean worktree and origin parity,
       leave Issue #64 and its PR open, and mark the PR ready for review.

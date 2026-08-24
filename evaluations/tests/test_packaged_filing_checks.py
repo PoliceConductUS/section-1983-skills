@@ -79,6 +79,9 @@ class PackagedFilingChecksTest(unittest.TestCase):
             self.assertNotIn("scripts.validate_folder_invocation", source)
             self.assertNotIn("scripts.skill_output_writer", source)
             self.assertNotIn("output_root", source)
+            self.assertNotIn("subprocess", source)
+            self.assertNotIn("urllib", source)
+            self.assertNotIn("socket", source)
         canonical = json.loads(
             (
                 COMPLAINT_SKILL
@@ -166,6 +169,35 @@ class PackagedFilingChecksTest(unittest.TestCase):
                         with self.assertRaises(checker.ComplaintCheckError) as captured:
                             checker.check_complaint(root, target)
                         self.assertEqual(captured.exception.finding_id, "invalid-target")
+            finally:
+                outside.unlink()
+
+    def test_complaint_checker_bounds_malformed_bytes_and_structures(self):
+        checker = load_module("packaged_complaint_checker_malformed", COMPLAINT_SCRIPT)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "malformed.json").write_text("not json\n")
+            with self.assertRaises(checker.ComplaintCheckError) as captured:
+                checker.check_complaint(root, "malformed.json")
+            self.assertEqual(captured.exception.finding_id, "malformed-input")
+
+            document = complaint_document()
+            document["counts"][0]["claim"] = ["not", "scalar"]
+            (root / "invalid-structure.json").write_text(json.dumps(document))
+            result = checker.check_complaint(root, "invalid-structure.json")
+            self.assertEqual(result["status"], "failed")
+            self.assertIn(
+                "claim-defendant-challenged-act-cardinality",
+                {finding["check_id"] for finding in result["findings"]},
+            )
+
+            outside = root.parent / f"{root.name}-symlink-target.json"
+            outside.write_text(json.dumps(complaint_document()))
+            try:
+                (root / "linked.json").symlink_to(outside)
+                with self.assertRaises(checker.ComplaintCheckError) as captured:
+                    checker.check_complaint(root, "linked.json")
+                self.assertEqual(captured.exception.finding_id, "invalid-target")
             finally:
                 outside.unlink()
 

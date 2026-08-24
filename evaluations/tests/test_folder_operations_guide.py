@@ -20,6 +20,7 @@ CALLER_ROOT_TOKENS = (
     "__AUTHORITIES_ROOT__",
     "__OUTPUT_ROOT__",
 )
+TARGET_PATH_TOKEN = "__TARGET_PATH__"
 FIRST_HOUR_HEADINGS = (
     "## 1. Select input and output folders",
     "## 2. Create the invocation",
@@ -250,6 +251,8 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 r"\bcanonical\b",
                 r"\bversion 1\b",
                 r"\binvocation\b",
+                re.escape(TARGET_PATH_TOKEN),
+                r"existing regular file",
             ),
             FIRST_HOUR_HEADINGS[2]: (
                 re.escape("scripts/validate_folder_invocation.py"),
@@ -308,10 +311,14 @@ class FolderOperationsGuideTest(unittest.TestCase):
             output_root = temporary_root / "generated-review"
             for root in (record_root, authorities_root, output_root):
                 root.mkdir()
+            selected_target_path = "selected-material.md"
+            declared_target = record_root / selected_target_path
+            declared_target.write_text("synthetic record\n", encoding="utf-8")
             replacements = {
                 "__RECORD_ROOT__": str(record_root),
                 "__AUTHORITIES_ROOT__": str(authorities_root),
                 "__OUTPUT_ROOT__": str(output_root),
+                TARGET_PATH_TOKEN: selected_target_path,
             }
             fixture = blocks[0]
             for token, root in replacements.items():
@@ -321,13 +328,11 @@ class FolderOperationsGuideTest(unittest.TestCase):
             target = invocation.get("target")
             self.assertIsInstance(target, dict)
             self.assertIsInstance(target.get("path"), str)
+            self.assertEqual(target["path"], selected_target_path)
             target_path = PurePosixPath(target["path"])
             self.assertFalse(target_path.is_absolute())
             self.assertTrue(target_path.parts)
             self.assertNotIn("..", target_path.parts)
-            declared_target = record_root.joinpath(*target_path.parts)
-            declared_target.parent.mkdir(parents=True, exist_ok=True)
-            declared_target.write_text("synthetic record\n", encoding="utf-8")
 
             validated = validate_invocation(invocation)
 
@@ -351,6 +356,28 @@ class FolderOperationsGuideTest(unittest.TestCase):
             )
             self.assertLessEqual(validated.runtime["max_seconds"], 3600)
             self.assertLessEqual(validated.runtime["max_input_bytes"], 1_073_741_824)
+
+    def test_validation_manifest_never_uses_an_ambient_filesystem_write(self):
+        section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[2]).split()
+        ).lower()
+
+        self.assertNotRegex(section, r">\s*input-manifest\.json")
+        self.assertRegex(
+            section,
+            r"trusted host.{0,160}(?:captures|keeps).{0,120}"
+            r"logical input manifest.{0,80}in memory",
+        )
+        self.assertRegex(
+            section,
+            r"(?:passes|provides).{0,120}logical input manifest.{0,120}"
+            r"outputrun\.start",
+        )
+        self.assertRegex(
+            section,
+            r"publish.{0,160}logical input manifest.{0,160}"
+            r"canonical output protocol.{0,120}explicit output",
+        )
 
     def test_fixture_defines_a_determinate_synthetic_host_operation(self):
         blocks = version_one_json_blocks(self.guide)
@@ -388,6 +415,48 @@ class FolderOperationsGuideTest(unittest.TestCase):
         for requirement, pattern in requirements.items():
             with self.subTest(requirement=requirement):
                 self.assertRegex(section, pattern)
+
+    def test_inventory_contract_is_target_derived_and_verified(self):
+        run_section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[3]).split()
+        ).lower()
+        verify_section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[5]).split()
+        ).lower()
+
+        required_inventory_fields = (
+            "schema_version",
+            "input_manifest_sha256",
+            "target.role",
+            "target.path",
+            "target.sha256",
+            "target.size",
+        )
+        for field in required_inventory_fields:
+            with self.subTest(field=field):
+                self.assertIn(field, run_section)
+
+        self.assertRegex(
+            run_section,
+            r"target\.(?:sha256|size).{0,160}(?:exact|actual).{0,100}target bytes",
+        )
+        self.assertRegex(
+            run_section,
+            r"input_manifest_sha256.{0,160}(?:fingerprint|sha-256).{0,120}"
+            r"logical input manifest",
+        )
+        self.assertRegex(
+            verify_section,
+            r"parse.{0,160}reports/example-inventory\.json",
+        )
+        for field in ("role", "path", "sha-256", "byte size", "input manifest"):
+            with self.subTest(verified_value=field):
+                self.assertIn(field, verify_section)
+        self.assertRegex(
+            verify_section,
+            r"artifact.{0,160}(?:sha-256|hash).{0,120}(?:byte )?size.{0,160}"
+            r"terminal manifest",
+        )
 
     def test_logical_roles_are_stable_while_caller_folders_are_configurable(self):
         selection = " ".join(

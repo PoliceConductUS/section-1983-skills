@@ -382,6 +382,72 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             )
 
             self.assertEqual(list(output.iterdir()), [])
+            response_failure = self.execute_folder_review(
+                packet(),
+                model="gpt-synthetic",
+                api_key="secret-test-key",
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=TransportSpy(status=401, body=b'{"error":"denied"}'),
+            )
+            self.assertEqual(response_failure["outcome"], "unavailable")
+            self.assertTrue(response_failure["internet_sources"])
+
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "adversarial-filing-review",
+                    "inputs": [
+                        {"role": "filing", "root": str(filing)},
+                        {
+                            "role": "approved-sources",
+                            "root": str(approved_sources),
+                        },
+                    ],
+                    "output": {"root": str(output)},
+                    "target": {"role": "filing", "path": "filing.md"},
+                    "runtime": {
+                        "max_seconds": 60,
+                        "max_input_bytes": 1_048_576,
+                    },
+                    "internet": "authorized",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            run = OutputRun.start(
+                invocation,
+                run_id="adversarial-unavailable-run",
+                skill_version="1",
+                mode="append-immutable",
+                input_manifest=build_input_manifest(invocation),
+            )
+            run.write(
+                response_failure["artifact_path"],
+                response_failure["report_bytes"],
+                internet_sources=response_failure["internet_sources"],
+            )
+            receipt = run.complete()
+            self.assertEqual(
+                receipt["internet"],
+                {"policy": "authorized", "used": True},
+            )
+
+            multibyte = self.execute_folder_review(
+                packet(),
+                model="é" * 5000,
+                api_key="secret-test-key",
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=TransportSpy(error=OSError("offline")),
+            )
         self.assertEqual(result["outcome"], "unavailable")
         self.assertLessEqual(len(result["report_bytes"]), 8192)
         self.assertNotIn(b"secret-test-key", result["report_bytes"])
@@ -390,11 +456,17 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             result["report_bytes"].count(b"## Independent review unavailable"),
             1,
         )
+        self.assertLessEqual(len(multibyte["report_bytes"]), 8192)
+        multibyte["report_bytes"].decode("utf-8")
+        self.launcher._json_result(multibyte)
 
     def test_required_filing_target_is_canonical_and_confined(self):
         execute = self.trusted_api("execute_trusted_review")
         with tempfile.TemporaryDirectory() as directory:
             filing, approved_sources, _ = self.make_declared_roles(directory)
+            outside = Path(directory) / "outside-filing.md"
+            outside.write_text(packet()["draft"]["content"])
+            (filing / "linked-filing.md").symlink_to(outside)
             for target in (
                 None,
                 "",
@@ -403,6 +475,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 "./filing.md",
                 "folder//filing.md",
                 "filing.md/",
+                "linked-filing.md",
                 "missing.md",
             ):
                 with self.subTest(target=target):

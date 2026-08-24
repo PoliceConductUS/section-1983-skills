@@ -178,9 +178,11 @@ folder, and verify a synthetic operation before using the drafting skills.
   document can still be prepared from verified sources.
 
 Localization results belong in a project-defined cache or returned internal
-audit, not inside an installed skill package. Numbered packet folders,
-manifests, hashes, and source records apply only when the user's project already
-uses them.
+audit, not inside an installed skill package. Logical input hashes and run
+manifests are required for every folder-scoped operation. These shared receipts
+bind the declared logical inputs to the terminal output run even when a caller
+maintains no packet-specific metadata. Project-specific extra packet controls
+remain optional and separate from the shared folder contract.
 
 Judge-specific observations are optional. If the reviewed corpus does not
 support an issue-specific conclusion, the judge overlay contributes no

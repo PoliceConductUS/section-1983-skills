@@ -7,8 +7,11 @@
 The repository SHALL provide one root-level folder-scoped operations guide
 linked from README through an install-local relative path. The guide SHALL link
 each documented operation to its owning install-local skill contract without
-copying that contract's implementation instructions. Every documented remote
-installation SHALL use one exact immutable semantic-version tag.
+copying that contract's implementation instructions. It SHALL link exactly once
+to `FOLDER_SCOPED_EXECUTION.md` as owner of invocation and isolation and to
+`SKILL_OUTPUT_PERSISTENCE.md` as owner of output and receipt production. Every
+documented remote installation SHALL use one exact immutable semantic-version
+tag.
 
 #### Scenario: New user follows README
 
@@ -21,10 +24,15 @@ installation SHALL use one exact immutable semantic-version tag.
 
 The guide SHALL provide one ordered synthetic flow that selects fixed named
 recursive read-only input roles and exactly one explicit output folder, declares
-target and internet policy, validates the invocation, runs one input-read-only
-skill through a trusted host, and verifies unchanged inputs, output artifacts,
-and the terminal run manifest. Logical role names SHALL remain stable within an
-operation while caller folder names and absolute locations remain configurable.
+target and internet policy, validates the invocation, runs the determinate
+`synthetic-folder-audit` host-conformance operation through a trusted host, and
+verifies unchanged inputs, its exact output artifact, and the terminal run
+manifest. The conformance operation SHALL read only the declared target, publish
+`reports/example-inventory.json` through the canonical output protocol, use no
+network, and stop as execution unavailable when the host cannot provide it. It
+SHALL NOT be presented as an installed public skill or as evidence of public-
+skill migration. Logical role names SHALL remain stable within an operation
+while caller folder names and absolute locations remain configurable.
 
 #### Scenario: Caller folders use different names
 
@@ -49,12 +57,15 @@ or unavailable state and SHALL NOT be presented as completed or filing-ready.
 
 ### Requirement: Product-independent folder-backed artifacts
 
-The guide SHALL explain folder-backed filing packets, immutable QC reports,
-profile packages, research corpora, and isolated role runs using hashes,
-manifests, checked-through dates, and retrieval provenance without requiring Git
-or a case-management product. It SHALL state that a separate product may adapt
-its own data into declared folders and import outputs, but no adapter is part of
-or required by the skills contract.
+The guide SHALL map filing packet inputs to a versioned drafting or audit
+output, filing or discovery inputs to an immutable QC report, public sources and
+approved identity records to a profile package, verified authorities and
+decisions to a research corpus, and a selected role package to an isolated
+review report. It SHALL explain these patterns using hashes, manifests,
+checked-through dates, and retrieval provenance without requiring Git or a
+case-management product. It SHALL state that a separate product may adapt its
+own data into declared folders and import outputs, but no adapter is part of or
+required by the skills contract.
 
 #### Scenario: Separate product supplies folders
 

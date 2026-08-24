@@ -9,6 +9,12 @@ This shared guide does not mean every installed skill is already folder-native.
 Follow the owning skill contract, and stop if any role that contract requires is
 unavailable.
 
+The [folder-scoped execution contract](FOLDER_SCOPED_EXECUTION.md) owns
+invocation and isolation. The
+[skill output persistence contract](SKILL_OUTPUT_PERSISTENCE.md) owns output and
+receipt production. This guide links to those contracts without copying their
+implementation details.
+
 Keep source classification, protected decisions, and gaps explicit. Record a
 source-bounded event without converting an allegation or inference into a fact.
 Only an actual user approval changes a protected decision to `status: approved`.
@@ -57,7 +63,7 @@ trusted host enforces the approved host policy.
 ```json
 {
   "version": 1,
-  "skill": "section-1983-drafting",
+  "skill": "synthetic-folder-audit",
   "inputs": [
     {
       "role": "record",
@@ -108,12 +114,21 @@ invent configuration, guess another command, or report a pass.
 
 ## 4. Run the skill through a trusted host
 
-Give the validated invocation and the selected owning skill contract to a
-trusted host for one input-read-only operation. The trusted host owns execution
-and enforces isolation: recursive input reads, writes only through the explicit
-output folder, denial of undeclared filesystem paths, bounded runtime, and the
-declared network policy. This repository does not provide a universal skill
-runner.
+Give the validated invocation to a trusted host for the synthetic
+host-conformance operation. It performs an input-read-only read of the declared
+target, creates a synthetic inventory, and publishes the exact output-relative
+artifact `reports/example-inventory.json` through the canonical output protocol.
+It uses no network.
+
+The synthetic host-conformance operation is not an installed public skill and
+does not claim public-skill migration. It tests only whether a trusted host can
+honor this guide's declared folder boundary. If the host cannot provide this
+exact operation, report `execution unavailable` and stop.
+
+The trusted host owns execution and enforces isolation: recursive input reads,
+writes only through the explicit output folder, denial of undeclared filesystem
+paths, bounded runtime, and the declared network policy. This repository does
+not provide a universal skill runner.
 
 If the host cannot enforce read-only inputs, output-only writes, parent and
 sibling denial, ambient repository denial, and disabled or authorized internet,
@@ -130,23 +145,23 @@ output.
 
 ## 6. Verify outputs and the terminal manifest
 
-Inspect the expected artifacts only under `__OUTPUT_ROOT__`. Confirm each
-artifact is complete and belongs to the selected skill operation. A run is
-successful only when `.skill-runs/<run-id>/manifest.json` is valid and
-`.skill-runs/<run-id>/incomplete.json` is absent. A missing or invalid terminal
-receipt remains a gap; the output is not filing-ready.
+Inspect `reports/example-inventory.json` only under `__OUTPUT_ROOT__`. Confirm
+that exact artifact is complete and belongs to the synthetic host-conformance
+operation. A run is successful only when `.skill-runs/<run-id>/manifest.json` is
+valid and `.skill-runs/<run-id>/incomplete.json` is absent. A missing or invalid
+terminal receipt remains a gap; the output is not filing-ready.
 
 ### Folder-backed patterns
 
 The same folder contract supports these portable patterns:
 
-| Operation                   | Owning skill contract                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| folder-backed filing packet | [`section-1983-drafting`](skills/section-1983-drafting/SKILL.md)                         |
-| immutable QC report         | [`filing-ci`](skills/filing-ci/SKILL.md)                                                 |
-| profile package             | [`building-defense-counsel-overlays`](skills/building-defense-counsel-overlays/SKILL.md) |
-| research corpus             | [`studying-rule-59e-decisions`](skills/studying-rule-59e-decisions/SKILL.md)             |
-| isolated role run           | [`adversarial-filing-review`](skills/adversarial-filing-review/SKILL.md)                 |
+| Operation                   | Logical input and immutable output                                    | Owning skill contract                                                                    |
+| --------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| folder-backed filing packet | filing packet inputs become a versioned drafting or audit output      | [`section-1983-drafting`](skills/section-1983-drafting/SKILL.md)                         |
+| immutable QC report         | filing or discovery inputs produce an immutable QC report             | [`filing-ci`](skills/filing-ci/SKILL.md)                                                 |
+| profile package             | public sources and approved identity records become a profile package | [`building-defense-counsel-overlays`](skills/building-defense-counsel-overlays/SKILL.md) |
+| research corpus             | verified authorities and decisions become a research corpus           | [`studying-rule-59e-decisions`](skills/studying-rule-59e-decisions/SKILL.md)             |
+| isolated role run           | a selected role package becomes an isolated review report             | [`adversarial-filing-review`](skills/adversarial-filing-review/SKILL.md)                 |
 
 For reproducibility, generated artifacts use hashes and manifests; researched
 material records checked-through dates and retrieval provenance. The skills do

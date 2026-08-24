@@ -10,25 +10,29 @@ instead of copying their full implementation contracts.
 
 ## Invocation example
 
-The guide uses one parseable version-1 JSON envelope with two synthetic logical
-roles, `record` and `authorities`, exactly one output root, one target in the
-`record` role, disabled internet, bounded runtime, and the required isolation
-declaration. Shell variables substitute caller-selected absolute folders before
-validation; the repository does not prescribe their names or parent directory.
+The guide uses one parseable version-1 JSON envelope with the synthetic
+`synthetic-folder-audit` operation, two logical roles, `record` and
+`authorities`, exactly one output root, one target in the `record` role,
+disabled internet, bounded runtime, and the required isolation declaration.
+Shell variables substitute caller-selected absolute folders before validation;
+the repository does not prescribe their names or parent directory.
 
 The ordered flow:
 
 1. selects existing input and output folders;
 2. writes the synthetic invocation envelope;
 3. validates it with `scripts/validate_folder_invocation.py`;
-4. supplies the validated envelope and selected skill contract to a trusted host
-   for one input-read-only operation;
+4. asks a trusted host to perform the documented synthetic input-read-only
+   conformance operation, without network access, and publish
+   `reports/example-inventory.json` through the canonical output protocol;
 5. verifies input hashes are unchanged; and
-6. verifies output artifacts plus `.skill-runs/<run-id>/manifest.json` and the
-   absence of `incomplete.json`.
+6. verifies that exact output artifact plus `.skill-runs/<run-id>/manifest.json`
+   and the absence of `incomplete.json`.
 
-The guide does not invent a universal skill runner. It states that the trusted
-host owns sandbox enforcement and invocation of the selected agent/skill.
+The synthetic operation is not an installed public skill and does not claim
+public-skill migration. The guide does not invent a universal skill runner. It
+states that the trusted host owns sandbox enforcement and reports execution
+unavailable when it cannot provide the exact operation.
 
 ## Portable artifact patterns
 

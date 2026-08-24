@@ -891,10 +891,8 @@ class SkillOutputWriterTest(unittest.TestCase):
         )
         manifest = run.complete()
 
-        self.assertEqual(manifest["internet"], {"policy": "authorized", "used": True})
-        self.assertEqual(
-            manifest["artifacts"],
-            [
+        expected_manifest = {
+            "artifacts": [
                 {
                     "path": "reports/web.md",
                     "sha256": "4ded89b3f9f03689b7032b92a091e742e1205e2a54277e52b32498d9fcdf3642",
@@ -902,8 +900,18 @@ class SkillOutputWriterTest(unittest.TestCase):
                     "internet_sources": [normalized_url_source_without_context, identity_source_with_context],
                 }
             ],
-        )
+            "input_manifest_sha256": INPUT_MANIFEST_SHA256,
+            "internet": {"policy": "authorized", "used": True},
+            "mode": "append-immutable",
+            "run_id": "authorized-internet-run",
+            "schema_version": 1,
+            "skill": "synthetic-skill",
+            "skill_version": "1.4.0",
+            "status": "success",
+        }
         receipt_bytes = (output_root / ".skill-runs" / "authorized-internet-run" / "manifest.json").read_bytes()
+        self.assertEqual(manifest, expected_manifest)
+        self.assertEqual(json.loads(receipt_bytes), expected_manifest)
         self.assertNotIn(str(output_root).encode("utf-8"), receipt_bytes)
 
     def test_authorized_internet_without_source_records_derives_unused(self):
@@ -949,17 +957,34 @@ class SkillOutputWriterTest(unittest.TestCase):
 
         failure = run.fail("later-step-failed", "analysis")
 
-        self.assertEqual(failure["status"], "failure")
-        self.assertEqual(failure["internet"], {"policy": "authorized", "used": True})
-        self.assertEqual(
-            failure["artifacts"][0]["internet_sources"],
-            [
+        expected_failure = {
+            "artifacts": [
                 {
-                    **supplied_source,
-                    "retrieved_at": "2026-08-24T12:34:56Z",
+                    "path": "reports/internet-before-failure.md",
+                    "sha256": "5ed47fb900159076164815501fdf68987c84affe6e6b6e11e91afecb44ebc7dd",
+                    "size": 23,
+                    "internet_sources": [
+                        {
+                            **supplied_source,
+                            "retrieved_at": "2026-08-24T12:34:56Z",
+                        }
+                    ],
                 }
             ],
-        )
+            "failure": {"code": "later-step-failed", "phase": "analysis"},
+            "incomplete_artifacts": [],
+            "input_manifest_sha256": INPUT_MANIFEST_SHA256,
+            "internet": {"policy": "authorized", "used": True},
+            "mode": "append-immutable",
+            "run_id": "authorized-failure-run",
+            "schema_version": 1,
+            "skill": "synthetic-skill",
+            "skill_version": "1.4.0",
+            "status": "failure",
+        }
+        failure_path = output_root / ".skill-runs" / "authorized-failure-run" / "failure.json"
+        self.assertEqual(failure, expected_failure)
+        self.assertEqual(json.loads(failure_path.read_bytes()), expected_failure)
         self.assertFalse(
             os.path.lexists(output_root / ".skill-runs" / "authorized-failure-run" / "manifest.json")
         )
@@ -1155,7 +1180,7 @@ class SkillOutputWriterTest(unittest.TestCase):
         original_unlink = os.unlink
 
         def fail_incomplete_cleanup(path, *args, **kwargs):
-            if path == "incomplete.json":
+            if os.fspath(path) == "incomplete.json":
                 raise OSError("injected incomplete cleanup /private/case-material")
             return original_unlink(path, *args, **kwargs)
 
@@ -1167,6 +1192,38 @@ class SkillOutputWriterTest(unittest.TestCase):
             self.assert_error(cleanup_run.complete, "receipt-unavailable")
         self.assertTrue((self.run_directory(cleanup_run_id) / "manifest.json").is_file())
         self.assertTrue((self.run_directory(cleanup_run_id) / "incomplete.json").is_file())
+
+        removal_sync_run_id = "receipt-removal-sync-failure-run"
+        removal_sync_run = self.start_run(removal_sync_run_id)
+        removal_sync_run_directory = self.run_directory(removal_sync_run_id)
+        removal_sync_run_metadata = removal_sync_run_directory.stat()
+        injected_removal_sync_failure = False
+
+        def fail_sync_after_incomplete_removal(descriptor):
+            nonlocal injected_removal_sync_failure
+            metadata = os.fstat(descriptor)
+            is_run_directory = (metadata.st_dev, metadata.st_ino) == (
+                removal_sync_run_metadata.st_dev,
+                removal_sync_run_metadata.st_ino,
+            )
+            incomplete_is_absent = not os.path.lexists(removal_sync_run_directory / "incomplete.json")
+            if is_run_directory and incomplete_is_absent and not injected_removal_sync_failure:
+                injected_removal_sync_failure = True
+                raise OSError("injected removal sync /private/case-material")
+            return original_fsync(descriptor)
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "fsync",
+            side_effect=fail_sync_after_incomplete_removal,
+        ):
+            self.assert_error(removal_sync_run.complete, "receipt-unavailable")
+        self.assertTrue(injected_removal_sync_failure)
+        self.assertTrue((removal_sync_run_directory / "manifest.json").is_file())
+        self.assertEqual(
+            (removal_sync_run_directory / "incomplete.json").read_bytes(),
+            b'{"run_id":"receipt-removal-sync-failure-run","schema_version":1,"status":"incomplete"}',
+        )
 
     def test_incomplete_artifacts_block_success_and_are_recorded_in_failure_receipts(self):
         destination_sync_run_id = "honest-destination-sync-run"

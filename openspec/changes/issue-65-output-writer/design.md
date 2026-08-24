@@ -89,15 +89,21 @@ Run state lives at `.skill-runs/<run-id>/`:
 - `failure.json` is the immutable terminal failure receipt;
 - `staging/` contains only current-run temporary files.
 
-The incomplete record is current-run state, not a durable success artifact. A
-terminal receipt never replaces another file. Consumers treat a run as
-successful only when `manifest.json` exists and validates. A failure receipt or
-only an incomplete record is never durable success.
+The incomplete record is authoritative non-success state, not a durable success
+artifact. A terminal receipt never replaces another file. Consumers treat a run
+as successful only when `manifest.json` exists and validates AND
+`incomplete.json` is absent. Manifest presence while the incomplete record
+remains is non-success. A failure receipt or only an incomplete record is never
+durable success.
 
 Terminal receipt publication follows the same staged, create-exclusive, file-
-and-directory-sync protocol as an artifact. A directory-sync failure may leave
-an artifact name visible, but it cannot produce a success receipt; the bounded
-failure receipt lists that artifact as incomplete publication.
+the manifest name visible, but the incomplete record remains and prevents a
+success result. Successful completion publishes and syncs `manifest.json`, then
+removes `incomplete.json`, then syncs the run directory again. If incomplete-
+record removal fails, or if the directory sync after removal fails, completion
+restores `incomplete.json` when necessary and syncs that restored non-success
+state before returning `receipt-unavailable`. The writer never reports success
+from manifest presence alone.
 
 ## Canonical manifest
 

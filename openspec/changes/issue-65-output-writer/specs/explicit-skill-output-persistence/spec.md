@@ -68,7 +68,12 @@ It MUST publish a terminal success manifest only after all recorded artifact
 bytes are durably published. A failure or interruption MUST remain visibly
 incomplete or failed and MUST NOT be interpreted as durable success. Temporary
 files MUST remain beneath the output root and be safely removed or recorded as
-incomplete.
+incomplete. A run is successful only when `manifest.json` exists and validates
+and `incomplete.json` is absent. Completion MUST publish and sync the manifest,
+remove the incomplete record, and sync the run directory in that order. If
+incomplete-record removal or the following directory sync fails, the writer MUST
+leave or restore and re-sync `incomplete.json` before returning a bounded
+failure.
 
 #### Scenario: Process stops before completion
 
@@ -80,6 +85,20 @@ incomplete.
 - **WHEN** the writer publishes a terminal failure receipt
 - **THEN** it contains only bounded failure information and the run rejects any
   later write or success transition
+
+#### Scenario: Manifest is visible while the run remains incomplete
+
+- **WHEN** terminal manifest publication or incomplete-state cleanup stops with
+  both `manifest.json` and `incomplete.json` visible
+- **THEN** consumers treat the run as non-success regardless of manifest
+  validity
+
+#### Scenario: Incomplete-state removal is not durably synced
+
+- **WHEN** `incomplete.json` is removed after the manifest is synced but the
+  following run-directory sync fails
+- **THEN** the writer restores and re-syncs `incomplete.json` before reporting
+  `receipt-unavailable`, and manifest presence alone does not report success
 
 ### Requirement: Run manifests are reproducible
 

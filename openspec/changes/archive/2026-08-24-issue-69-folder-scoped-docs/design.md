@@ -22,9 +22,11 @@ The ordered flow:
 
 1. selects existing input and output folders;
 2. writes the synthetic invocation envelope;
-3. validates it with `scripts/validate_folder_invocation.py`, retains the
-   logical input manifest in trusted-host memory, passes it to the output
-   writer, and publishes it only through the canonical output protocol;
+3. validates it with `scripts/validate_folder_invocation.py`, retains the parsed
+   logical input manifest object in trusted-host memory, passes it to the output
+   writer, serializes the same object with the writer's canonical compact UTF-8
+   sorted-key JSON encoding, and publishes those exact bytes only through the
+   canonical output protocol;
 4. asks a trusted host to perform the documented synthetic input-read-only
    conformance operation, without network access, and publish
    `reports/example-inventory.json` through the canonical output protocol;

@@ -107,13 +107,18 @@ python3 scripts/validate_folder_invocation.py \
 ```
 
 The command validates the envelope and emits a logical input manifest containing
-relative paths, byte sizes, and SHA-256 hashes. The trusted host captures that
-logical input manifest in memory and passes the logical input manifest object to
-`OutputRun.start(..., input_manifest=logical_input_manifest)`. During the run,
-the host publishes the logical input manifest as
+relative paths, byte sizes, and SHA-256 hashes. The trusted host parses
+validator stdout JSON into the logical input manifest object in memory and
+passes the logical input manifest object to
+`OutputRun.start(..., input_manifest=logical_input_manifest)`.
+
+Before publication, the host serializes that same object with the writer's exact
+canonical compact UTF-8 sorted-key JSON encoding. During the run, it publishes
+the logical input manifest as those exact canonical bytes at
 `metadata/logical-input-manifest.json` through the canonical output protocol
-beneath the explicit output folder. It does not redirect generated data to an
-ambient working-directory file.
+beneath the explicit output folder. Do not publish the validator's raw stdout
+bytes. The host does not redirect generated data to an ambient working-directory
+file.
 
 The validator does not establish operating system isolation. If validation is
 not configured or the configured command is unavailable, report

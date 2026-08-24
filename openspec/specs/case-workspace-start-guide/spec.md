@@ -49,17 +49,21 @@ manifest. The target SHALL be a caller-selected safe relative path to an
 existing regular file in its named input role. The trusted host SHALL retain the
 logical input manifest in memory, pass it to the output writer, and publish it
 through the canonical output protocol beneath the explicit output folder rather
-than through an ambient filesystem write. The conformance operation SHALL read
-only the declared target, publish `reports/example-inventory.json` through the
+than through an ambient filesystem write. The host SHALL parse validator stdout
+into the manifest object and SHALL persist the exact canonical compact UTF-8
+sorted-key JSON bytes used by the output writer's input-manifest fingerprint,
+not the raw validator stdout bytes. The conformance operation SHALL read only
+the declared target, publish `reports/example-inventory.json` through the
 canonical output protocol, use no network, and stop as execution unavailable
 when the host cannot provide it. The inventory SHALL identify its schema
 version, target role and path, target byte size and SHA-256, and logical input-
 manifest SHA-256. Verification SHALL compare those values to the invocation,
 unchanged target bytes, persisted logical input manifest, and terminal artifact
-record. The operation SHALL NOT be presented as an installed public skill or as
-evidence of public-skill migration. Logical role names SHALL remain stable
-within an operation while caller folder names and absolute locations remain
-configurable.
+record, including equality among the persisted manifest artifact SHA-256,
+inventory input-manifest SHA-256, and terminal receipt input-manifest SHA-256.
+The operation SHALL NOT be presented as an installed public skill or as evidence
+of public-skill migration. Logical role names SHALL remain stable within an
+operation while caller folder names and absolute locations remain configurable.
 
 #### Scenario: Caller folders use different names
 

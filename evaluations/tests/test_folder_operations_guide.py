@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 import re
 import tempfile
 import unittest
@@ -367,7 +367,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
         self.assertNotRegex(section, r">\s*input-manifest\.json")
         self.assertRegex(
             section,
-            r"trusted host.{0,160}(?:captures|keeps).{0,120}"
+            r"trusted host.{0,160}(?:captures|keeps|parses).{0,120}"
             r"logical input manifest.{0,80}in memory",
         )
         self.assertRegex(

@@ -88,24 +88,84 @@ class SkillOutputWriterTest(unittest.TestCase):
             "bytes": path.read_bytes(),
         }
 
-    def snapshot_tree(self):
-        entries = {}
-        for path in self.output_root.rglob("*"):
-            metadata = path.lstat()
-            entries[path.relative_to(self.output_root).as_posix()] = metadata.st_mode
+    def snapshot_tree_at(self, root):
+        root_metadata = root.lstat()
+        entries = {
+            ".": {
+                "device": root_metadata.st_dev,
+                "inode": root_metadata.st_ino,
+                "mode": root_metadata.st_mode,
+                "size": root_metadata.st_size,
+                "modified": root_metadata.st_mtime_ns,
+            }
+        }
+
+        def walk(directory, relative_parent):
+            for entry in sorted(os.scandir(directory), key=lambda item: item.name):
+                relative = relative_parent / entry.name
+                metadata = entry.stat(follow_symlinks=False)
+                record = {
+                    "device": metadata.st_dev,
+                    "inode": metadata.st_ino,
+                    "mode": metadata.st_mode,
+                    "size": metadata.st_size,
+                    "modified": metadata.st_mtime_ns,
+                }
+                if stat.S_ISREG(metadata.st_mode):
+                    record["bytes"] = Path(entry.path).read_bytes()
+                elif stat.S_ISLNK(metadata.st_mode):
+                    record["target"] = os.readlink(entry.path)
+                entries[relative.as_posix()] = record
+                if stat.S_ISDIR(metadata.st_mode):
+                    walk(Path(entry.path), relative)
+
+        walk(root, Path())
         return entries
 
+    def snapshot_tree(self):
+        return self.snapshot_tree_at(self.output_root)
+
     def assert_failed_write_is_confined(self, relative_path, run_id, before):
-        self.assertFalse((self.output_root / relative_path).exists())
+        self.assertFalse(os.path.lexists(self.output_root / relative_path))
         after = self.snapshot_tree()
         staging = Path(".skill-runs") / run_id / "staging"
-        for relative, mode in after.items():
-            if relative in before or not stat.S_ISREG(mode):
+        final_path = Path(relative_path)
+        allowed_parent_directories = {
+            Path(*final_path.parts[:index])
+            for index in range(1, len(final_path.parts))
+        }
+        for relative in before:
+            self.assertIn(relative, after, f"existing output entry removed after failure: {relative}")
+        for relative, record in after.items():
+            relative_entry = Path(relative)
+            if relative in before:
+                mutable_directory = stat.S_ISDIR(record["mode"]) and (
+                    relative_entry == Path(".")
+                    or relative_entry in allowed_parent_directories
+                    or relative_entry.is_relative_to(staging)
+                )
+                if mutable_directory:
+                    continue
+                self.assertEqual(
+                    record,
+                    before[relative],
+                    f"existing output entry changed after failure: {relative}",
+                )
                 continue
-            self.assertTrue(
-                Path(relative).is_relative_to(staging),
-                f"new failure artifact escaped staging: {relative}",
-            )
+            mode = record["mode"]
+            if stat.S_ISREG(mode):
+                self.assertTrue(
+                    relative_entry.is_relative_to(staging),
+                    f"new failure artifact escaped staging: {relative}",
+                )
+            elif stat.S_ISDIR(mode):
+                self.assertTrue(
+                    relative_entry.is_relative_to(staging)
+                    or relative_entry in allowed_parent_directories,
+                    f"unexpected directory created after failure: {relative}",
+                )
+            else:
+                self.fail(f"symlink or special file created after failure: {relative}")
 
     def test_writes_utf8_text_with_exact_bytes_hash_and_size(self):
         run = self.start_run("text-run")
@@ -162,6 +222,56 @@ class SkillOutputWriterTest(unittest.TestCase):
 
         self.assertEqual(self.snapshot_tree(), before)
         self.assertEqual(prior.read_bytes(), b"prior immutable output\n")
+
+    def test_rejects_an_unsupported_run_mode_without_output_changes(self):
+        before = self.snapshot_tree()
+
+        self.assert_error(
+            lambda: self.start_run("unsupported-mode-run", mode="replace-existing"),
+            "invalid-run-mode",
+        )
+
+        self.assertEqual(self.snapshot_tree(), before)
+
+    def test_rejects_invalid_run_ids_before_creating_run_state(self):
+        cases = (
+            ("empty", ""),
+            ("dot", "."),
+            ("parent", ".."),
+            ("parent-traversal", "../escape"),
+            ("slash", "nested/run"),
+            ("backslash", "nested\\run"),
+            ("absolute", "/absolute-run"),
+            ("drive-prefix", "C:/run"),
+            ("nul", "nul\x00run"),
+        )
+
+        for label, run_id in cases:
+            with self.subTest(case=label):
+                before = self.snapshot_tree()
+                self.assert_error(
+                    lambda value=run_id: self.start_run(value),
+                    "invalid-run-id",
+                )
+                self.assertEqual(self.snapshot_tree(), before)
+
+        self.assertFalse(os.path.lexists(self.root / "escape"))
+
+    def test_rejects_a_preexisting_symlink_at_the_run_id(self):
+        outside = self.root / "outside-run-id"
+        outside.mkdir()
+        run_namespace = self.output_root / ".skill-runs"
+        run_namespace.mkdir()
+        (run_namespace / "occupied-run").symlink_to(outside, target_is_directory=True)
+        before = self.snapshot_tree()
+
+        self.assert_error(
+            lambda: self.start_run("occupied-run"),
+            "run-collision",
+        )
+
+        self.assertEqual(self.snapshot_tree(), before)
+        self.assertEqual(list(outside.iterdir()), [])
 
     def test_rejects_noncanonical_raw_and_reserved_output_paths(self):
         cases = (
@@ -224,6 +334,54 @@ class SkillOutputWriterTest(unittest.TestCase):
 
         self.assertEqual(list(outside.iterdir()), [])
 
+    def test_root_path_rename_and_directory_replacement_cannot_redirect_a_started_run(self):
+        run = self.start_run("stable-root-directory-run")
+        opened_root = self.root / "opened-output"
+        self.output_root.rename(opened_root)
+        self.output_root.mkdir()
+
+        run.write("reports/stable.md", b"bound to opened root\n")
+
+        self.assertEqual(
+            (opened_root / "reports" / "stable.md").read_bytes(),
+            b"bound to opened root\n",
+        )
+        self.assertEqual(list(self.output_root.iterdir()), [])
+
+    def test_root_path_rename_and_symlink_replacement_cannot_redirect_a_started_run(self):
+        run = self.start_run("stable-root-symlink-run")
+        opened_root = self.root / "opened-output"
+        outside = self.root / "outside-replacement"
+        outside.mkdir()
+        self.output_root.rename(opened_root)
+        self.output_root.symlink_to(outside, target_is_directory=True)
+
+        run.write("reports/stable.md", b"bound to opened root\n")
+
+        self.assertEqual(
+            (opened_root / "reports" / "stable.md").read_bytes(),
+            b"bound to opened root\n",
+        )
+        self.assertEqual(list(outside.iterdir()), [])
+
+    def test_post_start_descendant_symlink_swap_is_rejected_without_writing_either_target(self):
+        descendant = self.output_root / "reports"
+        descendant.mkdir()
+        run = self.start_run("descendant-swap-run")
+        renamed_descendant = self.output_root / "renamed-reports"
+        outside = self.root / "outside-descendant"
+        outside.mkdir()
+        descendant.rename(renamed_descendant)
+        descendant.symlink_to(outside, target_is_directory=True)
+
+        self.assert_error(
+            lambda: run.write("reports/stable.md", b"must not follow replacement"),
+            "invalid-output-path",
+        )
+
+        self.assertEqual(list(renamed_descendant.iterdir()), [])
+        self.assertEqual(list(outside.iterdir()), [])
+
     def test_existing_output_collision_preserves_inode_bytes_and_metadata(self):
         destination = self.output_root / "reports" / "existing.md"
         destination.parent.mkdir()
@@ -257,6 +415,20 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertEqual(self.snapshot_path(source), source_before)
         self.assertEqual(self.snapshot_path(alias), alias_before)
         self.assertEqual(source.stat().st_ino, alias.stat().st_ino)
+
+    def test_successful_write_preserves_both_declared_input_trees(self):
+        record_before = self.snapshot_tree_at(self.record_root)
+        authority_before = self.snapshot_tree_at(self.authority_root)
+        run = self.start_run("input-preservation-run")
+
+        run.write("reports/result.md", b"new output only\n")
+
+        self.assertEqual(self.snapshot_tree_at(self.record_root), record_before)
+        self.assertEqual(self.snapshot_tree_at(self.authority_root), authority_before)
+        self.assertEqual(
+            (self.output_root / "reports" / "result.md").read_bytes(),
+            b"new output only\n",
+        )
 
     def test_stream_failure_publishes_no_final_artifact_and_confines_staging(self):
         run_id = "stream-failure-run"

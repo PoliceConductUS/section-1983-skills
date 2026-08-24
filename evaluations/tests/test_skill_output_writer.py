@@ -1282,6 +1282,50 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertTrue((run_directory / "incomplete.json").is_file())
         self.assert_terminal_and_closed(run)
 
+    def test_linked_terminal_receipt_removed_before_sync_failure_still_seals_run(self):
+        for status in ("success", "failure"):
+            with self.subTest(status=status):
+                run_id = f"{status}-linked-receipt-removed-run"
+                run = self.start_run(run_id)
+                run_directory = self.run_directory(run_id)
+                run_metadata = run_directory.stat()
+                run_identity = (run_metadata.st_dev, run_metadata.st_ino)
+                receipt_name = "manifest.json" if status == "success" else "failure.json"
+                receipt_path = run_directory / receipt_name
+                original_fsync = os.fsync
+                removed_receipt = False
+
+                def remove_receipt_then_fail_sync(descriptor):
+                    nonlocal removed_receipt
+                    metadata = os.fstat(descriptor)
+                    if (
+                        not removed_receipt
+                        and (metadata.st_dev, metadata.st_ino) == run_identity
+                        and os.path.lexists(receipt_path)
+                    ):
+                        receipt_path.unlink()
+                        removed_receipt = True
+                        raise OSError("injected post-link removal /private/case-material")
+                    return original_fsync(descriptor)
+
+                operation = (
+                    run.complete
+                    if status == "success"
+                    else lambda: run.fail("stream-failed", "artifact-write")
+                )
+                with mock.patch.object(
+                    skill_output_writer.os,
+                    "fsync",
+                    side_effect=remove_receipt_then_fail_sync,
+                ):
+                    self.assert_error(operation, "receipt-unavailable")
+
+                self.assertTrue(removed_receipt)
+                self.assertFalse(os.path.lexists(receipt_path))
+                self.assertTrue((run_directory / "incomplete.json").is_file())
+                self.assertTrue(run._terminal)
+                self.assert_terminal_and_closed(run)
+
     def test_internet_use_includes_sources_on_incomplete_artifacts(self):
         invocation, input_manifest, output_root = self.make_relocated_invocation(
             "incomplete-internet-root",

@@ -395,7 +395,16 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         execute = self.trusted_api("execute_trusted_review")
         with tempfile.TemporaryDirectory() as directory:
             filing, approved_sources, _ = self.make_declared_roles(directory)
-            for target in (None, "", "/filing.md", "../filing.md", "missing.md"):
+            for target in (
+                None,
+                "",
+                "/filing.md",
+                "../filing.md",
+                "./filing.md",
+                "folder//filing.md",
+                "filing.md/",
+                "missing.md",
+            ):
                 with self.subTest(target=target):
                     transport = TransportSpy()
                     with self.assertRaises(self.launcher.ReviewLaunchError) as captured:

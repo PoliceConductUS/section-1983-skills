@@ -5,6 +5,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.validate_folder_invocation import (
+    InvocationError,
+    validate_installed_skill_invocation,
+)
 from scripts.validate_governance import (
     APPROVED_FOLDER_CONTRACTS,
     validate_folder_contract_document,
@@ -391,6 +395,103 @@ class SkillFolderContractsTest(unittest.TestCase):
                     "[folder contract](references/folder-contract.json)",
                     entrypoint.lower(),
                 )
+
+    def test_each_isolated_contract_enforces_its_exact_invocation_authority(self):
+        for skill, values in CONTRACTS.items():
+            with self.subTest(skill=skill), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                package = root / "installed" / skill
+                shutil.copytree(REPOSITORY / "skills" / skill, package)
+                input_roles, target_policy, target_roles, internet = values
+                inputs = []
+                for role in input_roles:
+                    role_root = root / "inputs" / role
+                    role_root.mkdir(parents=True)
+                    (role_root / "target.txt").write_text(
+                        f"{skill}:{role}\n", encoding="utf-8"
+                    )
+                    inputs.append({"role": role, "root": str(role_root)})
+                output_root = root / "output"
+                output_root.mkdir()
+                envelope = {
+                    "version": 1,
+                    "skill": skill,
+                    "inputs": inputs,
+                    "output": {"root": str(output_root)},
+                    "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
+                    "internet": internet,
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+                if target_policy == "required":
+                    envelope["target"] = {
+                        "role": target_roles[0],
+                        "path": "target.txt",
+                    }
+
+                validated = validate_installed_skill_invocation(envelope, package)
+                self.assertEqual(validated.skill, skill)
+
+                mutations = []
+                missing = {**envelope, "inputs": inputs[:-1]}
+                mutations.append(("missing-role", missing, "contract-input-roles"))
+                extra_root = root / "inputs" / "extra"
+                extra_root.mkdir()
+                extra = {
+                    **envelope,
+                    "inputs": inputs
+                    + [{"role": "extra", "root": str(extra_root)}],
+                }
+                mutations.append(("extra-role", extra, "contract-input-roles"))
+                if len(inputs) > 1:
+                    reordered = {**envelope, "inputs": list(reversed(inputs))}
+                    mutations.append(
+                        ("reordered-roles", reordered, "contract-input-roles")
+                    )
+                mutations.append(
+                    (
+                        "internet-mismatch",
+                        {
+                            **envelope,
+                            "internet": (
+                                "authorized" if internet == "disabled" else "disabled"
+                            ),
+                        },
+                        "contract-internet",
+                    )
+                )
+                if target_policy == "required":
+                    without_target = dict(envelope)
+                    del without_target["target"]
+                    mutations.append(
+                        ("missing-required-target", without_target, "contract-target")
+                    )
+                invalid_target_roles = [
+                    role for role in input_roles if role not in target_roles
+                ]
+                if invalid_target_roles:
+                    mutations.append(
+                        (
+                            "wrong-target-role",
+                            {
+                                **envelope,
+                                "target": {
+                                    "role": invalid_target_roles[0],
+                                    "path": "target.txt",
+                                },
+                            },
+                            "contract-target",
+                        )
+                    )
+
+                for label, mutation, code in mutations:
+                    with self.subTest(skill=skill, mutation=label):
+                        with self.assertRaises(InvocationError) as captured:
+                            validate_installed_skill_invocation(mutation, package)
+                        self.assertEqual(captured.exception.code, code)
 
 
 if __name__ == "__main__":

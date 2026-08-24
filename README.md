@@ -131,25 +131,31 @@ gates, and Filing CI adds a separate packaged integrity gate.
 
 ### Trusted adversarial-review runtime
 
-Independent adversarial review uses the built-in stateless OpenAI runtime. An
-arbitrary reviewer command or a caller assertion cannot establish independent
-isolation. Set `OPENAI_API_KEY` and an explicit model, build the bounded packet
-required by the skill, and run from the repository root:
+Independent adversarial review uses the built-in stateless OpenAI runtime. The
+declared `filing` role root supplies the filing bytes, and the declared
+`approved-sources` role root supplies every approved packet source. A required
+filing target selects one canonical relative file inside `filing`. Internet is
+authorized for this provider dispatch. Set `OPENAI_API_KEY`, choose an explicit
+model, build the bounded packet required by the skill, and run the install-local
+processor:
 
 ```bash
 python3 skills/adversarial-filing-review/scripts/launch_review.py \
   --trusted-openai \
   --model "$OPENAI_REVIEW_MODEL" \
-  --project-boundary "$CASE_ROOT" \
-  --version-folder "$VERSION_FOLDER" \
-  --artifact "$CANONICAL_DRAFT" \
+  --filing-root "$FILING_ROOT" \
+  --approved-sources-root "$APPROVED_SOURCES_ROOT" \
+  --filing-target "$FILING_TARGET" \
+  --internet-policy authorized \
   < "$REVIEW_PACKET"
 ```
 
-The host verifies the canonical draft and writes a new immutable report under
-`<version-folder>/audits/`. A missing credential, unavailable provider, or
-invalid response produces an unavailable report and a nonzero exit; it is not a
-completed independent review.
+The processor returns report bytes, a canonical output-relative artifact path,
+and validated internet-source records. It accepts no arbitrary command or output
+folder and writes nothing directly. Only the trusted host publishes the bytes
+with `OutputRun` and records the append-immutable terminal receipt. A missing
+credential, unavailable provider, or invalid response returns a bounded
+unavailable report and a nonzero exit; it is not a completed independent review.
 
 ## Complaint checker boundary
 

@@ -42,31 +42,35 @@ checker output or results, and inherited conversation or session state.
 
 Use the launcher's built-in trusted OpenAI mode. Supply the model explicitly,
 keep `OPENAI_API_KEY` in the environment, and send the packet through standard
-input. Resolve the project boundary, version folder, and exact canonical draft
-on the host; those paths never enter the reviewer packet.
+input. The declared `filing` role root contains the selected filing. The
+declared `approved-sources` role root contains every exact source byte embedded
+in the packet. A required filing target selects one canonical relative file
+inside `filing`. Internet is authorized for this provider dispatch.
 
 ```bash
 python3 skills/adversarial-filing-review/scripts/launch_review.py \
   --trusted-openai \
   --model "$OPENAI_REVIEW_MODEL" \
-  --project-boundary "$CASE_ROOT" \
-  --version-folder "$VERSION_FOLDER" \
-  --artifact "$CANONICAL_DRAFT" \
+  --filing-root "$FILING_ROOT" \
+  --approved-sources-root "$APPROVED_SOURCES_ROOT" \
+  --filing-target "$FILING_TARGET" \
+  --internet-policy authorized \
   < "$REVIEW_PACKET"
 ```
 
 The trusted adapter sends one stateless request with no tools, storage,
 conversation, session continuation, filesystem, repository, or browser access.
 The reviewer has no capabilities beyond the embedded packet. The adapter
-validates the complete packet and fingerprints before dispatch. A configured
-arbitrary command and `--runtime-enforces-empty-capabilities` cannot establish
-independence and must fail closed as `independent review unavailable`. Do not
-use that legacy command seam for an independent review.
+validates the complete packet, filing target, approved source membership, and
+fingerprints before dispatch. It has no arbitrary-command API and accepts no
+project, version, artifact, or output path.
 
-On success, the host writes one immutable completed report under the audited
-version's `audits/` directory. Missing credentials, provider failure, or an
-invalid provider response writes only an honest unavailable report when the
-output path is valid and exits nonzero. Do not simulate the review in the
+The processor returns report bytes, one canonical output-relative artifact path,
+and validated internet-source records. It never opens an output folder or writes
+a report. Only the trusted host publishes those bytes through `OutputRun` and
+records the terminal append-immutable receipt. Missing credentials, provider
+failure, or an invalid provider response returns only an honest, bounded
+`independent review unavailable` report. Do not simulate the review in the
 drafting context or relabel an unavailable result as completed.
 
 ## Apply the attack checklist

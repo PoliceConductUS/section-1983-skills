@@ -79,6 +79,17 @@ class PackagedFilingChecksTest(unittest.TestCase):
             self.assertNotIn("scripts.validate_folder_invocation", source)
             self.assertNotIn("scripts.skill_output_writer", source)
             self.assertNotIn("output_root", source)
+        canonical = json.loads(
+            (
+                COMPLAINT_SKILL
+                / "references"
+                / "complaint-structure-contract.json"
+            ).read_text()
+        )
+        packaged = json.loads(
+            (FILING_CI_SKILL / "references" / "packaged-complaint-checker.json").read_text()
+        )
+        self.assertEqual(packaged, canonical)
 
     def test_complaint_checker_is_deterministic_limited_and_non_mutating(self):
         checker = load_module("packaged_complaint_checker", COMPLAINT_SCRIPT)
@@ -231,6 +242,34 @@ class PackagedFilingChecksTest(unittest.TestCase):
                             CHECKER_ID,
                             **forbidden,
                         )
+
+    def test_filing_ci_distinguishes_fail_closed_unavailable_classes(self):
+        filing_ci = load_module("packaged_filing_ci_classes", FILING_CI_SCRIPT)
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            filing_root = base / "filing"
+            authorities_root = base / "authorities"
+            filing_root.mkdir()
+            authorities_root.mkdir()
+            (filing_root / "complaint.json").write_text("not json\n")
+            (filing_root / "complaint.md").write_text("{}\n")
+
+            cases = (
+                ("../outside.json", authorities_root, "invalid-target"),
+                ("complaint.md", authorities_root, "checker-incompatible"),
+                ("complaint.json", authorities_root, "malformed-input"),
+                ("complaint.json", base / "missing-authorities", "unresolved-input"),
+            )
+            for target, authority_root, reason in cases:
+                with self.subTest(reason=reason):
+                    result = filing_ci.run_filing_ci(
+                        filing_root,
+                        target,
+                        authority_root,
+                        CHECKER_ID,
+                    )
+                    self.assertEqual(result["status"], "unavailable")
+                    self.assertEqual(result["reason"], reason)
 
     def test_helpers_execute_from_isolated_skill_copies(self):
         with tempfile.TemporaryDirectory() as directory:

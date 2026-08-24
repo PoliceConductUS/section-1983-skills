@@ -17,6 +17,17 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `docket-snapshot` contains the approved immutable docket snapshot.
+- `filing` contains any filing manifest or target filing used for pinning.
+
+Target is required in `docket-snapshot`. Internet is `disabled`. Return the
+validated litigation overlay as a canonical output-relative path and
+deterministic bytes; only the trusted host may publish it append-immutable.
+Report missing actors, sources, filing pins, or docket coverage as a gap rather
+than refreshing or enlarging the snapshot.
+
 ## Purpose
 
 Transform one approved immutable docket snapshot into a source-backed, versioned
@@ -35,10 +46,10 @@ Read these install-local contracts completely:
 - [references/litigation-alignment-overlay.schema.json](references/litigation-alignment-overlay.schema.json)
 - [references/filing-overlay-manifest.schema.json](references/filing-overlay-manifest.schema.json)
 
-Use only one existing snapshot that passed its approved project preflight. Do
-not browse, open an unlisted path or URL, silently refresh the docket, or add a
-source from conversation history. If the snapshot is missing, stale, ambiguous,
-or invalid, report the scoped gap and stop overlay generation.
+Use only the selected `docket-snapshot` target after the packaged validator
+passes. Do not browse, open an unlisted path or URL, silently refresh the
+docket, or add a source from conversation history. If the snapshot is missing,
+stale, ambiguous, or invalid, report the scoped gap and stop overlay generation.
 
 ## Derive litigation-alignment groups
 

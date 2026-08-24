@@ -18,6 +18,18 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `filing` contains the canonical draft selected for review.
+- `approved-sources` contains the exact source material permitted in the review
+  packet.
+
+Target is required in `filing`. Internet is `authorized` only for the approved
+review provider. Return the categorized review as a canonical output-relative
+path and deterministic bytes; only the trusted host may publish it
+append-immutable. Report unavailable filing, source, provider, or validation
+material as a gap without broadening the input set.
+
 ## Purpose
 
 Run a read-only clean-room attack on one canonical draft. The reviewer receives
@@ -162,17 +174,18 @@ checked date used.
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
 Before review, an independent quality-control stage must select exactly one
 artifact through its declared input roles and target policy. It must propose

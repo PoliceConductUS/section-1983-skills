@@ -18,6 +18,18 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `filing` contains the document whose citations and propositions are audited.
+- `authorities` contains the approved opinions, metadata, and source records.
+
+Target is required in `filing`. Internet is `authorized` for bounded primary-
+source verification and later-history checks. Return the structured authority
+audit as a canonical output-relative path and deterministic bytes; only the
+trusted host may publish it append-immutable. Report missing authority,
+pinpoint, metadata, or source material as a filing-critical gap rather than
+substituting another folder.
+
 ## Goal
 
 Verify that every cited authority, factual assertion, and "differentiator"
@@ -37,26 +49,20 @@ Verify that every cited authority, factual assertion, and "differentiator"
 This skill applies to complaints, amendment proffers, RRDs, motions, responses,
 replies, briefs, declarations, and appendices.
 
-## Project Integration
+## Declared authority sources
 
-### Input files
-
-Resolve the controlling draft, verified-authority root, source units, and
-audit-output location from the repository instructions. If no repository schema
-exists, ask for or identify explicit paths. A citation tracker is optional and
-never replaces the document body or authority source.
-
-### Output file
-
-Write the audit where the repository requires. If no location is defined, return
-the structured audit without inventing a source-tree path.
+Use the required target in `filing` and only the source units available in
+`authorities`. A citation tracker inside a declared role is optional and never
+replaces the document body or authority source. Do not accept an arbitrary path
+or infer another source folder. Return the structured audit for trusted-host
+publication under the folder output contract above.
 
 ### Authority sourcing and verification
 
-Resolve the canonical verified-case root from the project instructions, source
-manifest, control file, or an explicit path supplied by the user. If none of
-those identifies the root, ask for it and do not mark any case citation
-verified. A public or installed skill must not assume a machine-specific path.
+Resolve each verified authority unit from the declared `authorities` role. If
+the role does not contain the required opinion and source metadata, report the
+gap and do not mark the citation verified. A public or installed skill must not
+assume a machine-specific or undeclared path.
 
 Every case citation must pass all three gates below before the citation or the
 document can be marked verified:
@@ -94,7 +100,8 @@ After the three gates pass, complete the remaining authority audit:
      (`tile.loc.gov/storage-services/service/ll/usrep/`)
    - **Fifth Circuit**: `ca5.uscourts.gov/opinions/`
    - **General**: CourtListener RECAP archive
-3. Preserve the source and retrieval provenance where repository rules require.
+3. Preserve source and retrieval provenance in the returned audit and trusted-
+   host receipt.
 4. Do not mark an authority verified merely because a PDF was downloaded.
    Verification requires identity, court, publication and binding status,
    proposition and pinpoint, holding classification, procedural posture,
@@ -261,17 +268,18 @@ checked date used.
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
 Before review, an independent quality-control stage must select exactly one
 artifact through its declared input roles and target policy. It must propose

@@ -118,4 +118,4 @@ A count is complete only if:
 - [ ] the prose is simple, concise, direct, and has passed the required
       `horan-bad-words` review after the last material substantive revision; and
 - [ ] paragraph numbering and cross-references are verified, and any
-      repository-required BWC timestamp convention is followed.
+      supplied-strategy BWC timestamp convention is followed.

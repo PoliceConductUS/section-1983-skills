@@ -20,6 +20,17 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `motion` contains the motion or argument set requiring a response plan.
+- `record` contains the approved pleading, docket, facts, and supporting record.
+- `authorities` contains approved governing and proposition-specific law.
+
+Target is required in `motion`. Internet is `disabled`. Return the RRD as a
+canonical output-relative path and deterministic bytes; only the trusted host
+may publish it append-immutable. Report missing motion headings, record support,
+authority, or response requirements as a gap without drafting the final brief.
+
 Create detailed **Response Requirements Documents (RRDs)** that are clear,
 actionable, and suitable for drafting a motion response **claim-by-claim**.
 
@@ -44,7 +55,8 @@ ready.
    to
 2. Ask 3–5 essential clarifying questions (with lettered options)
 3. Generate a structured RRD based on answers
-4. Save to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+4. Return `rrd.yaml` bytes and that canonical output-relative path to the
+   trusted host
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
@@ -268,31 +280,13 @@ The RRD reader may be a junior attorney, paralegal, or AI agent. Therefore:
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** `responses/<response-due-date>/<motion-folder>/`
-- **Filename:** `rrd.yaml` (fixed)
+- **Canonical output-relative path:** `rrd.yaml`
+- **Publication:** return deterministic bytes; only the trusted host publishes
+  them append-immutable beneath the declared output folder
 
-Where:
-
-- `<response-due-date>` is the court-ordered due date for the response
-  (YYYY-MM-DD)
-- `<motion-folder>` matches the motion folder name (e.g., `city-mtd`,
-  `officers-mtd`)
-
-Example output folder layout:
-
-```text
-responses/
-└── 2026-01-29/
-    ├── city-mtd/
-    │   ├── SOURCE.yaml
-    │   └── rrd.yaml
-    └── officers-mtd/
-        ├── SOURCE.yaml
-        └── rrd.yaml
-```
-
-Each response folder should already contain `SOURCE.yaml`; if it does not,
-create it following the project `SOURCE.yaml` spec.
+Reference source metadata supplied in `motion`, `record`, or `authorities`. If a
+required source record is missing, report a gap rather than creating a fallback
+schema.
 
 ---
 

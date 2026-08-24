@@ -75,6 +75,12 @@ work. `temp/` is not a durable artifact destination.
 Load each applicable skill once. The more specific skill adds requirements; it
 does not replace source, authority, or court rules.
 
+Composition is sequential: the trusted host validates and invokes each skill
+separately against that installed skill's exact folder contract. It never unions
+roles across the stack or enlarges one skill's filesystem or internet authority.
+Output from one skill is available to another only through a new invocation that
+expressly supplies it in the receiving skill's declared input role.
+
 1. Start with `section-1983-drafting` for routing, localization, and writing
    rules.
 2. For factual declarations and exhibit-foundation preparation supporting
@@ -167,29 +173,23 @@ package; an absent, unknown, unavailable, or incompatible checker returns an
 honest unavailable result. Neither helper accepts a command, executable, or
 output folder, and only the trusted host publishes returned report bytes.
 
-## Project inputs and portability
+## Invocation inputs and portability
 
-The skills describe artifact roles, not a required case-management product.
-Projects may use different filenames or keep the same information in one
-document. When a skill calls for a strategy, chronology or fact lock, claim
-ledger, gap register, authority library, or coded corpus:
+The skills consume named artifact roles, not a case-management product or
+repository layout. Callers may use different filenames or keep related
+information in one document, but each invocation exposes only the exact
+recursive read-only folders declared for that skill. Missing strategy,
+chronology, fact-lock, claim-ledger, gap-register, authority, or corpus material
+is reported as a gap; the skill does not search another folder or imply that an
+absent artifact was reviewed.
 
 New users can follow [Run folder-scoped skill operations](FOLDER_OPERATIONS.md)
-to map those roles to recursive read-only input folders, select one output
-folder, and verify a synthetic operation before using the drafting skills.
-
-- use the project's existing equivalent;
-- do not invent a file or imply that a missing artifact was reviewed;
-- ask before drafting without a strategy; and
-- create a minimal internal working table for other missing roles when the
-  document can still be prepared from verified sources.
-
-Localization results belong in a project-defined cache or returned internal
-audit, not inside an installed skill package. Logical input hashes and run
-manifests are required for every folder-scoped operation. These shared receipts
-bind the declared logical inputs to the terminal output run even when a caller
-maintains no packet-specific metadata. Project-specific extra packet controls
-remain optional and separate from the shared folder contract.
+to map roles to input folders, select one output folder, and verify a synthetic
+operation before using the drafting skills. Only the trusted host publishes
+returned artifacts. Logical input hashes and run manifests are required for
+every folder-scoped operation and bind the declared inputs to the terminal
+output run. Caller-specific additional packet controls remain optional and
+separate from the shared folder contract.
 
 Judge-specific observations are optional. If the reviewed corpus does not
 support an issue-specific conclusion, the judge overlay contributes no

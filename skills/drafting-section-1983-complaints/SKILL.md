@@ -17,6 +17,18 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `record` contains the approved facts, chronology, exhibits, and claim map.
+- `authorities` contains approved constitutional, statutory, and procedural law.
+- `filing` contains any complaint or amendment being drafted or audited.
+
+Target is optional in `filing`; without one, draft from the supplied record and
+user request. Internet is `disabled`. Return the complaint or mechanical handoff
+as a canonical output-relative path and deterministic bytes; only the trusted
+host may publish it append-immutable. Report missing facts, actors, claims,
+authority, or required contract material as a gap without inventing it.
+
 ## Required complaint contract
 
 Before drafting, revising, or auditing any complaint, amended complaint, or
@@ -51,11 +63,12 @@ video, also use `drafting-false-arrest-complaints`. Load each applicable skill
 once; this skill owns the general complaint contract and the false-arrest skill
 adds the specialized contract.
 
-Before drafting, read the repository `AGENTS.md` when one exists and obey its
-authority, source, citation, and gap rules. Use verified authority only.
-Preserve supported alternative theories when discovery-controlled facts prevent
-choosing among them. Run `audit-authorities` before treating a filing-near
-authority or clearly-established-law proposition as verified.
+Before drafting, apply the authority, source, citation, and gap rules supplied
+in the declared input roles. If a required rule is absent, report the gap. Use
+verified authority only. Preserve supported alternative theories when
+discovery-controlled facts prevent choosing among them. Run `audit-authorities`
+before treating a filing-near authority or clearly-established-law proposition
+as verified.
 
 **REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the complaint
 is substantively complete and rerun it after any material authority-driven
@@ -278,17 +291,18 @@ checks.
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
 Before review, an independent quality-control stage must select exactly one
 artifact through its declared input roles and target policy. It must propose

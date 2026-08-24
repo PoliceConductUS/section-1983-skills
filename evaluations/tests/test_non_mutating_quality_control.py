@@ -42,7 +42,7 @@ QUALITY_CONTROL_RULES = (
         "An independent quality-control stage may mutate an artifact under review.",
     ),
     (
-        "It may read designated artifacts and write only its designated report or result.",
+        "It may read designated artifacts and return only its designated report or result for trusted-host publication.",
         "It may write changes to an artifact under review.",
     ),
     (

@@ -18,6 +18,18 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `record` contains the approved arrest facts and incorporated materials.
+- `authorities` contains the approved offense elements and governing cases.
+- `filing` contains any complaint or amendment being revised.
+
+Target is optional in `filing`; without one, draft from the supplied record and
+user request. Internet is `disabled`. Return the complaint or audit as a
+canonical output-relative path and deterministic bytes; only the trusted host
+may publish it append-immutable. Report missing offense, seizure, actor, timing,
+or source material as a gap without supplying it from another location.
+
 ## Core principle
 
 Organize the pleading around the probable-cause decision: **who seized the
@@ -43,12 +55,12 @@ unavailable, report **complaint contract unavailable** and do not draft, revise,
 or audit the complaint. Do not invent or reconstruct the missing requirements,
 and do not promote this local delta into a replacement general contract.
 
-Before acting, read the current pleading, controlling motions and rulings, claim
-matrix, chronology, gaps, and the canonical sources material to each
-proposition. If the repository supplies `AGENTS.md`, a fact-lock protocol,
-versioning rules, or source gates, follow them. For filing-near authority, run
-`audit-authorities` and complete the identity, status, pre-event date,
-later-history, pinpoint, and rule-of-orderliness checks.
+Before acting, read the current pleading in `filing` and the controlling
+motions, rulings, claim matrix, chronology, gaps, and canonical source material
+supplied in `record` and `authorities`. Treat missing instructions or source
+gates as a gap; do not search another folder for them. For filing-near
+authority, run `audit-authorities` and complete the identity, status, pre-event
+date, later-history, pinpoint, and rule-of-orderliness checks.
 
 **REQUIRED FINAL EDITING SUB-SKILL:** Run `horan-bad-words` after the complaint
 is substantively complete and rerun it after any material authority-driven
@@ -156,17 +168,18 @@ unavailable** and do not complete the false-arrest audit from this delta.
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
 Before review, an independent quality-control stage must select exactly one
 artifact through its declared input roles and target policy. It must propose

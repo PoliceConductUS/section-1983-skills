@@ -711,7 +711,9 @@ class FolderOperationsGuideTest(unittest.TestCase):
 
     def test_readme_requires_folder_operation_hashes_and_run_manifests(self):
         portability = " ".join(
-            markdown_section(self.readme, "## Project inputs and portability").split()
+            markdown_section(
+                self.readme, "## Invocation inputs and portability"
+            ).split()
         ).lower()
         with self.subTest(requirement="mandatory folder receipts"):
             self.assertRegex(
@@ -722,14 +724,14 @@ class FolderOperationsGuideTest(unittest.TestCase):
         with self.subTest(requirement="extra packet controls remain separate"):
             self.assertRegex(
                 portability,
-                r"project-specific (?:extra|additional) packet controls"
+                r"caller-specific (?:extra|additional) packet controls"
                 r".{0,100}optional.{0,100}separate",
             )
         with self.subTest(requirement="folder receipts are not optional"):
             self.assertNotRegex(
                 portability,
                 r"(?:logical input hashes|run manifests|manifests, hashes)"
-                r".{0,120}(?:apply only|optional|when the .{0,30}project)",
+                r".{0,120}(?:apply only|optional|when the .{0,30}caller)",
             )
 
     def test_reproducibility_is_folder_native_and_does_not_require_git(self):

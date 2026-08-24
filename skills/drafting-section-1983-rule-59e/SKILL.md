@@ -17,6 +17,19 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `record` contains the operative judgment record, chronology, and claim facts.
+- `authorities` contains approved Rule 59(e), amendment, and merits authorities.
+- `filing` contains any motion, brief, proposed pleading, or related artifact.
+
+Target is optional in `filing`; without one, draft the user-requested package
+from the supplied roles. Internet is `disabled`. Return each requested filing
+artifact with a canonical output-relative path and deterministic bytes; only the
+trusted host may publish it append-immutable. Report missing record, authority,
+requested relief, or package material as a gap without inventing a versioning
+scheme.
+
 ## Purpose
 
 Build one genuine request for district-court relief. When the case strategy
@@ -84,15 +97,15 @@ Before drafting, identify and read:
 9. canonical verified sources for every load-bearing authority and record
    quotation.
 
-Treat the artifact names in item 7 as roles, not mandatory filenames. If a
-public user's project has no formal fact lock, claim ledger, gap register, or
-authority audit, use the available equivalents and create a minimal internal
+Treat the artifact names in item 7 as roles, not mandatory filenames. If the
+declared inputs contain no formal fact lock, claim ledger, gap register, or
+authority audit, use the available equivalents and create a minimal in-memory
 working table for the missing role. Do not invent a path or imply that an
 artifact was reviewed. The minimum substitutes are: a dated chronology and
 source list; a claim-by-defendant disposition table; an unresolved-fact and
 source list; and an authority-status ledger. Follow `section-1983-drafting` for
-a missing strategy: ask the user for one or for permission to proceed without
-one.
+a missing strategy: report the gap and ask the user for one or for permission to
+proceed without one.
 
 Before using material developed or located near the filing deadline, apply the
 evidence-maturity and source-use gate in the postjudgment-amendment contract. Do
@@ -227,16 +240,11 @@ Generate the documents required by the court and strategy, commonly the motion,
 brief, complete proposed complaint, proposed order, appendix, exhibit
 instructions, accurate conference certificate, and internal audits.
 
-Follow the project's existing version and audit system. When it uses numbered
-packet folders, manifests, hashes, or source records, create the next version,
-carry forward only still-used artifacts, identify unchanged files, and update
-those records. Never overwrite a prior packet.
-
-When no project versioning system exists, do not invent numbered folders,
-manifests, or source schemas as filing requirements. Preserve the prior draft,
-create a clearly identified new working version in the user's chosen location,
-and report which documents changed. Ask before creating a new directory or
-repository structure.
+Return each changed document as a new canonical output-relative artifact and
+identify which supplied filing artifacts remain unchanged. The trusted host
+records hashes and publishes every returned artifact append-immutable. Never
+overwrite a prior filing or invent numbered folders, manifests, or source
+schemas as legal requirements.
 
 ## Appendix and final-render traceability
 
@@ -321,8 +329,7 @@ Reject the packet unless:
     disclosure, appears in the required place and form;
 17. the writing-system lint and `horan-bad-words` review pass; and
 18. page limit, conference statement, and appendix pagination are verified; and
-19. hashes, manifests, and source records are verified when the project requires
-    them.
+19. required input hashes, run manifests, and source records are verified.
 
 Do not call the packet filing-ready while a load-bearing source, authority,
 deadline, conference statement, proposed-complaint cross-reference, requested
@@ -331,17 +338,18 @@ ruling, or supersession effect remains unresolved.
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
 Before review, an independent quality-control stage must select exactly one
 artifact through its declared input roles and target policy. It must propose

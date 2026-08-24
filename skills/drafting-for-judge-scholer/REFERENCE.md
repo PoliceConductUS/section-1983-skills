@@ -25,11 +25,12 @@ Use the complete inventories at:
 - `research-notes/judicial-docket-study-2026-07-24/scholer-missing-recap-documents.csv`
 - `research-notes/judicial-docket-study-2026-07-24/scholer-recap-retrieval-status.csv`
 
-These paths belong to the source research workspace and may be absent from an
-installed copy of this skill. If a file is unavailable, do not imply that it was
-reviewed. Treat the summaries below as retrieval leads, obtain the underlying
-decision from a reliable source, and verify identity, authorship, holding,
-pinpoint, authority status, and later history before use.
+These paths identify expected content within the declared `judge-corpus` input
+role and may be absent. If a file is unavailable, do not imply that it was
+reviewed. Treat the summaries below as retrieval leads and report the missing
+corpus material as a gap; this skill's internet policy is disabled. Verify
+identity, authorship, holding, pinpoint, authority status, and later history
+before use.
 
 ## High-value independently reasoned decisions
 
@@ -53,9 +54,9 @@ pinpoint, authority status, and later history before use.
 ## Use limits
 
 These decisions are non-binding district-court materials. Before citation,
-confirm that the authority folder satisfies the repository's `SOURCE.yaml` gate,
-verify the PDF and pinpoint, and check later history. Treat adoption orders as
-evidence of acceptance of a recommendation in that case, not proof of
+confirm that the declared `judge-corpus` material supplies the required source
+metadata, verify the PDF and pinpoint, and check later history. Treat adoption
+orders as evidence of acceptance of a recommendation in that case, not proof of
 independent authorship of its reasoning.
 
 ## Amendment observation

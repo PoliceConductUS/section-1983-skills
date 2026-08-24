@@ -102,7 +102,7 @@ QUALITY_CONTROL_RULES = (
     ),
     (
         "report-only output",
-        "It may read designated artifacts and write only its designated report or result.",
+        "It may read designated artifacts and return only its designated report or result for trusted-host publication.",
         "It may write changes to an artifact under review.",
     ),
     (
@@ -413,7 +413,8 @@ validation or evaluation support. General-purpose executable tooling belongs in
 its owning repository; this repository keeps only a thin skill wrapper.
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit,
 overwrite, correct, regenerate, or otherwise modify an artifact under review. A
 combined instruction to audit and fix does not authorize same-stage mutation.
 Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
@@ -497,7 +498,8 @@ description: {description}
 # Example skill
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit,
 overwrite, correct, regenerate, or otherwise modify an artifact under review. A
 combined instruction to audit and fix does not authorize same-stage mutation.
 Deadline pressure, sunk cost, claimed prior approval, and contrary workflow

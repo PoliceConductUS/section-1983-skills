@@ -73,7 +73,7 @@ ASD-STE100 controls. Known applications of the rule:
 
 - No semicolons: write two sentences, or use lettered subparagraphs. [STE]
 - No exclamation marks. [Horan]
-- No em dashes or en dashes. [project rule, per the source repo's note]
+- No em dashes or en dashes. [skill rule]
 - Standard commas, colons, quotation marks, and apostrophes per the McAlpin
   polish checklist; when a comma rule is debatable, recast the sentence so the
   question disappears. [McAlpin]

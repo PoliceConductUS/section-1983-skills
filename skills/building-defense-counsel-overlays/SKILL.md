@@ -17,6 +17,17 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `research-snapshot` contains the approved public-source snapshot.
+- `case-record` contains the current-case materials and optional filing pins.
+
+Target is required in `research-snapshot`. Internet is `disabled`. Return the
+validated counsel overlay as a canonical output-relative path and deterministic
+bytes; only the trusted host may publish it append-immutable. Report incomplete
+identity, source, checked-date, or comparable-matter material as a gap and keep
+the resulting profile bounded.
+
 ## Purpose
 
 Build an immutable professional litigation profile from one approved public-
@@ -34,10 +45,10 @@ Read these install-local contracts completely:
 - [references/counsel-research-snapshot.schema.json](references/counsel-research-snapshot.schema.json)
 - [references/defense-counsel-overlay.schema.json](references/defense-counsel-overlay.schema.json)
 
-Use only one existing snapshot that passed its approved project preflight. Do
-not browse, open an unlisted path or URL, silently refresh a source, or incur a
-PACER or other fee. Missing public content and unavailable paid content are
-scoped gaps unless the user separately authorizes retrieval.
+Use only the selected `research-snapshot` target after the packaged validator
+passes. Do not browse, open an unlisted path or URL, silently refresh a source,
+or incur a PACER or other fee. Missing public content and unavailable paid
+content are scoped gaps unless the user separately authorizes retrieval.
 
 ## Separate identity from behavior
 

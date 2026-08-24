@@ -28,6 +28,20 @@ Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
 
+## Folder inputs and output
+
+- `record` contains the approved docket, facts, evidence, and procedural record.
+- `authorities` contains approved governing law, rules, and local requirements.
+- `strategy` contains user-approved positions, concessions, and objectives.
+- `filing` contains any existing filing selected for drafting or revision.
+
+Target is optional in `filing`; without one, draft the document selected by the
+user request and supplied record. Internet is `authorized` for bounded
+localization and authority research. Return each requested artifact with a
+canonical output-relative path and deterministic bytes; only the trusted host
+may publish it append-immutable. Report missing facts, authority, strategy, or
+filing material as a gap without searching undeclared folders.
+
 Draft litigation documents in Section 1983 cases that read like a dispassionate
 factual record, not like advocacy theater and not like AI slop. The theory of
 this skill: adjectives and adverbs tell; facts show. A judge reading "Officer
@@ -79,7 +93,7 @@ Load each applicable skill once, in this order:
     any material authority-driven revision.
 
 The more specific skill adds requirements. It does not relax this skill,
-governing court rules, repository instructions, source gates, or authority
+governing court rules, declared-input instructions, source gates, or authority
 gates.
 
 **REQUIRED FINAL EDITING SUB-SKILL:** Every drafting task must use
@@ -121,16 +135,14 @@ rhetorical argument is a small part of any document, if present at all.
 
 ## Workflow
 
-1. Strategy. Locate the case strategy file: `strategy.md`, or the
-   highest-numbered `strategy-v*.md` if versions exist, in the case or
-   workstream folder. If none is found, ask the user for it (or for permission
-   to proceed without one) before drafting. Follow its objective and relief
-   hierarchy, argument-structure directives (which theory leads, which
-   corroborates, claim-lane rules), filing-packet requirements, and prescribed
-   audits. If the work surfaces a reason to depart — a new fact, a better
-   authority, a structural problem — do not deviate silently: propose the change
-   as the next strategy version and proceed only per the user's decision. Never
-   edit a strategy version in place.
+1. Strategy. Read the strategy supplied in the declared `strategy` role. If no
+   strategy is supplied, report the gap and ask the user whether to proceed
+   without one before drafting. Follow its objective and relief hierarchy,
+   argument-structure directives (which theory leads, which corroborates,
+   claim-lane rules), filing-packet requirements, and prescribed audits. If the
+   work surfaces a reason to depart — a new fact, a better authority, a
+   structural problem — do not deviate silently: propose the change and proceed
+   only per the user's decision.
 2. Route. For a complaint, amended complaint, or amendment proffer, before any
    drafting use the [complaint route](references/documents/complaint.md), load
    drafting-section-1983-complaints, and require that skill to read both of its
@@ -145,15 +157,15 @@ rhetorical argument is a small part of any document, if present at all.
    is the answer.
 3. Calendar. Establish the deadline before drafting. A perfect late filing
    loses. Local rules control most response deadlines.
-4. Localize. Run `references/localization.md`: use the cached project
-   localization record if one exists. Otherwise fetch the district's local rules
-   and the assigned judges' standing orders and answer the checklist. Preserve
-   it where the project requires; never write into an installed skill package or
-   invent a repository path.
-5. Source authorities. Follow `references/authorities.md` for every citation: a
-   verified-authorities tool or repository when available, binding before
-   persuasive, and a `[VERIFY]` marker on anything cited without a verified
-   source. Never invent a citation.
+4. Localize. Run `references/localization.md`: use approved localization
+   material in `authorities` when supplied. Otherwise use the authorized
+   internet connection to fetch the district's local rules and the assigned
+   judges' standing orders and answer the checklist. Return the result for
+   publication by the trusted host; never write into an installed skill package.
+5. Source authorities. Follow `references/authorities.md` for every citation:
+   use approved material in `authorities`, then bounded primary-source internet
+   research, binding before persuasive, and a `[VERIFY]` marker on anything not
+   verified from those sources. Never invent a citation.
 6. Gather the facts: who did what to whom, when, where, under what authority.
    Ask for what is missing before drafting.
 7. Draft from the selected document skeleton. For a complaint, draft from the
@@ -223,10 +235,10 @@ and keep their required wording.
 - `references/case-map.md` — docket event to responsive document, with federal
   deadline baselines.
 - `references/localization.md` — the protocol for district and judge variation,
-  using a project-defined cache when one exists and a returned internal audit
-  otherwise.
+  using approved material in `authorities` when supplied and returning a
+  completed audit otherwise.
 - `references/authorities.md` — citation sourcing rules and the interface this
-  skill expects from a verified-authorities tool or repository.
+  skill expects from the declared `authorities` role and authorized internet.
 - `references/discovery-coordination-contract.md` — shared discovery target,
   proportionality, source, existence, and plaintiff-decision boundaries. Each
   public discovery peer repeats its operative minimum for standalone use.

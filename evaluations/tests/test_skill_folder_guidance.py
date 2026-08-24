@@ -19,7 +19,7 @@ class SkillFolderGuidanceTest(unittest.TestCase):
             flags=re.MULTILINE | re.DOTALL,
         )
         self.assertIsNotNone(match, f"missing folder guidance: {skill}")
-        return match.group("section").lower()
+        return re.sub(r"\s+", " ", match.group("section")).strip().lower()
 
     def test_every_installed_skill_explains_its_exact_contract(self):
         for skill, values in CONTRACTS.items():
@@ -37,10 +37,14 @@ class SkillFolderGuidanceTest(unittest.TestCase):
                 self.assertIn("canonical output-relative path", section)
                 self.assertIn("append-immutable", section)
                 self.assertIn("only the trusted host", section)
-                self.assertRegex(section, r"report.{0,100}gap")
+                self.assertRegex(section, r"report.{0,220}gap")
 
     def test_composition_never_unions_skill_authority(self):
-        readme = (REPOSITORY / "README.md").read_text(encoding="utf-8").lower()
+        readme = re.sub(
+            r"\s+",
+            " ",
+            (REPOSITORY / "README.md").read_text(encoding="utf-8"),
+        ).lower()
         self.assertRegex(
             readme,
             r"(?:compose|composition).{0,240}invok.{0,120}separately",
@@ -72,6 +76,10 @@ class SkillFolderGuidanceTest(unittest.TestCase):
             r"local authorities repository",
             r"canonical verified-case root from the project",
             r"create it following the project `source\.yaml`",
+            r"save to `responses/",
+            r"write to two\s+separate folders",
+            r"write a new versioned ledger",
+            r"write only its designated report",
         )
         for pattern in forbidden:
             with self.subTest(pattern=pattern):

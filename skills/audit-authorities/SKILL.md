@@ -296,9 +296,25 @@ reviewing stage must propose a different new append-immutable report for
 trusted-host publication. Existing reports are immutable and must not be edited,
 overwritten, replaced, renamed, or deleted.
 
-The report identifies the logical input roles and hashes, selected target path
-and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
-approved source identities, and result. Separate failed findings from
-passing-but-suboptimal observations. Recommendations, proposed language, and
-copy-ready replacements for failures or passing-but-suboptimal observations are
-advisory and do not authorize implementation.
+The trusted host derives the report path as
+`quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and publishes
+exactly one report through the shared output writer. Generated reports beneath
+`quality-control-reports/` are excluded from the reviewed-input manifest and
+fingerprint unless one exact report is the explicit target; selecting one report
+does not include sibling or older reports.
+
+The trusted host prefixes the report with the canonical quality-control metadata
+envelope containing the skill and version, filtered logical input roles and
+reviewed artifact hashes, selected target role, relative path, SHA-256
+fingerprint, and byte size, quality-control kind, UTC run time, run ID, scope,
+approved source identities, result, failed findings, passing-but-suboptimal
+recommendations, and terminal run-manifest identity. The skill returns report
+content and structured findings; it does not build the canonical metadata
+envelope or publish output.
+
+The quality-control run is complete only after both report bytes and the
+terminal success manifest are durable and incomplete state is absent. Separate
+failed findings from passing-but-suboptimal observations. Recommendations,
+proposed language, and copy-ready replacements for failures or
+passing-but-suboptimal observations are advisory and do not authorize
+implementation.

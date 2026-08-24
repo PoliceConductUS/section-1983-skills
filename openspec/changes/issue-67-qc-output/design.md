@@ -2,11 +2,13 @@
 
 ## Invocation and target
 
-Every skill discovered by the repository's behavioral quality-control classifier
-has `target.policy: required` in its install-local folder contract. The target
-role remains restricted to that skill's approved target-role set. The trusted
-host rejects a missing, directory, escaping, or out-of-role target before report
-publication.
+Every independent quality-control stage requires one primary target. A
+quality-control-only skill uses `target.policy: required` in its install-local
+folder contract. A mixed drafting/auditing skill may retain an optional target
+for its non-QC drafting behavior, but the trusted-host QC report builder always
+rejects a missing target before report publication. The target role remains
+restricted to that skill's approved target-role set. The host also rejects a
+directory, escaping, or out-of-role target.
 
 ## Reviewed-input manifest
 
@@ -44,7 +46,7 @@ canonical compact JSON object has exactly:
 - `quality_control_kind`, `run_at`, and `run_id`;
 - `input_manifest`, containing ordered logical roles and reviewed file hashes;
 - `target`, containing role, relative path, SHA-256, and byte size;
-- `scope` and `result`;
+- `scope`, approved source identities, and `result`;
 - `failed_findings` and `passing_but_suboptimal_recommendations`;
 - `run_manifest`, containing the same run ID and the canonical output-relative
   identity `.skill-runs/<run-id>/manifest.json`.
@@ -78,7 +80,7 @@ run ID and therefore a different report path.
 
 Governance and every independently installable QC skill state that the stage:
 
-1. declares all exact input roles and one primary target;
+1. declares all exact input roles and one primary target for the QC stage;
 2. returns report content and structured findings only;
 3. uses the trusted-host QC publisher for one new report;
 4. treats prior reports as excluded unless one is the explicit target; and

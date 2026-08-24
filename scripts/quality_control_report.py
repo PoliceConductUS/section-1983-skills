@@ -166,6 +166,7 @@ def build_quality_control_report_plan(
     run_at: datetime,
     scope: str,
     result: str,
+    approved_source_identities: list[str],
     failed_findings: list[Any],
     passing_but_suboptimal_recommendations: list[Any],
     body: str,
@@ -183,6 +184,15 @@ def build_quality_control_report_plan(
         _fail("invalid-quality-control-scope")
     if not _valid_identifier(result):
         _fail("invalid-quality-control-result")
+    if (
+        type(approved_source_identities) is not list
+        or any(
+            not isinstance(identity, str) or not identity.strip()
+            for identity in approved_source_identities
+        )
+        or len(approved_source_identities) != len(set(approved_source_identities))
+    ):
+        _fail("invalid-quality-control-source-identities")
     if type(failed_findings) is not list:
         _fail("invalid-quality-control-findings")
     if type(passing_but_suboptimal_recommendations) is not list:
@@ -199,6 +209,7 @@ def build_quality_control_report_plan(
     target, _, _ = _target_identity(invocation, input_manifest)
 
     metadata = {
+        "approved_source_identities": copy.deepcopy(approved_source_identities),
         "failed_findings": _canonical_value(
             failed_findings, "invalid-quality-control-findings"
         ),
@@ -245,6 +256,7 @@ def publish_quality_control_report(
     run_at: datetime,
     scope: str,
     result: str,
+    approved_source_identities: list[str],
     failed_findings: list[Any],
     passing_but_suboptimal_recommendations: list[Any],
     body: str,
@@ -259,6 +271,7 @@ def publish_quality_control_report(
         run_at=run_at,
         scope=scope,
         result=result,
+        approved_source_identities=approved_source_identities,
         failed_findings=failed_findings,
         passing_but_suboptimal_recommendations=(
             passing_but_suboptimal_recommendations

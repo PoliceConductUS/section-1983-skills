@@ -76,6 +76,7 @@ class QualityControlReportTest(unittest.TestCase):
             "run_at": datetime(2026, 8, 24, 16, 17, 18, 123456, timezone.utc),
             "scope": "Citations and quoted language in the selected filing.",
             "result": "pass",
+            "approved_source_identities": ["authorities/case.txt"],
             "failed_findings": [],
             "passing_but_suboptimal_recommendations": [
                 {"id": "QC-ADVISORY-1", "recommendation": "Prefer a tighter pinpoint."}
@@ -108,6 +109,7 @@ class QualityControlReportTest(unittest.TestCase):
         self.assertEqual(
             metadata,
             {
+                "approved_source_identities": ["authorities/case.txt"],
                 "failed_findings": [],
                 "input_manifest": {
                     "inputs": [
@@ -295,6 +297,7 @@ class QualityControlReportTest(unittest.TestCase):
             ("naive-time", {"run_at": datetime(2026, 8, 24)}),
             ("blank-scope", {"scope": ""}),
             ("invalid-result", {"result": "looks good"}),
+            ("invalid-sources", {"approved_source_identities": [""]}),
             ("invalid-body", {"body": b"not markdown text"}),
             ("invalid-findings", {"failed_findings": "none"}),
         )

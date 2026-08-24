@@ -66,3 +66,20 @@ on both durable and incomplete artifacts.
 Failure receipts accept only a lower-kebab code and phase of at most 64
 characters. Receipts never include absolute machine paths, raw exceptions,
 tracebacks, environment values, credentials, or case-material excerpts.
+
+## Quality-control reports
+
+The trusted host builds an independent QC report through
+`scripts/quality_control_report.py`. A QC stage always has one primary target,
+even when the installed skill permits targetless non-QC drafting behavior. The
+host excludes generated files beneath `quality-control-reports/` from the
+reviewed-input manifest unless one exact report is the target, prefixes the
+Markdown body with canonical QC metadata, and derives the immutable path from
+the check kind, UTC run time, and run ID.
+
+The QC publisher starts one `append-immutable` `OutputRun`, writes exactly one
+report, and completes the run. Its metadata names the future terminal manifest
+at `.skill-runs/<run-id>/manifest.json`; that identity does not claim
+completion. The publisher returns success only after both the report and
+manifest are durable and incomplete state is absent. A validation, collision,
+write, or receipt failure never reports a completed QC run.

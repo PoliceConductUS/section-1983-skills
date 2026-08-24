@@ -11,8 +11,8 @@ reviewed artifacts.
 
 ## What changes
 
-- Require one declared primary target for every detected independent
-  quality-control entrypoint.
+- Require one declared primary target whenever an entrypoint runs an independent
+  quality-control stage; retain optional targets for non-QC drafting behavior.
 - Add a trusted-host quality-control report publisher on top of the existing
   folder invocation validator and `OutputRun`.
 - Give every report one canonical collision-resistant path containing its check

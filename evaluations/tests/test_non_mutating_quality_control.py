@@ -96,6 +96,23 @@ EXPLICIT_OUTPUT_RULES = (
     "skill's target policy.",
     "The reviewing stage must propose a different new append-immutable report "
     "for trusted-host publication.",
+    "The trusted host derives the report path as "
+    "`quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and "
+    "publishes exactly one report through the shared output writer.",
+    "Generated reports beneath `quality-control-reports/` are excluded from "
+    "the reviewed-input manifest and fingerprint unless one exact report is "
+    "the explicit target; selecting one report does not include sibling or "
+    "older reports.",
+    "The trusted host prefixes the report with the canonical quality-control "
+    "metadata envelope containing the skill and version, filtered logical "
+    "input roles and reviewed artifact hashes, selected target role, relative "
+    "path, SHA-256 fingerprint, and byte size, quality-control kind, UTC run "
+    "time, run ID, scope, approved source identities, result, failed findings, "
+    "passing-but-suboptimal recommendations, and terminal run-manifest identity.",
+    "The quality-control run is complete only after both report bytes and the "
+    "terminal success manifest are durable and incomplete state is absent.",
+    "The skill returns report content and structured findings; it does not "
+    "build the canonical metadata envelope or publish output.",
 )
 OBSOLETE_REPORT_RULES = (
     "resolve exactly one existing version-specific folder",
@@ -198,8 +215,15 @@ class NonMutatingQualityControlTest(unittest.TestCase):
                 assert_contract(self, skill)
                 assert_explicit_output_contract(self, skill)
 
-    def test_each_quality_control_skill_requires_one_primary_target(self):
-        for name in sorted(QUALITY_CONTROL_SKILLS):
+    def test_quality_control_only_skills_require_one_primary_target(self):
+        quality_control_only = {
+            "adversarial-filing-review",
+            "audit-authorities",
+            "auditing-section-1983-discovery-responses",
+            "auditing-section-1983-privilege-logs",
+            "filing-ci",
+        }
+        for name in sorted(quality_control_only):
             with self.subTest(skill=name):
                 contract = json.loads(
                     (

@@ -3,7 +3,7 @@
   "skill": "auditing-section-1983-discovery-responses",
   "input_roles": ["served-discovery", "responses", "production", "authorities"],
   "target": {
-    "policy": "optional",
+    "policy": "required",
     "roles": ["served-discovery", "responses"]
   },
   "internet": "disabled",

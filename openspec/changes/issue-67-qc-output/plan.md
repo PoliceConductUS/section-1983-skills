@@ -6,32 +6,33 @@
 
 ## Task 1: OpenSpec and draft PR
 
-- [ ] Record the selected trusted-host report-envelope design and durable spec
+- [x] Record the selected trusted-host report-envelope design and durable spec
       deltas.
-- [ ] Validate the change, commit, push, and open a draft PR against the Issue
+- [x] Validate the change, commit, push, and open a draft PR against the Issue
       #71 branch.
 
 ## Task 2: QC publisher RED/GREEN
 
-- [ ] Add RED tests for required primary targets, canonical unique report paths,
+- [x] Add RED tests for required primary targets, canonical unique report paths,
       complete metadata, exact target hashes, and default prior-report
       exclusion.
-- [ ] Add RED filesystem tests for input/prior-report preservation, output
+- [x] Add RED filesystem tests for input/prior-report preservation, output
       confinement, collision refusal, write/receipt failure honesty, and
       advisory-only recommendations.
-- [ ] Implement the narrow trusted-host report builder/publisher on top of
+- [x] Implement the narrow trusted-host report builder/publisher on top of
       `build_input_manifest()` and `OutputRun`.
-- [ ] Run focused tests and commit/push RED and GREEN separately.
+- [x] Run focused tests and commit/push RED and GREEN separately.
 
 ## Task 3: Governance and entrypoints
 
-- [ ] Change every behaviorally detected QC folder contract to require exactly
-      one target in its existing approved target roles.
-- [ ] Update governance and every QC `SKILL.md` with the exact shared report
+- [x] Make every QC-only folder contract require exactly one target; preserve
+      optional targets for mixed drafting behavior while requiring a target at
+      the QC publisher.
+- [x] Update governance and every QC `SKILL.md` with the exact shared report
       metadata, filtering, receipt, and advisory-remediation contract.
-- [ ] Extend deterministic governance tests and stable findings without claiming
+- [x] Extend deterministic governance tests and stable findings without claiming
       to prove subjective report quality.
-- [ ] Run focused tests, commit, and push.
+- [x] Run focused tests, commit, and push.
 
 ## Task 4: Verify and archive
 

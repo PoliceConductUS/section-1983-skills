@@ -45,7 +45,7 @@ def _relative_parts(value: Any) -> tuple[str, ...]:
         or "\x00" in value
         or re.match(r"^[A-Za-z]:/", value) is not None
         or any(part in {"", ".", ".."} for part in parts)
-        or parts[0] == ".skill-runs"
+        or parts[0].casefold() == ".skill-runs"
     ):
         _fail("invalid-output-path")
     return tuple(parts)
@@ -111,8 +111,11 @@ def _input_file_identities(invocation: ValidatedInvocation) -> frozenset[tuple[i
         finally:
             active.remove(directory_identity)
 
-    for _, root in invocation.inputs:
-        walk(root, root, set())
+    try:
+        for _, root in invocation.inputs:
+            walk(root, root, set())
+    except RecursionError:
+        _fail("input-index-unavailable")
     return frozenset(identities)
 
 
@@ -125,6 +128,16 @@ def _existing_destination_error(parent_fd: int, leaf: str, input_identities: fro
         _fail("invalid-output-path")
     if stat.S_ISREG(metadata.st_mode) and (metadata.st_dev, metadata.st_ino) in input_identities:
         _fail("input-alias")
+    if stat.S_ISLNK(metadata.st_mode):
+        try:
+            target_metadata = os.stat(leaf, dir_fd=parent_fd, follow_symlinks=True)
+        except OSError:
+            _fail("output-collision")
+        if stat.S_ISREG(target_metadata.st_mode) and (
+            target_metadata.st_dev,
+            target_metadata.st_ino,
+        ) in input_identities:
+            _fail("input-alias")
     _fail("output-collision")
 
 
@@ -185,6 +198,7 @@ class OutputRun:
         self._staging_fd = staging_fd
         self._input_identities = input_identities
         self._artifacts: list[dict[str, Any]] = []
+        self._incomplete_artifacts: list[dict[str, Any]] = []
 
     @classmethod
     def start(
@@ -198,7 +212,7 @@ class OutputRun:
     ) -> "OutputRun":
         if not _valid_run_id(run_id):
             _fail("invalid-run-id")
-        if mode not in _MODES:
+        if not isinstance(mode, str) or mode not in _MODES:
             _fail("invalid-run-mode")
 
         try:
@@ -292,6 +306,7 @@ class OutputRun:
         parts = _relative_parts(relative_path)
         staging_name, staging_file_fd = self._new_staging_name()
         staged = True
+        linked = False
         parent_fd = None
         try:
             try:
@@ -307,6 +322,7 @@ class OutputRun:
 
             parent_fd = self._destination_parent(parts)
             _existing_destination_error(parent_fd, parts[-1], self._input_identities)
+            artifact = {"path": relative_path, "sha256": sha256, "size": size}
             try:
                 os.link(
                     staging_name,
@@ -320,18 +336,20 @@ class OutputRun:
                 _fail("output-collision")
             except (OSError, TypeError):
                 _fail("publication-failed")
+            linked = True
             try:
                 os.fsync(parent_fd)
             except OSError:
+                self._incomplete_artifacts.append({**artifact, "phase": "destination-sync"})
                 _fail("publication-incomplete")
+            self._artifacts.append(artifact)
             try:
                 os.unlink(staging_name, dir_fd=self._staging_fd)
                 staged = False
             except OSError:
+                self._incomplete_artifacts.append({**artifact, "phase": "staging-cleanup"})
                 _fail("staging-incomplete")
 
-            artifact = {"path": relative_path, "sha256": sha256, "size": size}
-            self._artifacts.append(artifact)
             return dict(artifact)
         finally:
             if staging_file_fd >= 0:
@@ -339,7 +357,7 @@ class OutputRun:
                     os.close(staging_file_fd)
                 except OSError:
                     pass
-            if staged:
+            if staged and not linked:
                 try:
                     os.unlink(staging_name, dir_fd=self._staging_fd)
                 except OSError:

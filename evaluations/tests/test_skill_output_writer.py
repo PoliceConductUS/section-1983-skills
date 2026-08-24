@@ -2,6 +2,7 @@ import hashlib
 import io
 import os
 import stat
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -233,6 +234,38 @@ class SkillOutputWriterTest(unittest.TestCase):
 
         self.assertEqual(self.snapshot_tree(), before)
 
+    def test_rejects_non_string_and_unhashable_run_modes_without_output_changes(self):
+        for label, mode in (("none", None), ("list", []), ("dict", {})):
+            with self.subTest(case=label):
+                before = self.snapshot_tree()
+
+                self.assert_error(
+                    lambda value=mode: self.start_run("invalid-mode-run", mode=value),
+                    "invalid-run-mode",
+                )
+
+                self.assertEqual(self.snapshot_tree(), before)
+
+    def test_input_index_recursion_exhaustion_is_bounded_before_output_changes(self):
+        current = self.record_root
+        for _ in range(120):
+            current = current / "d"
+            current.mkdir()
+        (current / "deep.txt").write_bytes(b"deep input\n")
+        before = self.snapshot_tree()
+        original_limit = sys.getrecursionlimit()
+
+        try:
+            sys.setrecursionlimit(80)
+            self.assert_error(
+                lambda: self.start_run("deep-input-run"),
+                "input-index-unavailable",
+            )
+        finally:
+            sys.setrecursionlimit(original_limit)
+
+        self.assertEqual(self.snapshot_tree(), before)
+
     def test_rejects_invalid_run_ids_before_creating_run_state(self):
         cases = (
             ("empty", ""),
@@ -289,6 +322,8 @@ class SkillOutputWriterTest(unittest.TestCase):
             ("drive-prefix", "C:/report.md"),
             ("reserved-root", ".skill-runs"),
             ("reserved-child", ".skill-runs/foreign/manifest.json"),
+            ("reserved-uppercase", ".SKILL-RUNS"),
+            ("reserved-mixed-case", ".Skill-Runs/foreign/manifest.json"),
         )
 
         for index, (label, relative_path) in enumerate(cases):
@@ -416,6 +451,30 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertEqual(self.snapshot_path(alias), alias_before)
         self.assertEqual(source.stat().st_ino, alias.stat().st_ino)
 
+    def test_input_symlink_alias_is_classified_without_mutating_or_replacing_it(self):
+        source = self.record_root / "source.txt"
+        source.chmod(0o640)
+        alias = self.output_root / "reports" / "input-alias.txt"
+        alias.parent.mkdir()
+        alias.symlink_to(source)
+        source_before = self.snapshot_path(source)
+        alias_before = alias.lstat()
+        alias_target_before = os.readlink(alias)
+        run = self.start_run("input-symlink-alias-run")
+
+        self.assert_error(
+            lambda: run.write("reports/input-alias.txt", b"replacement bytes\n"),
+            "input-alias",
+        )
+
+        alias_after = alias.lstat()
+        self.assertEqual(self.snapshot_path(source), source_before)
+        self.assertEqual(os.readlink(alias), alias_target_before)
+        self.assertEqual(alias_after.st_dev, alias_before.st_dev)
+        self.assertEqual(alias_after.st_ino, alias_before.st_ino)
+        self.assertEqual(alias_after.st_mode, alias_before.st_mode)
+        self.assertEqual(alias_after.st_mtime_ns, alias_before.st_mtime_ns)
+
     def test_successful_write_preserves_both_declared_input_trees(self):
         record_before = self.snapshot_tree_at(self.record_root)
         authority_before = self.snapshot_tree_at(self.authority_root)
@@ -481,6 +540,79 @@ class SkillOutputWriterTest(unittest.TestCase):
             self.assert_error(lambda: run.write("reports/unpublished.bin", b"complete staged bytes"))
 
         self.assert_failed_write_is_confined("reports/unpublished.bin", run_id, before)
+
+    def test_destination_sync_failure_preserves_linked_staging_and_incomplete_accounting(self):
+        run_id = "destination-sync-run"
+        (self.output_root / "reports").mkdir()
+        run = self.start_run(run_id)
+        original_fsync = os.fsync
+        calls = 0
+
+        def fail_destination_sync(descriptor):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected destination sync path /private/case-material")
+            return original_fsync(descriptor)
+
+        contents = b"linked but incompletely durable\n"
+        expected = {
+            "path": "reports/incomplete.bin",
+            "sha256": hashlib.sha256(contents).hexdigest(),
+            "size": len(contents),
+        }
+        with mock.patch.object(skill_output_writer.os, "fsync", side_effect=fail_destination_sync):
+            self.assert_error(
+                lambda: run.write(expected["path"], contents),
+                "publication-incomplete",
+            )
+
+        final = self.output_root / expected["path"]
+        staging = self.output_root / ".skill-runs" / run_id / "staging"
+        staged_files = list(staging.iterdir())
+        self.assertEqual(final.read_bytes(), contents)
+        self.assertEqual(len(staged_files), 1)
+        self.assertEqual(staged_files[0].read_bytes(), contents)
+        self.assertEqual(staged_files[0].stat().st_ino, final.stat().st_ino)
+        self.assertEqual(run._artifacts, [])
+        self.assertEqual(
+            run._incomplete_artifacts,
+            [{**expected, "phase": "destination-sync"}],
+        )
+
+    def test_staging_unlink_failure_counts_durable_artifact_and_preserves_incomplete_evidence(self):
+        run_id = "staging-unlink-run"
+        (self.output_root / "reports").mkdir()
+        run = self.start_run(run_id)
+        contents = b"durable output with stale staging link\n"
+        expected = {
+            "path": "reports/durable.bin",
+            "sha256": hashlib.sha256(contents).hexdigest(),
+            "size": len(contents),
+        }
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "unlink",
+            side_effect=OSError("injected unlink path /private/case-material"),
+        ):
+            self.assert_error(
+                lambda: run.write(expected["path"], contents),
+                "staging-incomplete",
+            )
+
+        final = self.output_root / expected["path"]
+        staging = self.output_root / ".skill-runs" / run_id / "staging"
+        staged_files = list(staging.iterdir())
+        self.assertEqual(final.read_bytes(), contents)
+        self.assertEqual(len(staged_files), 1)
+        self.assertEqual(staged_files[0].read_bytes(), contents)
+        self.assertEqual(staged_files[0].stat().st_ino, final.stat().st_ino)
+        self.assertEqual(run._artifacts, [expected])
+        self.assertEqual(
+            run._incomplete_artifacts,
+            [{**expected, "phase": "staging-cleanup"}],
+        )
 
 
 if __name__ == "__main__":

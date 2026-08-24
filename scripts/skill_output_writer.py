@@ -101,6 +101,14 @@ def _entry_exists(directory_fd: int, name: str) -> bool:
     return True
 
 
+def _unlink_and_sync(directory_fd: int, name: str, error_code: str) -> None:
+    try:
+        os.unlink(name, dir_fd=directory_fd)
+        os.fsync(directory_fd)
+    except OSError:
+        _fail(error_code)
+
+
 def _publish_record(
     staging_fd: int,
     run_fd: int,
@@ -109,9 +117,11 @@ def _publish_record(
     *,
     on_visible=None,
 ) -> None:
-    staging_name, descriptor = _new_staging_file(staging_fd, "receipt", "receipt-unavailable")
+    staging_name = None
+    descriptor = -1
     linked = False
     try:
+        staging_name, descriptor = _new_staging_file(staging_fd, "receipt", "receipt-unavailable")
         try:
             _write_all(descriptor, contents, "receipt-unavailable")
         finally:
@@ -119,6 +129,7 @@ def _publish_record(
                 os.close(descriptor)
             except OSError:
                 pass
+            descriptor = -1
         try:
             os.link(
                 staging_name,
@@ -128,21 +139,25 @@ def _publish_record(
                 follow_symlinks=False,
             )
             linked = True
-            if on_visible is not None:
-                on_visible()
             os.fsync(run_fd)
-            os.unlink(staging_name, dir_fd=staging_fd)
-            os.fsync(staging_fd)
-        except OSError:
-            if on_visible is not None and _entry_exists(run_fd, name):
-                on_visible()
+            _unlink_and_sync(staging_fd, staging_name, "receipt-unavailable")
+        except OutputError:
+            raise
+        except (OSError, TypeError):
             _fail("receipt-unavailable")
     finally:
-        if not linked:
+        if descriptor >= 0:
             try:
-                os.unlink(staging_name, dir_fd=staging_fd)
+                os.close(descriptor)
             except OSError:
                 pass
+        if staging_name is not None and not linked:
+            try:
+                _unlink_and_sync(staging_fd, staging_name, "receipt-unavailable")
+            except OutputError:
+                pass
+        if on_visible is not None and _entry_exists(run_fd, name):
+            on_visible()
 
 
 def _restore_incomplete(run_fd: int, contents: bytes) -> None:
@@ -198,6 +213,7 @@ def _normalize_internet_sources(value: Any) -> tuple[dict[str, Any], ...]:
         if identity_field == "url":
             if (
                 len(identity) > 2048
+                or not identity.startswith(("http://", "https://"))
                 or "\\" in identity
                 or any(ord(character) < 33 or ord(character) > 126 for character in identity)
             ):
@@ -562,14 +578,9 @@ class OutputRun:
                 _fail("publication-incomplete")
             self._artifacts.append(artifact)
             try:
-                os.unlink(staging_name, dir_fd=self._staging_fd)
+                _unlink_and_sync(self._staging_fd, staging_name, "staging-incomplete")
                 staged = False
-            except OSError:
-                self._incomplete_artifacts.append({**artifact, "phase": "staging-cleanup"})
-                _fail("staging-incomplete")
-            try:
-                os.fsync(self._staging_fd)
-            except OSError:
+            except OutputError:
                 self._incomplete_artifacts.append({**artifact, "phase": "staging-cleanup"})
                 _fail("staging-incomplete")
 
@@ -582,8 +593,8 @@ class OutputRun:
                     pass
             if staged and not linked:
                 try:
-                    os.unlink(staging_name, dir_fd=self._staging_fd)
-                except OSError:
+                    _unlink_and_sync(self._staging_fd, staging_name, "staging-incomplete")
+                except OutputError:
                     pass
             if parent_fd is not None:
                 try:
@@ -649,7 +660,7 @@ class OutputRun:
             except OSError:
                 _restore_incomplete(self._run_fd, self._incomplete_bytes)
                 _fail("receipt-unavailable")
-        except OutputError:
+        except BaseException:
             if self._terminal:
                 self._close_descriptors()
             raise
@@ -685,7 +696,7 @@ class OutputRun:
                 receipt_bytes,
                 on_visible=self._seal,
             )
-        except OutputError:
+        except BaseException:
             if self._terminal:
                 self._close_descriptors()
             raise

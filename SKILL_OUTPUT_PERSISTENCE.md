@@ -48,12 +48,13 @@ size.
 An internet-derived artifact supplies one or more source records before its
 bytes are published. Each source has exactly one nonempty `url` or `identity`, a
 valid UTC `retrieved_at` value normalized to `Z`, a lowercase SHA-256, and an
-optional nonempty `request_context` of at most 1024 characters. Source records
-include URLs of at most 2048 printable ASCII characters using an absolute
-lowercase `http://` or `https://` scheme with a nonempty host and no whitespace,
-control character, backslash, embedded username/password, or invalid port.
-Source records are rejected when internet is disabled. Receipt `internet.used`
-is derived from validated sources on both durable and incomplete artifacts.
+optional nonempty `request_context` of at most 1024 characters. Each URL has at
+most 2048 printable ASCII characters. Its raw value begins with literal
+lowercase `http://` or `https://`, has a nonempty host, and contains no
+whitespace, control character, backslash, embedded username/password, or invalid
+port. Source records are rejected when internet is disabled. Receipt
+`internet.used` is derived from validated sources on both durable and incomplete
+artifacts.
 
 Failure receipts accept only a lower-kebab code and phase of at most 64
 characters. Receipts never include absolute machine paths, raw exceptions,

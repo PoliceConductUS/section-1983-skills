@@ -148,24 +148,44 @@ QUALITY_CONTROL_RULES = (
 )
 QUALITY_CONTROL_REPORT_RULES = (
     (
-        "version directory",
-        "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
-        "A quality-control stage may choose any convenient output folder.",
+        "declared target",
+        "Before review, an independent quality-control stage must select exactly one artifact through its declared input roles and target policy.",
+        "An independent quality-control stage may select an artifact outside its declared input roles or target policy.",
     ),
     (
-        "version-local report",
-        "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
-        "A report may be written outside the audited version's `audits/` directory.",
+        "explicit append-immutable output",
+        "It must propose exactly one unique append-immutable output-relative report beneath the caller-declared output folder.",
+        "It may propose a mutable or non-unique report outside the caller-declared output folder.",
     ),
     (
-        "unique filename",
-        "Name it `<check-kind>-<UTC timestamp>-<run-id>.md`.",
-        "Use a stable shared filename for the latest report.",
+        "no fallback",
+        "A missing, ambiguous, nonexistent, or out-of-role target must fail closed without a fallback write.",
+        "A missing, ambiguous, nonexistent, or out-of-role target may use a fallback write.",
     ),
     (
-        "exclusive creation",
-        "Create the report exclusively; if the path exists, fail closed and preserve its bytes.",
-        "If the path exists, overwrite the prior report.",
+        "path confinement",
+        "The report path must reject absolute paths, traversal, symlink escapes, and existing destinations.",
+        "The report path may be absolute, traverse, follow symlink escapes, or replace an existing destination.",
+    ),
+    (
+        "host-only publication",
+        "Only the trusted host may publish the report through the shared output boundary.",
+        "The skill or helper may publish the report directly.",
+    ),
+    (
+        "prior report exclusion",
+        "Prior quality-control reports must not become implicit input.",
+        "Prior quality-control reports may become implicit input.",
+    ),
+    (
+        "declared prior report",
+        "A report may be reviewed only when that exact report is expressly present in a declared input role and selected consistently with the reviewing skill's target policy.",
+        "A report may be reviewed from ambient output without a declared input role or target.",
+    ),
+    (
+        "new review report",
+        "The reviewing stage must propose a different new append-immutable report for trusted-host publication.",
+        "The reviewing stage may update or replace the report under review.",
     ),
     (
         "immutable reports",
@@ -173,24 +193,9 @@ QUALITY_CONTROL_REPORT_RULES = (
         "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
     ),
     (
-        "report input exclusion",
-        "Exclude `audits/` from review input unless one exact report is expressly designated; write any review of that report to a different new report.",
-        "Include `audits/` in every review and update the report being reviewed.",
-    ),
-    (
-        "unresolved version",
-        "If the version folder is missing, ambiguous, nonexistent, or outside the designated boundary, report output is unavailable and write nowhere else.",
-        "If the version folder cannot be resolved, write the report to a fallback location.",
-    ),
-    (
-        "path confinement",
-        "Reject traversal and any `audits/` symlink that resolves outside the canonical audits directory.",
-        "Follow traversal or an `audits/` symlink outside the canonical audits directory.",
-    ),
-    (
         "report identity",
-        "The report identifies the audited version, artifact paths and SHA-256 fingerprints, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
-        "The report may omit its audited version, artifact fingerprints, scope, sources, or result.",
+        "The report identifies the logical input roles and hashes, selected target path and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
+        "The report may omit its logical input roles, target fingerprint, scope, sources, or result.",
     ),
     (
         "separate observations",
@@ -235,6 +240,9 @@ PARAPHRASED_REPORT_PERMISSIONS = (
     "An independent audit may save its report in a shared project folder.",
     "The latest audit report may replace the previous report.",
     "Prior audit reports are included in every re-audit.",
+    "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
+    "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
+    "Exclude `audits/` from review input unless one exact report is expressly designated.",
 )
 QUALITY_CONTROL_DESCRIPTIONS = (
     "Use when auditing a synthetic artifact.",
@@ -418,25 +426,27 @@ remediated artifact. An internal self-check inside an explicitly authorized
 drafting or revision stage may guide edits within that stage, but it is not an
 independent quality-control result.
 
-Before review, resolve exactly one existing version-specific folder inside the
-designated project boundary. Write exactly one new report under the canonical
-`<version-folder>/audits/` directory. Name it
-`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
-the path exists, fail closed and preserve its bytes. Existing reports are
-immutable and must not be edited, overwritten, replaced, renamed, or deleted.
-Exclude `audits/` from review input unless one exact report is expressly
-designated; write any review of that report to a different new report. If the
-version folder is missing, ambiguous, nonexistent, or outside the designated
-boundary, report output is unavailable and write nowhere else.
-Reject traversal and any `audits/` symlink that resolves outside the canonical
-audits directory.
+Before review, an independent quality-control stage must select exactly one
+artifact through its declared input roles and target policy. It must propose
+exactly one unique append-immutable output-relative report beneath the
+caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
+target must fail closed without a fallback write. The report path must reject
+absolute paths, traversal, symlink escapes, and existing destinations. Only the
+trusted host may publish the report through the shared output boundary.
 
-The report identifies the audited version, artifact paths and SHA-256
-fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
-identities, and result. Separate failed findings from passing-but-suboptimal
-observations. Recommendations, proposed language, and copy-ready replacements
-for failures or passing-but-suboptimal observations are advisory and do not
-authorize implementation.
+Prior quality-control reports must not become implicit input. A report may be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage must propose a different new append-immutable report for
+trusted-host publication. Existing reports are immutable and must not be
+edited, overwritten, replaced, renamed, or deleted.
+
+The report identifies the logical input roles and hashes, selected target path
+and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
+approved source identities, and result. Separate failed findings from
+passing-but-suboptimal observations. Recommendations, proposed language, and
+copy-ready replacements for failures or passing-but-suboptimal observations are
+advisory and do not authorize implementation.
 """
 
 
@@ -500,25 +510,27 @@ remediated artifact. An internal self-check inside an explicitly authorized
 drafting or revision stage may guide edits within that stage, but it is not an
 independent quality-control result.
 
-Before review, resolve exactly one existing version-specific folder inside the
-designated project boundary. Write exactly one new report under the canonical
-`<version-folder>/audits/` directory. Name it
-`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
-the path exists, fail closed and preserve its bytes. Existing reports are
-immutable and must not be edited, overwritten, replaced, renamed, or deleted.
-Exclude `audits/` from review input unless one exact report is expressly
-designated; write any review of that report to a different new report. If the
-version folder is missing, ambiguous, nonexistent, or outside the designated
-boundary, report output is unavailable and write nowhere else.
-Reject traversal and any `audits/` symlink that resolves outside the canonical
-audits directory.
+Before review, an independent quality-control stage must select exactly one
+artifact through its declared input roles and target policy. It must propose
+exactly one unique append-immutable output-relative report beneath the
+caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
+target must fail closed without a fallback write. The report path must reject
+absolute paths, traversal, symlink escapes, and existing destinations. Only the
+trusted host may publish the report through the shared output boundary.
 
-The report identifies the audited version, artifact paths and SHA-256
-fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
-identities, and result. Separate failed findings from passing-but-suboptimal
-observations. Recommendations, proposed language, and copy-ready replacements
-for failures or passing-but-suboptimal observations are advisory and do not
-authorize implementation.
+Prior quality-control reports must not become implicit input. A report may be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage must propose a different new append-immutable report for
+trusted-host publication. Existing reports are immutable and must not be
+edited, overwritten, replaced, renamed, or deleted.
+
+The report identifies the logical input roles and hashes, selected target path
+and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
+approved source identities, and result. Separate failed findings from
+passing-but-suboptimal observations. Recommendations, proposed language, and
+copy-ready replacements for failures or passing-but-suboptimal observations are
+advisory and do not authorize implementation.
 """
 
 
@@ -859,7 +871,9 @@ description: Use when independently auditing a synthetic artifact.
 
     def test_governance_validator_rejects_missing_or_inverted_quality_control_report_contract(self):
         valid = valid_quality_control_skill()
-        without_report = valid.partition("\nBefore review, resolve exactly one")[0]
+        without_report = valid.partition(
+            "\nBefore review, an independent quality-control stage"
+        )[0]
         mutations = [("missing report contract", without_report)]
         mutations.extend(
             (
@@ -885,7 +899,7 @@ description: Use when independently auditing a synthetic artifact.
         for description in QUALITY_CONTROL_DESCRIPTIONS:
             with self.subTest(description=description):
                 skill = valid_quality_control_skill(description).partition(
-                    "\nBefore review, resolve exactly one"
+                    "\nBefore review, an independent quality-control stage"
                 )[0]
                 with tempfile.TemporaryDirectory() as directory:
                     root = Path(directory)
@@ -1011,7 +1025,9 @@ description: Use when independently auditing a synthetic artifact.
 
     def test_governance_validator_rejects_missing_or_inverted_quality_control_report_policy(self):
         valid = valid_policy()
-        without_report = valid.partition("\nBefore review, resolve exactly one")[0]
+        without_report = valid.partition(
+            "\nBefore review, an independent quality-control stage"
+        )[0]
         mutations = [("missing report contract", without_report)]
         mutations.extend(
             (

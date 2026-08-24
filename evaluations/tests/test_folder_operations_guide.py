@@ -53,13 +53,18 @@ FORBIDDEN_SAFETY_CONTRADICTIONS = {
         r" an allegation or inference into a fact"
     ),
     "human approval": (
-        r"(?:no|without) actual user approval.{0,120}"
-        r"protected decision.{0,120}`?status: approved`?"
+        r"(?:no actual user approval is required.{0,120}protected decision|"
+        r"protected decision.{0,120}"
+        r"(?:may|can|should|must|is allowed to) change.{0,120}"
+        r"without actual user approval)"
     ),
     "immutable inputs": (
         r"\b(?:may|can|should|must|is allowed to) overwrite immutable inputs"
     ),
-    "configured validation": r"run (?:guessed|unconfigured|any) validation commands",
+    "configured validation": (
+        r"\b(?:(?:may|can|should|must|is allowed to) run|run)"
+        r" (?:guessed|unconfigured|arbitrary) validation commands"
+    ),
     "filing ready": (
         r"\b(?:workspace|artifact|output|report|packet) (?:is|are) filing-ready\b"
     ),
@@ -448,15 +453,29 @@ class FolderOperationsGuideTest(unittest.TestCase):
             with self.subTest(contradiction=contradiction):
                 self.assertNotRegex(self.normalized_lower, pattern)
 
-    def test_safety_contradiction_patterns_allow_prohibitions_and_reject_permissions(self):
+    def test_every_safety_contradiction_pattern_distinguishes_prohibition_from_reversal(self):
         pattern_cases = {
             "source classification": (
                 "do not convert an allegation or inference into a fact",
                 "may convert an allegation or inference into a fact",
             ),
+            "human approval": (
+                "without actual user approval, a protected decision cannot change "
+                "to `status: approved`",
+                "no actual user approval is required before a protected decision "
+                "changes to `status: approved`",
+            ),
             "immutable inputs": (
                 "cannot overwrite immutable inputs",
                 "is allowed to overwrite immutable inputs",
+            ),
+            "configured validation": (
+                "do not run any validation commands not configured by the project",
+                "may run arbitrary validation commands",
+            ),
+            "filing ready": (
+                "the artifact is not filing-ready",
+                "the artifact is filing-ready",
             ),
         }
         for obligation, (safe, unsafe) in pattern_cases.items():

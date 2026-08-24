@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import errno
 import hashlib
 import json
@@ -21,6 +22,10 @@ _RUN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _SKILL_VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _FAILURE_VALUE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_RETRIEVED_AT = re.compile(
+    r"^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])"
+    r"T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\.[0-9]+)?(?:Z|\+00:00)$"
+)
 _MODES = frozenset({"append-immutable", "fresh-regenerable"})
 _DIRECTORY_FLAGS = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
 _STAGING_CHUNK_SIZE = 1024 * 1024
@@ -232,9 +237,7 @@ def _normalize_internet_sources(value: Any) -> tuple[dict[str, Any], ...]:
                 _fail("invalid-internet-source")
             if invalid_url:
                 _fail("invalid-internet-source")
-        if not isinstance(retrieved_at, str) or not (
-            retrieved_at.endswith("Z") or retrieved_at.endswith("+00:00")
-        ):
+        if not isinstance(retrieved_at, str) or _RETRIEVED_AT.fullmatch(retrieved_at) is None:
             _fail("invalid-internet-source")
         try:
             parsed_time = datetime.fromisoformat(retrieved_at.replace("Z", "+00:00"))
@@ -425,6 +428,7 @@ class OutputRun:
         self._input_identities = input_identities
         self._artifacts: list[dict[str, Any]] = []
         self._incomplete_artifacts: list[dict[str, Any]] = []
+        self._completion_ineligible = False
         self._terminal = False
 
     @classmethod
@@ -536,6 +540,8 @@ class OutputRun:
         normalized_sources = _normalize_internet_sources(internet_sources)
         if normalized_sources and self.invocation.internet == "disabled":
             _fail("internet-not-authorized")
+        previously_ineligible = self._completion_ineligible
+        self._completion_ineligible = True
         staging_name, staging_file_fd = self._new_staging_name()
         staged = True
         linked = False
@@ -584,7 +590,9 @@ class OutputRun:
                 self._incomplete_artifacts.append({**artifact, "phase": "staging-cleanup"})
                 _fail("staging-incomplete")
 
-            return dict(artifact)
+            result = copy.deepcopy(artifact)
+            self._completion_ineligible = previously_ineligible
+            return result
         finally:
             if staging_file_fd >= 0:
                 try:
@@ -638,7 +646,7 @@ class OutputRun:
     def complete(self) -> dict[str, Any]:
         if self._terminal:
             _fail("run-terminal")
-        if self._incomplete_artifacts:
+        if self._completion_ineligible or self._incomplete_artifacts:
             _fail("receipt-unavailable")
 
         receipt = self._receipt("success")
@@ -654,6 +662,7 @@ class OutputRun:
             try:
                 os.unlink(_INCOMPLETE_NAME, dir_fd=self._run_fd)
             except OSError:
+                _restore_incomplete(self._run_fd, self._incomplete_bytes)
                 _fail("receipt-unavailable")
             try:
                 os.fsync(self._run_fd)

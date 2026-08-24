@@ -91,6 +91,10 @@ f20e160 fix: harden terminal publication cleanup
 - The Task 5 worker leaves PR #73 draft despite the plan's final transition
   wording because the controller reserved readiness until after independent
   whole-branch review. No product behavior changes.
+- The controller's post-archive whole-branch review found four additional
+  Important state, detachment, and timestamp-grammar defects. RED commit
+  `06c2292` proved them before a narrow correction updated runtime behavior and
+  both archived and durable contracts without unarchiving the change.
 
 ## Boundaries preserved
 
@@ -113,3 +117,10 @@ f20e160 fix: harden terminal publication cleanup
   needs durability treatment.
 - Failure receipts must account for provenance attached to uncertain artifacts,
   not only artifacts already accepted into the success set.
+- A handled artifact-write exception still belongs to the run state machine;
+  success eligibility cannot be inferred only from durable and incomplete
+  artifact lists.
+- Returning a shallow copy of a record that contains nested provenance still
+  exposes receipt state to caller mutation.
+- General ISO 8601 parsing is wider than an RFC 3339 receipt contract and needs
+  an explicit grammar before semantic date validation.

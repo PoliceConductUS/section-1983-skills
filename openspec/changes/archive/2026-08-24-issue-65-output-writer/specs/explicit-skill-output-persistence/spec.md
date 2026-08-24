@@ -23,7 +23,21 @@ output root.
 #### Scenario: Content production fails
 
 - **WHEN** a stream fails before staging completes or sync succeeds
-- **THEN** no final artifact is published and the run cannot report success
+- **THEN** no final artifact is published, the run cannot report success, and
+  the caller can still publish a bounded failure receipt
+
+#### Scenario: Validation fails before an artifact attempt
+
+- **WHEN** path, provenance, or authorization validation rejects a write before
+  staging begins
+- **THEN** no artifact attempt has begun and the validation error alone does not
+  make the run ineligible for success
+
+#### Scenario: Caller mutates a returned artifact record
+
+- **WHEN** a caller mutates any nested value in the artifact record returned by
+  a successful write
+- **THEN** later receipts and internet-use derivation remain unchanged
 
 ### Requirement: Inputs and prior outputs remain immutable
 
@@ -141,8 +155,11 @@ Internet source records MUST be rejected when the invocation policy is
 A source URL MUST be 1–2048 printable ASCII characters whose raw value begins
 with literal lowercase `http://` or `https://` and has a nonempty host. It MUST
 NOT contain whitespace, a control character, a backslash, an embedded username
-or password, or an invalid port. Internet-use status MUST be derived from
-validated source records on both durable and incomplete artifact records.
+or password, or an invalid port. A retrieval time MUST use
+`YYYY-MM-DDTHH:MM:SS[.fraction]Z` or the same form ending in `+00:00`; the
+writer MUST normalize the offset form to literal `Z` and MUST reject alternate
+ISO 8601 forms. Internet-use status MUST be derived from validated source
+records on both durable and incomplete artifact records.
 
 #### Scenario: Authorized internet artifact is written
 

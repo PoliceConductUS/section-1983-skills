@@ -1266,11 +1266,14 @@ class SkillOutputWriterTest(unittest.TestCase):
         removed_cleanup_metadata = removed_cleanup_directory.stat()
         original_unlink = os.unlink
         original_fsync = os.fsync
+        incomplete_unlink_failed = False
         recovery_sync_count = 0
 
         def remove_incomplete_then_report_unlink_error(path, *args, **kwargs):
+            nonlocal incomplete_unlink_failed
             if os.fspath(path) == "incomplete.json":
                 original_unlink(path, *args, **kwargs)
+                incomplete_unlink_failed = True
                 raise OSError("injected post-removal unlink error /private/case-material")
             return original_unlink(path, *args, **kwargs)
 
@@ -1280,6 +1283,7 @@ class SkillOutputWriterTest(unittest.TestCase):
             if (
                 (metadata.st_dev, metadata.st_ino)
                 == (removed_cleanup_metadata.st_dev, removed_cleanup_metadata.st_ino)
+                and incomplete_unlink_failed
                 and os.path.lexists(removed_cleanup_directory / "incomplete.json")
             ):
                 recovery_sync_count += 1

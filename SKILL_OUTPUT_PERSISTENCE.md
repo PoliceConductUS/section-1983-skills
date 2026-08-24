@@ -18,6 +18,8 @@ existing outputs; and destinations that alias an input. Publication stages and
 syncs the complete file under the output root, creates the final name without
 replacement, and syncs its parent directory. After removing the staging name, it
 syncs the staging directory; failure is recorded as incomplete staging cleanup.
+The returned artifact record is a recursively detached copy; mutating it cannot
+change later receipt artifacts or internet-use derivation.
 
 ## Run state
 
@@ -36,7 +38,11 @@ leaves or restores and syncs `incomplete.json` and reports
 `receipt-unavailable`. A failed or interrupted run is never success. A terminal
 receipt name seals the run even when a later sync or cleanup is uncertain. A
 sealed run closes its retained directory handles and rejects every later write
-or state transition. Retry uses a new run ID and new artifact paths.
+or state transition. Once an artifact write attempt begins, any failure before
+that write durably completes makes the run ineligible for success; the caller
+may still publish a bounded failure receipt. Validation rejected before an
+artifact attempt begins does not change run eligibility. Retry uses a new run ID
+and new artifact paths.
 
 ## Reproducibility and internet provenance
 
@@ -47,14 +53,15 @@ size.
 
 An internet-derived artifact supplies one or more source records before its
 bytes are published. Each source has exactly one nonempty `url` or `identity`, a
-valid UTC `retrieved_at` value normalized to `Z`, a lowercase SHA-256, and an
-optional nonempty `request_context` of at most 1024 characters. Each URL has at
-most 2048 printable ASCII characters. Its raw value begins with literal
-lowercase `http://` or `https://`, has a nonempty host, and contains no
-whitespace, control character, backslash, embedded username/password, or invalid
-port. Source records are rejected when internet is disabled. Receipt
-`internet.used` is derived from validated sources on both durable and incomplete
-artifacts.
+UTC `retrieved_at` in `YYYY-MM-DDTHH:MM:SS[.fraction]Z` form or the same form
+ending in `+00:00`, a lowercase SHA-256, and an optional nonempty
+`request_context` of at most 1024 characters. The writer normalizes the UTC
+offset form to literal `Z`. Each URL has at most 2048 printable ASCII
+characters. Its raw value begins with literal lowercase `http://` or `https://`,
+has a nonempty host, and contains no whitespace, control character, backslash,
+embedded username/password, or invalid port. Source records are rejected when
+internet is disabled. Receipt `internet.used` is derived from validated sources
+on both durable and incomplete artifacts.
 
 Failure receipts accept only a lower-kebab code and phase of at most 64
 characters. Receipts never include absolute machine paths, raw exceptions,

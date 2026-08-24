@@ -103,3 +103,45 @@ independent review.
 
 PASS for OpenSpec archive. PR #73 remains draft until the controller completes
 its independent whole-branch review and final state checks.
+
+## Post-archive independent-review correction
+
+The controller's later independent whole-branch review found four Important
+defects not covered by the pre-archive scoped reviews:
+
+1. a caught prepublication write failure did not prevent a later success
+   receipt;
+2. an unlink operation that removed `incomplete.json` and then reported failure
+   could leave a visible manifest without the authoritative incomplete marker;
+3. the value returned by `write()` shared nested provenance state with the
+   eventual receipt; and
+4. runtime retrieval-time parsing accepted alternate ISO 8601 forms outside the
+   receipt schema's RFC 3339 contract.
+
+The correction was performed without unarchiving the change. RED commit
+`06c2292` proved all four defects while the prior 74-test focused baseline
+remained green. The narrow correction adds sticky completion-ineligible state
+after an artifact attempt begins, restores and re-syncs incomplete state on any
+terminal cleanup error, recursively detaches returned artifact records, and
+accepts only `YYYY-MM-DDTHH:MM:SS[.fraction]Z` or the equivalent `+00:00` input
+before normalizing it to `Z`. The durable and archived specifications were
+updated together.
+
+Fresh post-correction evidence:
+
+- `python3 -m unittest evaluations.tests.test_skill_output_writer evaluations.tests.test_folder_scoped_execution -v`
+  — 76 tests passed.
+- `python3 -m unittest discover -s evaluations/tests -p 'test_*.py'` — 435 tests
+  passed.
+- `npx openspec validate explicit-skill-output-persistence --strict` — passed.
+- `npx openspec validate --all --strict` — all 22 durable specifications passed.
+- `npm run validate` with the ignored SDD coordination directory temporarily
+  isolated and restored unchanged — formatting passed; 26 drafting tests and 435
+  evaluation tests passed; 22 skills were discovered; all 22 OpenSpec items, the
+  evaluation corpus, and governance validation passed.
+- `git diff --check` — passed.
+
+The archive remains valid, but this post-archive correction supersedes the
+earlier statement that no Important findings remained. PR #73 and Issue #65
+remain open, and the PR remains draft pending correction re-review and final
+controller checks.

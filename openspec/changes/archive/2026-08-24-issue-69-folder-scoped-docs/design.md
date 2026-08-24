@@ -14,19 +14,23 @@ The guide uses one parseable version-1 JSON envelope with the synthetic
 `synthetic-folder-audit` operation, two logical roles, `record` and
 `authorities`, exactly one output root, one target in the `record` role,
 disabled internet, bounded runtime, and the required isolation declaration.
-Shell variables substitute caller-selected absolute folders before validation;
-the repository does not prescribe their names or parent directory.
+Tokens substitute caller-selected absolute folders and a safe relative path to
+an existing regular target file before validation; the repository does not
+prescribe their names or parent directory.
 
 The ordered flow:
 
 1. selects existing input and output folders;
 2. writes the synthetic invocation envelope;
-3. validates it with `scripts/validate_folder_invocation.py`;
+3. validates it with `scripts/validate_folder_invocation.py`, retains the
+   logical input manifest in trusted-host memory, passes it to the output writer,
+   and publishes it only through the canonical output protocol;
 4. asks a trusted host to perform the documented synthetic input-read-only
    conformance operation, without network access, and publish
    `reports/example-inventory.json` through the canonical output protocol;
 5. verifies input hashes are unchanged; and
-6. verifies that exact output artifact plus `.skill-runs/<run-id>/manifest.json`
+6. verifies the target-derived inventory fields, persisted logical input
+   manifest, terminal artifact records, `.skill-runs/<run-id>/manifest.json`,
    and the absence of `incomplete.json`.
 
 The synthetic operation is not an installed public skill and does not claim

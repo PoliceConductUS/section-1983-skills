@@ -3,7 +3,7 @@
 This guide is the product-independent first-hour path for one folder-scoped
 skill operation. It uses logical roles rather than a prescribed case directory.
 The examples are generic synthetic examples; replace their tokens only with
-folders the caller has selected for the operation.
+folders and target material the caller has selected for the operation.
 
 This shared guide does not mean every installed skill is already folder-native.
 Follow the owning skill contract, and stop if any role that contract requires is
@@ -54,11 +54,12 @@ and cannot use the internet unless authorized. Never overwrite immutable inputs.
 
 ## 2. Create the invocation
 
-Create one canonical version 1 invocation. Replace the three tokens with the
-caller-selected absolute folder locations. The target is a safe relative path
-inside the named `record` role. Internet is either `disabled` or `authorized`;
-this generic synthetic example disables it. When internet is authorized, the
-trusted host enforces the approved host policy.
+Create one canonical version 1 invocation. Replace the three root tokens with
+the caller-selected absolute folder locations. Replace `__TARGET_PATH__` with
+the safe relative path of an existing regular file inside the named `record`
+role. The validator does not create the target. Internet is either `disabled`
+or `authorized`; this generic synthetic example disables it. When internet is
+authorized, the trusted host enforces the approved host policy.
 
 ```json
 {
@@ -79,7 +80,7 @@ trusted host enforces the approved host policy.
   },
   "target": {
     "role": "record",
-    "path": "documents/example-pleading.md"
+    "path": "__TARGET_PATH__"
   },
   "runtime": {
     "max_seconds": 900,
@@ -102,15 +103,22 @@ validation commands configured by the project. This repository configures
 
 ```bash
 python3 scripts/validate_folder_invocation.py \
-  < invocation.json \
-  > input-manifest.json
+  < invocation.json
 ```
 
 The command validates the envelope and emits a logical input manifest containing
-relative paths, byte sizes, and SHA-256 hashes. It does not establish operating
-system isolation. If validation is not configured or the configured command is
-unavailable, report `validation unavailable`, record a gap, and stop. Do not
-invent configuration, guess another command, or report a pass.
+relative paths, byte sizes, and SHA-256 hashes. The trusted host captures that
+logical input manifest in memory and passes the logical input manifest object to
+`OutputRun.start(..., input_manifest=logical_input_manifest)`. During the run,
+the host publishes the logical input manifest as
+`metadata/logical-input-manifest.json` through the canonical output protocol
+beneath the explicit output folder. It does not redirect generated data to an
+ambient working-directory file.
+
+The validator does not establish operating system isolation. If validation is
+not configured or the configured command is unavailable, report
+`validation unavailable`, record a gap, and stop. Do not invent configuration,
+guess another command, or report a pass.
 
 ## 4. Run the skill through a trusted host
 
@@ -119,6 +127,16 @@ host-conformance operation. It performs an input-read-only read of the declared
 target, creates a synthetic inventory, and publishes the exact output-relative
 artifact `reports/example-inventory.json` through the canonical output protocol.
 It uses no network.
+
+The inventory is canonical UTF-8 JSON with exactly these values:
+
+- `schema_version` is the integer `1`.
+- `input_manifest_sha256` is the lowercase SHA-256 fingerprint of the exact
+  canonical logical input manifest passed to `OutputRun.start`.
+- `target.role` and `target.path` equal the invocation target role and selected
+  relative path.
+- `target.sha256` and `target.size` are derived from the exact target bytes read;
+  they are the lowercase SHA-256 and byte size, respectively.
 
 The synthetic host-conformance operation is not an installed public skill and
 does not claim public-skill migration. It tests only whether a trusted host can
@@ -145,11 +163,17 @@ output.
 
 ## 6. Verify outputs and the terminal manifest
 
-Inspect `reports/example-inventory.json` only under `__OUTPUT_ROOT__`. Confirm
-that exact artifact is complete and belongs to the synthetic host-conformance
-operation. A run is successful only when `.skill-runs/<run-id>/manifest.json` is
-valid and `.skill-runs/<run-id>/incomplete.json` is absent. A missing or invalid
-terminal receipt remains a gap; the output is not filing-ready.
+Parse `reports/example-inventory.json` only under `__OUTPUT_ROOT__` as canonical
+UTF-8 JSON. Confirm `target.role` and `target.path` equal the invocation,
+`target.sha256` and the target byte size equal the unchanged selected file, and
+`input_manifest_sha256` equals the SHA-256 of
+`metadata/logical-input-manifest.json`, the persisted logical input manifest.
+Verify each artifact's SHA-256 hash and byte size against its artifact record in
+the terminal manifest.
+
+A run is successful only when `.skill-runs/<run-id>/manifest.json` is valid and
+`.skill-runs/<run-id>/incomplete.json` is absent. A missing or invalid terminal
+receipt remains a gap; the output is not filing-ready.
 
 ### Folder-backed patterns
 

@@ -45,12 +45,21 @@ recursive read-only input roles and exactly one explicit output folder, declares
 target and internet policy, validates the invocation, runs the determinate
 `synthetic-folder-audit` host-conformance operation through a trusted host, and
 verifies unchanged inputs, its exact output artifact, and the terminal run
-manifest. The conformance operation SHALL read only the declared target, publish
-`reports/example-inventory.json` through the canonical output protocol, use no
-network, and stop as execution unavailable when the host cannot provide it. It
-SHALL NOT be presented as an installed public skill or as evidence of public-
-skill migration. Logical role names SHALL remain stable within an operation
-while caller folder names and absolute locations remain configurable.
+manifest. The target SHALL be a caller-selected safe relative path to an
+existing regular file in its named input role. The trusted host SHALL retain the
+logical input manifest in memory, pass it to the output writer, and publish it
+through the canonical output protocol beneath the explicit output folder rather
+than through an ambient filesystem write. The conformance operation SHALL read
+only the declared target, publish `reports/example-inventory.json` through the
+canonical output protocol, use no network, and stop as execution unavailable
+when the host cannot provide it. The inventory SHALL identify its schema
+version, target role and path, target byte size and SHA-256, and logical input-
+manifest SHA-256. Verification SHALL compare those values to the invocation,
+unchanged target bytes, persisted logical input manifest, and terminal artifact
+record. The operation SHALL NOT be presented as an installed public skill or as
+evidence of public-skill migration. Logical role names SHALL remain stable
+within an operation while caller folder names and absolute locations remain
+configurable.
 
 #### Scenario: Caller folders use different names
 
@@ -58,6 +67,8 @@ while caller folder names and absolute locations remain configurable.
   folders under different names or parents
 - **THEN** invocation validation and output verification use those selected
   folders without requiring a prescribed case-directory layout
+- **AND** the caller selects an existing regular target file within the named
+  role rather than relying on a guide-specific hard-coded path
 
 ### Requirement: Missing or inaccessible material remains explicit
 

@@ -62,8 +62,8 @@ FORBIDDEN_SAFETY_CONTRADICTIONS = {
         r"\b(?:may|can|should|must|is allowed to) overwrite immutable inputs"
     ),
     "configured validation": (
-        r"\b(?:(?:may|can|should|must|is allowed to) run|run)"
-        r" (?:guessed|unconfigured|arbitrary) validation commands"
+        r"(?<!not )(?<!never )\brun"
+        r" (?:any|guessed|unconfigured|arbitrary) validation commands"
     ),
     "filing ready": (
         r"\b(?:workspace|artifact|output|report|packet) (?:is|are) filing-ready\b"
@@ -456,34 +456,50 @@ class FolderOperationsGuideTest(unittest.TestCase):
     def test_every_safety_contradiction_pattern_distinguishes_prohibition_from_reversal(self):
         pattern_cases = {
             "source classification": (
-                "do not convert an allegation or inference into a fact",
-                "may convert an allegation or inference into a fact",
+                ("do not convert an allegation or inference into a fact",),
+                ("may convert an allegation or inference into a fact",),
             ),
             "human approval": (
-                "without actual user approval, a protected decision cannot change "
-                "to `status: approved`",
-                "no actual user approval is required before a protected decision "
-                "changes to `status: approved`",
+                (
+                    "without actual user approval, a protected decision cannot change "
+                    "to `status: approved`",
+                ),
+                (
+                    "no actual user approval is required before a protected decision "
+                    "changes to `status: approved`",
+                ),
             ),
             "immutable inputs": (
-                "cannot overwrite immutable inputs",
-                "is allowed to overwrite immutable inputs",
+                ("cannot overwrite immutable inputs",),
+                ("is allowed to overwrite immutable inputs",),
             ),
             "configured validation": (
-                "do not run any validation commands not configured by the project",
-                "may run arbitrary validation commands",
+                (
+                    "do not run any validation commands",
+                    "must not run any validation commands",
+                    "cannot run any validation commands",
+                    "never run any validation commands",
+                ),
+                (
+                    "run any validation commands",
+                    "run guessed validation commands",
+                    "run unconfigured validation commands",
+                    "may run arbitrary validation commands",
+                ),
             ),
             "filing ready": (
-                "the artifact is not filing-ready",
-                "the artifact is filing-ready",
+                ("the artifact is not filing-ready",),
+                ("the artifact is filing-ready",),
             ),
         }
-        for obligation, (safe, unsafe) in pattern_cases.items():
+        for obligation, (safe_statements, unsafe_statements) in pattern_cases.items():
             pattern = FORBIDDEN_SAFETY_CONTRADICTIONS[obligation]
-            with self.subTest(obligation=obligation, statement="prohibition"):
-                self.assertNotRegex(safe, pattern)
-            with self.subTest(obligation=obligation, statement="permission"):
-                self.assertRegex(unsafe, pattern)
+            for safe in safe_statements:
+                with self.subTest(obligation=obligation, statement=safe):
+                    self.assertNotRegex(safe, pattern)
+            for unsafe in unsafe_statements:
+                with self.subTest(obligation=obligation, statement=unsafe):
+                    self.assertRegex(unsafe, pattern)
 
     def test_install_is_pinned_to_one_immutable_release(self):
         sources = remote_install_sources(self.guide)

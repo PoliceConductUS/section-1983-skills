@@ -1,4 +1,6 @@
 import json
+import hashlib
+import importlib.util
 import subprocess
 import tempfile
 import unittest
@@ -46,7 +48,14 @@ def schema_property_enums(contract):
 
 def run_validator(path):
     return subprocess.run(
-        ["python3", str(VALIDATOR), str(path)],
+        [
+            "python3",
+            str(VALIDATOR),
+            "--decisions-root",
+            str(path.parent),
+            "--corpus-target",
+            path.name,
+        ],
         cwd=REPOSITORY,
         text=True,
         capture_output=True,
@@ -90,6 +99,14 @@ def write_json(directory, name, corpus):
 
 class Rule59CorpusContractTest(unittest.TestCase):
 
+    def validator(self):
+        specification = importlib.util.spec_from_file_location(
+            "rule59_folder_validator", VALIDATOR
+        )
+        module = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(module)
+        return module
+
     def assert_invalid(self, path, finding):
         completed = run_validator(path)
         output = validator_output(completed)
@@ -99,6 +116,30 @@ class Rule59CorpusContractTest(unittest.TestCase):
 
     def fixture(self, name):
         return load_json(FIXTURE_DIRECTORY / name)
+
+    def test_folder_target_is_canonical_bounded_and_nonmutating(self):
+        validator = self.validator()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "corpus.json"
+            target.write_bytes((FIXTURE_DIRECTORY / "valid-complete.json").read_bytes())
+            before = hashlib.sha256(target.read_bytes()).hexdigest()
+            for relative, expected in (
+                ("../corpus.json", "input-path-invalid"),
+                ("/absolute.json", "input-path-invalid"),
+                ("bad\x00name", "input-path-invalid"),
+                ("corpus.json", "input-file-too-large"),
+            ):
+                with self.subTest(target=relative):
+                    result = validator.validate_folder_corpus(
+                        decisions_root=root,
+                        corpus_target=relative,
+                        max_input_bytes=1,
+                    )
+                    self.assertFalse(result["passed"])
+                    self.assertTrue(result["findings"][0].startswith(expected))
+            after = hashlib.sha256(target.read_bytes()).hexdigest()
+        self.assertEqual(after, before)
 
     def test_decision_schema_requires_canonical_public_components(self):
         schema = load_json(DECISION_SCHEMA)

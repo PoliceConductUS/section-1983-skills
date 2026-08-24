@@ -844,8 +844,16 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
 
     def test_public_cli_validates_committed_fixtures_and_reports_stable_json(self):
         complete = subprocess.run(
-            [sys.executable, str(VALIDATOR), str(FIXTURES / "complete-research-snapshot.json"), str(FIXTURES / "complete-counsel-overlay.json")],
+            [
+                sys.executable,
+                str(VALIDATOR),
+                "--research-snapshot-root",
+                str(FIXTURES),
+                "--research-snapshot-target",
+                "complete-research-snapshot.json",
+            ],
             cwd=REPOSITORY,
+            input=(FIXTURES / "complete-counsel-overlay.json").read_text(),
             capture_output=True,
             text=True,
             check=False,
@@ -853,8 +861,16 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
         self.assertEqual(complete.returncode, 0, complete.stderr)
         self.assertEqual(json.loads(complete.stdout), {"findings": [], "passed": True})
         bounded = subprocess.run(
-            [sys.executable, str(VALIDATOR), str(FIXTURES / "incomplete-research-snapshot.json"), str(FIXTURES / "bounded-example-overlay.json")],
+            [
+                sys.executable,
+                str(VALIDATOR),
+                "--research-snapshot-root",
+                str(FIXTURES),
+                "--research-snapshot-target",
+                "incomplete-research-snapshot.json",
+            ],
             cwd=REPOSITORY,
+            input=(FIXTURES / "bounded-example-overlay.json").read_text(),
             capture_output=True,
             text=True,
             check=False,
@@ -862,11 +878,20 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
         self.assertEqual(bounded.returncode, 0, bounded.stderr)
         self.assertTrue(json.loads(bounded.stdout)["passed"])
         with tempfile.TemporaryDirectory() as directory:
-            bad = Path(directory) / "bad.json"
+            root = Path(directory)
+            bad = root / "bad.json"
             bad.write_bytes(b"\xff")
             result = subprocess.run(
-                [sys.executable, str(VALIDATOR), str(bad), str(FIXTURES / "complete-counsel-overlay.json")],
+                [
+                    sys.executable,
+                    str(VALIDATOR),
+                    "--research-snapshot-root",
+                    str(root),
+                    "--research-snapshot-target",
+                    "bad.json",
+                ],
                 cwd=REPOSITORY,
+                input=(FIXTURES / "complete-counsel-overlay.json").read_text(),
                 capture_output=True,
                 text=True,
                 check=False,
@@ -916,14 +941,19 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
             command = [
                 sys.executable,
                 str(VALIDATOR),
-                str(snapshot_path),
-                str(overlay_path),
-                "--filing-manifest",
-                str(manifest_path),
+                "--research-snapshot-root",
+                str(root),
+                "--research-snapshot-target",
+                "snapshot.json",
+                "--case-record-root",
+                str(root),
+                "--filing-manifest-target",
+                "manifest.json",
             ]
             passing = subprocess.run(
                 command,
                 cwd=REPOSITORY,
+                input=json.dumps(overlay),
                 capture_output=True,
                 text=True,
                 check=False,
@@ -934,12 +964,38 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
             stale = subprocess.run(
                 command,
                 cwd=REPOSITORY,
+                input=json.dumps(overlay),
                 capture_output=True,
                 text=True,
                 check=False,
             )
         self.assertNotEqual(stale.returncode, 0)
         self.assertIn("counsel-pin-stale", finding_ids(json.loads(stale.stdout)["findings"]))
+
+    def test_folder_targets_are_confined_bounded_and_nonmutating(self):
+        validator = load_validator()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            snapshot = root / "snapshot.json"
+            snapshot.write_text(json.dumps(complete_snapshot()), encoding="utf-8")
+            before = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+            for target, expected in (
+                ("../outside.json", "input-path-invalid"),
+                ("/absolute.json", "input-path-invalid"),
+                ("bad\x00name", "input-path-invalid"),
+                ("snapshot.json", "input-file-too-large"),
+            ):
+                with self.subTest(target=target):
+                    result = validator.validate_folder_overlay(
+                        research_snapshot_root=root,
+                        research_snapshot_target=target,
+                        overlay=complete_overlay(complete_snapshot()),
+                        max_input_bytes=1,
+                    )
+                    self.assertFalse(result["passed"])
+                    self.assertEqual(result["findings"][0]["id"], expected)
+            after = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+        self.assertEqual(after, before)
 
 
 if __name__ == "__main__":

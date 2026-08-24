@@ -5,10 +5,12 @@ import io
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 import uuid
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -1254,12 +1256,17 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
             [
                 sys.executable,
                 str(VALIDATOR),
-                str(FIXTURES / "complete-snapshot.json"),
-                str(FIXTURES / "complete-overlay.json"),
-                "--filing-manifest",
-                str(FIXTURES / "complete-filing-manifest.json"),
+                "--docket-snapshot-root",
+                str(FIXTURES),
+                "--docket-snapshot-target",
+                "complete-snapshot.json",
+                "--filing-root",
+                str(FIXTURES),
+                "--filing-manifest-target",
+                "complete-filing-manifest.json",
             ],
             cwd=REPOSITORY,
+            input=(FIXTURES / "complete-overlay.json").read_bytes(),
             capture_output=True,
             check=False,
         )
@@ -1270,10 +1277,13 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
             [
                 sys.executable,
                 str(VALIDATOR),
-                str(FIXTURES / "initial-snapshot.json"),
-                str(FIXTURES / "no-responsive-overlay.json"),
+                "--docket-snapshot-root",
+                str(FIXTURES),
+                "--docket-snapshot-target",
+                "initial-snapshot.json",
             ],
             cwd=REPOSITORY,
+            input=(FIXTURES / "no-responsive-overlay.json").read_bytes(),
             capture_output=True,
             check=False,
         )
@@ -1283,15 +1293,69 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
     def test_cli_reports_stable_findings_and_nonzero(self):
         validator = load_validator()
         stdout = io.StringIO()
-        with redirect_stdout(stdout):
-            exit_code = validator.main(
-                ["missing-snapshot.json", "missing-overlay.json"]
-            )
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch("sys.stdin", io.StringIO("{}")),
+            redirect_stdout(stdout),
+        ):
+            exit_code = validator.main([
+                "--docket-snapshot-root",
+                directory,
+                "--docket-snapshot-target",
+                "missing-snapshot.json",
+            ])
         result = json.loads(stdout.getvalue())
         self.assertNotEqual(exit_code, 0)
         self.assertIs(result["passed"], False)
         self.assertEqual(result["findings"][0]["id"], "input-file-unavailable")
         self.assertEqual(set(result["findings"][0]), {"id", "path", "message"})
+
+    def test_folder_targets_reject_noncanonical_and_escaping_paths(self):
+        validator = load_validator()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            outside = root.parent / f"outside-{uuid.uuid4().hex}.json"
+            outside.write_text("{}", encoding="utf-8")
+            (root / "escape.json").symlink_to(outside)
+            try:
+                for target in (
+                    "/absolute.json",
+                    "../outside.json",
+                    "./snapshot.json",
+                    "escape.json",
+                    "missing.json",
+                    "bad\x00name",
+                ):
+                    with self.subTest(target=target):
+                        result = validator.validate_folder_overlay(
+                            docket_snapshot_root=root,
+                            docket_snapshot_target=target,
+                            overlay={},
+                        )
+                        self.assertFalse(result["passed"])
+                        self.assertEqual(
+                            result["findings"][0]["id"], "input-path-invalid"
+                        )
+            finally:
+                outside.unlink()
+
+    def test_folder_target_reader_is_bounded_and_preserves_input_bytes(self):
+        validator = load_validator()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            snapshot = root / "snapshot.json"
+            snapshot.write_text(json.dumps(complete_snapshot()), encoding="utf-8")
+            before = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+            result = validator.validate_folder_overlay(
+                docket_snapshot_root=root,
+                docket_snapshot_target="snapshot.json",
+                overlay=complete_overlay(complete_snapshot()),
+                max_input_bytes=1,
+            )
+            after = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+        self.assertFalse(result["passed"])
+        self.assertEqual(result["findings"][0]["id"], "input-file-too-large")
+        self.assertEqual(after, before)
 
 
 if __name__ == "__main__":

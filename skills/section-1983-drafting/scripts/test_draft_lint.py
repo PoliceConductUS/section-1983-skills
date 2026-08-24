@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import sys
@@ -5,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from draft_lint import EXEMPT_PHRASES, lint, lint_paths
+from draft_lint import EXEMPT_PHRASES, LintInputError, lint, lint_folder_target
 
 
 class LintTest(unittest.TestCase):
@@ -207,23 +208,41 @@ class LintTest(unittest.TestCase):
                 count,
             )
 
-    def test_lint_paths_preserves_each_supplied_artifact(self):
+    def test_lint_target_confines_one_relative_filing_artifact(self):
         with tempfile.TemporaryDirectory() as directory:
-            first = Path(directory, "first.md")
-            second = Path(directory, "second.md")
-            first.write_text("The delay was unbearably long.")
-            second.write_text("The officer acted almost immediately.")
+            root = Path(directory)
+            target = root / "draft.md"
+            target.write_text("The delay was unbearably long.")
+            before = hashlib.sha256(target.read_bytes()).hexdigest()
 
-            reports = lint_paths([str(first), str(second)])
+            report = lint_folder_target(
+                filing_root=root,
+                filing_target="draft.md",
+            )
 
-        self.assertIn("findings", reports[str(first)])
-        self.assertIn("findings", reports[str(second)])
-        self.assertEqual(
-            reports[str(first)]["findings"][0]["artifact"], str(first)
-        )
-        self.assertEqual(
-            reports[str(second)]["findings"][0]["artifact"], str(second)
-        )
+            self.assertIn("findings", report)
+            self.assertEqual(report["findings"][0]["artifact"], "draft.md")
+            self.assertEqual(hashlib.sha256(target.read_bytes()).hexdigest(), before)
+
+            for path, code in (
+                ("../draft.md", "invalid-target"),
+                ("/absolute.md", "invalid-target"),
+                ("./draft.md", "invalid-target"),
+                ("bad\x00name", "invalid-target"),
+                ("missing.md", "invalid-target"),
+            ):
+                with self.subTest(path=path):
+                    with self.assertRaises(LintInputError) as captured:
+                        lint_folder_target(filing_root=root, filing_target=path)
+                    self.assertEqual(captured.exception.code, code)
+
+            with self.assertRaises(LintInputError) as captured:
+                lint_folder_target(
+                    filing_root=root,
+                    filing_target="draft.md",
+                    max_input_bytes=1,
+                )
+            self.assertEqual(captured.exception.code, "input-too-large")
 
     def test_long_sentence_density_is_a_non_gating_paragraph_warning(self):
         long_sentence = " ".join(["word"] * 26) + "."
@@ -307,6 +326,27 @@ class LintTest(unittest.TestCase):
         report = json.loads(result.stdout)
         self.assertIn("findings", report)
         self.assertEqual(report["findings"][0]["artifact"], "<stdin>")
+
+    def test_public_cli_uses_filing_root_and_relative_target(self):
+        script = Path(__file__).with_name("draft_lint.py")
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory, "draft.md")
+            target.write_text("The delay was unbearably long.", encoding="utf-8")
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "--filing-root",
+                    directory,
+                    "--filing-target",
+                    "draft.md",
+                ],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+        report = json.loads(result.stdout)
+        self.assertEqual(report["findings"][0]["artifact"], "draft.md")
 
 
 if __name__ == "__main__":

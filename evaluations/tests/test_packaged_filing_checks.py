@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import importlib.util
 import json
@@ -134,8 +135,17 @@ class PackagedFilingChecksTest(unittest.TestCase):
         )
         document = complaint_document()
         document["sections"].remove("jury-demand")
+        document["sections"][2], document["sections"][3] = (
+            document["sections"][3],
+            document["sections"][2],
+        )
         document["paragraphs"][1]["number"] = 3
         document["paragraphs"][1]["cross_references"] = [99]
+        duplicate_count = copy.deepcopy(document["counts"][0])
+        document["counts"][0]["number"] = 2
+        duplicate_count["number"] = 4
+        duplicate_count["incorporated_paragraphs"] = [99]
+        document["counts"].append(duplicate_count)
         document["counts"][0].pop("injury")
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -145,16 +155,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertNotEqual(result["exit_status"], 0)
         finding_checks = {finding["check_id"] for finding in result["findings"]}
-        self.assertTrue(finding_checks)
-        self.assertLessEqual(finding_checks, set(contract["mechanical_checks"]))
-        self.assertTrue(
-            {
-                "section-presence",
-                "paragraph-numbering-continuity",
-                "cross-reference-target",
-                "required-count-field-location",
-            }.issubset(finding_checks)
-        )
+        self.assertEqual(finding_checks, set(contract["mechanical_checks"]))
         self.assertTrue(set(contract["excluded_judgments"]).isdisjoint(finding_checks))
 
     def test_complaint_checker_rejects_unconfined_targets(self):
@@ -191,6 +192,19 @@ class PackagedFilingChecksTest(unittest.TestCase):
                 {finding["check_id"] for finding in result["findings"]},
             )
 
+            document = complaint_document()
+            document["paragraphs"][1]["cross_references"] = [[]]
+            document["counts"][0]["incorporated_paragraphs"] = [{}]
+            (root / "nested-references.json").write_text(json.dumps(document))
+            result = checker.check_complaint(root, "nested-references.json")
+            self.assertEqual(result["status"], "failed")
+            self.assertTrue(
+                {
+                    "cross-reference-target",
+                    "incorporation-target",
+                }.issubset({finding["check_id"] for finding in result["findings"]})
+            )
+
             outside = root.parent / f"{root.name}-symlink-target.json"
             outside.write_text(json.dumps(complaint_document()))
             try:
@@ -200,6 +214,34 @@ class PackagedFilingChecksTest(unittest.TestCase):
                 self.assertEqual(captured.exception.finding_id, "invalid-target")
             finally:
                 outside.unlink()
+
+    def test_filing_ci_bounds_nested_reference_values(self):
+        filing_ci = load_module("packaged_filing_ci_nested_references", FILING_CI_SCRIPT)
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            filing_root = base / "filing"
+            authorities_root = base / "authorities"
+            filing_root.mkdir()
+            authorities_root.mkdir()
+            document = complaint_document()
+            document["paragraphs"][1]["cross_references"] = [[]]
+            document["counts"][0]["incorporated_paragraphs"] = [{}]
+            (filing_root / "complaint.json").write_text(json.dumps(document))
+
+            result = filing_ci.run_filing_ci(
+                filing_root,
+                "complaint.json",
+                authorities_root,
+                CHECKER_ID,
+            )
+
+        self.assertEqual(result["status"], "failed")
+        self.assertTrue(
+            {
+                "cross-reference-target",
+                "incorporation-target",
+            }.issubset({finding["check_id"] for finding in result["findings"]})
+        )
 
     def test_filing_ci_dispatches_only_the_registered_packaged_checker(self):
         filing_ci = load_module("packaged_filing_ci", FILING_CI_SCRIPT)

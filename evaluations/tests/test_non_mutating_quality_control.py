@@ -198,6 +198,21 @@ class NonMutatingQualityControlTest(unittest.TestCase):
                 assert_contract(self, skill)
                 assert_explicit_output_contract(self, skill)
 
+    def test_each_quality_control_skill_requires_one_primary_target(self):
+        for name in sorted(QUALITY_CONTROL_SKILLS):
+            with self.subTest(skill=name):
+                contract = json.loads(
+                    (
+                        REPOSITORY
+                        / "skills"
+                        / name
+                        / "references"
+                        / "folder-contract.json"
+                    ).read_text()
+                )
+                self.assertEqual(contract["target"]["policy"], "required")
+                self.assertTrue(contract["target"]["roles"])
+
     def test_clean_room_review_exposes_no_command_authority_before_any_write(self):
         launcher = launcher_module()
         with tempfile.TemporaryDirectory() as directory:

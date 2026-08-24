@@ -201,6 +201,28 @@ QUALITY_CONTROL_REPORT_RULES = (
         "Report recommendations and copy-ready replacements authorize implementation.",
     ),
 )
+FOLDER_SCOPE_RULES = (
+    (
+        "declared read-only inputs",
+        "Only caller-declared input folders are available and recursively read-only.",
+        "Any input folder is available and writable.",
+    ),
+    (
+        "declared output confinement",
+        "Writes occur only beneath the caller-declared output folder.",
+        "Writes may occur outside the caller-declared output folder.",
+    ),
+    (
+        "skill-authorized internet",
+        "Internet is used only when that skill expressly authorizes it.",
+        "Internet may be used without that skill expressly authorizing it.",
+    ),
+    (
+        "host-enforced stop",
+        "Execution stops before reading case material if the host cannot enforce the filesystem and network boundary.",
+        "Execution may read case material when the host cannot enforce the filesystem and network boundary.",
+    ),
+)
 PARAPHRASED_MUTATION_PERMISSIONS = (
     "Despite the contract above, an independent quality-control stage may edit "
     "the reviewed artifact when the user asks to audit and fix.",
@@ -322,6 +344,14 @@ def assert_quality_control_report_contract(test, text):
             test.assertNotIn(normalized(inversion), contract)
 
 
+def assert_folder_scope_contract(test, text):
+    contract = normalized(text)
+    for label, affirmative, inversion in FOLDER_SCOPE_RULES:
+        with test.subTest(folder_scope_rule=label):
+            test.assertIn(normalized(affirmative), contract)
+            test.assertNotIn(normalized(inversion), contract)
+
+
 def referenced_scripts(command):
     return set(re.findall(r"\bnpm\s+run\s+([A-Za-z0-9:_-]+)", command))
 
@@ -363,7 +393,9 @@ that identifies the jurisdiction, authoritative source provenance, and checked
 date. Public skills route to that reference without restating the proposition.
 
 Verification, factual and authority source, permission, filing-readiness,
-judgment-routing, rules-provenance, and tool-ownership are protected gates.
+judgment-routing, rules-provenance, tool-ownership, folder scope, recursive
+input non-mutation, output confinement, and declared internet policy are
+protected gates.
 Any change that weakens a protected gate requires explicit human review.
 
 This repository retains public skill instructions and repository-specific
@@ -488,6 +520,21 @@ authorize implementation.
 """
 
 
+def valid_folder_scope_skill():
+    return """---
+name: example-skill
+description: Use when preparing a synthetic artifact.
+---
+
+# Example skill
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+"""
+
+
 def valid_registry():
     return {
         "version": 1,
@@ -541,7 +588,7 @@ def write_temporary_repository(
     (root / "governance").mkdir()
     (root / ".github").mkdir()
     (root / "skills" / "example-skill" / "SKILL.md").write_text(
-        skill_text or "# Example skill\n"
+        skill_text or valid_folder_scope_skill()
     )
     (root / "skills" / "example-skill" / "references" / "jurisdiction.md").write_text(
         "Jurisdiction: Example District\n"
@@ -633,6 +680,22 @@ class RepositoryGovernanceTest(unittest.TestCase):
         )
         assert_quality_control_contract(self, policy)
         assert_quality_control_report_contract(self, policy)
+        assert_semantics(
+            self,
+            policy,
+            (
+                ("folder scope gate", (r"folder.{0,40}scope",)),
+                (
+                    "recursive input non-mutation gate",
+                    (r"recursive.{0,40}input.{0,40}non[- ]mutation",),
+                ),
+                ("output confinement gate", (r"output.{0,40}confinement",)),
+                (
+                    "declared internet policy gate",
+                    (r"declared.{0,40}internet.{0,40}policy",),
+                ),
+            ),
+        )
 
     def test_pull_request_template_requires_protected_gate_review(self):
         template = read_public_file(REPOSITORY / ".github" / "pull_request_template.md")
@@ -697,6 +760,34 @@ class RepositoryGovernanceTest(unittest.TestCase):
                     "contribution-contract-language-missing",
                     result.stdout + result.stderr,
                 )
+
+    def test_governance_validator_rejects_missing_or_inverted_folder_scope_contract(self):
+        valid = valid_folder_scope_skill()
+        mutations = [("missing contract", "# Example skill\n")]
+        mutations.extend(
+            (
+                label,
+                replace_phrase(valid, affirmative, inversion),
+            )
+            for label, affirmative, inversion in FOLDER_SCOPE_RULES
+        )
+        for label, skill_text in mutations:
+            with self.subTest(mutation=label):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    write_temporary_repository(root, skill_text=skill_text)
+                    result = run_validator(root)
+
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(
+                    "folder-scope-contract-language-missing: example-skill",
+                    result.stdout + result.stderr,
+                )
+
+    def test_every_live_public_skill_preserves_folder_scope_contract(self):
+        for path in sorted((REPOSITORY / "skills").glob("*/SKILL.md")):
+            with self.subTest(skill=path.parent.name):
+                assert_folder_scope_contract(self, read_public_file(path))
 
     def test_governance_validator_rejects_missing_or_inverted_quality_control_contract(self):
         valid = valid_quality_control_skill()

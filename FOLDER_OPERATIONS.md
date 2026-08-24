@@ -57,8 +57,8 @@ and cannot use the internet unless authorized. Never overwrite immutable inputs.
 Create one canonical version 1 invocation. Replace the three root tokens with
 the caller-selected absolute folder locations. Replace `__TARGET_PATH__` with
 the safe relative path of an existing regular file inside the named `record`
-role. The validator does not create the target. Internet is either `disabled`
-or `authorized`; this generic synthetic example disables it. When internet is
+role. The validator does not create the target. Internet is either `disabled` or
+`authorized`; this generic synthetic example disables it. When internet is
 authorized, the trusted host enforces the approved host policy.
 
 ```json
@@ -135,8 +135,8 @@ The inventory is canonical UTF-8 JSON with exactly these values:
   canonical logical input manifest passed to `OutputRun.start`.
 - `target.role` and `target.path` equal the invocation target role and selected
   relative path.
-- `target.sha256` and `target.size` are derived from the exact target bytes read;
-  they are the lowercase SHA-256 and byte size, respectively.
+- `target.sha256` and `target.size` are derived from the exact target bytes
+  read; they are the lowercase SHA-256 and byte size, respectively.
 
 The synthetic host-conformance operation is not an installed public skill and
 does not claim public-skill migration. It tests only whether a trusted host can

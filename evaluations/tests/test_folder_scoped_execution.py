@@ -54,7 +54,20 @@ class FolderScopedExecutionTest(unittest.TestCase):
         self.assertTrue(captured.exception.code)
 
     def test_validates_two_named_roots_with_literal_canonical_paths(self):
-        invocation = validate_invocation(self.envelope())
+        declared_record_root = self.root / "declared-record"
+        declared_authority_root = self.root / "declared-authority"
+        declared_output_root = self.root / "declared-output"
+        declared_record_root.symlink_to(self.record_root, target_is_directory=True)
+        declared_authority_root.symlink_to(self.authority_root, target_is_directory=True)
+        declared_output_root.symlink_to(self.output_root, target_is_directory=True)
+        envelope = self.envelope()
+        envelope["inputs"] = [
+            {"role": "record", "root": str(declared_record_root)},
+            {"role": "authority", "root": str(declared_authority_root)},
+        ]
+        envelope["output"] = {"root": str(declared_output_root)}
+
+        invocation = validate_invocation(envelope)
 
         self.assertEqual(invocation.skill, "synthetic-skill")
         self.assertEqual(
@@ -71,6 +84,7 @@ class FolderScopedExecutionTest(unittest.TestCase):
 
     def test_rejects_invalid_envelopes_before_case_material_is_read(self):
         missing_root = self.root / "missing"
+        missing_output_root = self.root / "missing-output"
         plain_file = self.root / "not-a-directory.txt"
         plain_file.write_text("not a directory\n", encoding="utf-8")
         cases = []
@@ -91,11 +105,54 @@ class FolderScopedExecutionTest(unittest.TestCase):
                     {"role": "record", "root": "record"},
                     {"role": "authority", "root": str(self.authority_root)},
                 ]}),
+                ("input-missing-role", {**self.envelope(), "inputs": [
+                    {"root": str(self.record_root)},
+                    {"role": "authority", "root": str(self.authority_root)},
+                ]}),
+                ("input-missing-root", {**self.envelope(), "inputs": [
+                    {"role": "record"},
+                    {"role": "authority", "root": str(self.authority_root)},
+                ]}),
+                ("input-unknown-field", {**self.envelope(), "inputs": [
+                    {"role": "record", "root": str(self.record_root), "unexpected": True},
+                    {"role": "authority", "root": str(self.authority_root)},
+                ]}),
                 ("missing-root", {**self.envelope(), "inputs": [
                     {"role": "record", "root": str(missing_root)},
                     {"role": "authority", "root": str(self.authority_root)},
                 ]}),
-                ("non-directory-root", {**self.envelope(), "output": {"root": str(plain_file)}}),
+                ("non-directory-input-root", {**self.envelope(), "inputs": [
+                    {"role": "record", "root": str(plain_file)},
+                    {"role": "authority", "root": str(self.authority_root)},
+                ]}),
+                ("missing-output-root", {**self.envelope(), "output": {"root": str(missing_output_root)}}),
+                ("output-missing-root", {**self.envelope(), "output": {}}),
+                ("output-unknown-field", {**self.envelope(), "output": {
+                    "root": str(self.output_root), "unexpected": True,
+                }}),
+                ("non-directory-output-root", {**self.envelope(), "output": {"root": str(plain_file)}}),
+                ("runtime-missing-seconds", {**self.envelope(), "runtime": {
+                    "max_input_bytes": 1048576,
+                }}),
+                ("runtime-missing-bytes", {**self.envelope(), "runtime": {
+                    "max_seconds": 60,
+                }}),
+                ("runtime-unknown-field", {**self.envelope(), "runtime": {
+                    "max_seconds": 60, "max_input_bytes": 1048576, "unexpected": True,
+                }}),
+                ("isolation-missing-inputs", {**self.envelope(), "isolation": {
+                    "output": "read-write", "undeclared": "none",
+                }}),
+                ("isolation-missing-output", {**self.envelope(), "isolation": {
+                    "inputs": "read-only", "undeclared": "none",
+                }}),
+                ("isolation-missing-undeclared", {**self.envelope(), "isolation": {
+                    "inputs": "read-only", "output": "read-write",
+                }}),
+                ("isolation-unknown-field", {**self.envelope(), "isolation": {
+                    "inputs": "read-only", "output": "read-write", "undeclared": "none",
+                    "unexpected": True,
+                }}),
                 ("invalid-isolation-inputs", {**self.envelope(), "isolation": {
                     "inputs": "read-write", "output": "read-write", "undeclared": "none",
                 }}),

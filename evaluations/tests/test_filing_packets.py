@@ -16,7 +16,7 @@ from scripts.validate_folder_invocation import validate_invocation
 
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURES = ROOT / "evaluations" / "fixtures" / "filing-packets"
+FIXTURES = ROOT / "evaluations" / "filing-packet-fixtures"
 
 
 class FilingPacketTest(unittest.TestCase):

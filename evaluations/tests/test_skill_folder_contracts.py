@@ -206,6 +206,27 @@ class SkillFolderContractsTest(unittest.TestCase):
         }
         self.assertEqual(APPROVED_FOLDER_CONTRACTS, expected)
 
+    def test_composed_skill_roles_cannot_be_unionized_into_either_contract(self):
+        first = expected_contract("rrd-rule12", CONTRACTS["rrd-rule12"])
+        second = expected_contract(
+            "drafting-section-1983-complaints",
+            CONTRACTS["drafting-section-1983-complaints"],
+        )
+        union = list(dict.fromkeys(first["input_roles"] + second["input_roles"]))
+        self.assertIn(
+            "skill-folder-contract-mismatch",
+            validate_folder_contract_document(
+                {**first, "input_roles": union}, "rrd-rule12"
+            ),
+        )
+        self.assertIn(
+            "skill-folder-contract-mismatch",
+            validate_folder_contract_document(
+                {**second, "input_roles": union},
+                "drafting-section-1983-complaints",
+            ),
+        )
+
     def test_document_validation_rejects_contract_mutations_with_stable_findings(self):
         valid = expected_contract("filing-ci", CONTRACTS["filing-ci"])
         mutations = (

@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import errno
 import hashlib
+import json
 import os
 import re
 import secrets
 import stat
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, BinaryIO
 
@@ -15,9 +17,14 @@ from scripts.validate_folder_invocation import ValidatedInvocation
 
 
 _RUN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_FAILURE_VALUE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _MODES = frozenset({"append-immutable", "fresh-regenerable"})
 _DIRECTORY_FLAGS = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
 _STAGING_CHUNK_SIZE = 1024 * 1024
+_INCOMPLETE_NAME = "incomplete.json"
+_MANIFEST_NAME = "manifest.json"
+_FAILURE_NAME = "failure.json"
 
 
 class OutputError(RuntimeError):
@@ -34,6 +41,158 @@ def _fail(code: str) -> None:
 
 def _valid_run_id(value: Any) -> bool:
     return isinstance(value, str) and _RUN_ID.fullmatch(value) is not None
+
+
+def _canonical_json(value: Any, error_code: str) -> bytes:
+    try:
+        return json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+    except (TypeError, ValueError, UnicodeError):
+        _fail(error_code)
+
+
+def _write_all(descriptor: int, contents: bytes, error_code: str) -> None:
+    offset = 0
+    try:
+        while offset < len(contents):
+            written = os.write(descriptor, contents[offset:])
+            if written <= 0:
+                _fail(error_code)
+            offset += written
+        os.fsync(descriptor)
+    except OutputError:
+        raise
+    except OSError:
+        _fail(error_code)
+
+
+def _new_staging_file(staging_fd: int, prefix: str, error_code: str) -> tuple[str, int]:
+    for _ in range(32):
+        name = f"{prefix}-{secrets.token_hex(16)}.tmp"
+        try:
+            descriptor = os.open(
+                name,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+                dir_fd=staging_fd,
+            )
+            return name, descriptor
+        except FileExistsError:
+            continue
+        except OSError:
+            _fail(error_code)
+    _fail(error_code)
+
+
+def _publish_record(staging_fd: int, run_fd: int, name: str, contents: bytes) -> None:
+    staging_name, descriptor = _new_staging_file(staging_fd, "receipt", "receipt-unavailable")
+    linked = False
+    try:
+        try:
+            _write_all(descriptor, contents, "receipt-unavailable")
+        finally:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        try:
+            os.link(
+                staging_name,
+                name,
+                src_dir_fd=staging_fd,
+                dst_dir_fd=run_fd,
+                follow_symlinks=False,
+            )
+            linked = True
+            os.fsync(run_fd)
+            os.unlink(staging_name, dir_fd=staging_fd)
+        except OSError:
+            _fail("receipt-unavailable")
+    finally:
+        if not linked:
+            try:
+                os.unlink(staging_name, dir_fd=staging_fd)
+            except OSError:
+                pass
+
+
+def _restore_incomplete(run_fd: int, contents: bytes) -> None:
+    descriptor = -1
+    try:
+        try:
+            descriptor = os.open(
+                _INCOMPLETE_NAME,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+                dir_fd=run_fd,
+            )
+            _write_all(descriptor, contents, "receipt-unavailable")
+        except FileExistsError:
+            pass
+        finally:
+            if descriptor >= 0:
+                try:
+                    os.close(descriptor)
+                except OSError:
+                    pass
+        os.fsync(run_fd)
+    except (OSError, OutputError):
+        _fail("receipt-unavailable")
+
+
+def _normalize_internet_sources(value: Any) -> tuple[dict[str, Any], ...]:
+    try:
+        sources = tuple(value)
+    except (TypeError, ValueError):
+        _fail("invalid-internet-source")
+
+    normalized: list[dict[str, Any]] = []
+    for source in sources:
+        if type(source) is not dict:
+            _fail("invalid-internet-source")
+        identity_fields = {field for field in ("url", "identity") if field in source}
+        allowed_fields = {"url", "identity", "retrieved_at", "request_context", "sha256"}
+        required_fields = identity_fields | {"retrieved_at", "sha256"}
+        if (
+            len(identity_fields) != 1
+            or set(source) != required_fields | ({"request_context"} if "request_context" in source else set())
+            or not set(source).issubset(allowed_fields)
+        ):
+            _fail("invalid-internet-source")
+
+        identity_field = next(iter(identity_fields))
+        identity = source[identity_field]
+        retrieved_at = source["retrieved_at"]
+        sha256 = source["sha256"]
+        if not isinstance(identity, str) or not identity:
+            _fail("invalid-internet-source")
+        if not isinstance(retrieved_at, str) or not (
+            retrieved_at.endswith("Z") or retrieved_at.endswith("+00:00")
+        ):
+            _fail("invalid-internet-source")
+        try:
+            parsed_time = datetime.fromisoformat(retrieved_at.replace("Z", "+00:00"))
+        except ValueError:
+            _fail("invalid-internet-source")
+        if parsed_time.utcoffset() != timezone.utc.utcoffset(None):
+            _fail("invalid-internet-source")
+        if not isinstance(sha256, str) or _SHA256.fullmatch(sha256) is None:
+            _fail("invalid-internet-source")
+
+        normalized_source = dict(source)
+        if retrieved_at.endswith("+00:00"):
+            normalized_source["retrieved_at"] = f"{retrieved_at[:-6]}Z"
+        if "request_context" in source:
+            context = source["request_context"]
+            if not isinstance(context, str) or not context or len(context) > 1024:
+                _fail("invalid-internet-source")
+        normalized.append(normalized_source)
+    return tuple(normalized)
 
 
 def _relative_parts(value: Any) -> tuple[str, ...]:
@@ -182,11 +341,14 @@ class OutputRun:
         invocation: ValidatedInvocation,
         *,
         root_fd: int,
+        run_fd: int,
         staging_fd: int,
         run_id: str,
         skill_version: str,
         mode: str,
         input_manifest: Any,
+        input_manifest_sha256: str,
+        incomplete_bytes: bytes,
         input_identities: frozenset[tuple[int, int]],
     ):
         self.invocation = invocation
@@ -195,10 +357,14 @@ class OutputRun:
         self.mode = mode
         self.input_manifest = input_manifest
         self._root_fd = root_fd
+        self._run_fd = run_fd
         self._staging_fd = staging_fd
+        self._input_manifest_sha256 = input_manifest_sha256
+        self._incomplete_bytes = incomplete_bytes
         self._input_identities = input_identities
         self._artifacts: list[dict[str, Any]] = []
         self._incomplete_artifacts: list[dict[str, Any]] = []
+        self._terminal = False
 
     @classmethod
     def start(
@@ -214,6 +380,13 @@ class OutputRun:
             _fail("invalid-run-id")
         if not isinstance(mode, str) or mode not in _MODES:
             _fail("invalid-run-mode")
+
+        input_manifest_bytes = _canonical_json(input_manifest, "invalid-input-manifest")
+        input_manifest_sha256 = hashlib.sha256(input_manifest_bytes).hexdigest()
+        incomplete_bytes = _canonical_json(
+            {"run_id": run_id, "schema_version": 1, "status": "incomplete"},
+            "receipt-unavailable",
+        )
 
         try:
             root_fd = os.open(invocation.output_root, _DIRECTORY_FLAGS)
@@ -244,17 +417,22 @@ class OutputRun:
                 _fail("run-unavailable")
             run_fd = _open_directory(runs_fd, run_id, create=False, error_code="run-unavailable")
             staging_fd = _open_directory(run_fd, "staging", create=True, error_code="run-unavailable")
+            _publish_record(staging_fd, run_fd, _INCOMPLETE_NAME, incomplete_bytes)
             result = cls(
                 invocation,
                 root_fd=root_fd,
+                run_fd=run_fd,
                 staging_fd=staging_fd,
                 run_id=run_id,
                 skill_version=skill_version,
                 mode=mode,
                 input_manifest=input_manifest,
+                input_manifest_sha256=input_manifest_sha256,
+                incomplete_bytes=incomplete_bytes,
                 input_identities=input_identities,
             )
             root_fd = -1
+            run_fd = -1
             staging_fd = -1
             return result
         finally:
@@ -286,24 +464,15 @@ class OutputRun:
             raise
 
     def _new_staging_name(self) -> tuple[str, int]:
-        for _ in range(32):
-            name = f"artifact-{secrets.token_hex(16)}.tmp"
-            try:
-                descriptor = os.open(
-                    name,
-                    os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
-                    0o600,
-                    dir_fd=self._staging_fd,
-                )
-                return name, descriptor
-            except FileExistsError:
-                continue
-            except OSError:
-                _fail("staging-unavailable")
-        _fail("staging-unavailable")
+        return _new_staging_file(self._staging_fd, "artifact", "staging-unavailable")
 
     def write(self, relative_path: str, contents_or_stream: Any, *, internet_sources=()):
+        if self._terminal:
+            _fail("run-terminal")
         parts = _relative_parts(relative_path)
+        normalized_sources = _normalize_internet_sources(internet_sources)
+        if normalized_sources and self.invocation.internet == "disabled":
+            _fail("internet-not-authorized")
         staging_name, staging_file_fd = self._new_staging_name()
         staged = True
         linked = False
@@ -323,6 +492,8 @@ class OutputRun:
             parent_fd = self._destination_parent(parts)
             _existing_destination_error(parent_fd, parts[-1], self._input_identities)
             artifact = {"path": relative_path, "sha256": sha256, "size": size}
+            if normalized_sources:
+                artifact["internet_sources"] = list(normalized_sources)
             try:
                 os.link(
                     staging_name,
@@ -368,8 +539,71 @@ class OutputRun:
                 except OSError:
                     pass
 
+    def _internet_status(self) -> dict[str, Any]:
+        used = any(artifact.get("internet_sources") for artifact in self._artifacts)
+        return {"policy": self.invocation.internet, "used": used}
+
+    def _receipt(self, status: str) -> dict[str, Any]:
+        return {
+            "artifacts": sorted(self._artifacts, key=lambda artifact: artifact["path"]),
+            "input_manifest_sha256": self._input_manifest_sha256,
+            "internet": self._internet_status(),
+            "mode": self.mode,
+            "run_id": self.run_id,
+            "schema_version": 1,
+            "skill": self.invocation.skill,
+            "skill_version": self.skill_version,
+            "status": status,
+        }
+
+    def complete(self) -> dict[str, Any]:
+        if self._terminal:
+            _fail("run-terminal")
+        if self._incomplete_artifacts:
+            _fail("receipt-unavailable")
+
+        receipt = self._receipt("success")
+        receipt_bytes = _canonical_json(receipt, "receipt-unavailable")
+        _publish_record(self._staging_fd, self._run_fd, _MANIFEST_NAME, receipt_bytes)
+        try:
+            os.unlink(_INCOMPLETE_NAME, dir_fd=self._run_fd)
+        except OSError:
+            _fail("receipt-unavailable")
+        try:
+            os.fsync(self._run_fd)
+        except OSError:
+            _restore_incomplete(self._run_fd, self._incomplete_bytes)
+            _fail("receipt-unavailable")
+
+        self._terminal = True
+        return receipt
+
+    def fail(self, code: str, phase: str) -> dict[str, Any]:
+        if self._terminal:
+            _fail("run-terminal")
+        if (
+            not isinstance(code, str)
+            or len(code) > 64
+            or _FAILURE_VALUE.fullmatch(code) is None
+            or not isinstance(phase, str)
+            or len(phase) > 64
+            or _FAILURE_VALUE.fullmatch(phase) is None
+        ):
+            _fail("invalid-failure")
+
+        receipt = self._receipt("failure")
+        receipt["failure"] = {"code": code, "phase": phase}
+        receipt["incomplete_artifacts"] = sorted(
+            self._incomplete_artifacts,
+            key=lambda artifact: (artifact["path"], artifact["phase"]),
+        )
+        receipt_bytes = _canonical_json(receipt, "receipt-unavailable")
+        _publish_record(self._staging_fd, self._run_fd, _FAILURE_NAME, receipt_bytes)
+        self._terminal = True
+        return receipt
+
     def __del__(self):
-        for descriptor_name in ("_staging_fd", "_root_fd"):
+        for descriptor_name in ("_staging_fd", "_run_fd", "_root_fd"):
             descriptor = getattr(self, descriptor_name, -1)
             if descriptor >= 0:
                 try:

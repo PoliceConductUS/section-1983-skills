@@ -28,3 +28,10 @@ mounted inputs read-only, denied undeclared filesystem paths, or blocked the
 network. Those filesystem and network capabilities must be enforced by the
 trusted host; the isolation declaration and prompt text alone are not
 enforcement.
+
+## Durable output
+
+Artifact-producing skills use the invocation-bound writer and canonical run
+protocol in `SKILL_OUTPUT_PERSISTENCE.md`. Direct filesystem paths, file
+objects, shell commands, repositories, graphs, and external services do not
+grant alternate write authority.

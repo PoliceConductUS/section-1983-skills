@@ -34,11 +34,11 @@
 
 ## 5. Review and archive
 
-- [ ] 5.1 Independently review directory-handle confinement, race behavior,
+- [x] 5.1 Independently review directory-handle confinement, race behavior,
       collision/alias classification, atomicity, retry honesty, receipt
       completeness, and bounded diagnostics.
-- [ ] 5.2 Correct accepted Critical or Important findings test-first and rerun
+- [x] 5.2 Correct accepted Critical or Important findings test-first and rerun
       review.
-- [ ] 5.3 Write verification and retrospective evidence, archive the OpenSpec
+- [x] 5.3 Write verification and retrospective evidence, archive the OpenSpec
       change, validate durable specs, run `npm run validate`, push, and mark the
       draft PR ready while leaving Issue #65 and the PR open.

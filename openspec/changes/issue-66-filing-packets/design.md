@@ -2,9 +2,10 @@
 
 ## Manifest
 
-`filing-packet.json` is canonical compact UTF-8 JSON with sorted object keys. A
-version-1 manifest contains `schema_version`, `packet_id`, `documents`, and
-`provenance`. `documents` is an ordered nonempty array. Every document contains:
+`filing-packet.json` is strict UTF-8 JSON. Trusted-host output uses canonical
+compact encoding with sorted object keys. A version-1 manifest contains
+`schema_version`, `packet_id`, `documents`, and `provenance`. `documents` is an
+ordered nonempty array. Every document contains:
 
 - unique lower-kebab `id`;
 - lower-kebab `kind`, independent from its role;

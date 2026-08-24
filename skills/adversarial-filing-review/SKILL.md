@@ -30,6 +30,16 @@ the trusted host derives the canonical output-relative path and publishes the
 report append-immutable. Report unavailable filing, source, provider, or
 validation material as a gap without broadening the input set.
 
+## FilingPacket boundary
+
+When a declared filing folder is a FilingPacket, follow
+[the folder-backed FilingPacket contract](../../FILING_PACKETS.md). Validate
+\`filing-packet.json\` and every hashed member before work. The manifest targets
+the whole packet; any document target must be one exact manifest-listed member.
+Member review does not count as whole-packet coverage. Drafting or revision
+returns proposed members for trusted-host publication as a complete new packet
+and never mutates the source packet.
+
 ## Purpose
 
 Run a read-only clean-room attack on one canonical draft. The reviewer receives

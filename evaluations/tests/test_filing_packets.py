@@ -20,6 +20,31 @@ FIXTURES = ROOT / "evaluations" / "fixtures" / "filing-packets"
 
 
 class FilingPacketTest(unittest.TestCase):
+    def test_schema_public_contract_and_relevant_skills_publish_packet_boundary(self):
+        schema = json.loads(
+            (ROOT / "governance" / "filing-packet.schema.json").read_text()
+        )
+        self.assertFalse(schema["additionalProperties"])
+        self.assertEqual(schema["properties"]["schema_version"], {"const": 1})
+        for path in (
+            ROOT / "README.md",
+            ROOT / "GOVERNANCE.md",
+            ROOT / "FILING_PACKETS.md",
+        ):
+            self.assertIn("FilingPacket", path.read_text())
+        for skill in (
+            "section-1983-drafting",
+            "drafting-section-1983-complaints",
+            "drafting-section-1983-rule-59e",
+            "drafting-false-arrest-complaints",
+            "audit-authorities",
+            "filing-ci",
+            "adversarial-filing-review",
+        ):
+            text = (ROOT / "skills" / skill / "SKILL.md").read_text()
+            self.assertIn("## FilingPacket boundary", text, skill)
+            self.assertIn("never mutates the source packet", text, skill)
+
     def test_four_packet_families_validate_with_stable_order_and_kind_role_split(self):
         cases = (
             ("complaint", {"main"}, ["complaint"]),

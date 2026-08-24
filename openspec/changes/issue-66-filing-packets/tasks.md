@@ -11,19 +11,19 @@
       main, confined paths, required members, hashes, and authorized roles.
 - [x] 2.2 Add complaint, motion-with-proposed-amended-complaint, response, and
       multi-exhibit fixtures.
-- [ ] 2.3 Implement and GREEN the manifest validator and target resolver.
+- [x] 2.3 Implement and GREEN the manifest validator and target resolver.
 
 ## 3. Generation and revision
 
 - [x] 3.1 RED-test complete packet publication, source preservation, and source
       packet/input-manifest provenance.
-- [ ] 3.2 Implement and GREEN the trusted-host packet planner and publisher.
+- [x] 3.2 Implement and GREEN the trusted-host packet planner and publisher.
 
 ## 4. Review and filing readiness
 
 - [x] 4.1 RED-test whole-packet/member targeting and packet-level gate coverage.
-- [ ] 4.2 Implement and GREEN mechanical filing-readiness evaluation.
-- [ ] 4.3 Update installed skill guidance, governance, and OpenSpec deltas.
+- [x] 4.2 Implement and GREEN mechanical filing-readiness evaluation.
+- [x] 4.3 Update installed skill guidance, governance, and OpenSpec deltas.
 
 ## 5. Verification and archive
 

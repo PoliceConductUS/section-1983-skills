@@ -30,6 +30,16 @@ trusted host may publish it append-immutable. Report missing record, authority,
 requested relief, or package material as a gap without inventing a versioning
 scheme.
 
+## FilingPacket boundary
+
+When a declared filing folder is a FilingPacket, follow
+[the folder-backed FilingPacket contract](../../FILING_PACKETS.md). Validate
+\`filing-packet.json\` and every hashed member before work. The manifest targets
+the whole packet; any document target must be one exact manifest-listed member.
+Member review does not count as whole-packet coverage. Drafting or revision
+returns proposed members for trusted-host publication as a complete new packet
+and never mutates the source packet.
+
 ## Purpose
 
 Build one genuine request for district-court relief. When the case strategy

@@ -25,11 +25,11 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `judge-corpus` contains the approved evidence-coded decision corpus.
 - `court-conduct` contains approved court-conduct observations and sources.
 
-Target is required in `filing`. Internet is `disabled`. Return any judge-
-specific receipt or bounded no-change result as a canonical output-relative path
-and deterministic bytes; only the trusted host may publish it append-immutable.
-Report unsupported, stale, incomplete, or unavailable overlay material as a gap
-and make no judge-specific change.
+Target is required in `filing`. Internet is `disabled`. Return judge-specific
+receipt bytes and structured findings without selecting an output path; only the
+trusted host derives the canonical output-relative path for the quality-control
+report and publishes it append-immutable. Report unsupported, stale, incomplete,
+or unavailable overlay material as a gap and make no judge-specific change.
 
 ## Role in the skill stack
 
@@ -75,11 +75,12 @@ necessary clearly-established-law distinctions.
 8. After the applicable document and claim skills compose the filing, select the
    required filing target inside the declared `filing` role root and use the
    declared `judge-corpus` and `court-conduct` role roots. The packaged
-   processor returns immutable receipt bytes and one output-relative path; only
-   the trusted host may publish them through `OutputRun`. If no qualifying
-   support permits a specialized change, record
-   `no judge-specific drafting change` and the bounded reason. The absence of
-   judge-specific prose or a receipt does not prove this overlay ran.
+   processor returns immutable receipt bytes and structured findings without an
+   output path; only the trusted host derives the canonical path and publishes
+   through the quality-control publisher. If no qualifying support permits a
+   specialized change, record `no judge-specific drafting change` and the
+   bounded reason. The absence of judge-specific prose or a receipt does not
+   prove this overlay ran.
 
 ## Evidence hierarchy
 

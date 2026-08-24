@@ -25,10 +25,13 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `filing` contains any complaint or amendment being revised.
 
 Target is optional in `filing`; without one, draft from the supplied record and
-user request. Internet is `disabled`. Return the complaint or audit as a
-canonical output-relative path and deterministic bytes; only the trusted host
-may publish it append-immutable. Report missing offense, seizure, actor, timing,
-or source material as a gap without supplying it from another location.
+user request. Internet is `disabled`. For drafting or revision, return the
+complaint as a canonical output-relative path and deterministic bytes. For an
+independent audit, return report content and structured findings without a path;
+the trusted host derives the canonical quality-control report path. Only the
+trusted host may publish either result append-immutable. Report missing offense,
+seizure, actor, timing, or source material as a gap without supplying it from
+another location.
 
 ## Core principle
 

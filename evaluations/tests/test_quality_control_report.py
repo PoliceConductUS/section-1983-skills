@@ -26,6 +26,39 @@ def sha256(contents):
     return hashlib.sha256(contents).hexdigest()
 
 
+def canonical_report_bytes(run_id, body):
+    metadata = {
+        "approved_source_identities": [],
+        "failed_findings": [],
+        "input_manifest": {"inputs": []},
+        "passing_but_suboptimal_recommendations": [],
+        "quality_control_kind": "synthetic-audit",
+        "result": "pass",
+        "run_at": "2026-08-24T16:17:18Z",
+        "run_id": run_id,
+        "run_manifest": {
+            "path": f".skill-runs/{run_id}/manifest.json",
+            "run_id": run_id,
+        },
+        "schema_version": 1,
+        "scope": "Synthetic prior report.",
+        "skill": "synthetic-quality-control",
+        "skill_version": "2.4.0",
+        "target": {
+            "path": "draft.md",
+            "role": "filing",
+            "sha256": "a" * 64,
+            "size": 24,
+        },
+    }
+    return (
+        METADATA_FENCE
+        + json.dumps(metadata, separators=(",", ":"), sort_keys=True).encode("utf-8")
+        + b"\n```\n\n"
+        + body
+    )
+
+
 class QualityControlReportTest(unittest.TestCase):
     def setUp(self):
         self.temporary_directory = tempfile.TemporaryDirectory()
@@ -62,14 +95,16 @@ class QualityControlReportTest(unittest.TestCase):
         (self.authorities_root / "case.txt").write_bytes(b"Synthetic authority.\n")
         report_folder = self.prior_reports_root / "quality-control-reports"
         report_folder.mkdir()
-        self.prior_report_bytes = (
-            METADATA_FENCE + b'{"schema_version":1}\n```\n\nprior report\n'
+        self.prior_report_bytes = canonical_report_bytes(
+            "11111111-1111-4111-8111-111111111111", b"prior report\n"
         )
-        self.sibling_report_bytes = (
-            METADATA_FENCE + b'{"schema_version":1}\n```\n\nsibling report\n'
+        self.sibling_report_bytes = canonical_report_bytes(
+            "22222222-2222-4222-8222-222222222222", b"sibling report\n"
         )
         (report_folder / "older-audit.md").write_bytes(self.prior_report_bytes)
         (report_folder / "sibling-audit.md").write_bytes(self.sibling_report_bytes)
+        self.marker_only_bytes = METADATA_FENCE + b'{"schema_version":1}\n```\n\n'
+        (report_folder / "marker-only.md").write_bytes(self.marker_only_bytes)
 
     def tearDown(self):
         self.temporary_directory.cleanup()
@@ -243,7 +278,16 @@ class QualityControlReportTest(unittest.TestCase):
         ordinary = build_quality_control_report_plan(
             self.invocation(), **self.report_arguments()
         )
-        self.assertEqual(ordinary.input_manifest["inputs"][2]["files"], [])
+        self.assertEqual(
+            ordinary.input_manifest["inputs"][2]["files"],
+            [
+                {
+                    "path": "marker-only.md",
+                    "sha256": sha256(self.marker_only_bytes),
+                    "size": len(self.marker_only_bytes),
+                }
+            ],
+        )
 
         targeted = build_quality_control_report_plan(
             self.invocation(
@@ -253,7 +297,7 @@ class QualityControlReportTest(unittest.TestCase):
         )
         self.assertEqual(
             [file["path"] for file in targeted.input_manifest["inputs"][2]["files"]],
-            ["older-audit.md"],
+            ["marker-only.md", "older-audit.md"],
         )
 
     def test_builder_rejects_unbound_and_disallowed_mixed_or_qc_only_roles(self):
@@ -398,7 +442,7 @@ class QualityControlReportTest(unittest.TestCase):
     def test_filtered_manifest_is_derived_from_the_generic_manifest(self):
         invocation = self.invocation()
         generic = build_input_manifest(invocation)
-        self.assertEqual(len(generic["inputs"][2]["files"]), 2)
+        self.assertEqual(len(generic["inputs"][2]["files"]), 3)
 
         plan = build_quality_control_report_plan(invocation, **self.report_arguments())
 

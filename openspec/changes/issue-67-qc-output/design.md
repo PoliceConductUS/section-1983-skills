@@ -16,13 +16,15 @@ a directory, escaping, or out-of-role target.
 
 The host starts from the deterministic logical input manifest produced by
 `build_input_manifest()`. For a QC run it filters every path beneath the
-reserved `quality-control-reports/` prefix from the reviewed set. A file that
-begins with the canonical `quality-control-report+json` metadata fence is also a
-generated report, including when a declared input role is rooted directly at a
-report directory and its relative paths no longer carry the reserved prefix. If
-and only if the explicit target is itself a generated report, the exact target
-file remains in the filtered manifest; sibling and older reports remain
-excluded. Role order, file order, sizes, and SHA-256 values remain canonical.
+reserved `quality-control-reports/` prefix from the reviewed set. A file with a
+complete schema-valid, canonically encoded `quality-control-report+json`
+metadata envelope is also a generated report, including when a declared input
+role is rooted directly at a report directory and its relative paths no longer
+carry the reserved prefix. A fence marker or malformed partial envelope does not
+hide an ordinary file from the reviewed manifest. If and only if the explicit
+target is itself a generated report, the exact target file remains in the
+filtered manifest; sibling and older reports remain excluded. Role order, file
+order, sizes, and SHA-256 values remain canonical.
 
 The report metadata contains the complete filtered logical manifest, so the
 logical input roles and every reviewed artifact hash are inspectable. The

@@ -22,8 +22,28 @@ _UUID_V4 = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
 )
 _SKILL_VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
+_SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_UTC_RUN_TIME = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?Z$"
+)
 _REPORT_PREFIX = "quality-control-reports"
 _METADATA_FENCE = b"```quality-control-report+json\n"
+_REPORT_METADATA_KEYS = {
+    "approved_source_identities",
+    "failed_findings",
+    "input_manifest",
+    "passing_but_suboptimal_recommendations",
+    "quality_control_kind",
+    "result",
+    "run_at",
+    "run_id",
+    "run_manifest",
+    "schema_version",
+    "scope",
+    "skill",
+    "skill_version",
+    "target",
+}
 
 
 class QualityControlReportError(ValueError):
@@ -76,6 +96,100 @@ def _canonical_bytes(value: Any, code: str) -> bytes:
 
 def _valid_identifier(value: Any) -> bool:
     return isinstance(value, str) and _IDENTIFIER.fullmatch(value) is not None
+
+
+def _valid_manifest_identity(value: Any) -> bool:
+    if type(value) is not dict or set(value) != {"inputs"}:
+        return False
+    inputs = value["inputs"]
+    if type(inputs) is not list:
+        return False
+    for input_role in inputs:
+        if type(input_role) is not dict or set(input_role) != {"role", "files"}:
+            return False
+        if not _valid_identifier(input_role["role"]) or type(input_role["files"]) is not list:
+            return False
+        for file_identity in input_role["files"]:
+            if type(file_identity) is not dict or set(file_identity) != {
+                "path",
+                "sha256",
+                "size",
+            }:
+                return False
+            if (
+                not isinstance(file_identity["path"], str)
+                or not file_identity["path"]
+                or not isinstance(file_identity["sha256"], str)
+                or _SHA256.fullmatch(file_identity["sha256"]) is None
+                or type(file_identity["size"]) is not int
+                or file_identity["size"] < 0
+            ):
+                return False
+    return True
+
+
+def _valid_report_metadata(value: Any, encoded: bytes) -> bool:
+    if type(value) is not dict or set(value) != _REPORT_METADATA_KEYS:
+        return False
+    run_id = value["run_id"]
+    run_manifest = value["run_manifest"]
+    target = value["target"]
+    if (
+        value["schema_version"] != 1
+        or not _valid_identifier(value["skill"])
+        or not isinstance(value["skill_version"], str)
+        or _SKILL_VERSION.fullmatch(value["skill_version"]) is None
+        or not _valid_identifier(value["quality_control_kind"])
+        or not isinstance(value["run_at"], str)
+        or _UTC_RUN_TIME.fullmatch(value["run_at"]) is None
+        or not isinstance(run_id, str)
+        or _UUID_V4.fullmatch(run_id) is None
+        or not isinstance(value["scope"], str)
+        or not value["scope"].strip()
+        or not _valid_identifier(value["result"])
+        or type(value["approved_source_identities"]) is not list
+        or any(
+            not isinstance(identity, str) or not identity.strip()
+            for identity in value["approved_source_identities"]
+        )
+        or type(value["failed_findings"]) is not list
+        or type(value["passing_but_suboptimal_recommendations"]) is not list
+        or not _valid_manifest_identity(value["input_manifest"])
+        or type(target) is not dict
+        or set(target) != {"path", "role", "sha256", "size"}
+        or not isinstance(target["path"], str)
+        or not target["path"]
+        or not _valid_identifier(target["role"])
+        or not isinstance(target["sha256"], str)
+        or _SHA256.fullmatch(target["sha256"]) is None
+        or type(target["size"]) is not int
+        or target["size"] < 0
+        or type(run_manifest) is not dict
+        or set(run_manifest) != {"path", "run_id"}
+        or run_manifest["run_id"] != run_id
+        or run_manifest["path"] != f".skill-runs/{run_id}/manifest.json"
+    ):
+        return False
+    return _canonical_bytes(value, "invalid-quality-control-metadata") == encoded
+
+
+def _has_canonical_report_envelope(path: Path) -> bool:
+    try:
+        with path.open("rb") as candidate:
+            if candidate.readline() != _METADATA_FENCE:
+                return False
+            metadata_line = candidate.readline(1_000_001)
+            if not metadata_line.endswith(b"\n") or len(metadata_line) > 1_000_000:
+                return False
+            if candidate.readline() != b"```\n":
+                return False
+    except OSError:
+        _fail("quality-control-input-unavailable")
+    try:
+        metadata = json.loads(metadata_line[:-1])
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return False
+    return _valid_report_metadata(metadata, metadata_line[:-1])
 
 
 def _validate_contract_target(invocation: ValidatedInvocation) -> None:
@@ -138,11 +252,7 @@ def _is_generated_report(
     role_root = next((root for name, root in invocation.inputs if name == role), None)
     if role_root is None:
         _fail("quality-control-contract-target")
-    try:
-        with (role_root / Path(relative_path)).open("rb") as candidate:
-            return candidate.read(len(_METADATA_FENCE)) == _METADATA_FENCE
-    except OSError:
-        _fail("quality-control-input-unavailable")
+    return _has_canonical_report_envelope(role_root / Path(relative_path))
 
 
 def _filtered_input_manifest(

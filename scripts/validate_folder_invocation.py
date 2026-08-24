@@ -53,12 +53,20 @@ def _require_exact_object(value: Any, required: set[str], allowed: set[str], cod
 def _require_relative_path(value: Any, code: str) -> Path:
     if not isinstance(value, str) or not value:
         _fail(code)
+    segments = value.split("/")
+    if (
+        "\\" in value
+        or "\x00" in value
+        or re.match(r"^[A-Za-z]:/", value) is not None
+        or any(segment in {"", ".", ".."} for segment in segments)
+    ):
+        _fail(code)
     try:
         path = Path(value)
         invalid_path = not path.parts or path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts)
     except ValueError:
         _fail(code)
-    if "\\" in value or invalid_path:
+    if invalid_path:
         _fail(code)
     return path
 
@@ -270,7 +278,10 @@ def _manifest_files(root: Path) -> list[dict[str, Any]]:
         finally:
             active_directories.remove(identity)
 
-    walk(root, Path(), set())
+    try:
+        walk(root, Path(), set())
+    except RecursionError:
+        _fail("manifest-unavailable")
     return sorted(files, key=lambda item: item["path"])
 
 
@@ -291,7 +302,7 @@ def main() -> int:
     except InvocationError as error:
         print(json.dumps({"error": {"code": error.code}}, separators=(",", ":")))
         return 1
-    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError, RecursionError):
         print(json.dumps({"error": {"code": "invalid-json"}}, separators=(",", ":")))
         return 1
     except ValueError:

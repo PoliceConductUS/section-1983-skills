@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import subprocess
 import sys
@@ -260,6 +261,73 @@ class FolderScopedExecutionTest(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIsNone(re.fullmatch(pattern, path))
 
+    def test_runtime_rejects_raw_paths_rejected_by_the_schema(self):
+        schema = json.loads(
+            (Path(__file__).resolve().parents[2] / "governance" / "folder-invocation.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        pattern = schema["$defs"]["relativePath"]["pattern"]
+        (self.record_root / "a").mkdir()
+        (self.record_root / "a" / "b").write_text("valid\n", encoding="utf-8")
+        if os.name == "posix":
+            (self.record_root / "C:").mkdir()
+            (self.record_root / "C:" / "x").write_text("drive-like\n", encoding="utf-8")
+        (self.record_root / "line\nname").write_text("newline\n", encoding="utf-8")
+        invocation = validate_invocation(self.envelope())
+
+        self.assertIsNotNone(re.fullmatch(pattern, "a/b"))
+        valid_target = self.envelope()
+        valid_target["target"] = {"role": "record", "path": "a/b"}
+        self.assertEqual(validate_invocation(valid_target).target, ("record", (self.record_root / "a" / "b").resolve()))
+        self.assertEqual(resolve_input_path(invocation, "record", "a/b"), (self.record_root / "a" / "b").resolve())
+        self.assertEqual(resolve_output_path(invocation, "a/b"), (self.output_root / "a" / "b").resolve())
+        self.assertIsNotNone(re.fullmatch(pattern, "line\nname"))
+        newline_target = self.envelope()
+        newline_target["target"] = {"role": "record", "path": "line\nname"}
+        self.assertEqual(
+            validate_invocation(newline_target).target,
+            ("record", (self.record_root / "line\nname").resolve()),
+        )
+        self.assertEqual(
+            resolve_input_path(invocation, "record", "line\nname"),
+            (self.record_root / "line\nname").resolve(),
+        )
+        self.assertEqual(
+            resolve_output_path(invocation, "line\nname"),
+            (self.output_root / "line\nname").resolve(),
+        )
+
+        for raw_path in ("./a/b", "a/./b", "a//b", "a/b/", "C:/x", "nul\x00name"):
+            with self.subTest(path=raw_path):
+                self.assertIsNone(re.fullmatch(pattern, raw_path))
+                target = self.envelope()
+                target["target"] = {"role": "record", "path": raw_path}
+                with self.assertRaises(InvocationError) as target_error:
+                    validate_invocation(target)
+                self.assertEqual(target_error.exception.code, "invalid-target")
+                with self.assertRaises(InvocationError) as input_error:
+                    resolve_input_path(invocation, "record", raw_path)
+                self.assertEqual(input_error.exception.code, "invalid-input-path")
+                with self.assertRaises(InvocationError) as output_error:
+                    resolve_output_path(invocation, raw_path)
+                self.assertEqual(output_error.exception.code, "invalid-output-path")
+
+    def test_cli_reports_parser_recursion_as_a_bounded_json_error(self):
+        nested_arrays = "[" * 250_000 + "]" * 250_000
+
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parents[2] / "scripts" / "validate_folder_invocation.py")],
+            input=nested_arrays,
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(json.loads(result.stdout), {"error": {"code": "invalid-json"}})
+
     def test_resolves_only_existing_confined_input_children(self):
         invocation = validate_invocation(self.envelope())
 
@@ -385,6 +453,26 @@ class FolderScopedExecutionTest(unittest.TestCase):
 
         with self.assertRaises(InvocationError):
             build_input_manifest(invocation)
+
+    def test_manifest_reports_recursion_exhaustion_as_a_bounded_error(self):
+        current = self.record_root
+        for _ in range(120):
+            current = current / "d"
+            current.mkdir()
+        (current / "deep.txt").write_text("deep\n", encoding="utf-8")
+        invocation = validate_invocation(self.envelope())
+        original_limit = sys.getrecursionlimit()
+
+        try:
+            sys.setrecursionlimit(80)
+            with self.assertRaises(InvocationError) as captured:
+                build_input_manifest(invocation)
+        finally:
+            sys.setrecursionlimit(original_limit)
+
+        self.assertEqual(captured.exception.code, "manifest-unavailable")
+        self.assertEqual(str(captured.exception), "manifest-unavailable")
+        self.assertNotIn(str(self.root), str(captured.exception))
 
 
 if __name__ == "__main__":

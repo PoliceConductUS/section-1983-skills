@@ -17,23 +17,27 @@ The review checked schema/runtime agreement, strict envelope shapes, canonical
 root containment, target and child traversal, file and directory symlink
 handling, directory-cycle rejection, deterministic logical manifests, bounded
 CLI diagnostics, truthful host-enforcement language, and all 22 public skill
-packages. No Critical or Important defect was proved, so no review correction or
-implementation expansion was made.
+packages. The first self-review found no defect. Independent whole-branch review
+then proved two Important false-green classes: runtime child paths normalized
+raw syntax that the schema rejected, and parser or manifest recursion exhaustion
+could escape the bounded-error contract. Focused RED tests now cover both, and
+the narrow corrections preserve the existing public error codes and normal
+manifest behavior.
 
 The validator proves only invocation conformance, confined resolution, target
 selection, and logical fingerprints. It does not claim to enforce read-only
 mounts, undeclared-path denial, runtime limits, or network policy; those remain
 trusted-host responsibilities.
 
-## Fresh pre-archive evidence
+## Fresh verification evidence
 
-- `python3 -m unittest evaluations.tests.test_folder_scoped_execution -v` — 14
+- `python3 -m unittest evaluations.tests.test_folder_scoped_execution -v` — 17
   tests passed.
 - `python3 -m unittest evaluations.tests.test_repository_governance -v` — 37
   tests passed.
-- `python3 -m unittest discover -s evaluations/tests -p 'test_*.py'` — 373 tests
+- `python3 -m unittest discover -s evaluations/tests -p 'test_*.py'` — 376 tests
   passed.
-- `npm run test:unit` — 26 drafting tests and 373 evaluation tests passed.
+- `npm run test:unit` — 26 drafting tests and 376 evaluation tests passed.
 - `npm run skills:list` — discovered 22 public skills.
 - `npm run openspec:validate` — 21 of 21 items passed before archive.
 - `npm run evaluations:corpus` — passed and reproduced the tracked corpus
@@ -67,12 +71,19 @@ ready-for-review transition.
 - Task 4 added the protected governance gate and the compact four-sentence
   install-local contract to all 22 public skills. Independent task review was
   clean.
+- Final independent review added RED coverage for raw dot, empty, trailing,
+  drive-prefixed, and NUL child-path segments across target/input/output APIs.
+  The shared helper now rejects them consistently with the schema while
+  preserving valid POSIX newline names.
+- The same review reproduced unbounded `RecursionError` behavior in the CLI JSON
+  parser and deep manifest traversal. Both now return stable bounded errors with
+  no stderr traceback or installation-path leakage.
 
 ## Archive verification
 
 The repository-local OpenSpec CLI archived this change as
 `2026-08-24-issue-64-folder-scoped-execution`, created the durable
-`folder-scoped-skill-execution` specification, and update the durable
+`folder-scoped-skill-execution` specification, and updated the durable
 `repository-skill-governance` specification. The generated placeholder Purpose
 was replaced with the concrete capability statement above. Post-archive
 durable-spec and repository validation results are recorded in the Task 5

@@ -12,12 +12,13 @@ skills remain independently installable and carry the same compact boundary.
 - Pre-archive range: `1e163cd..c10aa89` (8 commits; 40 files; +1,732 / -12).
 - Tasks before archive: 12 of 12 checked.
 - External dependencies: none.
-- Focused result: 14 folder-invocation tests and 37 governance tests passed.
-- Full result: 26 drafting tests and 373 evaluation tests passed; 22 skills
+- Focused result: 17 folder-invocation tests and 37 governance tests passed.
+- Full result: 26 drafting tests and 376 evaluation tests passed; 22 skills
   discovered; governance and corpus checks passed.
 - OpenSpec state before archive: 21 of 21 items valid.
 - Implementation work used four task-sized RED/GREEN dispatches with independent
-  reviews and two review-correction rounds for the conformance helper.
+  reviews, two initial review-correction rounds for the conformance helper, and
+  one final whole-branch correction round.
 
 Commit chain:
 
@@ -41,6 +42,13 @@ c10aa89 docs: apply folder boundary to public skills
 - Review mutations found two real boundary drifts: NUL-containing root errors
   could escape bounded diagnostics, and schema/runtime handling of backslashes
   differed. Both were corrected test-first.
+- Independent whole-branch review found raw child-path normalization let dot,
+  empty, trailing, drive-prefixed, and NUL forms bypass schema restrictions. One
+  raw-segment check now governs target, input, and output resolution without
+  rejecting valid POSIX newline filenames.
+- The same review forced JSON-parser and deep-manifest recursion exhaustion.
+  Both paths now fail with stable bounded codes instead of tracebacks containing
+  installation paths.
 - One compact contract in each `SKILL.md` preserves the boundary when a skill is
   installed alone, while one canonical owner document avoids copying the full
   protocol 22 times.
@@ -55,11 +63,16 @@ c10aa89 docs: apply folder boundary to public skills
   the aggregate validation command temporarily red even when every tracked file
   is formatted; the controller must remove the scratch workspace before final
   validation.
+- `pathlib.Path` normalizes several noncanonical raw spellings before exposing
+  segments. Validation must inspect the raw slash-delimited string before
+  constructing a `Path` when runtime behavior must match a JSON Schema grammar.
 
 ## Plan deviations
 
 - Task 2 needed two narrow review-correction commits for bounded NUL-path errors
   and schema/runtime backslash agreement. Both followed new failing tests.
+- Final review required one additional test-first correction for raw child-path
+  equivalence and bounded recursion exhaustion.
 - The Task 5 worker left PR #72 draft despite the plan's final state-transition
   wording because the controller reserved that action until after independent
   whole-branch review. No product behavior changed.

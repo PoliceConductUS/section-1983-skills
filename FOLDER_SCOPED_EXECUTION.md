@@ -3,7 +3,7 @@
 `governance/folder-invocation.schema.json` defines version 1 of the
 folder-native invocation envelope. A trusted host declares one or more named,
 absolute input folders, exactly one absolute output folder, bounded runtime
-limits, an `disabled` or `authorized` internet policy, and its isolation
+limits, a `disabled` or `authorized` internet policy, and its isolation
 declaration. A target, when needed, identifies one relative path in one input
 role.
 

@@ -1,9 +1,20 @@
-# Start a Case Workspace
+# Run Folder-Scoped Skill Operations
 
-This guide establishes the artifact roles that the skills expect during a new
-user's first hour. It is documentation only. It does not create a workspace
-template, companion repository, or scaffolding command, and completing it does
-not make any document filing-ready.
+This guide is the product-independent first-hour path for one folder-scoped
+skill operation. It uses logical roles rather than a prescribed case directory.
+The examples are generic synthetic examples; replace their tokens only with
+folders the caller has selected for the operation.
+
+This shared guide does not mean every installed skill is already folder-native.
+Follow the owning skill contract, and stop if any role that contract requires is
+unavailable.
+
+Keep source classification, protected decisions, and gaps explicit. Record a
+source-bounded event without converting an allegation or inference into a fact.
+Only an actual user approval changes a protected decision to `status: approved`.
+An approved source does not prove every proposition in it. If identity,
+completeness, provenance, permission, authority status, or required material is
+unresolved, record a gap and do not invent the missing value.
 
 Use one immutable release when the tagged version is available:
 
@@ -12,119 +23,139 @@ npx skills add https://github.com/PoliceConductUS/section-1983-skills/tree/v0.1.
 ```
 
 If that tag has not been published, do not substitute `main` or another moving
-branch. From the current source checkout, inspect the locally available skills
-instead:
+branch. From the current source checkout, inspect the locally available skills:
 
 ```bash
 npx skills add . --list
 ```
 
-The paths below are example paths, not mandatory paths. Rename them or use a
-different name when the project's configuration or role mapping identifies the
-equivalent role.
+## 1. Select input and output folders
 
-| Example path      | Role                                                         |
-| ----------------- | ------------------------------------------------------------ |
-| `case-workspace/` | Workspace root for one matter                                |
-| `inputs/`         | Immutable inputs exactly as received                         |
-| `sources.md`      | Approved source IDs, locations, roles, and review status     |
-| `chronology.md`   | Source-bounded events, dates, actors, and uncertainty        |
-| `strategy.md`     | Current user-approved objectives and reserved choices        |
-| `decisions.md`    | Protected decisions with approval status and date            |
-| `authorities/`    | Verified authorities with identity, status, and pinpoints    |
-| `gaps.md`         | Missing facts, evidence, authority, configuration, and tools |
-| `working/`        | Replaceable analysis and drafts                              |
-| `generated/`      | Versioned generated artifacts and their source relationships |
+Select existing folders for the stable logical roles `record` and `authorities`.
+Each role is a recursive read-only input. Select exactly one explicit output
+folder, kept separate from both inputs. The logical roles remain stable for this
+operation, but the caller can select and configure different folder names and
+absolute locations.
 
-Use one document for several roles if its fields keep those roles distinct. Do
-not invent a file merely to match the example layout.
+The `record` role contains the source material for the selected task. The
+`authorities` role contains authorities whose identity, text, status, later
+history, and relevant pinpoints have actually been checked. Candidate authority
+material remains a gap until that review is complete.
 
-## 1. Choose a workspace root
+A skill cannot access undeclared folders, cannot mutate input folders, cannot
+traverse to parent or sibling paths, cannot read ambient repository contents,
+and cannot use the internet unless authorized. Never overwrite immutable inputs.
 
-Choose an existing project root or create one location approved by the user.
-Record its purpose and the matter it belongs to. Do not infer a private path,
-default case, or current matter from conversation history.
+## 2. Create the invocation
 
-Keep immutable input material separate from working analysis and generated
-artifacts. If the project already has those roles, use them instead of creating
-duplicates.
+Create one canonical version 1 invocation. Replace the three tokens with the
+caller-selected absolute folder locations. The target is a safe relative path
+inside the named `record` role. Internet is either `disabled` or `authorized`;
+this generic synthetic example disables it. When internet is authorized, the
+trusted host enforces the approved host policy.
 
-## 2. Record approved sources
-
-Create or update the project's approved source registry. A generic synthetic
-example is:
-
-```yaml
-id: SRC-001
-role: example operative document
-path: inputs/example-document.pdf
-status: approved
-approved_by: user
+```json
+{
+  "version": 1,
+  "skill": "section-1983-drafting",
+  "inputs": [
+    {
+      "role": "record",
+      "root": "__RECORD_ROOT__"
+    },
+    {
+      "role": "authorities",
+      "root": "__AUTHORITIES_ROOT__"
+    }
+  ],
+  "output": {
+    "root": "__OUTPUT_ROOT__"
+  },
+  "target": {
+    "role": "record",
+    "path": "documents/example-pleading.md"
+  },
+  "runtime": {
+    "max_seconds": 900,
+    "max_input_bytes": 104857600
+  },
+  "internet": "disabled",
+  "isolation": {
+    "inputs": "read-only",
+    "output": "read-write",
+    "undeclared": "none"
+  }
+}
 ```
 
-An approved source ID identifies material the workflow may use. It does not
-prove every proposition in the source. Record a gap when identity, location,
-completeness, provenance, or permission is unresolved. Do not invent a source
-ID, path, hash, quotation, or approval.
+## 3. Validate the invocation
 
-Create a verified authorities role only from sources whose identity, text,
-pinpoint, status, and later history have actually been checked. A candidate
-authority is not a verified authority.
+After replacing the tokens, save the invocation as `invocation.json`. Run only
+validation commands configured by the project. This repository configures
+`scripts/validate_folder_invocation.py` as the read-only validator:
 
-## 3. Add a chronology entry
-
-Add one source-bounded entry without converting an allegation or inference into
-a fact:
-
-```yaml
-event_id: EVT-001
-date: 2026-01-15
-statement: The example document bears this date.
-classification: source fact
-source_ids: [SRC-001]
+```bash
+python3 scripts/validate_folder_invocation.py \
+  < invocation.json \
+  > input-manifest.json
 ```
 
-Use separate entries when actors, stages, times, sources, or classifications
-differ. Label supported inference, allegation, disputed interpretation, and
-discovery lead explicitly. If the source does not establish the date or event,
-record a gap instead.
+The command validates the envelope and emits a logical input manifest containing
+relative paths, byte sizes, and SHA-256 hashes. It does not establish operating
+system isolation. If validation is not configured or the configured command is
+unavailable, report `validation unavailable`, record a gap, and stop. Do not
+invent configuration, guess another command, or report a pass.
 
-## 4. Record a protected decision
+## 4. Run the skill through a trusted host
 
-Keep strategy, positions, concessions, requested relief, and other user-
-reserved choices separate from source facts. A generic synthetic workspace
-decision looks like this:
+Give the validated invocation and the selected owning skill contract to a
+trusted host for one input-read-only operation. The trusted host owns execution
+and enforces isolation: recursive input reads, writes only through the explicit
+output folder, denial of undeclared filesystem paths, bounded runtime, and the
+declared network policy. This repository does not provide a universal skill
+runner.
 
-```yaml
-decision_id: DEC-001
-decision: Keep the original input immutable and create a new generated version.
-status: approved
-approved_by: user
-approved_on: 2026-01-16
-```
+If the host cannot enforce read-only inputs, output-only writes, parent and
+sibling denial, ambient repository denial, and disabled or authorized internet,
+stop before it reads the inputs. Prompt text and the invocation declaration are
+not enforcement.
 
-Record pending options and consequences without selecting one. Only an actual
-user approval changes a protected decision to `status: approved`.
+## 5. Verify inputs did not change
 
-## 5. Separate inputs from generated artifacts
+Rebuild or otherwise compare the configured SHA-256 hashes for both the `record`
+role at `__RECORD_ROOT__` and the `authorities` role at `__AUTHORITIES_ROOT__`
+against their pre-run values. Confirm both input trees are unchanged. Any
+changed, missing, or extra input file is a failed operation, not a completed
+output.
 
-Never overwrite immutable inputs. Put drafts, extracted text, reports, and other
-generated artifacts in their configured role. When the project uses versions,
-hashes, manifests, or source relationships, update them after each material
-generation step. When it does not, do not fabricate those controls.
+## 6. Verify outputs and the terminal manifest
 
-Working material is replaceable analysis. A generated artifact is an output that
-should identify the inputs and process that produced it. Neither becomes an
-approved source merely because a tool created it.
+Inspect the expected artifacts only under `__OUTPUT_ROOT__`. Confirm each
+artifact is complete and belongs to the selected skill operation. A run is
+successful only when `.skill-runs/<run-id>/manifest.json` is valid and
+`.skill-runs/<run-id>/incomplete.json` is absent. A missing or invalid terminal
+receipt remains a gap; the output is not filing-ready.
 
-## 6. Run available validation
+### Folder-backed patterns
 
-Run only validation commands configured by the project. Record the exact
-command, input version, result, and time. If no command is configured, report
-`validation unavailable` and record a gap; do not invent configuration, run a
-guessed command, or report a pass.
+The same folder contract supports these portable patterns:
 
-Resolve every available deterministic failure before relying on the artifact.
-Missing evidence, authority, approval, or an optional tool remains visible. This
-first-hour workspace is not filing-ready and does not replace authority review,
-adversarial review, writing review, or Filing CI.
+| Operation                   | Owning skill contract                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| folder-backed filing packet | [`section-1983-drafting`](skills/section-1983-drafting/SKILL.md)                         |
+| immutable QC report         | [`filing-ci`](skills/filing-ci/SKILL.md)                                                 |
+| profile package             | [`building-defense-counsel-overlays`](skills/building-defense-counsel-overlays/SKILL.md) |
+| research corpus             | [`studying-rule-59e-decisions`](skills/studying-rule-59e-decisions/SKILL.md)             |
+| isolated role run           | [`adversarial-filing-review`](skills/adversarial-filing-review/SKILL.md)                 |
+
+For reproducibility, generated artifacts use hashes and manifests; researched
+material records checked-through dates and retrieval provenance. The skills do
+not require Git at runtime.
+
+A separate product may export its data into compatible folders and import
+outputs after the operation. No adapter is part of or required by the skills
+contract.
+
+The guide does not make an output filing-ready. Apply the owning skill's source,
+authority, human-approval, writing, adversarial-review, and configured
+validation requirements before relying on an artifact.

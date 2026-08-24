@@ -11,16 +11,16 @@
 - Rename/modify: `evaluations/tests/test_case_workspace_guide.py` to
   `evaluations/tests/test_folder_operations_guide.py`
 
-- [ ] Specify one repository-relative README guide link and confined operation
+- [x] Specify one repository-relative README guide link and confined operation
       owner links.
-- [ ] Specify the ordered first-hour flow and parse the canonical invocation
+- [x] Specify the ordered first-hour flow and parse the canonical invocation
       fixture after replacing caller-selected root tokens.
-- [ ] Specify stable logical roles, exactly one reused output root, target and
+- [x] Specify stable logical roles, exactly one reused output root, target and
       internet/isolation fields, inaccessible paths, and receipt verification.
-- [ ] Specify synthetic-only examples and ban obsolete product-specific terms
+- [x] Specify synthetic-only examples and ban obsolete product-specific terms
       from current public documents.
-- [ ] Run the focused test and record RED.
-- [ ] Commit with `test: define folder operations documentation` and push.
+- [x] Run the focused test and record RED.
+- [x] Commit with `test: define folder operations documentation` and push.
 
 ## Task 2: Folder-native documentation GREEN
 
@@ -30,16 +30,16 @@
 - Modify: `FOLDER_OPERATIONS.md`
 - Modify: `README.md`
 
-- [ ] Write one canonical invocation and ordered first-hour flow without a
+- [x] Write one canonical invocation and ordered first-hour flow without a
       prescribed case directory or universal runner.
-- [ ] Explain recursive read-only inputs, one output, target selection, internet
+- [x] Explain recursive read-only inputs, one output, target selection, internet
       policy, trusted-host isolation, inaccessible paths, hashes, manifests,
       checked-through dates, and retrieval provenance.
-- [ ] Explain portable folder-backed artifact patterns and the separate-product
+- [x] Explain portable folder-backed artifact patterns and the separate-product
       adapter boundary.
-- [ ] Link each described operation to its owning skill contract.
-- [ ] Make focused and full tests green.
-- [ ] Commit with `docs: explain folder-scoped skill operations` and push.
+- [x] Link each described operation to its owning skill contract.
+- [x] Make focused and full tests green.
+- [x] Commit with `docs: explain folder-scoped skill operations` and push.
 
 ## Task 3: Whole-story review and archive
 

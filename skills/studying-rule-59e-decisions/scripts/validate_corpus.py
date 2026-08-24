@@ -1,7 +1,11 @@
+import argparse
 import json
 import sys
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+
+MAX_INPUT_BYTES = 1_000_000
 
 
 TOP_LEVEL_REQUIRED = (
@@ -759,20 +763,102 @@ def validate_corpus(corpus: object) -> list[str]:
     return list(dict.fromkeys(findings))
 
 
-def read_corpus(path):
+def _input_root(value):
     try:
-        return json.loads(Path(path).read_text(encoding="utf-8")), []
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        return None, [f"malformed-input: {error}"]
+        path = Path(value)
+        if not path.is_absolute():
+            raise ValueError
+        resolved = path.resolve(strict=True)
+        if not resolved.is_dir():
+            raise ValueError
+        return resolved
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return None
+
+
+def _relative_target(value):
+    if (
+        not isinstance(value, str)
+        or not value
+        or "\\" in value
+        or "\x00" in value
+        or (len(value) >= 3 and value[0].isalpha() and value[1:3] == ":/")
+    ):
+        return None
+    try:
+        relative = PurePosixPath(value)
+    except (TypeError, ValueError):
+        return None
+    if (
+        relative.is_absolute()
+        or str(relative) != value
+        or any(part in {"", ".", ".."} for part in value.split("/"))
+    ):
+        return None
+    return Path(*relative.parts)
+
+
+def validate_folder_corpus(
+    *, decisions_root, corpus_target, max_input_bytes=MAX_INPUT_BYTES
+):
+    root = _input_root(decisions_root)
+    relative = _relative_target(corpus_target)
+    if root is None or relative is None or type(max_input_bytes) is not int or max_input_bytes < 1:
+        findings = ["input-path-invalid: decisions target"]
+    else:
+        max_input_bytes = min(max_input_bytes, MAX_INPUT_BYTES)
+        try:
+            resolved = (root / relative).resolve(strict=True)
+            resolved.relative_to(root)
+            if not resolved.is_file():
+                raise ValueError
+            with resolved.open("rb") as source:
+                payload = source.read(max_input_bytes + 1)
+        except (OSError, RuntimeError, TypeError, ValueError):
+            findings = ["input-path-invalid: decisions target"]
+        else:
+            if len(payload) > max_input_bytes:
+                findings = ["input-file-too-large: decisions target"]
+            else:
+                try:
+                    corpus = json.loads(payload.decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
+                    findings = [f"malformed-input: {error}"]
+                else:
+                    findings = validate_corpus(corpus)
+    return {"passed": not findings, "findings": findings}
+
+
+def _parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--decisions-root")
+    parser.add_argument("--corpus-target")
+    return parser
 
 
 def main(arguments):
-    if len(arguments) != 1:
-        print("malformed-input: expected one corpus JSON path")
-        return 1
-    corpus, findings = read_corpus(arguments[0])
-    if not findings:
-        findings = validate_corpus(corpus)
+    parsed = _parser().parse_args(arguments)
+    if (parsed.decisions_root is None) != (parsed.corpus_target is None):
+        findings = ["input-path-invalid: decisions root and corpus target are required together"]
+    elif parsed.decisions_root is not None:
+        findings = validate_folder_corpus(
+            decisions_root=parsed.decisions_root,
+            corpus_target=parsed.corpus_target,
+        )["findings"]
+    else:
+        stream = getattr(sys.stdin, "buffer", sys.stdin)
+        payload = stream.read(MAX_INPUT_BYTES + 1)
+        if isinstance(payload, str):
+            payload = payload.encode("utf-8")
+        if len(payload) > MAX_INPUT_BYTES:
+            findings = ["input-file-too-large: corpus input"]
+        else:
+            try:
+                corpus = json.loads(payload.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
+                findings = [f"malformed-input: {error}"]
+            else:
+                findings = validate_corpus(corpus)
     if findings:
         for finding in findings:
             print(finding)

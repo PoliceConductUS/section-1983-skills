@@ -32,9 +32,13 @@ Use
 for every published or transferred corpus and
 [references/transfer-card.schema.json](references/transfer-card.schema.json) for
 standalone downstream transfers. Before release, run
-`python3 scripts/validate_corpus.py <corpus.json>` from the installed skill
-directory. CSV, YAML, and databases remain valid working formats, but they must
-export canonical JSON that passes the validator before publication or transfer.
+`python3 scripts/validate_corpus.py --decisions-root "$DECISIONS_ROOT" --corpus-target "$CORPUS_TARGET"`
+from the installed skill directory. The target is a canonical relative path
+inside the caller-declared `decisions` role root. With neither flag, the helper
+accepts bounded corpus JSON on standard input. CSV, YAML, and databases remain
+valid working formats, but they must export canonical JSON that passes the
+validator before publication or transfer. The helper does not write or publish
+its deterministic result.
 
 ## Required companion skill
 

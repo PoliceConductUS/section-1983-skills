@@ -2,12 +2,14 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from datetime import date, datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 STABLE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+MAX_INPUT_BYTES = 1_000_000
 SNAPSHOT_KEYS = {
     "schema_version",
     "snapshot_id",
@@ -909,31 +911,115 @@ def validate_filing_manifest(manifest, overlay, snapshot):
     return validate_filing_pins(counsel_pins, overlay, snapshot)
 
 
-def _load(path):
+def _input_root(value, role):
     try:
-        return json.loads(Path(path).read_bytes().decode("utf-8")), None
-    except OSError as error:
-        return None, _finding("input-file-unavailable", str(path), f"input file unavailable: {error}")
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        return None, _finding("input-file-malformed-json", str(path), f"input file is not valid UTF-8 JSON: {error}")
+        path = Path(value)
+        if not path.is_absolute():
+            raise ValueError
+        resolved = path.resolve(strict=True)
+        if not resolved.is_dir():
+            raise ValueError
+        return resolved, None
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return None, _finding(
+            "input-path-invalid", role, f"{role} root must be an absolute existing directory"
+        )
 
 
-def _parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("snapshot")
-    parser.add_argument("overlay")
-    parser.add_argument("--filing-manifest")
-    return parser
+def _relative_target(value):
+    if (
+        not isinstance(value, str)
+        or not value
+        or "\\" in value
+        or "\x00" in value
+        or (len(value) >= 3 and value[0].isalpha() and value[1:3] == ":/")
+    ):
+        return None
+    try:
+        relative = PurePosixPath(value)
+    except (TypeError, ValueError):
+        return None
+    if (
+        relative.is_absolute()
+        or str(relative) != value
+        or any(part in {"", ".", ".."} for part in value.split("/"))
+    ):
+        return None
+    return Path(*relative.parts)
 
 
-def main(argv=None):
-    arguments = _parser().parse_args(argv)
-    snapshot, snapshot_error = _load(arguments.snapshot)
-    overlay, overlay_error = _load(arguments.overlay)
-    findings = [item for item in (snapshot_error, overlay_error) if item]
+def _load_target(root_value, target, role, max_input_bytes):
+    root, root_error = _input_root(root_value, role)
+    relative = _relative_target(target)
+    if root_error or relative is None or type(max_input_bytes) is not int or max_input_bytes < 1:
+        return None, root_error or _finding(
+            "input-path-invalid", str(target), f"{role} target must be a canonical relative path"
+        )
+    max_input_bytes = min(max_input_bytes, MAX_INPUT_BYTES)
+    try:
+        resolved = (root / relative).resolve(strict=True)
+    except FileNotFoundError:
+        return None, _finding(
+            "input-file-unavailable", target, f"{role} target is unavailable"
+        )
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return None, _finding(
+            "input-path-invalid", target, f"{role} target is unavailable or outside its declared root"
+        )
+    try:
+        resolved.relative_to(root)
+        if not resolved.is_file():
+            raise ValueError
+        with resolved.open("rb") as source:
+            payload = source.read(max_input_bytes + 1)
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return None, _finding(
+            "input-path-invalid", target, f"{role} target is unavailable or outside its declared root"
+        )
+    if len(payload) > max_input_bytes:
+        return None, _finding(
+            "input-file-too-large", target, f"{role} target exceeds the input byte limit"
+        )
+    try:
+        return json.loads(payload.decode("utf-8")), None
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
+        return None, _finding(
+            "input-file-malformed-json", target, f"input file is not valid UTF-8 JSON: {error}"
+        )
+
+
+def validate_folder_overlay(
+    *,
+    research_snapshot_root,
+    research_snapshot_target,
+    overlay,
+    case_record_root=None,
+    filing_manifest_target=None,
+    max_input_bytes=MAX_INPUT_BYTES,
+):
+    snapshot, snapshot_error = _load_target(
+        research_snapshot_root,
+        research_snapshot_target,
+        "research-snapshot",
+        max_input_bytes,
+    )
+    findings = [snapshot_error] if snapshot_error else []
     manifest = None
-    if arguments.filing_manifest:
-        manifest, manifest_error = _load(arguments.filing_manifest)
+    if (case_record_root is None) != (filing_manifest_target is None):
+        findings.append(
+            _finding(
+                "input-path-invalid",
+                "case-record",
+                "case-record root and filing manifest target must be supplied together",
+            )
+        )
+    elif case_record_root is not None:
+        manifest, manifest_error = _load_target(
+            case_record_root,
+            filing_manifest_target,
+            "case-record",
+            max_input_bytes,
+        )
         if manifest_error:
             findings.append(manifest_error)
     if not findings:
@@ -941,7 +1027,55 @@ def main(argv=None):
         findings.extend(validate_overlay(overlay, snapshot))
         if manifest is not None:
             findings.extend(validate_filing_manifest(manifest, overlay, snapshot))
-    result = {"findings": findings, "passed": not findings}
+    return {"findings": findings, "passed": not findings}
+
+
+def _parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--research-snapshot-root", required=True)
+    parser.add_argument("--research-snapshot-target", required=True)
+    parser.add_argument("--case-record-root")
+    parser.add_argument("--filing-manifest-target")
+    return parser
+
+
+def main(argv=None):
+    arguments = _parser().parse_args(argv)
+    stream = getattr(sys.stdin, "buffer", sys.stdin)
+    payload = stream.read(MAX_INPUT_BYTES + 1)
+    if isinstance(payload, str):
+        payload = payload.encode("utf-8")
+    if len(payload) > MAX_INPUT_BYTES:
+        result = {
+            "findings": [
+                _finding(
+                    "input-file-too-large", "<stdin>", "overlay input exceeds the input byte limit"
+                )
+            ],
+            "passed": False,
+        }
+    else:
+        try:
+            overlay = json.loads(payload.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
+            result = {
+                "findings": [
+                    _finding(
+                        "input-file-malformed-json",
+                        "<stdin>",
+                        f"overlay input is not valid UTF-8 JSON: {error}",
+                    )
+                ],
+                "passed": False,
+            }
+        else:
+            result = validate_folder_overlay(
+                research_snapshot_root=arguments.research_snapshot_root,
+                research_snapshot_target=arguments.research_snapshot_target,
+                overlay=overlay,
+                case_record_root=arguments.case_record_root,
+                filing_manifest_target=arguments.filing_manifest_target,
+            )
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     return 0 if result["passed"] else 1
 

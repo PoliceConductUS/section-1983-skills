@@ -6,7 +6,9 @@ postjudgment amendment practice.
 CSV, YAML, and databases may be used while researching. Publication and
 downstream transfer require a versioned canonical JSON export that conforms to
 [decision-corpus.schema.json](decision-corpus.schema.json) and passes
-`python3 ../scripts/validate_corpus.py <corpus.json>` from this directory. Use
+`python3 ../scripts/validate_corpus.py --decisions-root "$DECISIONS_ROOT" --corpus-target "$CORPUS_TARGET"`
+from this directory. The target must be a canonical relative path inside the
+caller-declared `decisions` role root. Use
 [transfer-card.schema.json](transfer-card.schema.json) when transferring a card
 without the corpus. These schemas document the public format; the validator is
 skill-specific and does not certify legal accuracy or implement a general JSON

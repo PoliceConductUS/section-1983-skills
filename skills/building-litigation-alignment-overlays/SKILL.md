@@ -110,9 +110,18 @@ actual reviewer receives only its validated slice.
 Run:
 
 ```bash
-python3 scripts/validate_overlays.py SNAPSHOT_JSON OVERLAY_JSON \
-  --filing-manifest FILING_MANIFEST_JSON
+python3 scripts/validate_overlays.py \
+  --docket-snapshot-root "$DOCKET_SNAPSHOT_ROOT" \
+  --docket-snapshot-target "$DOCKET_SNAPSHOT_TARGET" \
+  --filing-root "$FILING_ROOT" \
+  --filing-manifest-target "$FILING_MANIFEST_TARGET" \
+  < candidate-overlay.json
 ```
+
+The roots are caller-declared role folders and each target is a canonical
+relative path inside its named root. The generated overlay arrives as bounded
+standard-input JSON. The helper returns deterministic JSON and never writes or
+publishes the overlay.
 
 The filing-version manifest pins every consumed overlay by kind, ID, version,
 SHA-256, checked-through date, validator result, and source snapshot. A stale,

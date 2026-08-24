@@ -123,11 +123,20 @@ class Rule59CorpusContractTest(unittest.TestCase):
             root = Path(directory)
             target = root / "corpus.json"
             target.write_bytes((FIXTURE_DIRECTORY / "valid-complete.json").read_bytes())
+            (root / "directory").mkdir()
+            outside = root.parent / f"{root.name}-outside-rule59.json"
+            outside.write_text("{}", encoding="utf-8")
+            (root / "escape.json").symlink_to(outside)
             before = hashlib.sha256(target.read_bytes()).hexdigest()
             for relative, expected in (
                 ("../corpus.json", "input-path-invalid"),
                 ("/absolute.json", "input-path-invalid"),
+                ("C:/absolute.json", "input-path-invalid"),
+                ("folder\\corpus.json", "input-path-invalid"),
                 ("bad\x00name", "input-path-invalid"),
+                ("directory", "input-path-invalid"),
+                ("escape.json", "input-path-invalid"),
+                ("missing.json", "input-path-invalid"),
                 ("corpus.json", "input-file-too-large"),
             ):
                 with self.subTest(target=relative):
@@ -139,6 +148,14 @@ class Rule59CorpusContractTest(unittest.TestCase):
                     self.assertFalse(result["passed"])
                     self.assertTrue(result["findings"][0].startswith(expected))
             after = hashlib.sha256(target.read_bytes()).hexdigest()
+            outside.unlink()
+            invalid_root = validator.validate_folder_corpus(
+                decisions_root="relative",
+                corpus_target="corpus.json",
+            )
+            self.assertTrue(
+                invalid_root["findings"][0].startswith("input-path-invalid")
+            )
         self.assertEqual(after, before)
 
     def test_decision_schema_requires_canonical_public_components(self):

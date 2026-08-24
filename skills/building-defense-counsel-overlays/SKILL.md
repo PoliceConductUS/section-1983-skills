@@ -102,9 +102,18 @@ replace, remove, or displace any common attack or the independent blind review.
 Run:
 
 ```bash
-python3 scripts/validate_counsel_overlays.py SNAPSHOT_JSON OVERLAY_JSON \
-  --filing-manifest FILING_MANIFEST_JSON
+python3 scripts/validate_counsel_overlays.py \
+  --research-snapshot-root "$RESEARCH_SNAPSHOT_ROOT" \
+  --research-snapshot-target "$RESEARCH_SNAPSHOT_TARGET" \
+  --case-record-root "$CASE_RECORD_ROOT" \
+  --filing-manifest-target "$FILING_MANIFEST_TARGET" \
+  < candidate-overlay.json
 ```
+
+The roots are caller-declared role folders and each target is a canonical
+relative path inside its named root. The generated overlay arrives as bounded
+standard-input JSON. The helper returns deterministic JSON and never writes or
+publishes the overlay.
 
 Pin counsel identity and counsel team as separate overlay kinds in the filing-
 version manifest. A stale, mismatched, or failing pin produces no specialized

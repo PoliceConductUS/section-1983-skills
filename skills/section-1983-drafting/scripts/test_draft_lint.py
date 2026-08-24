@@ -213,6 +213,10 @@ class LintTest(unittest.TestCase):
             root = Path(directory)
             target = root / "draft.md"
             target.write_text("The delay was unbearably long.")
+            (root / "directory").mkdir()
+            outside = root.parent / f"{root.name}-outside-draft.md"
+            outside.write_text("outside", encoding="utf-8")
+            (root / "escape.md").symlink_to(outside)
             before = hashlib.sha256(target.read_bytes()).hexdigest()
 
             report = lint_folder_target(
@@ -227,9 +231,13 @@ class LintTest(unittest.TestCase):
             for path, code in (
                 ("../draft.md", "invalid-target"),
                 ("/absolute.md", "invalid-target"),
+                ("C:/absolute.md", "invalid-target"),
+                ("folder\\draft.md", "invalid-target"),
                 ("./draft.md", "invalid-target"),
                 ("bad\x00name", "invalid-target"),
                 ("missing.md", "invalid-target"),
+                ("directory", "invalid-target"),
+                ("escape.md", "invalid-target"),
             ):
                 with self.subTest(path=path):
                     with self.assertRaises(LintInputError) as captured:
@@ -243,6 +251,20 @@ class LintTest(unittest.TestCase):
                     max_input_bytes=1,
                 )
             self.assertEqual(captured.exception.code, "input-too-large")
+            (root / "bad.md").write_bytes(b"\xff")
+            with self.assertRaises(LintInputError) as captured:
+                lint_folder_target(
+                    filing_root=root,
+                    filing_target="bad.md",
+                )
+            self.assertEqual(captured.exception.code, "malformed-input")
+            with self.assertRaises(LintInputError) as captured:
+                lint_folder_target(
+                    filing_root="relative",
+                    filing_target="draft.md",
+                )
+            self.assertEqual(captured.exception.code, "invalid-root")
+            outside.unlink()
 
     def test_long_sentence_density_is_a_non_gating_paragraph_warning(self):
         long_sentence = " ".join(["word"] * 26) + "."

@@ -178,8 +178,15 @@ rhetorical argument is a small part of any document, if present at all.
 10. Self-edit against `references/banned-words.md`, then run the linter:
 
 ```bash
-python3 scripts/draft_lint.py draft.md
+python3 scripts/draft_lint.py \
+  --filing-root "$FILING_ROOT" \
+  --filing-target "$FILING_TARGET"
 ```
+
+The root is the caller-declared `filing` role and the target is one canonical
+relative path inside it. With neither flag, the linter accepts bounded draft
+text on standard input. It returns deterministic JSON and does not write or
+publish a report.
 
 Score is violations per 100 words. Lint, revise, and lint again. A score delta
 is editing feedback only, never a merits verdict, legal-sufficiency decision, or

@@ -582,8 +582,16 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
             snapshot_path.write_text(json.dumps(invalid))
             overlay_path.write_text(json.dumps(complete_overlay()))
             result = subprocess.run(
-                [sys.executable, str(VALIDATOR), str(snapshot_path), str(overlay_path)],
+                [
+                    sys.executable,
+                    str(VALIDATOR),
+                    "--research-snapshot-root",
+                    str(root),
+                    "--research-snapshot-target",
+                    "snapshot.json",
+                ],
                 cwd=REPOSITORY,
+                input=overlay_path.read_text(),
                 capture_output=True,
                 text=True,
                 check=False,
@@ -978,11 +986,20 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
             root = Path(directory)
             snapshot = root / "snapshot.json"
             snapshot.write_text(json.dumps(complete_snapshot()), encoding="utf-8")
+            (root / "directory").mkdir()
+            outside = root.parent / f"outside-{uuid.uuid4().hex}.json"
+            outside.write_text("{}", encoding="utf-8")
+            (root / "escape.json").symlink_to(outside)
             before = hashlib.sha256(snapshot.read_bytes()).hexdigest()
             for target, expected in (
                 ("../outside.json", "input-path-invalid"),
                 ("/absolute.json", "input-path-invalid"),
+                ("C:/absolute.json", "input-path-invalid"),
+                ("folder\\snapshot.json", "input-path-invalid"),
                 ("bad\x00name", "input-path-invalid"),
+                ("directory", "input-path-invalid"),
+                ("escape.json", "input-path-invalid"),
+                ("missing.json", "input-file-unavailable"),
                 ("snapshot.json", "input-file-too-large"),
             ):
                 with self.subTest(target=target):
@@ -995,7 +1012,33 @@ class DefenseCounselOverlayValidatorTest(unittest.TestCase):
                     self.assertFalse(result["passed"])
                     self.assertEqual(result["findings"][0]["id"], expected)
             after = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+            outside.unlink()
         self.assertEqual(after, before)
+
+    def test_generated_overlay_stdin_is_bounded_and_strict_json(self):
+        command = [
+            sys.executable,
+            str(VALIDATOR),
+            "--research-snapshot-root",
+            str(FIXTURES),
+            "--research-snapshot-target",
+            "complete-research-snapshot.json",
+        ]
+        for payload, expected in (
+            (b"\xff", "input-file-malformed-json"),
+            (b" " * 1_000_001, "input-file-too-large"),
+        ):
+            with self.subTest(expected=expected):
+                completed = subprocess.run(
+                    command,
+                    cwd=REPOSITORY,
+                    input=payload,
+                    capture_output=True,
+                    check=False,
+                )
+                result = json.loads(completed.stdout)
+                self.assertNotEqual(completed.returncode, 0)
+                self.assertEqual(result["findings"][0]["id"], expected)
 
 
 if __name__ == "__main__":

@@ -1314,17 +1314,21 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
         validator = load_validator()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            (root / "directory").mkdir()
             outside = root.parent / f"outside-{uuid.uuid4().hex}.json"
             outside.write_text("{}", encoding="utf-8")
             (root / "escape.json").symlink_to(outside)
             try:
-                for target in (
-                    "/absolute.json",
-                    "../outside.json",
-                    "./snapshot.json",
-                    "escape.json",
-                    "missing.json",
-                    "bad\x00name",
+                for target, expected in (
+                    ("/absolute.json", "input-path-invalid"),
+                    ("C:/absolute.json", "input-path-invalid"),
+                    ("folder\\snapshot.json", "input-path-invalid"),
+                    ("../outside.json", "input-path-invalid"),
+                    ("./snapshot.json", "input-path-invalid"),
+                    ("escape.json", "input-path-invalid"),
+                    ("directory", "input-path-invalid"),
+                    ("missing.json", "input-file-unavailable"),
+                    ("bad\x00name", "input-path-invalid"),
                 ):
                     with self.subTest(target=target):
                         result = validator.validate_folder_overlay(
@@ -1334,8 +1338,14 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
                         )
                         self.assertFalse(result["passed"])
                         self.assertEqual(
-                            result["findings"][0]["id"], "input-path-invalid"
+                            result["findings"][0]["id"], expected
                         )
+                result = validator.validate_folder_overlay(
+                    docket_snapshot_root="relative",
+                    docket_snapshot_target="snapshot.json",
+                    overlay={},
+                )
+                self.assertEqual(result["findings"][0]["id"], "input-path-invalid")
             finally:
                 outside.unlink()
 
@@ -1356,6 +1366,31 @@ class LitigationAlignmentOverlayValidatorTest(unittest.TestCase):
         self.assertFalse(result["passed"])
         self.assertEqual(result["findings"][0]["id"], "input-file-too-large")
         self.assertEqual(after, before)
+
+    def test_generated_overlay_stdin_is_bounded_and_strict_json(self):
+        command = [
+            sys.executable,
+            str(VALIDATOR),
+            "--docket-snapshot-root",
+            str(FIXTURES),
+            "--docket-snapshot-target",
+            "complete-snapshot.json",
+        ]
+        for payload, expected in (
+            (b"\xff", "input-file-malformed-json"),
+            (b" " * 1_000_001, "input-file-too-large"),
+        ):
+            with self.subTest(expected=expected):
+                completed = subprocess.run(
+                    command,
+                    cwd=REPOSITORY,
+                    input=payload,
+                    capture_output=True,
+                    check=False,
+                )
+                result = json.loads(completed.stdout)
+                self.assertNotEqual(completed.returncode, 0)
+                self.assertEqual(result["findings"][0]["id"], expected)
 
 
 if __name__ == "__main__":

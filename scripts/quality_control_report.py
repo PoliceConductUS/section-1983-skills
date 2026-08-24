@@ -18,6 +18,9 @@ from scripts.validate_folder_invocation import (
 
 
 _IDENTIFIER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_UUID_V4 = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+)
 _SKILL_VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _REPORT_PREFIX = "quality-control-reports"
 _METADATA_FENCE = b"```quality-control-report+json\n"
@@ -75,6 +78,18 @@ def _valid_identifier(value: Any) -> bool:
     return isinstance(value, str) and _IDENTIFIER.fullmatch(value) is not None
 
 
+def _validate_contract_target(invocation: ValidatedInvocation) -> None:
+    if (
+        invocation.contract_target_policy not in {"required", "optional"}
+        or invocation.contract_target_roles is None
+    ):
+        _fail("quality-control-contract-unbound")
+    if invocation.target is None:
+        _fail("invalid-quality-control-target")
+    if invocation.target[0] not in invocation.contract_target_roles:
+        _fail("quality-control-contract-target")
+
+
 def _target_identity(
     invocation: ValidatedInvocation,
     manifest: dict[str, list[dict[str, Any]]],
@@ -113,11 +128,25 @@ def _target_identity(
     _fail("invalid-quality-control-target")
 
 
-def _is_generated_report(relative_path: str) -> bool:
-    return relative_path.startswith(f"{_REPORT_PREFIX}/")
+def _is_generated_report(
+    invocation: ValidatedInvocation,
+    role: str,
+    relative_path: str,
+) -> bool:
+    if relative_path.startswith(f"{_REPORT_PREFIX}/"):
+        return True
+    role_root = next((root for name, root in invocation.inputs if name == role), None)
+    if role_root is None:
+        _fail("quality-control-contract-target")
+    try:
+        with (role_root / Path(relative_path)).open("rb") as candidate:
+            return candidate.read(len(_METADATA_FENCE)) == _METADATA_FENCE
+    except OSError:
+        _fail("quality-control-input-unavailable")
 
 
 def _filtered_input_manifest(
+    invocation: ValidatedInvocation,
     manifest: dict[str, list[dict[str, Any]]],
     target_role: str,
     target_path: str,
@@ -129,7 +158,9 @@ def _filtered_input_manifest(
                 "files": [
                     copy.deepcopy(file_identity)
                     for file_identity in input_role["files"]
-                    if not _is_generated_report(file_identity["path"])
+                    if not _is_generated_report(
+                        invocation, input_role["role"], file_identity["path"]
+                    )
                     or (
                         input_role["role"] == target_role
                         and file_identity["path"] == target_path
@@ -178,7 +209,7 @@ def build_quality_control_report_plan(
         _fail("invalid-quality-control-skill-version")
     if not _valid_identifier(quality_control_kind):
         _fail("invalid-quality-control-kind")
-    if not _valid_identifier(run_id):
+    if not isinstance(run_id, str) or _UUID_V4.fullmatch(run_id) is None:
         _fail("invalid-quality-control-run-id")
     if not isinstance(scope, str) or not scope.strip():
         _fail("invalid-quality-control-scope")
@@ -201,10 +232,11 @@ def build_quality_control_report_plan(
         _fail("invalid-quality-control-body")
 
     run_at_text, path_time = _utc_values(run_at)
+    _validate_contract_target(invocation)
     generic_manifest = build_input_manifest(invocation)
     target, target_role, target_path = _target_identity(invocation, generic_manifest)
     input_manifest = _filtered_input_manifest(
-        generic_manifest, target_role, target_path
+        invocation, generic_manifest, target_role, target_path
     )
     target, _, _ = _target_identity(invocation, input_manifest)
 

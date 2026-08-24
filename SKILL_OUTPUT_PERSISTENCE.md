@@ -72,10 +72,15 @@ tracebacks, environment values, credentials, or case-material excerpts.
 The trusted host builds an independent QC report through
 `scripts/quality_control_report.py`. A QC stage always has one primary target,
 even when the installed skill permits targetless non-QC drafting behavior. The
-host excludes generated files beneath `quality-control-reports/` from the
-reviewed-input manifest unless one exact report is the target, prefixes the
-Markdown body with canonical QC metadata, and derives the immutable path from
-the check kind, UTC run time, and run ID.
+publisher accepts only an invocation bound to that installed skill's target
+policy and approved target roles. The host excludes generated files beneath
+`quality-control-reports/`, or identified by the canonical QC metadata envelope,
+from the reviewed-input manifest unless one exact report is the target. Envelope
+detection still applies when the report directory itself is a declared input
+root. The host prefixes the Markdown body with canonical QC metadata and derives
+the immutable path from the check kind, UTC run time, and canonical lowercase
+UUIDv4 run ID. The skill returns content and findings without selecting that
+path.
 
 The QC publisher starts one `append-immutable` `OutputRun`, writes exactly one
 report, and completes the run. Its metadata names the future terminal manifest

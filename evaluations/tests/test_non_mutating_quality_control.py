@@ -90,6 +90,10 @@ EXPLICIT_OUTPUT_RULES = (
     "existing destinations.",
     "Only the trusted host may publish the report through the shared output "
     "boundary.",
+    "The trusted host accepts quality-control publication only from an "
+    "invocation bound to the installed skill's target policy and approved "
+    "target roles; it rejects an unbound invocation or a target outside those "
+    "approved roles.",
     "Prior quality-control reports must not become implicit input.",
     "A report may be reviewed only when that exact report is expressly present "
     "in a declared input role and selected consistently with the reviewing "
@@ -103,6 +107,10 @@ EXPLICIT_OUTPUT_RULES = (
     "the reviewed-input manifest and fingerprint unless one exact report is "
     "the explicit target; selecting one report does not include sibling or "
     "older reports.",
+    "The canonical quality-control metadata envelope identifies a generated "
+    "report even when the report directory itself is a declared input root.",
+    "A quality-control run ID must be a canonical lowercase UUIDv4; weak, "
+    "malformed, or reused identities fail closed before publication.",
     "The trusted host prefixes the report with the canonical quality-control "
     "metadata envelope containing the skill and version, filtered logical "
     "input roles and reviewed artifact hashes, selected target role, relative "

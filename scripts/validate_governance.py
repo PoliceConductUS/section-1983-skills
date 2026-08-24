@@ -296,6 +296,10 @@ QUALITY_CONTROL_REPORT_RULES = (
         "The skill or helper may publish the report directly.",
     ),
     (
+        "The trusted host accepts quality-control publication only from an invocation bound to the installed skill's target policy and approved target roles; it rejects an unbound invocation or a target outside those approved roles.",
+        "The trusted host may publish from an unbound invocation or a target outside the installed skill's approved roles.",
+    ),
+    (
         "Prior quality-control reports must not become implicit input.",
         "Prior quality-control reports may become implicit input.",
     ),
@@ -322,6 +326,14 @@ QUALITY_CONTROL_REPORT_RULES = (
     (
         "Generated reports beneath `quality-control-reports/` are excluded from the reviewed-input manifest and fingerprint unless one exact report is the explicit target; selecting one report does not include sibling or older reports.",
         "Generated reports beneath `quality-control-reports/` are always included in the reviewed-input manifest and fingerprint.",
+    ),
+    (
+        "The canonical quality-control metadata envelope identifies a generated report even when the report directory itself is a declared input root.",
+        "A report is not generated when its declared input root omits the `quality-control-reports/` path segment.",
+    ),
+    (
+        "A quality-control run ID must be a canonical lowercase UUIDv4; weak, malformed, or reused identities fail closed before publication.",
+        "A quality-control run may use a weak, malformed, or reused identity.",
     ),
     (
         "The quality-control run is complete only after both report bytes and the terminal success manifest are durable and incomplete state is absent.",

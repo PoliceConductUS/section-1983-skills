@@ -10,8 +10,8 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from scripts.skill_output_writer import OutputRun
-from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
+from scripts.quality_control_report import publish_quality_control_report
+from scripts.validate_folder_invocation import validate_installed_skill_invocation
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -262,8 +262,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertEqual(first, second)
             self.assertEqual(first["outcome"], "completed")
             self.assertIsInstance(first["report_bytes"], bytes)
-            self.assertFalse(Path(first["artifact_path"]).is_absolute())
-            self.assertNotIn("..", Path(first["artifact_path"]).parts)
+            self.assertNotIn("artifact_path", first)
             self.assertEqual(list(output.iterdir()), [])
             self.assertTrue(first["internet_sources"])
             self.assertEqual(
@@ -282,7 +281,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 input_before,
             )
 
-            invocation = validate_invocation(
+            invocation = validate_installed_skill_invocation(
                 {
                     "version": 1,
                     "skill": "adversarial-filing-review",
@@ -305,27 +304,29 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                         "output": "read-write",
                         "undeclared": "none",
                     },
-                }
+                },
+                REPOSITORY / "skills" / "adversarial-filing-review",
             )
-            input_manifest = build_input_manifest(invocation)
-            run = OutputRun.start(
+            receipt = publish_quality_control_report(
                 invocation,
-                run_id="adversarial-folder-run",
                 skill_version="1",
-                mode="append-immutable",
-                input_manifest=input_manifest,
-            )
-            artifact = run.write(
-                first["artifact_path"],
-                first["report_bytes"],
+                quality_control_kind="adversarial-filing-review",
+                run_id=fixed_run,
+                run_at=fixed_time,
+                scope="The selected filing and approved source packet.",
+                result=first["outcome"],
+                approved_source_identities=["SRC-1"],
+                failed_findings=[],
+                passing_but_suboptimal_recommendations=[],
+                body=first["report_bytes"].decode("utf-8"),
                 internet_sources=first["internet_sources"],
             )
-            receipt = run.complete()
 
-            self.assertEqual(artifact["path"], first["artifact_path"])
-            self.assertEqual(
-                (output / first["artifact_path"]).read_bytes(),
-                first["report_bytes"],
+            self.assertEqual(len(receipt["artifacts"]), 1)
+            self.assertTrue(
+                receipt["artifacts"][0]["path"].startswith(
+                    "quality-control-reports/adversarial-filing-review-"
+                )
             )
             self.assertEqual(receipt["internet"], {"policy": "authorized", "used": True})
             self.assertNotIn(b"secret-test-key", first["report_bytes"])
@@ -395,7 +396,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertEqual(response_failure["outcome"], "unavailable")
             self.assertTrue(response_failure["internet_sources"])
 
-            invocation = validate_invocation(
+            invocation = validate_installed_skill_invocation(
                 {
                     "version": 1,
                     "skill": "adversarial-filing-review",
@@ -418,21 +419,23 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                         "output": "read-write",
                         "undeclared": "none",
                     },
-                }
+                },
+                REPOSITORY / "skills" / "adversarial-filing-review",
             )
-            run = OutputRun.start(
+            receipt = publish_quality_control_report(
                 invocation,
-                run_id="adversarial-unavailable-run",
                 skill_version="1",
-                mode="append-immutable",
-                input_manifest=build_input_manifest(invocation),
-            )
-            run.write(
-                response_failure["artifact_path"],
-                response_failure["report_bytes"],
+                quality_control_kind="adversarial-filing-review",
+                run_id="22222222-2222-4222-8222-222222222222",
+                run_at=datetime(2026, 8, 24, 17, 0, tzinfo=timezone.utc),
+                scope="The selected filing and approved source packet.",
+                result=response_failure["outcome"],
+                approved_source_identities=["SRC-1"],
+                failed_findings=[response_failure["error"]],
+                passing_but_suboptimal_recommendations=[],
+                body=response_failure["report_bytes"].decode("utf-8"),
                 internet_sources=response_failure["internet_sources"],
             )
-            receipt = run.complete()
             self.assertEqual(
                 receipt["internet"],
                 {"policy": "authorized", "used": True},

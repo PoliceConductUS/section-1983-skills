@@ -7,17 +7,22 @@ quality-control-only skill uses `target.policy: required` in its install-local
 folder contract. A mixed drafting/auditing skill may retain an optional target
 for its non-QC drafting behavior, but the trusted-host QC report builder always
 rejects a missing target before report publication. The target role remains
-restricted to that skill's approved target-role set. The host also rejects a
-directory, escaping, or out-of-role target.
+restricted to that skill's approved target-role set. The builder accepts only a
+validated invocation carrying target policy and roles copied from that installed
+skill contract; a generic unbound invocation fails closed. The host also rejects
+a directory, escaping, or out-of-role target.
 
 ## Reviewed-input manifest
 
 The host starts from the deterministic logical input manifest produced by
 `build_input_manifest()`. For a QC run it filters every path beneath the
-reserved `quality-control-reports/` prefix from the reviewed set. If and only if
-the explicit target is itself beneath that prefix, the exact target file remains
-in the filtered manifest; sibling and older reports remain excluded. Role order,
-file order, sizes, and SHA-256 values remain canonical.
+reserved `quality-control-reports/` prefix from the reviewed set. A file that
+begins with the canonical `quality-control-report+json` metadata fence is also a
+generated report, including when a declared input role is rooted directly at a
+report directory and its relative paths no longer carry the reserved prefix. If
+and only if the explicit target is itself a generated report, the exact target
+file remains in the filtered manifest; sibling and older reports remain
+excluded. Role order, file order, sizes, and SHA-256 values remain canonical.
 
 The report metadata contains the complete filtered logical manifest, so the
 logical input roles and every reviewed artifact hash are inspectable. The
@@ -30,11 +35,11 @@ The host derives exactly one path:
 
 `quality-control-reports/<check-kind>-<YYYYMMDDTHHMMSS[ffffff]Z>-<run-id>.md`
 
-`check-kind` and `run-id` are lower-kebab identifiers. The UTC instant is
-supplied explicitly and must be timezone-aware UTC. The microsecond component is
-included only when nonzero. `OutputRun` remains the final authority for
-canonical path validation, collision refusal, output confinement, and durable
-create-exclusive publication.
+`check-kind` is a lower-kebab identifier. `run-id` is a canonical lowercase
+UUIDv4. The UTC instant is supplied explicitly and must be timezone-aware UTC.
+The microsecond component is included only when nonzero. `OutputRun` remains the
+final authority for canonical path validation, collision refusal, output
+confinement, and durable create-exclusive publication.
 
 ## Report metadata and bytes
 
@@ -87,5 +92,5 @@ Governance and every independently installable QC skill state that the stage:
 5. leaves all remediation to a separately authorized stage followed by fresh
    verification.
 
-Public skill processors do not import the publisher or output writer and do not
-receive output-root paths.
+Public skill processors do not import the publisher or output writer, do not
+receive output-root paths, and do not select report paths.

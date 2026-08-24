@@ -23,11 +23,11 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `production` contains the supplied production and production references.
 - `authorities` contains the approved rules, orders, and agreements.
 
-One target is required in `served-discovery` or `responses`; a missing target
-fails closed without selecting from the supplied request-response set. Internet
-is `disabled`. Return the request-by-request audit as a canonical
-output-relative path and deterministic bytes; only the trusted host may publish
-it append-immutable. Report missing paired requests, responses, production, or
+Target is required in `served-discovery` or `responses`; a missing target fails
+closed without selecting from the supplied request-response set. Internet is
+`disabled`. Return audit content and structured findings; only the trusted host
+derives the canonical output-relative path and publishes the report
+append-immutable. Report missing paired requests, responses, production, or
 authority as a gap without inferring their contents.
 
 Audit each served request and response without converting silence or boilerplate
@@ -112,7 +112,10 @@ exactly one unique append-immutable output-relative report beneath the
 caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
 target must fail closed without a fallback write. The report path must reject
 absolute paths, traversal, symlink escapes, and existing destinations. Only the
-trusted host may publish the report through the shared output boundary.
+trusted host may publish the report through the shared output boundary. The
+trusted host accepts quality-control publication only from an invocation bound
+to the installed skill's target policy and approved target roles; it rejects an
+unbound invocation or a target outside those approved roles.
 
 Prior quality-control reports must not become implicit input. A report may be
 reviewed only when that exact report is expressly present in a declared input
@@ -126,7 +129,11 @@ The trusted host derives the report path as
 exactly one report through the shared output writer. Generated reports beneath
 `quality-control-reports/` are excluded from the reviewed-input manifest and
 fingerprint unless one exact report is the explicit target; selecting one report
-does not include sibling or older reports.
+does not include sibling or older reports. The canonical quality-control
+metadata envelope identifies a generated report even when the report directory
+itself is a declared input root. A quality-control run ID must be a canonical
+lowercase UUIDv4; weak, malformed, or reused identities fail closed before
+publication.
 
 The trusted host prefixes the report with the canonical quality-control metadata
 envelope containing the skill and version, filtered logical input roles and

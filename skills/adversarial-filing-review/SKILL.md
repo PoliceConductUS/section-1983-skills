@@ -25,10 +25,10 @@ case material if the host cannot enforce the filesystem and network boundary.
   packet.
 
 Target is required in `filing`. Internet is `authorized` only for the approved
-review provider. Return the categorized review as a canonical output-relative
-path and deterministic bytes; only the trusted host may publish it
-append-immutable. Report unavailable filing, source, provider, or validation
-material as a gap without broadening the input set.
+review provider. Return categorized report bytes and structured findings; only
+the trusted host derives the canonical output-relative path and publishes the
+report append-immutable. Report unavailable filing, source, provider, or
+validation material as a gap without broadening the input set.
 
 ## Purpose
 
@@ -77,11 +77,12 @@ validates the complete packet, filing target, approved source membership, and
 fingerprints before dispatch. It has no arbitrary-command API and accepts no
 project, version, artifact, or output path.
 
-The processor returns report bytes, one canonical output-relative artifact path,
-and validated internet-source records. It never opens an output folder or writes
-a report. Only the trusted host publishes those bytes through `OutputRun` and
-records the terminal append-immutable receipt. Missing credentials, provider
-failure, or an invalid provider response returns only an honest, bounded
+The processor returns report bytes, structured findings, and validated
+internet-source records. It never selects an output path, opens an output
+folder, or writes a report. Only the trusted host derives the canonical path,
+builds the metadata envelope, publishes through the shared writer, and records
+the terminal append-immutable receipt. Missing credentials, provider failure, or
+an invalid provider response returns only an honest, bounded
 `independent review unavailable` report. Do not simulate the review in the
 drafting context or relabel an unavailable result as completed.
 
@@ -193,7 +194,10 @@ exactly one unique append-immutable output-relative report beneath the
 caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
 target must fail closed without a fallback write. The report path must reject
 absolute paths, traversal, symlink escapes, and existing destinations. Only the
-trusted host may publish the report through the shared output boundary.
+trusted host may publish the report through the shared output boundary. The
+trusted host accepts quality-control publication only from an invocation bound
+to the installed skill's target policy and approved target roles; it rejects an
+unbound invocation or a target outside those approved roles.
 
 Prior quality-control reports must not become implicit input. A report may be
 reviewed only when that exact report is expressly present in a declared input
@@ -207,7 +211,11 @@ The trusted host derives the report path as
 exactly one report through the shared output writer. Generated reports beneath
 `quality-control-reports/` are excluded from the reviewed-input manifest and
 fingerprint unless one exact report is the explicit target; selecting one report
-does not include sibling or older reports.
+does not include sibling or older reports. The canonical quality-control
+metadata envelope identifies a generated report even when the report directory
+itself is a declared input root. A quality-control run ID must be a canonical
+lowercase UUIDv4; weak, malformed, or reused identities fail closed before
+publication.
 
 The trusted host prefixes the report with the canonical quality-control metadata
 envelope containing the skill and version, filtered logical input roles and

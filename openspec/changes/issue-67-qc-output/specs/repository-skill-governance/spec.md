@@ -17,6 +17,12 @@ directory, or out-of-role targets MUST fail closed.
 - **THEN** the quality-control stage publishes no report and does not choose a
   target from the input tree
 
+#### Scenario: The host receives only a generic validated invocation
+
+- **WHEN** a quality-control publisher receives an invocation that was not bound
+  to the installed skill's target policy and approved target roles
+- **THEN** it publishes no report and fails closed
+
 ### Requirement: Quality-control report metadata is complete and receipt-bound
 
 Every independent quality-control report MUST record the skill and version,
@@ -34,16 +40,24 @@ authorize same-stage remediation.
 
 ### Requirement: Generated QC reports are excluded from reviewed fingerprints
 
-Files beneath the reserved `quality-control-reports/` output prefix MUST be
-excluded from a quality-control run's reviewed-input manifest unless one exact
-report is itself the explicit primary target. Selecting one report MUST NOT
-implicitly include sibling or older reports.
+The trusted host MUST exclude files beneath the reserved
+`quality-control-reports/` output prefix and files identified by the canonical
+quality-control metadata envelope from a quality-control run's reviewed-input
+manifest unless one exact report is itself the explicit primary target.
+Selecting one report MUST NOT implicitly include sibling or older reports.
 
 #### Scenario: A prior report folder is declared as an input role
 
 - **WHEN** a later quality-control invocation targets an ordinary artifact
 - **THEN** prior generated reports do not contribute to the reviewed-input
   manifest or its fingerprint
+
+#### Scenario: The declared input role is the report directory itself
+
+- **WHEN** generated report relative paths omit the reserved prefix because the
+  declared role is rooted directly at `quality-control-reports/`
+- **THEN** the canonical metadata envelope still identifies and excludes every
+  non-target generated report
 
 #### Scenario: One prior report is the primary target
 

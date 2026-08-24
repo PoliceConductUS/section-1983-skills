@@ -1,5 +1,6 @@
 import hashlib
 import io
+import json
 import os
 import stat
 import sys
@@ -11,6 +12,9 @@ from unittest import mock
 from scripts import skill_output_writer
 from scripts.skill_output_writer import OutputError, OutputRun
 from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
+
+
+INPUT_MANIFEST_SHA256 = "7fcb5bb404fd81345d585c26eba719249559720fae28d4f95ec670dbebd45ddd"
 
 
 class FailingBinaryStream:
@@ -67,6 +71,48 @@ class SkillOutputWriterTest(unittest.TestCase):
             mode=mode,
             input_manifest=self.input_manifest,
         )
+
+    def run_directory(self, run_id):
+        return self.output_root / ".skill-runs" / run_id
+
+    def make_relocated_invocation(self, name, *, internet="disabled"):
+        relocated_root = self.root / name
+        record_root = relocated_root / "record"
+        authority_root = relocated_root / "authority"
+        output_root = relocated_root / "output"
+        record_root.mkdir(parents=True)
+        authority_root.mkdir()
+        output_root.mkdir()
+        (record_root / "source.txt").write_bytes(b"immutable input\n")
+        (authority_root / "cases.txt").write_bytes(b"authority\n")
+        invocation = validate_invocation(
+            {
+                "version": 1,
+                "skill": "synthetic-skill",
+                "inputs": [
+                    {"role": "record", "root": str(record_root)},
+                    {"role": "authority", "root": str(authority_root)},
+                ],
+                "output": {"root": str(output_root)},
+                "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
+                "internet": internet,
+                "isolation": {
+                    "inputs": "read-only",
+                    "output": "read-write",
+                    "undeclared": "none",
+                },
+            }
+        )
+        return invocation, build_input_manifest(invocation), output_root
+
+    def valid_internet_source(self, **overrides):
+        source = {
+            "url": "https://example.test/source",
+            "retrieved_at": "2026-08-24T12:34:56Z",
+            "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        }
+        source.update(overrides)
+        return source
 
     def assert_error(self, operation, code=None):
         with self.assertRaises(OutputError) as captured:
@@ -613,6 +659,467 @@ class SkillOutputWriterTest(unittest.TestCase):
             run._incomplete_artifacts,
             [{**expected, "phase": "staging-cleanup"}],
         )
+
+    def test_start_publishes_exact_incomplete_state_before_accepting_artifacts(self):
+        run_id = "visible-incomplete-run"
+
+        self.start_run(run_id)
+
+        run_directory = self.run_directory(run_id)
+        self.assertEqual(
+            (run_directory / "incomplete.json").read_bytes(),
+            b'{"run_id":"visible-incomplete-run","schema_version":1,"status":"incomplete"}',
+        )
+        self.assertFalse(os.path.lexists(run_directory / "manifest.json"))
+        self.assertFalse(os.path.lexists(run_directory / "failure.json"))
+
+    def test_complete_publishes_an_exact_canonical_success_receipt(self):
+        run_id = "canonical-success-run"
+        run = self.start_run(run_id)
+        run.write("reports/z.md", b"zulu\n")
+        run.write("reports/a.md", b"alpha\n")
+
+        returned = run.complete()
+
+        expected_bytes = (
+            b'{"artifacts":[{"path":"reports/a.md","sha256":"b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060","size":6},'
+            b'{"path":"reports/z.md","sha256":"4c8e0c0ec12989ff67bc82a6ea812393592d126d87294021b9a469bcbd286a41","size":5}],'
+            b'"input_manifest_sha256":"7fcb5bb404fd81345d585c26eba719249559720fae28d4f95ec670dbebd45ddd",'
+            b'"internet":{"policy":"disabled","used":false},"mode":"append-immutable","run_id":"canonical-success-run",'
+            b'"schema_version":1,"skill":"synthetic-skill","skill_version":"1.4.0","status":"success"}'
+        )
+        receipt = self.run_directory(run_id) / "manifest.json"
+        self.assertEqual(receipt.read_bytes(), expected_bytes)
+        self.assertEqual(returned, json.loads(expected_bytes))
+        self.assertFalse(os.path.lexists(self.run_directory(run_id) / "failure.json"))
+
+    def test_success_terminal_state_rejects_later_writes_and_transitions(self):
+        run = self.start_run("success-terminal-run")
+        run.write("reports/result.md", b"durable result\n")
+        receipt = run.complete()
+        before = self.snapshot_tree()
+
+        operations = (
+            ("write", lambda: run.write("reports/later.md", b"must not publish")),
+            ("complete", run.complete),
+            ("fail", lambda: run.fail("late-failure", "terminal-transition")),
+        )
+        for label, operation in operations:
+            with self.subTest(operation=label):
+                self.assert_error(operation, "run-terminal")
+
+        self.assertEqual(self.snapshot_tree(), before)
+        self.assertEqual(
+            json.loads((self.run_directory("success-terminal-run") / "manifest.json").read_bytes()),
+            receipt,
+        )
+
+    def test_fail_publishes_an_exact_bounded_failure_receipt_and_becomes_terminal(self):
+        run_id = "failure-terminal-run"
+        run = self.start_run(run_id)
+
+        returned = run.fail("stream-failed", "artifact-write")
+
+        expected_bytes = (
+            b'{"artifacts":[],"failure":{"code":"stream-failed","phase":"artifact-write"},'
+            b'"incomplete_artifacts":[],"input_manifest_sha256":"7fcb5bb404fd81345d585c26eba719249559720fae28d4f95ec670dbebd45ddd",'
+            b'"internet":{"policy":"disabled","used":false},"mode":"append-immutable","run_id":"failure-terminal-run",'
+            b'"schema_version":1,"skill":"synthetic-skill","skill_version":"1.4.0","status":"failure"}'
+        )
+        receipt = self.run_directory(run_id) / "failure.json"
+        self.assertEqual(receipt.read_bytes(), expected_bytes)
+        self.assertEqual(returned, json.loads(expected_bytes))
+        self.assertFalse(os.path.lexists(self.run_directory(run_id) / "manifest.json"))
+        before = self.snapshot_tree()
+        operations = (
+            ("write", lambda: run.write("reports/later.md", b"must not publish")),
+            ("complete", run.complete),
+            ("fail", lambda: run.fail("late-failure", "terminal-transition")),
+        )
+        for label, operation in operations:
+            with self.subTest(operation=label):
+                self.assert_error(operation, "run-terminal")
+        self.assertEqual(self.snapshot_tree(), before)
+
+    def test_interrupted_run_has_only_incomplete_state_and_never_success(self):
+        run_id = "interrupted-run"
+
+        run = self.start_run(run_id)
+        run.write("reports/published-before-interruption.md", b"artifact without terminal receipt\n")
+        del run
+
+        run_directory = self.run_directory(run_id)
+        self.assertTrue((run_directory / "incomplete.json").is_file())
+        self.assertFalse(os.path.lexists(run_directory / "manifest.json"))
+        self.assertFalse(os.path.lexists(run_directory / "failure.json"))
+        self.assertEqual(
+            (self.output_root / "reports" / "published-before-interruption.md").read_bytes(),
+            b"artifact without terminal receipt\n",
+        )
+
+    def test_failed_run_retry_requires_a_new_run_id_and_new_artifact_path(self):
+        failed_run = self.start_run("first-attempt-run")
+        self.assert_error(
+            lambda: failed_run.write("reports/missing.bin", FailingBinaryStream()),
+            "stream-failed",
+        )
+        failed_run.fail("stream-failed", "artifact-write")
+
+        self.assert_error(lambda: self.start_run("first-attempt-run"), "run-collision")
+
+        retry = self.start_run("second-attempt-run")
+        retry.write("reports/retry.bin", b"complete retry bytes\n")
+        retry_manifest = retry.complete()
+        self.assertFalse(os.path.lexists(self.output_root / "reports" / "missing.bin"))
+        self.assertEqual(
+            [artifact["path"] for artifact in retry_manifest["artifacts"]],
+            ["reports/retry.bin"],
+        )
+
+    def test_equivalent_machine_roots_and_call_orders_have_identical_logical_receipts(self):
+        first_run = self.start_run("equivalent-run")
+        first_run.write("reports/z.md", b"zulu\n")
+        first_run.write("reports/a.md", b"alpha\n")
+        first_run.complete()
+        first_receipt = (self.run_directory("equivalent-run") / "manifest.json").read_bytes()
+
+        second_invocation, second_manifest, second_output = self.make_relocated_invocation("other-machine-root")
+        reordered_manifest = {
+            "inputs": [
+                {
+                    "files": [
+                        {
+                            "size": 16,
+                            "sha256": "0197630d8ecf31b97fb61829e36f4043f943667c79feebc14c0ff65b086909ad",
+                            "path": "source.txt",
+                        }
+                    ],
+                    "role": "record",
+                },
+                {
+                    "files": [
+                        {
+                            "size": 10,
+                            "sha256": "17d31c37a2fd6589d7f6807e6e0743b6ab777440f416ab49880c0de1456d97e3",
+                            "path": "cases.txt",
+                        }
+                    ],
+                    "role": "authority",
+                },
+            ]
+        }
+        self.assertEqual(second_manifest, self.input_manifest)
+        second_run = OutputRun.start(
+            second_invocation,
+            run_id="equivalent-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=reordered_manifest,
+        )
+        second_run.write("reports/a.md", b"alpha\n")
+        second_run.write("reports/z.md", b"zulu\n")
+        second_run.complete()
+        second_receipt = (second_output / ".skill-runs" / "equivalent-run" / "manifest.json").read_bytes()
+
+        self.assertEqual(first_receipt, second_receipt)
+        parsed = json.loads(first_receipt)
+        self.assertEqual(parsed["input_manifest_sha256"], INPUT_MANIFEST_SHA256)
+        self.assertEqual(
+            parsed["artifacts"],
+            [
+                {
+                    "path": "reports/a.md",
+                    "sha256": "b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060",
+                    "size": 6,
+                },
+                {
+                    "path": "reports/z.md",
+                    "sha256": "4c8e0c0ec12989ff67bc82a6ea812393592d126d87294021b9a469bcbd286a41",
+                    "size": 5,
+                },
+            ],
+        )
+        self.assertNotIn(str(self.root).encode("utf-8"), first_receipt)
+        self.assertNotIn(str(second_output.parent).encode("utf-8"), second_receipt)
+
+    def test_disabled_internet_rejects_source_records_before_publication(self):
+        run = self.start_run("disabled-internet-run")
+
+        self.assert_error(
+            lambda: run.write(
+                "reports/internet.md",
+                b"must not publish",
+                internet_sources=(self.valid_internet_source(),),
+            ),
+            "internet-not-authorized",
+        )
+
+        self.assertFalse(os.path.lexists(self.output_root / "reports" / "internet.md"))
+        self.assertEqual(run._artifacts, [])
+
+    def test_authorized_internet_records_complete_provenance_and_derives_used(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "authorized-internet-root",
+            internet="authorized",
+        )
+        run = OutputRun.start(
+            invocation,
+            run_id="authorized-internet-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        url_source_without_context = self.valid_internet_source()
+        identity_source_with_context = {
+            "identity": "courtlistener:opinion:12345",
+            "retrieved_at": "2026-08-24T13:45:00Z",
+            "request_context": "q" * 1024,
+            "sha256": "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+        }
+
+        run.write(
+            "reports/web.md",
+            b"web\n",
+            internet_sources=(url_source_without_context, identity_source_with_context),
+        )
+        manifest = run.complete()
+
+        self.assertEqual(manifest["internet"], {"policy": "authorized", "used": True})
+        self.assertEqual(
+            manifest["artifacts"],
+            [
+                {
+                    "path": "reports/web.md",
+                    "sha256": "4ded89b3f9f03689b7032b92a091e742e1205e2a54277e52b32498d9fcdf3642",
+                    "size": 4,
+                    "internet_sources": [url_source_without_context, identity_source_with_context],
+                }
+            ],
+        )
+        receipt_bytes = (output_root / ".skill-runs" / "authorized-internet-run" / "manifest.json").read_bytes()
+        self.assertNotIn(str(output_root).encode("utf-8"), receipt_bytes)
+
+    def test_authorized_internet_without_source_records_derives_unused(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "authorized-unused-root",
+            internet="authorized",
+        )
+        run = OutputRun.start(
+            invocation,
+            run_id="authorized-unused-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        run.write("reports/local.md", b"local only\n")
+
+        manifest = run.complete()
+
+        self.assertEqual(manifest["internet"], {"policy": "authorized", "used": False})
+        self.assertNotIn("internet_sources", manifest["artifacts"][0])
+        self.assertTrue((output_root / "reports" / "local.md").is_file())
+
+    def test_authorized_internet_rejects_invalid_source_records_before_publication(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "invalid-internet-root",
+            internet="authorized",
+        )
+        run = OutputRun.start(
+            invocation,
+            run_id="invalid-internet-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        valid = self.valid_internet_source()
+        cases = (
+            ("not-an-object", "https://example.test/source"),
+            ("missing-identity", {key: value for key, value in valid.items() if key != "url"}),
+            ("both-identities", {**valid, "identity": "source:123"}),
+            ("empty-url", {**valid, "url": ""}),
+            ("missing-retrieval-time", {key: value for key, value in valid.items() if key != "retrieved_at"}),
+            ("non-utc-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34:56+00:00"}),
+            ("invalid-retrieval-time", {**valid, "retrieved_at": "2026-02-30T12:34:56Z"}),
+            ("missing-hash", {key: value for key, value in valid.items() if key != "sha256"}),
+            ("uppercase-hash", {**valid, "sha256": "A" * 64}),
+            ("invalid-hash", {**valid, "sha256": "g" * 64}),
+            ("empty-context", {**valid, "request_context": ""}),
+            ("oversized-context", {**valid, "request_context": "q" * 1025}),
+            ("non-string-context", {**valid, "request_context": 7}),
+            ("unknown-field", {**valid, "case_excerpt": "forbidden case bytes"}),
+        )
+
+        for index, (label, source) in enumerate(cases):
+            with self.subTest(case=label):
+                relative_path = f"reports/invalid-source-{index}.md"
+                self.assert_error(
+                    lambda path=relative_path, record=source: run.write(
+                        path,
+                        b"must not publish",
+                        internet_sources=(record,),
+                    ),
+                    "invalid-internet-source",
+                )
+                self.assertFalse(os.path.lexists(output_root / relative_path))
+
+        self.assertEqual(run._artifacts, [])
+
+    def test_failure_code_and_phase_accept_only_bounded_lower_kebab_values(self):
+        valid_boundary = "a" * 64
+        invalid_values = (
+            None,
+            "",
+            "Uppercase",
+            "under_score",
+            "path/segment",
+            "contains case excerpt",
+            "a" * 65,
+        )
+
+        for index, value in enumerate(invalid_values):
+            with self.subTest(field="code", value=value):
+                run = self.start_run(f"invalid-code-{index}")
+                self.assert_error(lambda candidate=value: run.fail(candidate, "artifact-write"), "invalid-failure")
+                self.assertFalse(os.path.lexists(self.run_directory(f"invalid-code-{index}") / "failure.json"))
+            with self.subTest(field="phase", value=value):
+                run = self.start_run(f"invalid-phase-{index}")
+                self.assert_error(lambda candidate=value: run.fail("stream-failed", candidate), "invalid-failure")
+                self.assertFalse(os.path.lexists(self.run_directory(f"invalid-phase-{index}") / "failure.json"))
+
+        boundary_run = self.start_run("failure-boundary-run")
+        receipt = boundary_run.fail(valid_boundary, valid_boundary)
+        self.assertEqual(receipt["failure"], {"code": valid_boundary, "phase": valid_boundary})
+
+    def test_failure_receipt_excludes_raw_exception_paths_and_case_bytes(self):
+        run_id = "bounded-failure-run"
+        run = self.start_run(run_id)
+        raw_failure = f"{self.root}/private/case.txt: forbidden case excerpt"
+
+        self.assert_error(lambda: run.fail(raw_failure, "artifact-write"), "invalid-failure")
+        returned = run.fail("stream-failed", "artifact-write")
+
+        receipt = (self.run_directory(run_id) / "failure.json").read_bytes()
+        self.assertEqual(returned["failure"], {"code": "stream-failed", "phase": "artifact-write"})
+        self.assertNotIn(str(self.root).encode("utf-8"), receipt)
+        self.assertNotIn(b"forbidden case excerpt", receipt)
+        self.assertNotIn(b"Traceback", receipt)
+
+    def test_terminal_receipts_are_create_exclusive_and_preserve_collisions(self):
+        success_run = self.start_run("success-receipt-collision-run")
+        manifest_path = self.run_directory("success-receipt-collision-run") / "manifest.json"
+        manifest_path.write_bytes(b"prior immutable manifest\n")
+        manifest_before = self.snapshot_path(manifest_path)
+
+        self.assert_error(success_run.complete, "receipt-unavailable")
+        self.assertEqual(self.snapshot_path(manifest_path), manifest_before)
+
+        failure_run = self.start_run("failure-receipt-collision-run")
+        failure_path = self.run_directory("failure-receipt-collision-run") / "failure.json"
+        failure_path.write_bytes(b"prior immutable failure\n")
+        failure_before = self.snapshot_path(failure_path)
+
+        self.assert_error(
+            lambda: failure_run.fail("stream-failed", "artifact-write"),
+            "receipt-unavailable",
+        )
+        self.assertEqual(self.snapshot_path(failure_path), failure_before)
+
+    def test_terminal_success_publication_and_sync_failures_never_report_success(self):
+        publication_run_id = "receipt-publication-failure-run"
+        publication_run = self.start_run(publication_run_id)
+        with mock.patch.object(
+            skill_output_writer.os,
+            "link",
+            side_effect=OSError("injected receipt publication /private/case-material"),
+        ):
+            self.assert_error(publication_run.complete, "receipt-unavailable")
+        self.assertFalse(os.path.lexists(self.run_directory(publication_run_id) / "manifest.json"))
+        self.assertTrue((self.run_directory(publication_run_id) / "incomplete.json").is_file())
+
+        sync_run_id = "receipt-sync-failure-run"
+        sync_run = self.start_run(sync_run_id)
+        run_directory_metadata = self.run_directory(sync_run_id).stat()
+        original_fsync = os.fsync
+
+        def fail_terminal_directory_sync(descriptor):
+            metadata = os.fstat(descriptor)
+            if (metadata.st_dev, metadata.st_ino) == (
+                run_directory_metadata.st_dev,
+                run_directory_metadata.st_ino,
+            ):
+                raise OSError("injected receipt sync /private/case-material")
+            return original_fsync(descriptor)
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "fsync",
+            side_effect=fail_terminal_directory_sync,
+        ):
+            self.assert_error(sync_run.complete, "receipt-unavailable")
+        self.assertFalse(os.path.lexists(self.run_directory(sync_run_id) / "manifest.json"))
+        self.assertTrue((self.run_directory(sync_run_id) / "incomplete.json").is_file())
+
+    def test_incomplete_artifacts_block_success_and_are_recorded_in_failure_receipts(self):
+        destination_sync_run_id = "honest-destination-sync-run"
+        (self.output_root / "destination-sync").mkdir()
+        destination_sync_run = self.start_run(destination_sync_run_id)
+        original_fsync = os.fsync
+        calls = 0
+
+        def fail_destination_sync(descriptor):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected destination sync /private/case-material")
+            return original_fsync(descriptor)
+
+        destination_bytes = b"linked not synced\n"
+        with mock.patch.object(skill_output_writer.os, "fsync", side_effect=fail_destination_sync):
+            self.assert_error(
+                lambda: destination_sync_run.write("destination-sync/result.bin", destination_bytes),
+                "publication-incomplete",
+            )
+        self.assert_error(destination_sync_run.complete, "receipt-unavailable")
+        destination_failure = destination_sync_run.fail("publication-incomplete", "artifact-write")
+        self.assertEqual(destination_failure["artifacts"], [])
+        self.assertEqual(
+            destination_failure["incomplete_artifacts"],
+            [
+                {
+                    "path": "destination-sync/result.bin",
+                    "sha256": "8b7dcfc43562caedc9ce045605ec437f1da26e92fa534ad4a45acbb4ebafb71c",
+                    "size": 18,
+                    "phase": "destination-sync",
+                }
+            ],
+        )
+        self.assertFalse(os.path.lexists(self.run_directory(destination_sync_run_id) / "manifest.json"))
+
+        staging_run_id = "honest-staging-run"
+        staging_run = self.start_run(staging_run_id)
+        staging_bytes = b"durable but staging remains\n"
+        with mock.patch.object(
+            skill_output_writer.os,
+            "unlink",
+            side_effect=OSError("injected staging cleanup /private/case-material"),
+        ):
+            self.assert_error(
+                lambda: staging_run.write("staging/result.bin", staging_bytes),
+                "staging-incomplete",
+            )
+        self.assert_error(staging_run.complete, "receipt-unavailable")
+        staging_failure = staging_run.fail("staging-incomplete", "artifact-write")
+        durable_artifact = {
+            "path": "staging/result.bin",
+            "sha256": "8222a172347f40f5cab83b1ea3387422f682f96f79e99a8d31415b26c4a73676",
+            "size": 28,
+        }
+        self.assertEqual(staging_failure["artifacts"], [durable_artifact])
+        self.assertEqual(
+            staging_failure["incomplete_artifacts"],
+            [{**durable_artifact, "phase": "staging-cleanup"}],
+        )
+        self.assertFalse(os.path.lexists(self.run_directory(staging_run_id) / "manifest.json"))
 
 
 if __name__ == "__main__":

@@ -1371,6 +1371,8 @@ class SkillOutputWriterTest(unittest.TestCase):
         cases = (
             ("relative", "example.test/source"),
             ("ftp", "ftp://example.test/source"),
+            ("uppercase-http", "HTTP://example.test/source"),
+            ("mixed-case-https", "Https://example.test/source"),
             ("missing-host", "https:///source"),
             ("credentials", "https://user:secret@example.test/source"),
             ("control", "https://example.test/source\nprivate-case"),
@@ -1390,6 +1392,112 @@ class SkillOutputWriterTest(unittest.TestCase):
                 )
                 self.assertFalse(os.path.lexists(output_root / relative_path))
         self.assertEqual(run._artifacts, [])
+
+    def test_existing_terminal_name_seals_on_prelink_receipt_failures(self):
+        for status in ("success", "failure"):
+            for failure_point in ("staging-create", "staging-write"):
+                with self.subTest(status=status, failure_point=failure_point):
+                    run_id = f"{status}-{failure_point}-terminal-run"
+                    run = self.start_run(run_id)
+                    receipt_name = "manifest.json" if status == "success" else "failure.json"
+                    receipt_path = self.run_directory(run_id) / receipt_name
+                    receipt_path.write_bytes(b"externally visible terminal receipt\n")
+                    patch_target = (
+                        "_new_staging_file" if failure_point == "staging-create" else "_write_all"
+                    )
+                    with mock.patch.object(
+                        skill_output_writer,
+                        patch_target,
+                        side_effect=OutputError("receipt-unavailable"),
+                    ):
+                        operation = (
+                            run.complete
+                            if status == "success"
+                            else lambda: run.fail("stream-failed", "artifact-write")
+                        )
+                        self.assert_error(operation, "receipt-unavailable")
+                    self.assertEqual(receipt_path.read_bytes(), b"externally visible terminal receipt\n")
+                    self.assert_terminal_and_closed(run)
+
+    def test_prepublication_staging_cleanup_unlinks_are_directory_synced(self):
+        stream_run = self.start_run("stream-cleanup-sync-run")
+        stream_staging = self.run_directory("stream-cleanup-sync-run") / "staging"
+        stream_staging_identity = (stream_staging.stat().st_dev, stream_staging.stat().st_ino)
+        original_fsync = os.fsync
+        stream_cleanup_syncs = 0
+
+        def count_stream_cleanup_sync(descriptor):
+            nonlocal stream_cleanup_syncs
+            metadata = os.fstat(descriptor)
+            if (metadata.st_dev, metadata.st_ino) == stream_staging_identity:
+                stream_cleanup_syncs += 1
+            return original_fsync(descriptor)
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "fsync",
+            side_effect=count_stream_cleanup_sync,
+        ):
+            self.assert_error(
+                lambda: stream_run.write("reports/partial.bin", FailingBinaryStream()),
+                "stream-failed",
+            )
+        self.assertEqual(stream_cleanup_syncs, 1)
+
+    def test_receipt_prelink_cleanup_unlink_is_directory_synced(self):
+        receipt_run = self.start_run("receipt-prelink-cleanup-sync-run")
+        receipt_staging = self.run_directory("receipt-prelink-cleanup-sync-run") / "staging"
+        receipt_staging_identity = (
+            receipt_staging.stat().st_dev,
+            receipt_staging.stat().st_ino,
+        )
+        receipt_cleanup_syncs = 0
+        original_fsync = os.fsync
+
+        def count_receipt_cleanup_sync(descriptor):
+            nonlocal receipt_cleanup_syncs
+            metadata = os.fstat(descriptor)
+            if (metadata.st_dev, metadata.st_ino) == receipt_staging_identity:
+                receipt_cleanup_syncs += 1
+            return original_fsync(descriptor)
+
+        with (
+            mock.patch.object(
+                skill_output_writer.os,
+                "fsync",
+                side_effect=count_receipt_cleanup_sync,
+            ),
+            mock.patch.object(
+                skill_output_writer.os,
+                "link",
+                side_effect=OSError("injected prelink failure /private/case-material"),
+            ),
+        ):
+            self.assert_error(receipt_run.complete, "receipt-unavailable")
+        self.assertEqual(receipt_cleanup_syncs, 1)
+
+    def test_cleanup_sync_failure_preserves_the_primary_bounded_failure(self):
+        run = self.start_run("primary-failure-cleanup-sync-run")
+        staging_path = self.run_directory("primary-failure-cleanup-sync-run") / "staging"
+        staging_identity = (staging_path.stat().st_dev, staging_path.stat().st_ino)
+        original_fsync = os.fsync
+        cleanup_sync_attempted = False
+
+        def fail_cleanup_sync(descriptor):
+            nonlocal cleanup_sync_attempted
+            metadata = os.fstat(descriptor)
+            if (metadata.st_dev, metadata.st_ino) == staging_identity:
+                cleanup_sync_attempted = True
+                raise OSError("injected cleanup sync /private/case-material")
+            return original_fsync(descriptor)
+
+        with mock.patch.object(skill_output_writer.os, "fsync", side_effect=fail_cleanup_sync):
+            self.assert_error(
+                lambda: run.write("reports/partial.bin", FailingBinaryStream()),
+                "stream-failed",
+            )
+        self.assertTrue(cleanup_sync_attempted)
+        self.assertFalse(os.path.lexists(self.output_root / "reports" / "partial.bin"))
 
     def test_manifest_schema_declares_bounded_skill_versions_and_safe_urls(self):
         schema = json.loads(

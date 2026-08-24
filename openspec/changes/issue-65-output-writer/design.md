@@ -103,14 +103,17 @@ as successful only when `manifest.json` exists and validates AND
 remains is non-success. A failure receipt or only an incomplete record is never
 durable success.
 
-Terminal receipt publication follows the same staged, create-exclusive, file-
-the manifest name visible, but the incomplete record remains and prevents a
-success result. Successful completion publishes and syncs `manifest.json`, then
-removes `incomplete.json`, then syncs the run directory again. If incomplete-
-record removal fails, or if the directory sync after removal fails, completion
-restores `incomplete.json` when necessary and syncs that restored non-success
-state before returning `receipt-unavailable`. The run remains sealed once the
-manifest may be visible. The writer never reports success from manifest presence
+Terminal receipt publication stages and file-syncs the canonical bytes, creates
+the terminal name with a create-exclusive hard link, syncs the run directory,
+removes the staging name, and syncs the staging directory. If any terminal
+publication exit finds that the terminal name is or may be visible, the run is
+sealed, including failures before the link attempt when another actor has
+created that name. The incomplete record remains and prevents a success result
+during uncertainty. Successful completion then removes `incomplete.json` and
+syncs the run directory again. If incomplete-record removal fails, or if the
+directory sync after removal fails, completion restores `incomplete.json` when
+necessary and syncs that restored non-success state before returning
+`receipt-unavailable`. The writer never reports success from manifest presence
 alone.
 
 ## Canonical manifest

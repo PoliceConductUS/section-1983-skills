@@ -138,11 +138,11 @@ content SHA-256 before a later skill may consume it as a read-only input.
 Internet source records MUST be rejected when the invocation policy is
 `disabled`.
 
-A source URL MUST be 1–2048 printable ASCII characters with an absolute
-lowercase `http://` or `https://` scheme and nonempty host. It MUST NOT contain
-whitespace, a control character, a backslash, an embedded username or password,
-or an invalid port. Internet-use status MUST be derived from validated source
-records on both durable and incomplete artifact records.
+A source URL MUST be 1–2048 printable ASCII characters whose raw value begins
+with literal lowercase `http://` or `https://` and has a nonempty host. It MUST
+NOT contain whitespace, a control character, a backslash, an embedded username
+or password, or an invalid port. Internet-use status MUST be derived from
+validated source records on both durable and incomplete artifact records.
 
 #### Scenario: Authorized internet artifact is written
 
@@ -158,11 +158,13 @@ records on both durable and incomplete artifact records.
 
 ### Requirement: Staging cleanup is durable
 
-After unlinking a staging entry for an artifact or receipt, the writer MUST sync
-the staging directory. An artifact staging-sync failure MUST record the artifact
-as incomplete at phase `staging-cleanup`. A receipt staging-sync failure after
-the receipt name may be visible MUST leave honest incomplete state, seal the
-run, and report `receipt-unavailable`.
+The writer MUST sync the staging directory after every staging-entry unlink for
+an artifact or receipt, including cleanup after a pre-publication failure. An
+artifact staging-sync failure after publication MUST record the artifact as
+incomplete at phase `staging-cleanup`. Cleanup failure after an earlier bounded
+stream or publication failure MUST NOT replace that more fundamental failure
+code. A receipt staging-sync failure after the receipt name may be visible MUST
+leave honest incomplete state, seal the run, and report `receipt-unavailable`.
 
 #### Scenario: Staging unlink is not durably synced
 

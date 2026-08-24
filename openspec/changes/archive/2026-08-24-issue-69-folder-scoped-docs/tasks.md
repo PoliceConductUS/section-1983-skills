@@ -23,6 +23,8 @@
 - [x] 3.1 Independently review links, flow completeness, role/output
       consistency, synthetic examples, contract ownership, and obsolete
       terminology; correct accepted Important findings test-first.
-- [ ] 3.2 Write verification and retrospective evidence, archive the change,
-      validate durable specs, run `npm run validate`, push, and mark the draft
-      PR ready while leaving Issue #69 and its PR open.
+- [x] 3.2 Write verification and retrospective evidence, archive the change,
+      validate durable specs, run `npm run validate`, commit, and push.
+- [ ] 3.3 Complete the final independent review, remove ignored review scratch,
+      rerun fresh repository-wide validation, and mark the draft PR ready while
+      leaving Issue #69 and its PR open.

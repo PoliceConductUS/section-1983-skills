@@ -79,6 +79,12 @@ optional and separate.
   cannot be expressed only as `MODIFIED` under the new header. The CLI aborted
   without mutation; a failing archive probe then drove explicit `RENAMED`
   operations plus the full modifications before archival work resumed.
+- The first archived guide still hard-coded a target path, redirected the
+  logical input manifest to an ambient file, and named an inventory artifact
+  without defining values that could be checked against the selected target.
+  Final-review regression tests now substitute a caller-selected existing
+  target, prohibit ambient manifest redirection, and require target-derived
+  inventory fields plus terminal-receipt comparison.
 - This change does not implement a trusted host, universal runner, adapter,
   sandbox, synthetic operation executable, or migration of any installed skill.
   Live Issue #71 owns the implemented-skill migration.

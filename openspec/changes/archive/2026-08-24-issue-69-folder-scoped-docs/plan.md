@@ -55,7 +55,9 @@
       ownership, synthetic scope, and Issue #71 boundary.
 - [x] Correct accepted Critical or Important findings test-first and rerun
       review.
-- [ ] Complete tasks, write evidence, archive with repository-local OpenSpec,
-      remove ignored SDD scratch after review, and run fresh `npm run validate`.
-- [ ] Commit with `docs: archive folder operations guide`, push, mark the draft
-      PR ready, and leave Issue #69 and its PR open.
+- [x] Write evidence, archive with repository-local OpenSpec, and run
+      `npm run validate` with ignored SDD scratch temporarily isolated.
+- [x] Commit with `docs: archive folder operations guide` and push.
+- [ ] Complete the final independent review, remove ignored SDD scratch, rerun
+      fresh `npm run validate`, mark the draft PR ready, and leave Issue #69 and
+      its PR open.

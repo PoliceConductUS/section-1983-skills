@@ -49,15 +49,21 @@
 
 The current public guide and README were reviewed against the complete change,
 the approved test suite, Git history, Task 1 and Task 2 reports, and every
-ignored review package. The review found no remaining Critical or Important
-defect.
+ignored review package. An initial review accepted the documented boundary. A
+fresh final review then found three Important documentation-verification gaps:
+the fixture hard-coded a target that ordinary selected folders would not
+contain, the validator example redirected its logical manifest to an ambient
+working-directory file, and the synthetic inventory had no target-derived
+semantic content contract. It also found that the archive checklist combined
+completed archive work with controller-owned final readiness work.
 
 - README links exactly once to the install-local guide while retaining the thin
   complaint-checker and Filing CI boundaries.
 - The six first-hour sections are ordered, locally complete, and reuse stable
   `record` and `authorities` roles plus one explicit output root.
-- The canonical fixture passes the real invocation validator after caller-root
-  substitution and target creation.
+- The corrected canonical fixture passes the real invocation validator after
+  caller-root and caller-selected existing-target substitution; the test no
+  longer creates the guide's hard-coded target behind the reader's back.
 - A direct link check resolved all 11 repository-relative links in README and
   the guide inside the repository.
 - The five portable operation units each state their logical input, immutable
@@ -70,9 +76,27 @@ defect.
 an installed public skill or repository runner. Current-code search finds the
 identifier only in the guide, its OpenSpec contract, and its documentation test.
 The guide requires an input-read-only read of the declared target, no network,
-and publication of only `reports/example-inventory.json` through the canonical
-output protocol. If the trusted host cannot provide that exact operation, the
-documented result is `execution unavailable` and execution stops.
+and publication of `reports/example-inventory.json` through the canonical output
+protocol. It now defines the inventory's schema version, target role and path,
+target byte size and SHA-256, and logical input-manifest SHA-256. Validation
+output stays in trusted-host memory until the host publishes the logical input
+manifest beneath the explicit output root through the same canonical protocol.
+If the trusted host cannot provide that exact operation, the documented result
+is `execution unavailable` and execution stops.
+
+## Final review correction RED and GREEN
+
+- `6315892` (`test: expose folder guide verification gaps`) ran 26 focused tests
+  with 11 intended assertion failures and no errors.
+- `40d807b` (`docs: make folder guide outputs verifiable`) made all 26 focused
+  tests and all 452 evaluation tests pass.
+- `npx openspec validate case-workspace-start-guide --strict` passed.
+- `npx openspec validate --all --strict` passed 22 items and failed 0.
+- `git diff --check` passed.
+
+The final independent re-review and controller-owned scratch removal, fresh
+repository-wide validation, and PR readiness remain pending at this evidence
+checkpoint.
 
 ## Issue #71 boundary
 

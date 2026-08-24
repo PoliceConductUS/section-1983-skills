@@ -1,9 +1,9 @@
 ---
 name: filing-ci
 description: >-
-  Use when a project-configured deterministic filing-integrity checker must run
-  after material legal-drafting changes, during filing-integrity checks, or
-  before a filing-readiness statement.
+  Use when a packaged deterministic filing-integrity checker must run after
+  material legal-drafting changes, during filing-integrity checks, or before a
+  filing-readiness statement.
 ---
 
 # Filing CI
@@ -19,27 +19,26 @@ case material if the host cannot enforce the filesystem and network boundary.
 
 ## Purpose
 
-Run the project's configured deterministic filing-integrity checker and report
-whether its filing gate is current and open or passed. This skill orchestrates
-the checker; it does not reproduce the checker's determinations in prose.
+Run a checker registered inside this installed skill package and report whether
+its filing gate is current and open or passed. This skill orchestrates the
+checker; it does not reproduce the checker's determinations in prose.
 
-## Resolve the configured inputs
+## Resolve declared inputs and packaged checker
 
-Resolve the controlling draft and complete checker invocation from repository
-instructions, project configuration, or explicit user input. Use a project's
-verified-authority root when one is configured and the checker requires
-authority verification.
+Use the required target in the declared `filing` role and the declared
+`authorities` role. `scripts/run_filing_ci.py` accepts only those two roots, the
+canonical relative filing target, and a checker ID registered inside this
+package. The packaged Section 1983 complaint checker ID is
+`section-1983-complaint-v1`.
 
-- Run the exact configured invocation against the identified controlling draft.
-- Do not invent an executable path, flag, source path, output location, or
-  verified-authority root.
-- If no complete invocation is configured, report **unavailable configuration**
-  and leave the filing gate open.
-- If the controlling draft, a required verified-authority root, or another
-  required input is unreadable or unresolved, report that class and leave the
-  filing gate open. When authority verification is required, do not substitute
-  another authority directory or run an invocation that cannot receive the
-  configured root.
+- Dispatch only the exact registered packaged checker ID.
+- Do not accept or infer a command, executable path, flag list, source path,
+  output path, repository instruction, or substitute authority root.
+- If the checker ID is absent, unknown, unavailable, or incompatible, report
+  **checker unavailable** and leave the filing gate open.
+- If the filing target or required authority material is unreadable or
+  unresolved, report that class and leave the filing gate open. Do not
+  substitute ambient or internet material.
 
 ## Run at the required workflow stages
 
@@ -49,7 +48,7 @@ invalidates any earlier successful result. A filing-readiness decision requires
 a current successful run for the controlling draft.
 
 Treat the checker's documented output contract as the boundary for interpreting
-the result. If the configured checker cannot execute, report **unavailable
+the result. If the packaged checker cannot execute, report **unavailable
 execution** and do not claim that a deterministic check ran. If promised output
 is malformed or cannot be reliably interpreted, report **malformed promised
 output** and leave the filing gate open.
@@ -87,16 +86,16 @@ response for a fresh checker run.
 
 ## Filing gate and boundaries
 
-Keep the filing gate open when configuration or execution is unavailable, a
-required input is unresolved, promised output cannot be reliably interpreted, a
-result is stale, or a hard finding remains unresolved. Describe Filing CI as
+Keep the filing gate open when the packaged checker or execution is unavailable,
+a required input is unresolved, promised output cannot be reliably interpreted,
+a result is stale, or a hard finding remains unresolved. Describe Filing CI as
 passed only after a current successful run for the controlling draft has no
 unresolved hard findings; preserve documented warnings and independent filing
 gates.
 
-This skill does not own checker logic, verified-authority-store verification,
-formatting, automatic correction, filing, or litigation judgment reserved to the
-user.
+This skill packages only its registered deterministic checker logic. It does not
+own verified-authority-store verification, formatting, automatic correction,
+filing, or litigation judgment reserved to the user.
 
 ## Independent quality-control stage
 

@@ -68,7 +68,7 @@ work. `temp/` is not a durable artifact destination.
 | `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
 | `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
 | `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
-| `filing-ci`                                       | Orchestrates a project-configured deterministic filing-integrity checker and its fail-closed filing gate.                                                                  |
+| `filing-ci`                                       | Runs registered packaged deterministic filing checks and preserves a fail-closed filing gate.                                                                              |
 
 ## How the skills compose
 
@@ -127,7 +127,7 @@ The ownership boundaries are deliberate: the umbrella routes; complaint skills
 establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; discovery peers draft or
 audit only their named artifacts; the authority and writing skills are final
-gates, and Filing CI adds a separate configured integrity gate.
+gates, and Filing CI adds a separate packaged integrity gate.
 
 ### Trusted adversarial-review runtime
 
@@ -153,12 +153,13 @@ completed independent review.
 
 ## Complaint checker boundary
 
-The canonical JSON complaint contract is a thin handoff for an external checker
-configured by the project. It does not provide or execute a checker and does not
-decide fact truth, legal sufficiency, authority fit, material analogy, strategy,
-or filing readiness. Filing CI may orchestrate only a complete
-project-configured checker invocation; it does not invent an executable, flags,
-inputs, or output paths.
+The canonical JSON complaint contract drives the install-local
+`scripts/check_complaint.py` mechanical checker. It does not decide fact truth,
+legal sufficiency, authority fit, material analogy, strategy, or filing
+readiness. Filing CI dispatches only checker IDs registered inside its installed
+package; an absent, unknown, unavailable, or incompatible checker returns an
+honest unavailable result. Neither helper accepts a command, executable, or
+output folder, and only the trusted host publishes returned report bytes.
 
 ## Project inputs and portability
 

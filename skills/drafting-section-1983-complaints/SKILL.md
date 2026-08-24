@@ -26,8 +26,9 @@ amendment proffer, read both install-local canonical references:
 - [references/complaint-structure-contract.json](references/complaint-structure-contract.json)
 
 The Markdown reference controls the complete general complaint skeleton and
-detailed count contract. The JSON reference is the mechanical handoff for an
-external checker; it is not an executable or a legal judgment.
+detailed count contract. The JSON reference defines the packaged mechanical
+check implemented by `scripts/check_complaint.py`; neither the contract nor the
+checker makes a legal judgment.
 
 If either reference cannot be read, report **complaint contract unavailable**
 and do not draft, revise, or audit the complaint. Do not invent or reconstruct

@@ -295,15 +295,19 @@ The Result must follow from the element map. It cannot repair a missing
 allegation. Confirm that the count identifies the injury and relief before the
 Result.
 
-## External-checker handoff
+## Packaged mechanical check
 
 The install-local
-[complaint-structure-contract.json](complaint-structure-contract.json) provides
-the mechanical interface for an external checker. It is a handoff, not an
-executable, and its presence does not mean that a checker ran. It does not make
-or replace a legal judgment.
+[complaint-structure-contract.json](complaint-structure-contract.json) defines
+the mechanical interface implemented by `../scripts/check_complaint.py`. The
+helper accepts the declared `filing` input root and one canonical relative JSON
+target. That target contains `sections` as ordered identifiers, `paragraphs` as
+objects with `number` and `cross_references`, and `counts` as numbered objects
+carrying the canonical count fields. The helper returns deterministic report
+bytes and an output-relative report path; only the trusted host publishes them.
 
 Deterministic checking is limited to the listed mechanical checks. It excludes
 fact truth, legal sufficiency, authority fit, material analogy, strategy, and
-filing readiness. A configured external checker reports findings using the
-listed stable fields and returns a nonzero status for a hard failure.
+filing readiness. The packaged helper reports findings using the listed stable
+fields and returns a nonzero status for a hard failure. Its presence does not
+mean the checker ran, and its result does not make or replace a legal judgment.

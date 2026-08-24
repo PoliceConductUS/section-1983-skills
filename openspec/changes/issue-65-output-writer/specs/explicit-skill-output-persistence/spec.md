@@ -73,7 +73,10 @@ and `incomplete.json` is absent. Completion MUST publish and sync the manifest,
 remove the incomplete record, and sync the run directory in that order. If
 incomplete-record removal or the following directory sync fails, the writer MUST
 leave or restore and re-sync `incomplete.json` before returning a bounded
-failure.
+failure. As soon as a terminal receipt name may be visible, including after an
+uncertain post-link sync or staging-cleanup failure, the writer MUST seal the
+run, close its retained directory handles, and reject every later operation as
+`run-terminal`.
 
 #### Scenario: Process stops before completion
 
@@ -109,6 +112,11 @@ failure information when applicable. It MUST use canonical logical JSON and MUST
 NOT contain absolute machine paths, tracebacks, credentials, environment values,
 or case-material excerpts.
 
+The skill version MUST be validated before run-state mutation and MUST match
+`[A-Za-z0-9][A-Za-z0-9._+-]{0,63}` so it is bounded and cannot contain a path,
+control character, whitespace-delimited excerpt, or other free-form receipt
+content.
+
 #### Scenario: Equivalent runs write in different call order
 
 - **WHEN** equivalent inputs and artifact bytes are written in different call
@@ -130,6 +138,12 @@ content SHA-256 before a later skill may consume it as a read-only input.
 Internet source records MUST be rejected when the invocation policy is
 `disabled`.
 
+A source URL MUST be 1–2048 printable ASCII characters with an absolute
+lowercase `http://` or `https://` scheme and nonempty host. It MUST NOT contain
+whitespace, a control character, a backslash, an embedded username or password,
+or an invalid port. Internet-use status MUST be derived from validated source
+records on both durable and incomplete artifact records.
+
 #### Scenario: Authorized internet artifact is written
 
 - **WHEN** an authorized invocation writes an artifact with complete internet
@@ -141,3 +155,17 @@ Internet source records MUST be rejected when the invocation policy is
 
 - **WHEN** a disabled invocation supplies an internet source record
 - **THEN** the writer rejects the write and publishes no final artifact
+
+### Requirement: Staging cleanup is durable
+
+After unlinking a staging entry for an artifact or receipt, the writer MUST sync
+the staging directory. An artifact staging-sync failure MUST record the artifact
+as incomplete at phase `staging-cleanup`. A receipt staging-sync failure after
+the receipt name may be visible MUST leave honest incomplete state, seal the
+run, and report `receipt-unavailable`.
+
+#### Scenario: Staging unlink is not durably synced
+
+- **WHEN** a staging entry is unlinked but the staging-directory sync fails
+- **THEN** the writer reports a bounded incomplete or unavailable result and
+  does not permit the run to claim a later conflicting terminal state

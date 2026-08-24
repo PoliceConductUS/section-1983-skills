@@ -124,6 +124,19 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertNotIn("/private/case-material", str(captured.exception))
         return captured.exception
 
+    def assert_terminal_and_closed(self, run):
+        operations = (
+            ("write", lambda: run.write("reports/late.md", b"must not publish")),
+            ("complete", run.complete),
+            ("fail", lambda: run.fail("late-failure", "terminal-transition")),
+        )
+        for label, operation in operations:
+            with self.subTest(operation=label):
+                self.assert_error(operation, "run-terminal")
+        self.assertEqual(run._root_fd, -1)
+        self.assertEqual(run._run_fd, -1)
+        self.assertEqual(run._staging_fd, -1)
+
     def snapshot_path(self, path):
         metadata = path.stat()
         return {
@@ -1174,6 +1187,7 @@ class SkillOutputWriterTest(unittest.TestCase):
             self.assert_error(sync_run.complete, "receipt-unavailable")
         self.assertTrue((self.run_directory(sync_run_id) / "manifest.json").is_file())
         self.assertTrue((self.run_directory(sync_run_id) / "incomplete.json").is_file())
+        self.assert_terminal_and_closed(sync_run)
 
         cleanup_run_id = "receipt-cleanup-failure-run"
         cleanup_run = self.start_run(cleanup_run_id)
@@ -1192,6 +1206,7 @@ class SkillOutputWriterTest(unittest.TestCase):
             self.assert_error(cleanup_run.complete, "receipt-unavailable")
         self.assertTrue((self.run_directory(cleanup_run_id) / "manifest.json").is_file())
         self.assertTrue((self.run_directory(cleanup_run_id) / "incomplete.json").is_file())
+        self.assert_terminal_and_closed(cleanup_run)
 
         removal_sync_run_id = "receipt-removal-sync-failure-run"
         removal_sync_run = self.start_run(removal_sync_run_id)
@@ -1235,6 +1250,259 @@ class SkillOutputWriterTest(unittest.TestCase):
             (removal_sync_run_directory / "incomplete.json").read_bytes(),
             b'{"run_id":"receipt-removal-sync-failure-run","schema_version":1,"status":"incomplete"}',
         )
+        self.assert_terminal_and_closed(removal_sync_run)
+
+    def test_visible_failure_receipt_after_sync_failure_seals_and_closes_run(self):
+        run_id = "failure-sync-sealed-run"
+        run = self.start_run(run_id)
+        run_directory = self.run_directory(run_id)
+        run_identity = (run_directory.stat().st_dev, run_directory.stat().st_ino)
+        original_fsync = os.fsync
+
+        def fail_failure_directory_sync(descriptor):
+            metadata = os.fstat(descriptor)
+            if (
+                (metadata.st_dev, metadata.st_ino) == run_identity
+                and os.path.lexists(run_directory / "failure.json")
+            ):
+                raise OSError("injected failure receipt sync /private/case-material")
+            return original_fsync(descriptor)
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "fsync",
+            side_effect=fail_failure_directory_sync,
+        ):
+            self.assert_error(
+                lambda: run.fail("stream-failed", "artifact-write"),
+                "receipt-unavailable",
+            )
+
+        self.assertTrue((run_directory / "failure.json").is_file())
+        self.assertTrue((run_directory / "incomplete.json").is_file())
+        self.assert_terminal_and_closed(run)
+
+    def test_internet_use_includes_sources_on_incomplete_artifacts(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "incomplete-internet-root",
+            internet="authorized",
+        )
+        (output_root / "reports").mkdir()
+        run = OutputRun.start(
+            invocation,
+            run_id="incomplete-internet-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        original_fsync = os.fsync
+        calls = 0
+
+        def fail_destination_sync(descriptor):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError("injected destination sync /private/case-material")
+            return original_fsync(descriptor)
+
+        with mock.patch.object(skill_output_writer.os, "fsync", side_effect=fail_destination_sync):
+            self.assert_error(
+                lambda: run.write(
+                    "reports/incomplete-web.md",
+                    b"internet bytes\n",
+                    internet_sources=(self.valid_internet_source(),),
+                ),
+                "publication-incomplete",
+            )
+
+        failure = run.fail("publication-incomplete", "artifact-write")
+        self.assertEqual(failure["internet"], {"policy": "authorized", "used": True})
+        self.assertEqual(
+            failure["incomplete_artifacts"][0]["internet_sources"],
+            [self.valid_internet_source()],
+        )
+
+    def test_rejects_unsafe_skill_versions_before_run_state_mutation(self):
+        cases = (
+            ("non-string", None),
+            ("empty", ""),
+            ("oversized", "v" * 65),
+            ("absolute-path", "/private/case-material"),
+            ("windows-path", "C:\\private\\case-material"),
+            ("case-excerpt", "forbidden case excerpt"),
+            ("control", "1.4.0\nprivate-case"),
+        )
+        for index, (label, skill_version) in enumerate(cases):
+            with self.subTest(case=label):
+                before = self.snapshot_tree()
+                self.assert_error(
+                    lambda version=skill_version, suffix=index: OutputRun.start(
+                        self.invocation,
+                        run_id=f"invalid-skill-version-{suffix}",
+                        skill_version=version,
+                        mode="append-immutable",
+                        input_manifest=self.input_manifest,
+                    ),
+                    "invalid-skill-version",
+                )
+                self.assertEqual(self.snapshot_tree(), before)
+
+        run = OutputRun.start(
+            self.invocation,
+            run_id="valid-skill-version-run",
+            skill_version="1.4.0+build-7",
+            mode="append-immutable",
+            input_manifest=self.input_manifest,
+        )
+        self.assertEqual(run.complete()["skill_version"], "1.4.0+build-7")
+
+    def test_rejects_unsafe_or_non_http_source_urls_before_publication(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "invalid-url-root",
+            internet="authorized",
+        )
+        run = OutputRun.start(
+            invocation,
+            run_id="invalid-url-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        cases = (
+            ("relative", "example.test/source"),
+            ("ftp", "ftp://example.test/source"),
+            ("missing-host", "https:///source"),
+            ("credentials", "https://user:secret@example.test/source"),
+            ("control", "https://example.test/source\nprivate-case"),
+            ("backslash", "https://example.test\\outside"),
+            ("oversized", f"https://example.test/{'a' * 2028}"),
+        )
+        for index, (label, url) in enumerate(cases):
+            with self.subTest(case=label):
+                relative_path = f"reports/invalid-url-{index}.md"
+                self.assert_error(
+                    lambda path=relative_path, value=url: run.write(
+                        path,
+                        b"must not publish",
+                        internet_sources=(self.valid_internet_source(url=value),),
+                    ),
+                    "invalid-internet-source",
+                )
+                self.assertFalse(os.path.lexists(output_root / relative_path))
+        self.assertEqual(run._artifacts, [])
+
+    def test_manifest_schema_declares_bounded_skill_versions_and_safe_urls(self):
+        schema = json.loads(
+            (Path(__file__).resolve().parents[2] / "governance" / "skill-run-manifest.schema.json").read_text()
+        )
+        self.assertEqual(schema["properties"]["skill_version"], {"$ref": "#/$defs/skillVersion"})
+        self.assertEqual(schema["$defs"]["skillVersion"]["maxLength"], 64)
+        self.assertEqual(
+            schema["$defs"]["skillVersion"]["pattern"],
+            "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$",
+        )
+        url_schema = schema["$defs"]["internetSource"]["properties"]["url"]
+        self.assertEqual(url_schema["format"], "uri")
+        self.assertEqual(url_schema["maxLength"], 2048)
+        self.assertIn("https?://", url_schema["pattern"])
+        self.assertIn("@", url_schema["pattern"])
+
+    def test_artifact_staging_unlink_is_synced_and_sync_failure_is_incomplete(self):
+        successful_run = self.start_run("artifact-staging-sync-run")
+        staging_path = self.run_directory("artifact-staging-sync-run") / "staging"
+        staging_identity = (staging_path.stat().st_dev, staging_path.stat().st_ino)
+        original_fsync = os.fsync
+        staging_syncs = 0
+
+        def count_staging_sync(descriptor):
+            nonlocal staging_syncs
+            metadata = os.fstat(descriptor)
+            if (metadata.st_dev, metadata.st_ino) == staging_identity:
+                staging_syncs += 1
+            return original_fsync(descriptor)
+
+        with mock.patch.object(skill_output_writer.os, "fsync", side_effect=count_staging_sync):
+            successful_run.write("reports/synced-cleanup.md", b"durable bytes\n")
+        self.assertEqual(staging_syncs, 1)
+
+        failed_run = self.start_run("artifact-staging-sync-failure-run")
+        failed_staging_path = self.run_directory("artifact-staging-sync-failure-run") / "staging"
+        failed_staging_identity = (
+            failed_staging_path.stat().st_dev,
+            failed_staging_path.stat().st_ino,
+        )
+
+        def fail_staging_sync(descriptor):
+            metadata = os.fstat(descriptor)
+            if (metadata.st_dev, metadata.st_ino) == failed_staging_identity:
+                raise OSError("injected staging directory sync /private/case-material")
+            return original_fsync(descriptor)
+
+        contents = b"durable output with uncertain staging cleanup\n"
+        with mock.patch.object(skill_output_writer.os, "fsync", side_effect=fail_staging_sync):
+            self.assert_error(
+                lambda: failed_run.write("reports/staging-sync-failed.md", contents),
+                "staging-incomplete",
+            )
+        self.assertEqual(
+            failed_run._incomplete_artifacts,
+            [
+                {
+                    "path": "reports/staging-sync-failed.md",
+                    "phase": "staging-cleanup",
+                    "sha256": hashlib.sha256(contents).hexdigest(),
+                    "size": len(contents),
+                }
+            ],
+        )
+
+    def test_receipt_staging_unlink_sync_failure_is_sealed_and_incomplete(self):
+        for status in ("success", "failure"):
+            with self.subTest(status=status):
+                run_id = f"{status}-receipt-staging-sync-run"
+                run = self.start_run(run_id)
+                run_directory = self.run_directory(run_id)
+                staging_path = run_directory / "staging"
+                staging_identity = (staging_path.stat().st_dev, staging_path.stat().st_ino)
+                receipt_name = "manifest.json" if status == "success" else "failure.json"
+                original_fsync = os.fsync
+
+                def fail_receipt_staging_sync(descriptor):
+                    metadata = os.fstat(descriptor)
+                    if (
+                        (metadata.st_dev, metadata.st_ino) == staging_identity
+                        and os.path.lexists(run_directory / receipt_name)
+                    ):
+                        raise OSError("injected receipt staging sync /private/case-material")
+                    return original_fsync(descriptor)
+
+                with mock.patch.object(
+                    skill_output_writer.os,
+                    "fsync",
+                    side_effect=fail_receipt_staging_sync,
+                ):
+                    operation = (
+                        run.complete
+                        if status == "success"
+                        else lambda: run.fail("stream-failed", "artifact-write")
+                    )
+                    self.assert_error(operation, "receipt-unavailable")
+                self.assertTrue((run_directory / receipt_name).is_file())
+                self.assertTrue((run_directory / "incomplete.json").is_file())
+                self.assert_terminal_and_closed(run)
+
+    def test_terminal_runs_close_descriptors_under_stress(self):
+        for index in range(80):
+            run = self.start_run(f"fd-stress-{index}")
+            descriptors = (run._root_fd, run._run_fd, run._staging_fd)
+            if index % 2:
+                run.fail("stress-failure", "terminal-transition")
+            else:
+                run.complete()
+            self.assert_terminal_and_closed(run)
+            for descriptor in descriptors:
+                with self.assertRaises(OSError):
+                    os.fstat(descriptor)
 
     def test_incomplete_artifacts_block_success_and_are_recorded_in_failure_receipts(self):
         destination_sync_run_id = "honest-destination-sync-run"

@@ -31,8 +31,14 @@ manifest = run.complete()
 binary stream whose `read()` returns bytes. Unsupported or mixed stream content
 fails before publication.
 
-`OutputRun.fail(code, phase)` publishes one bounded failure receipt. After
-`complete()` or `fail()`, further writes or terminal transitions fail closed.
+`skill_version` is a 1–64 character ASCII value matching
+`[A-Za-z0-9][A-Za-z0-9._+-]{0,63}`. It is validated before run-state mutation.
+
+`OutputRun.fail(code, phase)` publishes one bounded failure receipt. As soon as
+a terminal receipt name may be visible, including an uncertain post-link sync or
+cleanup failure, the run is sealed. Every later write or terminal transition
+fails with `run-terminal`. Sealing closes the retained output-root,
+run-directory, and staging-directory handles deterministically.
 
 ## Stable directory authority
 
@@ -58,7 +64,8 @@ For each artifact the writer:
 4. creates missing real parent directories beneath the stable output root;
 5. atomically creates the final name as a hard link to the staging inode;
 6. syncs the final parent directory so the published name is durable;
-7. unlinks the staging name only after publication succeeds.
+7. unlinks the staging name only after publication succeeds; and
+8. syncs the staging directory after that unlink.
 
 The hard-link publication is same-filesystem because staging and destination
 share the output root. It cannot replace an existing name. A failed copy never
@@ -102,8 +109,9 @@ success result. Successful completion publishes and syncs `manifest.json`, then
 removes `incomplete.json`, then syncs the run directory again. If incomplete-
 record removal fails, or if the directory sync after removal fails, completion
 restores `incomplete.json` when necessary and syncs that restored non-success
-state before returning `receipt-unavailable`. The writer never reports success
-from manifest presence alone.
+state before returning `receipt-unavailable`. The run remains sealed once the
+manifest may be visible. The writer never reports success from manifest presence
+alone.
 
 ## Canonical manifest
 
@@ -114,9 +122,12 @@ by relative path regardless of write order.
 
 Internet use is explicit. An artifact that derives from internet content must
 include source records containing stable identity or URL, UTC retrieval time,
-bounded request context, and lowercase SHA-256. `used` is derived from the
-presence of source records. Source records are rejected when the invocation's
-internet policy is `disabled`.
+bounded request context, and lowercase SHA-256. A URL is 1–2048 printable ASCII
+characters, has an absolute lowercase `http://` or `https://` scheme and a
+nonempty host, contains no whitespace, control character, backslash, or embedded
+username/password, and parses without an invalid port. `used` is derived from
+source records on both durable and incomplete artifacts. Source records are
+rejected when the invocation's internet policy is `disabled`.
 
 ## Error contract
 

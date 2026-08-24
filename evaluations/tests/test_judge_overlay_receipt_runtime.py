@@ -381,6 +381,7 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
                 "./filing.md",
                 "folder//filing.md",
                 "filing.md/",
+                "bad\x00name",
                 "linked.md",
                 "missing.md",
             ):
@@ -392,6 +393,7 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
                 "./filing.md",
                 "folder//filing.md",
                 "filing.md/",
+                "bad\x00name",
                 "audits/prior.md",
                 "linked.md",
             ):

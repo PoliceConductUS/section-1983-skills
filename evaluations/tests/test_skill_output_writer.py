@@ -1198,9 +1198,10 @@ class SkillOutputWriterTest(unittest.TestCase):
         removal_sync_run_directory = self.run_directory(removal_sync_run_id)
         removal_sync_run_metadata = removal_sync_run_directory.stat()
         injected_removal_sync_failure = False
+        recovery_sync_count = 0
 
         def fail_sync_after_incomplete_removal(descriptor):
-            nonlocal injected_removal_sync_failure
+            nonlocal injected_removal_sync_failure, recovery_sync_count
             metadata = os.fstat(descriptor)
             is_run_directory = (metadata.st_dev, metadata.st_ino) == (
                 removal_sync_run_metadata.st_dev,
@@ -1210,6 +1211,15 @@ class SkillOutputWriterTest(unittest.TestCase):
             if is_run_directory and incomplete_is_absent and not injected_removal_sync_failure:
                 injected_removal_sync_failure = True
                 raise OSError("injected removal sync /private/case-material")
+            if (
+                is_run_directory
+                and not incomplete_is_absent
+                and injected_removal_sync_failure
+                and recovery_sync_count == 0
+            ):
+                result = original_fsync(descriptor)
+                recovery_sync_count += 1
+                return result
             return original_fsync(descriptor)
 
         with mock.patch.object(
@@ -1219,6 +1229,7 @@ class SkillOutputWriterTest(unittest.TestCase):
         ):
             self.assert_error(removal_sync_run.complete, "receipt-unavailable")
         self.assertTrue(injected_removal_sync_failure)
+        self.assertEqual(recovery_sync_count, 1)
         self.assertTrue((removal_sync_run_directory / "manifest.json").is_file())
         self.assertEqual(
             (removal_sync_run_directory / "incomplete.json").read_bytes(),

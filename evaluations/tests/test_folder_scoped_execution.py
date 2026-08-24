@@ -1,3 +1,6 @@
+import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -208,6 +211,38 @@ class FolderScopedExecutionTest(unittest.TestCase):
                 envelope = self.envelope()
                 envelope["target"] = {"role": "record", "path": path}
                 self.assert_invocation_error(envelope)
+
+    def test_cli_reports_nul_roots_as_bounded_json_errors(self):
+        envelope = self.envelope()
+        envelope["inputs"][0]["root"] = f"{self.record_root}\x00"
+
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parents[2] / "scripts" / "validate_folder_invocation.py")],
+            input=json.dumps(envelope),
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(json.loads(result.stdout), {"error": {"code": "invalid-input-root"}})
+
+    def test_rejects_backslash_traversal_in_child_paths(self):
+        backslash_path = "dir\\..\\secret"
+        (self.record_root / backslash_path).write_text("secret\n", encoding="utf-8")
+        invocation = validate_invocation(self.envelope())
+        target_envelope = self.envelope()
+        target_envelope["target"] = {"role": "record", "path": backslash_path}
+
+        with self.subTest(path_kind="target"):
+            self.assert_invocation_error(target_envelope)
+        with self.subTest(path_kind="input"):
+            with self.assertRaises(InvocationError):
+                resolve_input_path(invocation, "record", backslash_path)
+        with self.subTest(path_kind="output"):
+            with self.assertRaises(InvocationError):
+                resolve_output_path(invocation, backslash_path)
 
     def test_resolves_only_existing_confined_input_children(self):
         invocation = validate_invocation(self.envelope())

@@ -53,21 +53,30 @@ def _require_exact_object(value: Any, required: set[str], allowed: set[str], cod
 def _require_relative_path(value: Any, code: str) -> Path:
     if not isinstance(value, str) or not value:
         _fail(code)
-    path = Path(value)
-    if not path.parts or path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
+    try:
+        path = Path(value)
+        invalid_path = not path.parts or path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts)
+    except ValueError:
+        _fail(code)
+    if "\\" in value or invalid_path:
         _fail(code)
     return path
 
 
 def _resolve_root(value: str, code: str) -> Path:
-    path = Path(value)
-    if not path.is_absolute():
+    try:
+        path = Path(value)
+        absolute = path.is_absolute()
+    except ValueError:
+        _fail(code)
+    if not absolute:
         _fail(code)
     try:
         resolved = path.resolve(strict=True)
-    except OSError:
+        directory = resolved.is_dir()
+    except (OSError, ValueError):
         _fail(code)
-    if not resolved.is_dir():
+    if not directory:
         _fail(code)
     return resolved
 
@@ -84,7 +93,7 @@ def _resolve_existing_child(root: Path, relative_path: Any, code: str) -> Path:
     relative = _require_relative_path(relative_path, code)
     try:
         resolved = (root / relative).resolve(strict=True)
-    except OSError:
+    except (OSError, ValueError):
         _fail(code)
     if not _is_within(resolved, root):
         _fail(code)
@@ -199,7 +208,7 @@ def resolve_output_path(invocation: ValidatedInvocation, relative_path: str) -> 
         if candidate.exists() or candidate.is_symlink():
             try:
                 current = candidate.resolve(strict=True)
-            except OSError:
+            except (OSError, ValueError):
                 _fail("invalid-output-path")
             if not _is_within(current, invocation.output_root):
                 _fail("invalid-output-path")
@@ -284,6 +293,9 @@ def main() -> int:
         return 1
     except (json.JSONDecodeError, OSError, UnicodeDecodeError):
         print(json.dumps({"error": {"code": "invalid-json"}}, separators=(",", ":")))
+        return 1
+    except ValueError:
+        print(json.dumps({"error": {"code": "invalid-invocation"}}, separators=(",", ":")))
         return 1
     print(json.dumps(manifest, separators=(",", ":")))
     return 0

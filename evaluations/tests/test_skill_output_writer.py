@@ -560,6 +560,25 @@ class SkillOutputWriterTest(unittest.TestCase):
 
         self.assert_failed_write_is_confined("reports/partial.bin", run_id, before)
 
+    def test_caught_stream_failure_prevents_success_but_allows_failure_receipt(self):
+        run_id = "caught-stream-failure-run"
+        run = self.start_run(run_id)
+
+        self.assert_error(
+            lambda: run.write("reports/partial.bin", FailingBinaryStream()),
+            "stream-failed",
+        )
+
+        self.assert_error(run.complete, "receipt-unavailable")
+        self.assertFalse(os.path.lexists(self.run_directory(run_id) / "manifest.json"))
+        self.assertTrue((self.run_directory(run_id) / "incomplete.json").is_file())
+
+        failure = run.fail("stream-failed", "artifact-write")
+        self.assertEqual(failure["status"], "failure")
+        self.assertEqual(failure["artifacts"], [])
+        self.assertEqual(failure["incomplete_artifacts"], [])
+        self.assertTrue((self.run_directory(run_id) / "failure.json").is_file())
+
     def test_text_returning_stream_publishes_no_final_artifact(self):
         run_id = "text-stream-run"
         run = self.start_run(run_id)
@@ -927,6 +946,36 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertEqual(json.loads(receipt_bytes), expected_manifest)
         self.assertNotIn(str(output_root).encode("utf-8"), receipt_bytes)
 
+    def test_write_result_is_recursively_detached_from_receipt_provenance(self):
+        invocation, input_manifest, output_root = self.make_relocated_invocation(
+            "detached-write-result-root",
+            internet="authorized",
+        )
+        run = OutputRun.start(
+            invocation,
+            run_id="detached-write-result-run",
+            skill_version="1.4.0",
+            mode="append-immutable",
+            input_manifest=input_manifest,
+        )
+        source = self.valid_internet_source()
+
+        returned = run.write(
+            "reports/web.md",
+            b"web\n",
+            internet_sources=(source,),
+        )
+        returned["internet_sources"][0]["url"] = "https://mutated.invalid/source"
+        returned["internet_sources"].append(self.valid_internet_source(url="https://extra.invalid"))
+
+        manifest = run.complete()
+        self.assertEqual(manifest["internet"], {"policy": "authorized", "used": True})
+        self.assertEqual(manifest["artifacts"][0]["internet_sources"], [source])
+        persisted = json.loads(
+            (output_root / ".skill-runs" / "detached-write-result-run" / "manifest.json").read_bytes()
+        )
+        self.assertEqual(persisted["artifacts"][0]["internet_sources"], [source])
+
     def test_authorized_internet_without_source_records_derives_unused(self):
         invocation, input_manifest, output_root = self.make_relocated_invocation(
             "authorized-unused-root",
@@ -1034,6 +1083,9 @@ class SkillOutputWriterTest(unittest.TestCase):
             ("naive-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34:56"}),
             ("nonzero-offset-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34:56-05:00"}),
             ("invalid-retrieval-time", {**valid, "retrieved_at": "2026-02-30T12:34:56Z"}),
+            ("week-date-retrieval-time", {**valid, "retrieved_at": "2026-W34-1T12:34:56Z"}),
+            ("space-retrieval-time", {**valid, "retrieved_at": "2026-08-24 12:34:56Z"}),
+            ("minute-only-retrieval-time", {**valid, "retrieved_at": "2026-08-24T12:34Z"}),
             ("missing-hash", {key: value for key, value in valid.items() if key != "sha256"}),
             ("non-string-hash", {**valid, "sha256": 7}),
             ("short-hash", {**valid, "sha256": "a" * 63}),
@@ -1207,6 +1259,50 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertTrue((self.run_directory(cleanup_run_id) / "manifest.json").is_file())
         self.assertTrue((self.run_directory(cleanup_run_id) / "incomplete.json").is_file())
         self.assert_terminal_and_closed(cleanup_run)
+
+        removed_cleanup_run_id = "receipt-removed-cleanup-failure-run"
+        removed_cleanup_run = self.start_run(removed_cleanup_run_id)
+        removed_cleanup_directory = self.run_directory(removed_cleanup_run_id)
+        removed_cleanup_metadata = removed_cleanup_directory.stat()
+        original_unlink = os.unlink
+        original_fsync = os.fsync
+        recovery_sync_count = 0
+
+        def remove_incomplete_then_report_unlink_error(path, *args, **kwargs):
+            if os.fspath(path) == "incomplete.json":
+                original_unlink(path, *args, **kwargs)
+                raise OSError("injected post-removal unlink error /private/case-material")
+            return original_unlink(path, *args, **kwargs)
+
+        def count_restored_incomplete_sync(descriptor):
+            nonlocal recovery_sync_count
+            metadata = os.fstat(descriptor)
+            if (
+                (metadata.st_dev, metadata.st_ino)
+                == (removed_cleanup_metadata.st_dev, removed_cleanup_metadata.st_ino)
+                and os.path.lexists(removed_cleanup_directory / "incomplete.json")
+            ):
+                recovery_sync_count += 1
+            return original_fsync(descriptor)
+
+        with mock.patch.object(
+            skill_output_writer.os,
+            "unlink",
+            side_effect=remove_incomplete_then_report_unlink_error,
+        ), mock.patch.object(
+            skill_output_writer.os,
+            "fsync",
+            side_effect=count_restored_incomplete_sync,
+        ):
+            self.assert_error(removed_cleanup_run.complete, "receipt-unavailable")
+
+        manifest_exists = os.path.lexists(removed_cleanup_directory / "manifest.json")
+        incomplete_exists = os.path.lexists(removed_cleanup_directory / "incomplete.json")
+        self.assertTrue(manifest_exists)
+        self.assertTrue(incomplete_exists)
+        self.assertFalse(manifest_exists and not incomplete_exists)
+        self.assertGreaterEqual(recovery_sync_count, 1)
+        self.assert_terminal_and_closed(removed_cleanup_run)
 
         removal_sync_run_id = "receipt-removal-sync-failure-run"
         removal_sync_run = self.start_run(removal_sync_run_id)

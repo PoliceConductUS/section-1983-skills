@@ -85,6 +85,11 @@ optional and separate.
   Final-review regression tests now substitute a caller-selected existing
   target, prohibit ambient manifest redirection, and require target-derived
   inventory fields plus terminal-receipt comparison.
+- The first correction still treated validator stdout bytes as if they were the
+  writer's canonical manifest bytes. A fresh re-review proved the two hashes
+  differed. The final executable regression now publishes through a real
+  `OutputRun` and binds the persisted artifact, inventory fingerprint, and
+  terminal receipt fingerprint to one canonical serialization.
 - This change does not implement a trusted host, universal runner, adapter,
   sandbox, synthetic operation executable, or migration of any installed skill.
   Live Issue #71 owns the implemented-skill migration.

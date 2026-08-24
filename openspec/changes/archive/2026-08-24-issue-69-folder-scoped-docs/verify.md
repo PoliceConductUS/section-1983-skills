@@ -98,6 +98,28 @@ The final independent re-review and controller-owned scratch removal, fresh
 repository-wide validation, and PR readiness remain pending at this evidence
 checkpoint.
 
+The re-review at `49ec3d7` found one further Important interoperability gap:
+validator stdout bytes and the writer's canonical input-manifest fingerprint
+used different JSON serializations. The guide could therefore instruct a host to
+persist bytes whose SHA-256 did not match the receipt.
+
+- `89bce81` (`test: bind guide manifest bytes to receipt`) added an executable
+  writer integration test and failed on the missing canonical-byte instruction.
+- `79e9b02` (`docs: bind persisted manifests to writer receipts`) requires the
+  host to parse validator stdout into an object, serialize the same object with
+  the writer's canonical compact UTF-8 sorted-key JSON encoding, and publish
+  those exact bytes.
+- The integration test now publishes the manifest and inventory through a real
+  `OutputRun`, completes the run, and proves equality among the manifest
+  artifact SHA-256, inventory `input_manifest_sha256`, and terminal receipt
+  `input_manifest_sha256`.
+- Focused documentation and writer integration tests passed 27 tests; full
+  evaluation discovery passed 453 tests; strict OpenSpec passed 22 items and
+  failed 0; tracked formatting and `git diff --check` passed.
+
+Final independent approval and controller-owned cleanup, repository-wide
+validation, and PR readiness remain pending at this evidence checkpoint.
+
 ## Issue #71 boundary
 
 Live Issue #71 remained open during verification and continues to own migration

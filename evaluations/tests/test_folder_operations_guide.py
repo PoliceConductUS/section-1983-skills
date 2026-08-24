@@ -30,7 +30,7 @@ FIRST_HOUR_HEADINGS = (
 )
 OPERATION_OWNERS = {
     "folder-backed filing packet": "skills/section-1983-drafting/SKILL.md",
-    "immutable QC report": "skills/filing-ci/SKILL.md",
+    "immutable qc report": "skills/filing-ci/SKILL.md",
     "profile package": "skills/building-defense-counsel-overlays/SKILL.md",
     "research corpus": "skills/studying-rule-59e-decisions/SKILL.md",
     "isolated role run": "skills/adversarial-filing-review/SKILL.md",
@@ -408,7 +408,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
         )
         self.assertRegex(
             self.normalized_lower,
-            r"no adapter (?:is|becomes )?(?:part of|required by|required for)",
+            r"no adapter (?:is |becomes )?(?:part of|required by|required for)",
         )
 
     def test_examples_are_synthetic_and_machine_independent(self):

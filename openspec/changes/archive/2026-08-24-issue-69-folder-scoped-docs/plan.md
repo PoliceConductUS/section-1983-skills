@@ -58,6 +58,9 @@
 - [x] Write evidence, archive with repository-local OpenSpec, and run
       `npm run validate` with ignored SDD scratch temporarily isolated.
 - [x] Commit with `docs: archive folder operations guide` and push.
-- [ ] Complete the final independent review, remove ignored SDD scratch, rerun
-      fresh `npm run validate`, mark the draft PR ready, and leave Issue #69 and
-      its PR open.
+- [x] Complete the final independent review, remove ignored SDD scratch, and
+      rerun fresh `npm run validate`.
+
+After the final evidence commit is pushed and freshly verified, the controller
+marks the draft PR ready while leaving Issue #69 and its PR open. That external
+PR-state transition is not a tracked repository change.

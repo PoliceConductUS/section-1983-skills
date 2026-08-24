@@ -25,6 +25,9 @@
       terminology; correct accepted Important findings test-first.
 - [x] 3.2 Write verification and retrospective evidence, archive the change,
       validate durable specs, run `npm run validate`, commit, and push.
-- [ ] 3.3 Complete the final independent review, remove ignored review scratch,
-      rerun fresh repository-wide validation, and mark the draft PR ready while
-      leaving Issue #69 and its PR open.
+- [x] 3.3 Complete the final independent review, remove ignored review scratch,
+      and rerun fresh repository-wide validation.
+
+After the final evidence commit is pushed and freshly verified, the controller
+marks the draft PR ready while leaving Issue #69 and its PR open. That external
+PR-state transition is not a tracked repository change.

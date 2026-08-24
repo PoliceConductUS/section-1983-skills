@@ -120,6 +120,26 @@ persist bytes whose SHA-256 did not match the receipt.
 Final independent approval and controller-owned cleanup, repository-wide
 validation, and PR readiness remain pending at this evidence checkpoint.
 
+## Final approval and controller verification
+
+The independent reviewer approved exact head `710a197` with no Critical,
+Important, or Minor finding. Independent execution confirmed equality among the
+persisted logical-manifest file SHA-256, its terminal artifact-record SHA-256,
+the inventory `input_manifest_sha256`, and the terminal receipt
+`input_manifest_sha256`. The live draft PR was open and green at that exact
+head, and Issue #69 remained open.
+
+The controller then consumed and removed only the retained ignored
+`.superpowers/sdd/plan/` review scratch. With no ignored review files remaining,
+a fresh `npm run validate` passed formatting, 26 drafting tests, 453 evaluation
+tests, 22 discovered skills, 22 OpenSpec items, corpus evaluation, and
+governance validation. The tracked tree remained clean before this final
+evidence update.
+
+PR readiness follows only after this evidence commit is pushed and its exact
+head is freshly verified. The PR and Issue #69 remain open under the requested
+close-on-merge policy.
+
 ## Issue #71 boundary
 
 Live Issue #71 remained open during verification and continues to own migration

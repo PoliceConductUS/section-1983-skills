@@ -9,28 +9,6 @@ drafting.
 
 ## Requirements
 
-### Requirement: Configured checker resolution
-
-The `filing-ci` skill SHALL resolve the checker invocation and controlling draft
-from repository instructions, project configuration, or explicit user input. It
-MUST run the configured invocation rather than describe or reproduce the
-deterministic checks in prose. It MUST NOT invent executable paths, flags,
-source paths, or output locations.
-
-#### Scenario: Project supplies a complete checker invocation
-
-- **WHEN** a project identifies the controlling draft and a complete
-  filing-integrity checker invocation
-- **THEN** the skill runs that invocation against the identified draft without
-  substituting an inferred command
-
-#### Scenario: Checker invocation is not configured
-
-- **WHEN** no repository instruction, project configuration, or explicit user
-  input supplies a complete checker invocation
-- **THEN** the skill reports unavailable checker configuration and leaves the
-  filing gate open without inventing a command
-
 ### Requirement: Workflow-stage execution
 
 The skill MUST run Filing CI after every material drafting change and again
@@ -49,120 +27,117 @@ MUST invalidate an earlier successful result.
 - **THEN** the skill requires a current successful Filing CI result for the
   controlling draft
 
-### Requirement: Verified-authority root integration
-
-The skill MUST use the project's configured verified-authority root when one is
-present and the checker requires authority verification. It MUST NOT hardcode a
-machine-specific root or silently substitute another authority directory.
-
-#### Scenario: Project configures a verified-authority root
-
-- **WHEN** project instructions or configuration identify a verified-authority
-  root and the checker invocation accepts that input
-- **THEN** the skill runs the checker with that configured root
-
-#### Scenario: Required root cannot be supplied
-
-- **WHEN** authority verification is required but the configured invocation
-  cannot resolve or accept the project's verified-authority root
-- **THEN** the skill reports the unresolved input and leaves the filing gate
-  open
-
 ### Requirement: Failure classification and drafting-loop return
 
-The skill SHALL distinguish unavailable configuration, unavailable execution,
-unreadable or unresolved required inputs, malformed promised output, and
-checker-reported findings. It MUST explain the blocking class, preserve the
-checker's documented severity, and return actionable findings to the drafting
-loop for correction and rerun.
+The skill SHALL distinguish unavailable packaged checker, unavailable execution,
+unreadable or unresolved declared inputs, invalid target, malformed
+deterministic result, publication failure, and checker-reported findings. It
+MUST explain the blocking class, preserve the checker's documented severity, and
+return actionable findings to the drafting loop without editing the filing.
 
-#### Scenario: Executable is unavailable
+#### Scenario: Packaged checker cannot execute
 
-- **WHEN** the configured checker cannot be executed
-- **THEN** the skill reports an unavailable-execution failure and does not claim
-  that any deterministic check ran
+- **WHEN** a registered checker cannot complete its deterministic processing
+- **THEN** the wrapper returns an unavailable-execution result and does not
+  claim that any check completed
 
 #### Scenario: Checker reports hard findings
 
-- **WHEN** the checker exits with or reports unresolved hard findings
+- **WHEN** the checker returns unresolved hard findings
 - **THEN** the skill identifies those findings as an open filing gate and sends
-  them back to the drafting loop
+  them back to a separately authorized drafting loop
 
 #### Scenario: Checker reports non-hard findings
 
-- **WHEN** the checker reports warnings or another documented non-hard class
-- **THEN** the skill preserves that class and presents the findings without
-  silently downgrading, dismissing, or correcting them
+- **WHEN** the checker returns warnings or another documented non-hard class
+- **THEN** the skill preserves that class without silently downgrading,
+  dismissing, or correcting the finding
 
 ### Requirement: Read-only orchestration
 
-The skill MUST treat checker execution and result reporting as read-only
-orchestration. It MUST NOT silently edit the controlling filing, create project
-paths, rewrite checker output, or represent a correction as user-approved.
-
-A Filing CI response with findings MUST stop after reporting and returning those
-findings. It MUST NOT edit the filing or perform a drafting handoff in that same
-response. Any user-authorized correction MUST occur through the applicable
-drafting workflow as a separate subsequent step. A general instruction to make a
-document filing-ready MUST NOT be treated as approval of particular corrective
-language.
-
-The later drafting workflow MAY use exact replacement text actually supplied by
-the checker or source-supported drafting. It MUST NOT infer corrective
-sentences, placeholders, merits assertions, or legal conclusions from a
-structural finding or attacked location. After any material correction, a
-separate later Filing CI response MUST run the checker again against the current
-draft.
+The skill MUST treat declared input processing and result reporting as
+non-mutating. The wrapper MUST NOT modify any input, create directories, open an
+output root, rewrite checker bytes, or represent a correction as user-approved.
+It SHALL return one canonical output-relative report path and deterministic
+bytes for trusted-host append-immutable publication. A response with findings
+MUST stop after reporting; remediation remains a separate authorized drafting
+operation followed by a fresh Filing CI invocation against the new target bytes.
 
 #### Scenario: Checker identifies a correctable defect
 
-- **WHEN** a checker finding could be corrected in the draft
-- **THEN** the skill reports the attacked location and required correction to
-  the drafting loop without modifying the controlling filing
+- **WHEN** a finding could be corrected in the filing
+- **THEN** the Filing CI operation returns the attacked location and supported
+  correction information without changing any input byte
 
-#### Scenario: Filing CI response contains findings
+#### Scenario: Drafting operation changes the filing
 
-- **WHEN** Filing CI reports any checker finding
-- **THEN** that response stops after returning the finding and does not edit the
-  filing or begin the drafting handoff
-
-#### Scenario: User generally requests filing readiness
-
-- **WHEN** a broader user request asks to make the document filing-ready but
-  does not approve specific corrective language
-- **THEN** Filing CI does not treat that request as authority to draft or apply
-  a particular correction
-
-#### Scenario: Finding supplies no exact replacement text
-
-- **WHEN** a checker identifies a structural defect or location without
-  supplying exact replacement text
-- **THEN** the later drafting workflow does not infer sentences, placeholders,
-  merits assertions, or legal conclusions from the finding
-
-#### Scenario: Separate drafting workflow changes the filing
-
-- **WHEN** a user-authorized later drafting workflow materially corrects the
-  controlling filing
-- **THEN** Filing CI runs again in a separate subsequent response before its
-  gate can pass
+- **WHEN** a later authorized drafting operation produces a materially changed
+  filing artifact
+- **THEN** a new Filing CI invocation with new logical input hashes is required
+  before the filing gate can pass
 
 ### Requirement: Fail-closed filing gate
 
-The skill MUST keep the filing gate open when the checker is unavailable, a
-required input is unresolved, output cannot be reliably interpreted, a material
-change has made the result stale, or a hard finding remains unresolved. It SHALL
-describe a filing as passing Filing CI only after a current successful run for
-the controlling draft.
+The skill MUST keep the filing gate open when a packaged checker is unavailable,
+a declared input or required target is unresolved, deterministic output cannot
+be interpreted, trusted-host publication lacks a valid terminal receipt, target
+bytes changed after the run, or a hard finding remains unresolved. It SHALL
+report a Filing CI pass only for the exact target fingerprint and logical input
+manifest recorded by a successful terminal output run.
 
-#### Scenario: Hard failure remains unresolved
+#### Scenario: Hard or infrastructure failure remains unresolved
 
-- **WHEN** any hard checker failure remains open
-- **THEN** the skill refuses to describe the document as filing-ready
+- **WHEN** any hard finding, unavailable class, stale fingerprint, incomplete
+  run marker, or missing manifest remains
+- **THEN** the skill refuses to describe the target as passing Filing CI or
+  filing-ready
 
-#### Scenario: Current run succeeds
+#### Scenario: Current packaged run succeeds
 
-- **WHEN** the configured checker completes successfully for the current draft
-  with no unresolved hard findings
-- **THEN** the skill may report that Filing CI passed while preserving any
-  documented warnings and other independent filing gates
+- **WHEN** the packaged checker completes for the current target with no hard
+  findings and the trusted host records a valid terminal manifest
+- **THEN** the skill may report that Filing CI passed while preserving warnings
+  and every other independent filing gate
+
+### Requirement: Packaged checker resolution
+
+The `filing-ci` package SHALL ship a narrow deterministic wrapper with an
+explicit registry of checker IDs packaged inside the installed distribution. The
+wrapper MUST accept the declared `filing` input root, the required canonical
+relative filing target, the declared `authorities` input root, and validated
+in-memory configuration. It MUST dispatch only a registered packaged checker and
+MUST NOT accept or infer a command, executable path, flag list, source path,
+output path, repository instruction, or general-purpose checker.
+
+#### Scenario: Packaged checker supports the selected filing
+
+- **WHEN** the filing target identifies a document supported by a registered
+  packaged checker
+- **THEN** the wrapper runs that checker against only declared input data and
+  returns deterministic structured findings and report bytes
+
+#### Scenario: No packaged checker supports the operation
+
+- **WHEN** the checker ID is absent, unknown, unavailable, or incompatible with
+  the selected target
+- **THEN** the wrapper returns a stable unavailable result, runs no substitute,
+  and leaves the filing gate open
+
+### Requirement: Declared authority-role integration
+
+The skill MUST use only the declared `authorities` role when its packaged
+checker requires authority verification. It MUST NOT hardcode, discover, or
+substitute another authority root. Missing required authority material remains
+an unresolved input and leaves the filing gate open.
+
+#### Scenario: Checker requires verified authorities
+
+- **WHEN** the registered checker declares authority verification
+- **THEN** the wrapper reads only canonical relative material from the declared
+  `authorities` role and records the used logical input hashes
+
+#### Scenario: Required authority material is unavailable
+
+- **WHEN** the declared authority role lacks required verified material
+- **THEN** the wrapper returns an unresolved-input result and does not use
+  ambient or internet authority material

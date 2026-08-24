@@ -11,45 +11,22 @@ strategy decisions.
 
 ### Requirement: Independent review packet
 
-The adversarial review orchestrator SHALL start a fresh reviewer process or
-context with only the immutable canonical draft content, its version and
-fingerprint, one supported document family, the public review skill and
-checklist, and explicit user- or repository-approved sources. Every source MUST
-contain a stable identifier, role, immutable content, and content fingerprint.
-Paths and URLs MUST NOT appear in the packet. The orchestrator MUST resolve and
-verify every fingerprint before dispatch. Each draft and source fingerprint MUST
-use a `sha256` field containing the lowercase hexadecimal SHA-256 digest of the
-exact UTF-8 bytes of its `content` field.
+The adversarial-review processor SHALL accept the required canonical relative
+filing target within the declared `filing` role root and approved sources only
+from the declared `approved-sources` role root. It SHALL validate and embed the
+exact target and source bytes, stable identities, roles, and SHA-256
+fingerprints in a bounded packet before dispatch. Paths and URLs MUST NOT appear
+in the provider packet. The reviewer capability set MUST exclude filesystem,
+repository, browser, tool, storage, and conversation access. Missing,
+out-of-role, malformed, or fingerprint-mismatched content MUST produce a scoped
+gap before dispatch without an undeclared or internet-sourced substitute.
 
-The launcher MUST reject extra packet fields and MUST expose the complete
-dispatched payload and enabled capability set for verification. The reviewer
-capability set MUST exclude filesystem, repository, browser, tool, and
-conversation access. The trusted runtime MUST establish those restrictions
-through its executable request or process boundary; a caller assertion or
-Boolean flag MUST NOT establish independence. It MUST exclude drafting history,
-redlines, strategy or control conclusions, prior reviews, checker output, and
-inherited conversation or provider session state.
+#### Scenario: Declared source is missing
 
-#### Scenario: Fresh reviewer cannot be started
-
-- **WHEN** the runtime cannot create a fresh reviewer context with the bounded
-  packet and required empty reviewer capability set
-- **THEN** it reports `independent review unavailable` and does not simulate an
-  independent review in the drafting context
-
-#### Scenario: Caller asserts an unproved boundary
-
-- **WHEN** a custom command is accompanied only by a caller assertion that empty
-  capabilities exist
-- **THEN** the launcher reports `independent review unavailable` before
-  executing the command
-
-#### Scenario: Approved source is missing
-
-- **WHEN** an approved source entry lacks immutable content or its content does
-  not match its fingerprint
-- **THEN** validation reports a scoped source gap before dispatch and does not
-  browse for, invent, or silently approve a substitute source
+- **WHEN** an approved source target is absent from `approved-sources` or its
+  bytes do not match its fingerprint
+- **THEN** processing reports a scoped source gap before provider dispatch and
+  does not read another folder
 
 ### Requirement: Document-specific adversarial passes
 
@@ -194,35 +171,26 @@ remain present and render `None found`.
   is unapproved, a correction is partial, or a plaintiff choice is selected
 - **THEN** response validation fails before any completed report is written
 
-### Requirement: Immutable execution report
+### Requirement: Host-published immutable execution report
 
-The launcher SHALL resolve one existing version folder inside an explicit
-project boundary and SHALL write only one new report under that version's
-canonical `audits/` directory. It MUST verify that the audited artifact bytes
-match the packet draft fingerprint before provider dispatch. The report MUST be
-named `adversarial-filing-review-<UTC timestamp>-<run-id>.md` and MUST record
-the runtime type, explicit model, local run identity, document family, packet
-and artifact fingerprints, source identities, time, outcome, and stable failure
-class when present. It MUST NOT record credentials or provider-session
-continuation state. Existing reports and reviewed artifacts MUST remain
-byte-for-byte unchanged.
+The input-confined processor SHALL return one canonical output-relative report
+path, deterministic report bytes, and validated internet-source records. It MUST
+NOT accept a project, version, artifact, or output-root path; open an output
+folder; write a report; create a receipt; or mutate any declared input. Only the
+trusted host MAY publish the returned result append-immutably through
+`OutputRun`. The report SHALL preserve the runtime type, explicit model, local
+run identity, document family, packet and artifact fingerprints, source
+identities, time, outcome, and stable failure class without credentials or
+provider-session continuation state.
 
-#### Scenario: Completed review is recorded
+#### Scenario: Completed review is returned
 
 - **WHEN** the trusted runtime returns a valid categorized review
-- **THEN** the launcher exclusively creates one immutable report in the audited
-  version's `audits/` directory and returns its path and completed outcome
+- **THEN** the processor returns one complete report plan and only the trusted
+  host may publish it append-immutably
 
 #### Scenario: Review is unavailable
 
-- **WHEN** the trusted runtime fails before completing a valid review
-- **THEN** the launcher may exclusively create one honest unavailable report,
-  returns a nonzero result, and does not synthesize findings or a passing label
-
-#### Scenario: Report path collides or escapes
-
-- **WHEN** the report already exists, the version is outside the project
-  boundary, traversal is attempted, or the audits path resolves outside its
-  canonical directory
-- **THEN** the launcher fails closed, writes nowhere else, and preserves every
-  existing byte
+- **WHEN** the provider cannot complete a valid review
+- **THEN** the processor returns an honest bounded unavailable result without
+  writing, synthesizing findings, or labeling the review complete

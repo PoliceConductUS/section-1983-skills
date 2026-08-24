@@ -9,34 +9,20 @@ Purpose after archive.
 
 ### Requirement: Complete judge-overlay execution packet
 
-The system SHALL accept one exact, versioned judge-overlay execution packet
-containing the audited version and scope, approved sources, artifact paths and
-fingerprints, overlay and corpus identity/version/fingerprint/check date/
-validation, official court-conduct inputs and checked dates, neutral transfer
-cards, exact prohibited-inference checks, and the requested drafting-change,
-no-change, or fail-closed result.
+The packaged processor SHALL accept the required canonical relative filing
+target inside the declared `filing` role root and canonical relative artifacts
+inside the declared `judge-corpus` and `court-conduct` role roots. The packet
+SHALL contain the exact filing scope, source and artifact fingerprints, overlay
+and corpus identity/version/fingerprint/check date/validation, official conduct
+inputs and checked dates, neutral transfer cards, exact prohibited-inference
+checks, and the requested drafting-change, no-change, or fail-closed result.
 
-#### Scenario: Required overlay input is unavailable
+#### Scenario: Required declared input is unavailable
 
-- **WHEN** the packet marks the overlay, corpus, conduct input, or used transfer
-  card as missing, stale, failed, or unavailable
-- **THEN** the system records a stable fail-closed outcome with no drafting
+- **WHEN** the filing target, corpus, conduct input, or used transfer card is
+  missing, stale, failed, out of role, or unavailable
+- **THEN** the processor returns a stable fail-closed outcome with no drafting
   change and does not represent it as passing
-
-### Requirement: Immutable version-local receipt
-
-The system SHALL verify the designated artifacts and write exactly one new
-Markdown receipt under the audited version's canonical `audits/` directory. It
-MUST reject an unresolved or out-of-bound version, artifact traversal, an
-artifact under `audits/`, an escaping audits symlink, or an existing report
-path. It MUST NOT edit the filing, any designated artifact, or any prior report.
-
-#### Scenario: Completed overlay writes a receipt
-
-- **WHEN** a valid execution packet and matching immutable artifacts are
-  supplied
-- **THEN** the system creates one exclusive version-local receipt and every
-  preexisting file remains byte-identical
 
 ### Requirement: No-change execution is explicit
 
@@ -67,15 +53,32 @@ MUST produce a fail-closed result and no drafting change.
 
 ### Requirement: Receipt preserves execution provenance
 
-The receipt SHALL identify the audited version, artifact paths and expected and
-actual fingerprints, quality-control kind, UTC run time, run ID, scope, approved
-sources, overlay and corpus identities/versions/check dates/validation, official
-conduct inputs, used neutral transfer-card IDs, all anti-gaming checks, the
-normalized outcome, and every supported drafting change or bounded no-change
-reason. It SHALL preserve the repository's advisory-remediation contract.
+The receipt SHALL identify the selected filing target, declared artifact roles
+and paths, expected and actual fingerprints, quality-control kind, UTC run time,
+run ID, scope, approved sources, overlay and corpus identities/versions/check
+dates/validation, official conduct inputs, used neutral transfer-card IDs, all
+anti-gaming checks, the normalized outcome, and every supported drafting change
+or bounded no-change reason. Remediation SHALL remain advisory and separately
+authorized.
 
-#### Scenario: Reviewer inspects a degraded receipt
+#### Scenario: Reviewer inspects a no-change receipt
 
-- **WHEN** a reviewer opens a no-change receipt
+- **WHEN** a reviewer opens a host-published no-change receipt
 - **THEN** the reviewer can distinguish validated execution from nonexecution
   without relying on filed judge-specific prose
+
+### Requirement: Host-published immutable receipt
+
+The packaged processor SHALL verify the declared target and artifacts and return
+exactly one canonical output-relative Markdown receipt path with deterministic
+bytes. It MUST reject traversal, symlink escape, an artifact under the output
+namespace, or mismatched bytes. It MUST NOT accept or open an output root, write
+a receipt, create a run marker, or edit any input. Only the trusted host MAY
+publish the returned receipt append-immutably through `OutputRun`.
+
+#### Scenario: Completed overlay returns a receipt plan
+
+- **WHEN** a valid execution packet and matching immutable artifacts are
+  supplied
+- **THEN** the processor returns one receipt plan and every input remains
+  byte-identical

@@ -80,6 +80,7 @@ class SkillFolderGuidanceTest(unittest.TestCase):
             r"write to two\s+separate folders",
             r"write a new versioned ledger",
             r"write only its designated report",
+            r"external[-\s]+checker\s+handoff",
         )
         for pattern in forbidden:
             with self.subTest(pattern=pattern):

@@ -129,7 +129,7 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
             encoding="utf-8",
         )
 
-    def invocation(self):
+    def invocation(self, output=None):
         return validate_invocation(
             {
                 "version": 1,
@@ -138,7 +138,7 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
                     {"role": role, "root": str(self.inputs[role])}
                     for role in ROLES
                 ],
-                "output": {"root": str(self.output)},
+                "output": {"root": str(output or self.output)},
                 "runtime": {"max_seconds": 60, "max_input_bytes": 5_242_880},
                 "internet": "disabled",
                 "isolation": {
@@ -229,6 +229,7 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
                 skill_version="1.0.0",
             )
         self.assertEqual(captured.exception.code, "source-content-mismatch")
+        self.assertEqual(captured.exception.exit_class, "invalid")
         self.assertEqual(list(self.output.iterdir()), [])
 
         self.output.mkdir(exist_ok=True)
@@ -252,7 +253,59 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
                 skill_version="1.0.0",
             )
         self.assertEqual(captured.exception.code, "invalid-source-documentation")
+        self.assertEqual(captured.exception.exit_class, "invalid")
         self.assertEqual(list(self.output.iterdir()), [])
+
+    def test_missing_selected_yaml_is_unavailable_before_output(self):
+        (self.inputs["filing-index"] / "filing.SOURCE.yaml").unlink()
+
+        with self.assertRaises(FilingIntegrityError) as captured:
+            run_and_publish_filing_integrity(
+                invocation=self.invocation(),
+                selection=self.selection(),
+                run_id="filing-integrity-missing",
+                skill_version="1.0.0",
+            )
+
+        self.assertEqual(captured.exception.code, "source-documentation-unavailable")
+        self.assertEqual(captured.exception.exit_class, "unavailable")
+        self.assertEqual(list(self.output.iterdir()), [])
+
+    def test_outputs_are_deterministic_and_all_transient_files_are_output_local(self):
+        second_output = self.root / "second-output"
+        second_output.mkdir()
+
+        first = run_and_publish_filing_integrity(
+            invocation=self.invocation(),
+            selection=self.selection(),
+            run_id="filing-integrity-repeat",
+            skill_version="1.0.0",
+        )
+        second = run_and_publish_filing_integrity(
+            invocation=self.invocation(second_output),
+            selection=self.selection(),
+            run_id="filing-integrity-repeat",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(first, second)
+        for relative_path in (
+            "reports/filing-integrity.json",
+            "reports/filing-integrity.md",
+            "run-receipt.yaml",
+            ".skill-runs/filing-integrity-repeat/manifest.json",
+        ):
+            self.assertEqual(
+                (self.output / relative_path).read_bytes(),
+                (second_output / relative_path).read_bytes(),
+            )
+        for output in (self.output, second_output):
+            temp = output / "temp"
+            self.assertTrue(temp.is_dir())
+            self.assertEqual(
+                [path for path in temp.rglob("*") if path.is_file()],
+                [],
+            )
 
     def test_initial_mechanical_failures_are_stable_findings_not_legal_judgments(self):
         target = self.inputs["filing-source"] / "complaint.json"

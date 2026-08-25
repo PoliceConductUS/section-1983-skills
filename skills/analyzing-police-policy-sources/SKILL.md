@@ -47,15 +47,15 @@ analysis.
 
 Resolve every selected `SOURCE.yaml` and ordinary artifact inside
 `policy-source`. Require the documented relative path, SHA-256, source identity,
-classification, adoption relationship, review approval, and effective-date
-state to match before semantic work.
+classification, adoption relationship, review approval, and effective-date state
+to match before semantic work.
 
 Only `adopted_policy` with `documented` adoption and separate
 `approved_for_analysis` review may generate a department-policy requirement.
-Statutes, regulations, collective-bargaining materials, accreditation
-standards, model policies, training materials, forms, guidance, and comparison
-sources remain distinct. They may identify a bounded gap or comparison question
-but never become department policy without documented adoption.
+Statutes, regulations, collective-bargaining materials, accreditation standards,
+model policies, training materials, forms, guidance, and comparison sources
+remain distinct. They may identify a bounded gap or comparison question but
+never become department policy without documented adoption.
 
 Never apply a later policy retroactively. Preserve the source's effective date
 or interval. If the effective date, supersession history, or applicable version
@@ -79,8 +79,8 @@ One record contains one independently testable unit. Preserve:
 A condition never becomes an unconditional duty. A permission never becomes a
 mandate. Discretion never becomes a duty or prohibition. An exception stays
 attached to the same operative unit. If a referenced definition, exception,
-dependency, page, or cross-reference cannot be resolved, return a gap instead
-of completing the requirement by inference.
+dependency, page, or cross-reference cannot be resolved, return a gap instead of
+completing the requirement by inference.
 
 ## Return artifacts without assessing conduct
 
@@ -92,9 +92,9 @@ Return deterministic output-relative bytes for:
 - `policy-analysis-validation.json`.
 
 The helper returns an artifact plan only and never opens an input or output
-root. Only the trusted host publishes the plan and its terminal run receipt.
-The caller may supply the resulting ordinary folder as a later read-only input
-to a separately authorized policy-assessment invocation.
+root. Only the trusted host publishes the plan and its terminal run receipt. The
+caller may supply the resulting ordinary folder as a later read-only input to a
+separately authorized policy-assessment invocation.
 
 Do not decide whether an actor complied with a policy. Do not decide
 constitutional or Monell liability, negligence, admissibility, governing legal

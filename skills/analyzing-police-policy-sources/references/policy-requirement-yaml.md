@@ -8,8 +8,8 @@ action; exceptions; definitions; dependencies; cross-references; documentation
 or review steps; gaps; and operative-marker booleans.
 
 Requirement type is exactly `mandatory`, `prohibited`, `permitted`, or
-`discretionary`. A true marker requires its corresponding structured content.
-A false marker prohibits invented corresponding content. A discretionary marker
+`discretionary`. A true marker requires its corresponding structured content. A
+false marker prohibits invented corresponding content. A discretionary marker
 requires the discretionary type. The effective start cannot precede the
 documented policy effective date.
 
@@ -18,6 +18,6 @@ documented policy effective date.
 `missing_page`, `illegible_text`, `unresolved_history`, `uncertain_adoption`,
 `ambiguous_cross_reference`, and `uncertain_effective_date`.
 
-`policy-analysis-validation.json` records the deterministic selected source
-IDs and hashes, requirement IDs, gap IDs, and `valid` state. None of these files
+`policy-analysis-validation.json` records the deterministic selected source IDs
+and hashes, requirement IDs, gap IDs, and `valid` state. None of these files
 records compliance or a legal conclusion.

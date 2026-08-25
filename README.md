@@ -62,7 +62,7 @@ work. `temp/` is not a durable artifact destination.
 | `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                            |
 | `building-judicial-reasoning-profiles`            | Generic builder for evidence-bounded Judicial Reasoning Profile files with domain YAML provenance from approved public sources.                                            |
 | `collecting-police-policy-sources`                | Bounded authorized collection of ordinary police-policy source files with adjacent YAML provenance and explicit coverage gaps.                                             |
-| `analyzing-police-policy-sources`                 | Offline decomposition of reviewed adopted-policy files into source-bounded atomic requirement and gap YAML.                                                               |
+| `analyzing-police-policy-sources`                 | Offline decomposition of reviewed adopted-policy files into source-bounded atomic requirement and gap YAML.                                                                |
 | `judicial-reviewer`                               | Findings-only review of comprehension, procedure, authority presentation, record traceability, and gaps under a validated judicial profile.                                |
 | `opposing-counsel`                                | Findings-only source-backed opposing-counsel simulation under a validated defense-counsel profile without impersonation or disposition.                                    |
 | `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
@@ -117,8 +117,8 @@ registry, graph, or case-management runtime is required.
    leave package, or other filing that should consume the current docket's
    actual adversary positions and judicial treatment.
 10. Add `building-defense-counsel-overlays` when an actual-adversary review
-   should consume validated professional history for the effective defense team.
-   Keep that material out of the blind common-attack review.
+    should consume validated professional history for the effective defense
+    team. Keep that material out of the blind common-attack review.
 11. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
     specialization. Those planners hand amendment work back to the applicable
     complaint skills.
@@ -133,10 +133,10 @@ registry, graph, or case-management runtime is required.
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-13. Run `adversarial-filing-review` in a fresh clean-room context after
+14. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-14. Run `filing-ci` after the applicable prose and authority audits, after each
+15. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.

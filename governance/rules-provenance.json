@@ -75,6 +75,12 @@
       "rationale": "Decomposes caller-approved policy sources without supplying procedural rules or deciding compliance."
     },
     {
+      "name": "assessing-police-policy-compliance",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Assesses caller-approved policy requirements against source-documented case records without supplying procedural rules or deciding legal liability."
+    },
+    {
       "name": "building-defense-counsel-overlays",
       "rules_mode": "runtime-sourced",
       "reviewed_on": "2026-08-22",

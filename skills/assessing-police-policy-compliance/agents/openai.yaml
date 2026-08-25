@@ -1,0 +1,7 @@
+interface:
+  display_name: "Assess Police-Policy Compliance"
+  short_description: "Assess policy requirements against declared case folders"
+  default_prompt:
+    "Use $assessing-police-policy-compliance to assess an approved policy
+    catalog against source-documented case folders without deciding legal
+    liability."

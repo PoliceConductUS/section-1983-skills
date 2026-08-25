@@ -1,6 +1,6 @@
 {
   "scope": {
-    "start_date": "2025-01-01",
+    "start_date": "2024-01-01",
     "end_date": "2025-12-31",
     "selected_requirement_ids": ["req-report-force"],
     "selected_actor_ids": ["actor-alpha", "actor-bravo"],

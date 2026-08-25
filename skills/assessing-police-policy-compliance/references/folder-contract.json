@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skill": "assessing-police-policy-compliance",
+  "input_roles": [
+    "policy-catalog",
+    "actor",
+    "event",
+    "phase",
+    "case-record",
+    "assessment-scope"
+  ],
+  "target": { "policy": "none", "roles": [] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

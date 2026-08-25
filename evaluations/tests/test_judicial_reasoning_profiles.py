@@ -6,6 +6,16 @@ import unittest
 import uuid
 from pathlib import Path
 
+from scripts.immutable_folder_package import (
+    load_folder_package,
+    publish_folder_package,
+)
+from scripts.validate_folder_invocation import (
+    InvocationError,
+    build_input_manifest,
+    validate_installed_skill_invocation,
+)
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SKILL = ROOT / "skills" / "building-judicial-reasoning-profiles"
@@ -49,7 +59,7 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
                     "verified-authorities",
                 ],
                 "target": {"policy": "none", "roles": []},
-                "internet": "authorized",
+                "internet": ["authorized", "disabled"],
                 "output": {"mode": "append-immutable"},
             },
         )
@@ -242,6 +252,204 @@ class JudicialReasoningProfileValidatorTest(unittest.TestCase):
                 max_bytes=1_048_576,
             )
             self.assertEqual(value["profile_id"], "fictional-judge-example-profile")
+
+
+class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
+    @staticmethod
+    def _envelope(root, *, output, approved_sources, internet):
+        return {
+            "version": 1,
+            "skill": "building-judicial-reasoning-profiles",
+            "inputs": [
+                {"role": "judge-identity", "root": str(root / "judge-identity")},
+                {"role": "court-scope", "root": str(root / "court-scope")},
+                {"role": "approved-sources", "root": str(approved_sources)},
+                {
+                    "role": "verified-authorities",
+                    "root": str(root / "verified-authorities"),
+                },
+            ],
+            "output": {"root": str(output)},
+            "runtime": {"max_seconds": 60, "max_input_bytes": 1_048_576},
+            "internet": internet,
+            "isolation": {
+                "inputs": "read-only",
+                "output": "read-write",
+                "undeclared": "none",
+            },
+        }
+
+    @staticmethod
+    def _receipt_member():
+        return {
+            "id": "validation-receipt",
+            "role": "receipt",
+            "classification": "validation-receipt",
+            "path": "validation-receipt.json",
+            "media_type": "application/json",
+            "contents": '{"status":"passed"}\n',
+        }
+
+    @staticmethod
+    def _validation():
+        return {
+            "status": "passed",
+            "validator": "judicial-profile-validator",
+            "version": "1",
+            "validated_at": "2026-08-25T12:00:00Z",
+            "receipt_member_id": "validation-receipt",
+        }
+
+    def test_acquisition_and_later_compilation_publish_separate_reloadable_packages(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in (
+                "judge-identity",
+                "court-scope",
+                "approved-sources",
+                "verified-authorities",
+                "acquisition-output",
+                "compilation-output",
+            ):
+                (root / name).mkdir()
+            (root / "judge-identity" / "identity.json").write_text(
+                '{"judge":"Fictional Judge"}\n'
+            )
+            (root / "court-scope" / "scope.json").write_text(
+                '{"court":"fictional-court"}\n'
+            )
+
+            acquisition = validate_installed_skill_invocation(
+                self._envelope(
+                    root,
+                    output=root / "acquisition-output",
+                    approved_sources=root / "approved-sources",
+                    internet="authorized",
+                ),
+                SKILL,
+            )
+            acquisition_inputs = build_input_manifest(acquisition)
+            publish_folder_package(
+                acquisition,
+                package_kind="source-package",
+                package_id="fictional-judge-source-package",
+                created_at="2026-08-25T12:00:00Z",
+                freshness={
+                    "checked_through": "2026-08-25",
+                    "retrieved_on": "2026-08-25",
+                },
+                sources=[],
+                members=[
+                    {
+                        "id": "public-order",
+                        "role": "source",
+                        "classification": "source",
+                        "path": "sources/public-order.txt",
+                        "media_type": "text/plain",
+                        "contents": "fictional public order\n",
+                    },
+                    self._receipt_member(),
+                ],
+                validation=self._validation(),
+                operation="acquisition",
+                run_id="judicial-acquisition-run",
+                skill_version="1",
+            )
+            acquired = load_folder_package(
+                root / "acquisition-output",
+                accepted_kinds={"source-package"},
+                max_bytes=1_048_576,
+            )
+            acquired_snapshot = {
+                path.relative_to(acquired.root).as_posix(): path.read_bytes()
+                for path in acquired.root.rglob("*")
+                if path.is_file()
+            }
+
+            compilation = validate_installed_skill_invocation(
+                self._envelope(
+                    root,
+                    output=root / "compilation-output",
+                    approved_sources=root / "acquisition-output",
+                    internet="disabled",
+                ),
+                SKILL,
+            )
+            profile_bytes = (FIXTURES / "complete-profile.json").read_bytes()
+            JudicialReasoningProfileValidatorTest.module.validate_profile_bytes(
+                profile_bytes, max_bytes=1_048_576
+            )
+            publish_folder_package(
+                compilation,
+                package_kind="judicial-profile",
+                package_id="fictional-judge-profile-package",
+                created_at="2026-08-25T12:00:00Z",
+                freshness={"checked_through": "2026-08-25", "retrieved_on": None},
+                sources=[
+                    {
+                        "role": "approved-sources",
+                        "source_id": acquired.package_id,
+                        "fingerprint": acquired.fingerprint,
+                    }
+                ],
+                members=[
+                    {
+                        "id": "judicial-profile",
+                        "role": "primary",
+                        "classification": "profile",
+                        "path": "judicial-profile.json",
+                        "media_type": "application/json",
+                        "contents": profile_bytes,
+                    },
+                    self._receipt_member(),
+                ],
+                validation=self._validation(),
+                operation="compilation",
+                run_id="judicial-compilation-run",
+                skill_version="1",
+            )
+            compiled = load_folder_package(
+                root / "compilation-output",
+                accepted_kinds={"judicial-profile"},
+                max_bytes=1_048_576,
+            )
+
+            self.assertEqual(acquired.package_kind, "source-package")
+            self.assertEqual(compiled.package_kind, "judicial-profile")
+            self.assertEqual(compiled.sources[0]["fingerprint"], acquired.fingerprint)
+            self.assertEqual(build_input_manifest(acquisition), acquisition_inputs)
+            self.assertEqual(
+                {
+                    path.relative_to(acquired.root).as_posix(): path.read_bytes()
+                    for path in acquired.root.rglob("*")
+                    if path.is_file()
+                },
+                acquired_snapshot,
+            )
+            self.assertFalse((root / "acquisition-output" / "packages").exists())
+            self.assertFalse((root / "compilation-output" / "packages").exists())
+
+    def test_current_output_cannot_be_same_run_approved_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in (
+                "judge-identity",
+                "court-scope",
+                "verified-authorities",
+                "output",
+            ):
+                (root / name).mkdir()
+            with self.assertRaises(InvocationError) as captured:
+                validate_installed_skill_invocation(
+                    self._envelope(
+                        root,
+                        output=root / "output",
+                        approved_sources=root / "output",
+                        internet="disabled",
+                    ),
+                    SKILL,
+                )
+            self.assertEqual(captured.exception.code, "overlapping-input-output")
 
 
 if __name__ == "__main__":

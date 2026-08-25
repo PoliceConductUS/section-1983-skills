@@ -8,7 +8,7 @@ The public skill package contains:
 - `agents/openai.yaml` for generic discovery;
 - `references/folder-contract.json` with ordered roles `judge-identity`,
   `court-scope`, `approved-sources`, and `verified-authorities`, no target, and
-  authorized internet policy;
+  the exact allowed internet policies for acquisition and compilation;
 - `references/judicial-reasoning-profile.schema.json` for the domain artifact;
 - `references/immutable-folder-package.md` for the common envelope;
 - fictional complete, thin, adoption-only, and hostile-profile fixtures;
@@ -34,6 +34,13 @@ Internet must be disabled. All inputs are recursively read-only and validated
 before use. The skill returns proposed domain members for trusted-host
 publication as a complete `judicial-profile` package beneath the explicit fresh
 output folder. No input is mutated or reread after validation.
+
+Because both operations belong to one installed skill, its install-local folder
+contract declares the exact allowed internet-policy set in operation order:
+`authorized` for acquisition and `disabled` for compilation. Each invocation
+still declares exactly one policy, and trusted-host validation rejects a policy
+outside that set before resolving inputs. Existing single-policy contracts keep
+their exact scalar policy.
 
 ## Judicial profile domain object
 

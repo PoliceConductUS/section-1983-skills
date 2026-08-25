@@ -59,7 +59,10 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
                     "verified-authorities",
                 ],
                 "target": {"policy": "none", "roles": []},
-                "internet": ["authorized", "disabled"],
+                "internet": {
+                    "acquisition": "authorized",
+                    "compilation": "disabled",
+                },
                 "output": {"mode": "append-immutable"},
             },
         )
@@ -292,10 +295,11 @@ class JudicialReasoningProfileValidatorTest(unittest.TestCase):
 
 class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
     @staticmethod
-    def _envelope(root, *, output, approved_sources, internet):
+    def _envelope(root, *, output, approved_sources, operation, internet):
         return {
             "version": 1,
             "skill": "building-judicial-reasoning-profiles",
+            "operation": operation,
             "inputs": [
                 {"role": "judge-identity", "root": str(root / "judge-identity")},
                 {"role": "court-scope", "root": str(root / "court-scope")},
@@ -360,6 +364,7 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
                     root,
                     output=root / "acquisition-output",
                     approved_sources=root / "approved-sources",
+                    operation="acquisition",
                     internet="authorized",
                 ),
                 SKILL,
@@ -407,6 +412,7 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
                     root,
                     output=root / "compilation-output",
                     approved_sources=root / "acquisition-output",
+                    operation="compilation",
                     internet="disabled",
                 ),
                 SKILL,
@@ -482,11 +488,36 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
                         root,
                         output=root / "output",
                         approved_sources=root / "output",
+                        operation="compilation",
                         internet="disabled",
                     ),
                     SKILL,
                 )
             self.assertEqual(captured.exception.code, "overlapping-input-output")
+
+    def test_operation_policy_pairing_fails_before_input_resolution(self):
+        missing = Path("/does-not-exist")
+        cases = (
+            ("acquisition", "disabled"),
+            ("compilation", "authorized"),
+            ("unknown-operation", "disabled"),
+        )
+        for operation, internet in cases:
+            envelope = self._envelope(
+                missing,
+                output=missing / "output",
+                approved_sources=missing / "approved-sources",
+                operation=operation,
+                internet=internet,
+            )
+            with self.subTest(operation=operation), self.assertRaises(
+                InvocationError
+            ) as captured:
+                validate_installed_skill_invocation(envelope, SKILL)
+            self.assertIn(
+                captured.exception.code,
+                {"contract-internet", "contract-operation"},
+            )
 
 
 if __name__ == "__main__":

@@ -36,11 +36,12 @@ publication as a complete `judicial-profile` package beneath the explicit fresh
 output folder. No input is mutated or reread after validation.
 
 Because both operations belong to one installed skill, its install-local folder
-contract declares the exact allowed internet-policy set in operation order:
-`authorized` for acquisition and `disabled` for compilation. Each invocation
-still declares exactly one policy, and trusted-host validation rejects a policy
-outside that set before resolving inputs. Existing single-policy contracts keep
-their exact scalar policy.
+contract maps each operation name to its exact internet policy: `authorized`
+for acquisition and `disabled` for compilation. Each invocation declares one
+operation and one policy, and trusted-host validation rejects a missing or
+unknown operation and every wrong operation-policy pair before resolving
+inputs. Existing single-operation contracts keep their exact scalar policy and
+do not add an operation field.
 
 ## Judicial profile domain object
 

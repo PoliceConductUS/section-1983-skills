@@ -36,13 +36,19 @@ class FilingPacketTest(unittest.TestCase):
         member_path_pattern = re.compile(
             schema["$defs"]["document"]["properties"]["path"]["pattern"]
         )
-        for path in ("motion.md", "exhibits/exhibit-a.pdf"):
+        for path in (
+            "motion.md",
+            "exhibits/exhibit-a.pdf",
+            "exhibits/line\nbreak.txt",
+        ):
             self.assertIsNotNone(member_path_pattern.fullmatch(path), path)
         for path in (
             "filing-packet.json",
             ".skill-runs/foreign/manifest.json",
             "filing-packets/nested/document.md",
             "/absolute.md",
+            ".",
+            "./inside.md",
             "../outside.md",
             "inside/../outside.md",
             "inside//document.md",
@@ -102,6 +108,7 @@ class FilingPacketTest(unittest.TestCase):
                 "missing-member": lambda value: value["documents"][1].update(path="missing.txt"),
                 "wrong-hash": lambda value: value["documents"][1].update(sha256="f" * 64),
                 "traversal": lambda value: value["documents"][1].update(path="../outside.txt"),
+                "dot": lambda value: value["documents"][1].update(path="."),
                 "manifest-member": lambda value: value["documents"][1].update(path="filing-packet.json"),
                 "reserved-run": lambda value: value["documents"][1].update(path=".skill-runs/member.txt"),
                 "reserved-packets": lambda value: value["documents"][1].update(path="filing-packets/member.txt"),

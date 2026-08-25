@@ -38,10 +38,11 @@ npx skills add . --list
 ## 1. Select input and output folders
 
 Select existing folders for the stable logical roles `record` and `authorities`.
-Each role is a recursive read-only input. Select exactly one explicit output
-folder, kept separate from both inputs. The logical roles remain stable for this
-operation, but the caller can select and configure different folder names and
-absolute locations.
+Each role is a recursive read-only input. Select exactly one explicit absolute
+output folder, kept separate from both inputs. If the output folder path is
+missing or was not supplied, ask the caller for it and stop until the caller
+supplies it. The logical roles remain stable for this operation, but the caller
+can select and configure different folder names and absolute locations.
 
 The `record` role contains the source material for the selected task. The
 `authorities` role contains authorities whose identity, text, status, later
@@ -153,6 +154,14 @@ writes only through the explicit output folder, denial of undeclared filesystem
 paths, bounded runtime, and the declared network policy. This repository does
 not provide a universal skill runner.
 
+The trusted host reserves `<output-folder>/temp/` as the invocation's only
+temporary workspace. It configures `cwd` to `<output-folder>/temp/`, `TMPDIR` to
+`<output-folder>/temp/`, `TMP` to `<output-folder>/temp/`, and `TEMP` to
+`<output-folder>/temp/`. Staging, intermediate files, scratch files, and other
+semantic-work temporary files remain beneath that folder. The host does not use
+a system temporary directory, repository worktree, input folder, ambient current
+directory, or undeclared path for invocation work.
+
 If the host cannot enforce read-only inputs, output-only writes, parent and
 sibling denial, ambient repository denial, and disabled or authorized internet,
 stop before it reads the inputs. Prompt text and the invocation declaration are
@@ -175,6 +184,10 @@ UTF-8 JSON. Confirm `target.role` and `target.path` equal the invocation,
 `metadata/logical-input-manifest.json`, the persisted logical input manifest.
 Verify each artifact's SHA-256 hash and byte size against its artifact record in
 the terminal manifest.
+
+Confirm transient files, if any remain, are beneath `__OUTPUT_ROOT__/temp/`.
+Durable artifacts must not use `temp/`; that namespace is reserved for
+trusted-host invocation work.
 
 A run is successful only when `.skill-runs/<run-id>/manifest.json` is valid and
 `.skill-runs/<run-id>/incomplete.json` is absent. A missing or invalid terminal

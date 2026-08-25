@@ -12,7 +12,7 @@
 
 ## 3. GREEN
 
-- [ ] 3.1 Update the canonical first-hour guide and current durable spec.
+- [x] 3.1 Update the canonical first-hour guide and current durable spec.
 
 ## 4. Verification
 

@@ -7,15 +7,15 @@
 
 ## 2. RED
 
-- [ ] 2.1 Test the two public skill contracts and fixed role definitions.
-- [ ] 2.2 Test domain profile validation, findings-only output, disposition
+- [x] 2.1 Test the two public skill contracts and fixed role definitions.
+- [x] 2.2 Test domain profile validation, findings-only output, disposition
       rejection, profile-data inertness, and folder/temp boundaries.
 
 ## 3. GREEN
 
-- [ ] 3.1 Implement the opposing-counsel role and public skill.
-- [ ] 3.2 Implement the judicial-reviewer role and public skill.
-- [ ] 3.3 Preserve the adversarial-filing-reviewer identity and shared launcher
+- [x] 3.1 Implement the opposing-counsel role and public skill.
+- [x] 3.2 Implement the judicial-reviewer role and public skill.
+- [x] 3.3 Preserve the adversarial-filing-reviewer identity and shared launcher
       boundary.
 
 ## 4. Verification

@@ -196,6 +196,12 @@ class ProfileConditionedRoleTest(unittest.TestCase):
             snapshot_path="counsel-research-snapshot.json",
         )
         approved = self.approved_source(invocation, "SRC-MOTION-CURRENT")
+        input_before = {
+            path.relative_to(self.root).as_posix(): path.read_bytes()
+            for root in (self.counsel_profile, self.filing, self.sources)
+            for path in root.rglob("*")
+            if path.is_file()
+        }
         adapter = FakeAdapter(
             {
                 "output_kind": "opposing-counsel-findings",
@@ -233,8 +239,38 @@ class ProfileConditionedRoleTest(unittest.TestCase):
         output = json.loads(result.artifacts[0].contents)
         self.assertEqual(output["role"], "opposing-counsel")
         self.assertEqual(output["findings"][0]["category"], "source-backed-attack")
+        self.assertEqual(
+            output["approved_sources"],
+            [
+                {
+                    "source_id": "SRC-MOTION-CURRENT",
+                    "checked_through": "2026-08-25",
+                    "sha256": approved[0].sha256,
+                }
+            ],
+        )
         self.assertEqual(binding.definition.internet, "disabled")
         self.assertEqual(binding.definition.target_mutation, "forbidden")
+        self.assertEqual(len(adapter.calls), 1)
+        workspace = Path(adapter.calls[0]["cwd"])
+        self.assertEqual(workspace.parent, self.counsel_output.resolve() / "temp")
+        self.assertEqual(
+            adapter.calls[0]["environment"],
+            {"TMPDIR": str(workspace), "TMP": str(workspace), "TEMP": str(workspace)},
+        )
+        self.assertEqual(adapter.calls[0]["visible_entries"], ())
+        self.assertEqual(
+            input_before,
+            {
+                path.relative_to(self.root).as_posix(): path.read_bytes()
+                for root in (self.counsel_profile, self.filing, self.sources)
+                for path in root.rglob("*")
+                if path.is_file()
+            },
+        )
+        self.assertEqual(
+            [path for path in self.counsel_output.rglob("*") if path.is_file()], []
+        )
 
     def test_judicial_reviewer_uses_validated_profile_and_bounded_categories(self):
         invocation = self.invocation(self.judicial_profile, self.judicial_output)

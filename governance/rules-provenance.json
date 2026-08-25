@@ -82,7 +82,27 @@
       "name": "building-judicial-reasoning-profiles",
       "rules_mode": "rules-independent",
       "reviewed_on": "2026-08-25",
-      "rationale": "Classifies and packages caller-approved public source material without supplying current procedural rule content."
+      "rationale": "Classifies and compiles caller-approved public source material without supplying current procedural rule content."
+    },
+    {
+      "name": "judicial-reviewer",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Returns bounded findings from caller-approved profile, filing, and source files supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "opposing-counsel",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Returns bounded simulated attacks from caller-approved counsel profile, filing, and source files supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
     },
     {
       "name": "drafting-false-arrest-complaints",

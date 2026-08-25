@@ -50,6 +50,18 @@ CONTRACTS = {
         [],
         {"acquisition": "authorized", "compilation": "disabled"},
     ),
+    "judicial-reviewer": (
+        ["profile", "filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
+    "opposing-counsel": (
+        ["profile", "filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
     "building-litigation-alignment-overlays": (
         ["docket-snapshot", "filing"],
         "required",

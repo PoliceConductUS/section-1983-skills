@@ -430,6 +430,66 @@ class AssessingPolicePolicyComplianceTest(unittest.TestCase):
             )
         self.assertEqual(captured.exception.code, "stale-catalog-validation")
 
+    def test_assessment_scope_rejects_undeclared_source_selection(self):
+        records = load_module()
+        data = fixture()
+        narrowed_scope = copy.deepcopy(data["scope"])
+        narrowed_scope["selected_source_paths"].remove(
+            "evidence/src-contrary.SOURCE.yaml"
+        )
+        with self.assertRaises(records.PolicyAssessmentError) as captured:
+            records.build_assessment_plan(
+                catalog(),
+                data["actors"],
+                data["events"],
+                data["phases"],
+                evidence_sources(),
+                assessments(),
+                [],
+                narrowed_scope,
+                fingerprints(),
+            )
+        self.assertEqual(captured.exception.code, "undeclared-source-selection")
+
+    def test_input_fingerprint_mapping_is_exact_but_order_independent(self):
+        records = load_module()
+        data = fixture()
+        reordered = dict(reversed(list(fingerprints().items())))
+        proposed = assessments()
+        for item in proposed:
+            item["input_fingerprints"] = reordered
+        plan = records.build_assessment_plan(
+            catalog(),
+            data["actors"],
+            data["events"],
+            data["phases"],
+            evidence_sources(),
+            proposed,
+            [],
+            data["scope"],
+            reordered,
+        )
+        validation = json.loads(
+            artifact(plan, "policy-assessment-validation.json")["bytes"]
+        )
+        self.assertEqual(list(validation["input_fingerprints"]), sorted(ROLES))
+
+        missing = dict(reordered)
+        missing.pop("actor")
+        with self.assertRaises(records.PolicyAssessmentError) as captured:
+            records.build_assessment_plan(
+                catalog(),
+                data["actors"],
+                data["events"],
+                data["phases"],
+                evidence_sources(),
+                assessments(),
+                [],
+                data["scope"],
+                missing,
+            )
+        self.assertEqual(captured.exception.code, "invalid-input-fingerprint")
+
     def test_conflicts_and_missing_material_remain_explicit(self):
         records = load_module()
         data = fixture()

@@ -13,6 +13,10 @@
       "phase-five",
       "phase-six",
       "phase-seven"
+    ],
+    "selected_source_paths": [
+      "evidence/src-support.SOURCE.yaml",
+      "evidence/src-contrary.SOURCE.yaml"
     ]
   },
   "actors": [

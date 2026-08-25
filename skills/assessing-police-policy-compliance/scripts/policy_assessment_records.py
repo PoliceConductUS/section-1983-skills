@@ -85,6 +85,7 @@ _SCOPE_FIELDS = {
     "selected_actor_ids",
     "selected_event_ids",
     "selected_phase_ids",
+    "selected_source_paths",
 }
 _ASSESSMENT_FIELDS = {
     "assessment_id",
@@ -402,13 +403,14 @@ def _selected_source(value):
     return {
         "source_id": source_id,
         "input_role": role,
+        "source_documentation_path": documentation_path,
         "source_path": artifact_path,
         "source_sha256": source_hash,
     }
 
 
 def _fingerprints(value, code):
-    if type(value) is not dict or tuple(value) != _ROLES:
+    if type(value) is not dict or set(value) != set(_ROLES):
         _fail(code)
     return {role: _sha256(value[role], code) for role in _ROLES}
 
@@ -434,6 +436,10 @@ def _scope(value):
         "selected_phase_ids": _strings(
             record["selected_phase_ids"], "invalid-scope", identifiers=True
         ),
+        "selected_source_paths": [
+            _relative(path, "invalid-scope")
+            for path in _strings(record["selected_source_paths"], "invalid-scope")
+        ],
     }
 
 
@@ -610,6 +616,10 @@ def build_assessment_plan(
         "source_id",
         "duplicate-source",
     )
+    if set(scope_record["selected_source_paths"]) != {
+        source["source_documentation_path"] for source in source_map.values()
+    }:
+        _fail("undeclared-source-selection")
     for selected, available, code in (
         (scope_record["selected_requirement_ids"], catalog_record["requirements"], "unresolved-requirement"),
         (scope_record["selected_actor_ids"], actor_map, "unresolved-actor"),

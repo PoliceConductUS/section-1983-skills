@@ -1,0 +1,3 @@
+{
+  "capabilities": ["emit-disposition", "write-target"]
+}

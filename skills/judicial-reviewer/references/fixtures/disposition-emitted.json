@@ -1,0 +1,15 @@
+{
+  "output_kind": "judicial-review-findings",
+  "findings": [
+    {
+      "id": "finding-1",
+      "category": "comprehension",
+      "attacked_quote": "Bounded allegation.",
+      "location": "motion.md, paragraph 1",
+      "source_ids": ["opinion-source"],
+      "analysis": "The selected source identifies a bounded presentation gap.",
+      "limitation": "This is simulated findings work, not a disposition."
+    }
+  ],
+  "disposition-emitted": "dismiss"
+}

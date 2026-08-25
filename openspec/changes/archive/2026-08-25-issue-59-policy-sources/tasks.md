@@ -27,7 +27,7 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Run focused tests, full validation, and whole-story review.
-- [ ] 5.2 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 5.1 Run focused tests, full validation, and whole-story review.
+- [x] 5.2 Record verification and retrospective evidence and archive OpenSpec.
 - [ ] 5.3 Verify exact remote head/checks and mark the PR ready while leaving
       the PR and Issue #59 open.

@@ -10,7 +10,12 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from scripts.validate_folder_invocation import ValidatedInvocation
+from scripts.skill_output_writer import OutputError, OutputRun
+from scripts.validate_folder_invocation import (
+    InvocationError,
+    ValidatedInvocation,
+    build_input_manifest,
+)
 
 
 _ROLES = ("filing-source", "verified-authority")
@@ -51,11 +56,17 @@ _AUTHORITY_FIELDS = frozenset(
     }
 )
 _MAX_DOCUMENTATION_BYTES = 65_536
+_RUN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
+_CITE_TAG = re.compile(r"<cite\b(?P<attributes>[^>]*)>(?P<text>.*?)</cite>", re.DOTALL)
+_CITE_ATTRIBUTE = re.compile(r'([a-z][a-z0-9_-]*)="([^"]+)"')
 _UNAVAILABLE_CODES = frozenset(
     {
         "authority-content-unavailable",
         "authority-documentation-unavailable",
         "corpus-documentation-unavailable",
+        "eyecite-unavailable",
+        "output-publication-failed",
     }
 )
 
@@ -114,6 +125,13 @@ class AuthorityCorpus:
     authorities: tuple[AuthorityRecord, ...]
     yaml_path: str
     yaml_sha256: str
+
+
+@dataclass(frozen=True)
+class AuthorityAuditResult:
+    status: str
+    exit_class: str
+    findings: tuple[dict[str, Any], ...]
 
 
 def _scalar(raw: str, code: str) -> str:
@@ -400,4 +418,334 @@ def load_verified_authority_corpus(
         authorities=authorities,
         yaml_path=corpus_documentation_path,
         yaml_sha256=hashlib.sha256(corpus_bytes).hexdigest(),
+    )
+
+
+def extract_eyecite_candidates(text: str) -> tuple[dict[str, Any], ...]:
+    """Extract citation candidates and antecedents without verifying them."""
+
+    if not isinstance(text, str):
+        _fail("invalid-filing-content")
+    try:
+        from eyecite import get_citations, resolve_citations
+    except (ImportError, OSError):
+        _fail("eyecite-unavailable")
+    try:
+        citations = list(get_citations(text))
+        resources = resolve_citations(citations)
+    except Exception:
+        _fail("eyecite-unavailable")
+    resolved: dict[int, str] = {}
+    for resource, resource_citations in resources.items():
+        canonical = resource.citation.matched_text()
+        for citation in resource_citations:
+            resolved[id(citation)] = canonical
+    kinds = {
+        "FullCaseCitation": "full",
+        "ShortCaseCitation": "short",
+        "IdCitation": "id",
+        "SupraCitation": "supra",
+    }
+    candidates = []
+    for index, citation in enumerate(citations):
+        class_name = type(citation).__name__
+        if class_name not in kinds:
+            continue
+        start, end = citation.span()
+        candidates.append(
+            {
+                "candidate_id": f"citation-{index + 1:04d}",
+                "kind": kinds[class_name],
+                "matched_text": citation.matched_text(),
+                "resolved_citation": resolved.get(id(citation)),
+                "span": {"start": start, "end": end},
+            }
+        )
+    return tuple(candidates)
+
+
+def _finding(
+    check_id: str, location: str, message: str, *, authority_id: str | None = None
+) -> dict[str, Any]:
+    identity = hashlib.sha256(
+        f"{check_id}\0{location}\0{message}\0{authority_id or ''}".encode("utf-8")
+    ).hexdigest()[:16]
+    finding = {
+        "finding_id": f"{check_id}-{identity}",
+        "check_id": check_id,
+        "severity": "hard",
+        "location": location,
+        "message": message,
+    }
+    if authority_id is not None:
+        finding["authority_id"] = authority_id
+    return finding
+
+
+def _persistent_markup_findings(
+    filing_text: str, authorities: dict[str, AuthorityRecord]
+) -> list[dict[str, Any]]:
+    findings = []
+    seen_ids: set[str] = set()
+    for index, match in enumerate(_CITE_TAG.finditer(filing_text)):
+        attributes = dict(_CITE_ATTRIBUTE.findall(match.group("attributes")))
+        location = f"persistent_citations[{index}]"
+        citation_id = attributes.get("id")
+        authority_id = attributes.get("authority")
+        if (
+            set(attributes) != {"id", "authority"}
+            or citation_id is None
+            or _IDENTIFIER.fullmatch(citation_id) is None
+            or citation_id in seen_ids
+        ):
+            findings.append(
+                _finding(
+                    "persistent-citation-id",
+                    location,
+                    "citation markup requires one unique stable ID",
+                )
+            )
+        else:
+            seen_ids.add(citation_id)
+        if authority_id not in authorities:
+            findings.append(
+                _finding(
+                    "persistent-authority-target",
+                    location,
+                    "citation markup authority is not selected",
+                    authority_id=authority_id,
+                )
+            )
+    return findings
+
+
+def _audit_findings(
+    filing_text: str,
+    candidates: tuple[dict[str, Any], ...],
+    corpus: AuthorityCorpus,
+) -> list[dict[str, Any]]:
+    authorities_by_id = {
+        authority.authority_id: authority for authority in corpus.authorities
+    }
+    authorities_by_citation = {
+        authority.citation: authority for authority in corpus.authorities
+    }
+    findings = _persistent_markup_findings(filing_text, authorities_by_id)
+    resolved_citations = {
+        candidate["resolved_citation"]
+        for candidate in candidates
+        if candidate["resolved_citation"] is not None
+    }
+    unresolved = [
+        candidate
+        for candidate in candidates
+        if candidate["kind"] in {"short", "id", "supra"}
+        and candidate["resolved_citation"] is None
+    ]
+    for candidate in unresolved:
+        findings.append(
+            _finding(
+                "unresolved-antecedent",
+                candidate["candidate_id"],
+                "short-form citation antecedent did not resolve",
+            )
+        )
+    for citation in sorted(resolved_citations):
+        if citation not in authorities_by_citation:
+            findings.append(
+                _finding(
+                    "missing-authority",
+                    citation,
+                    "extracted citation is absent from the selected authority corpus",
+                )
+            )
+    for authority in corpus.authorities:
+        if authority.text_layer_status == "unusable":
+            findings.append(
+                _finding(
+                    "visual-review-required",
+                    authority.document_path,
+                    "authority text layer is unusable and requires visual review",
+                    authority_id=authority.authority_id,
+                )
+            )
+            continue
+        try:
+            opinion_text = authority.document_bytes.decode("utf-8", errors="strict")
+        except UnicodeError:
+            findings.append(
+                _finding(
+                    "visual-review-required",
+                    authority.document_path,
+                    "authority bytes do not provide a usable UTF-8 text layer",
+                    authority_id=authority.authority_id,
+                )
+            )
+            continue
+        if authority.quotation not in opinion_text:
+            findings.append(
+                _finding(
+                    "quotation-not-found",
+                    authority.document_path,
+                    "asserted quotation is absent from the exact authority document",
+                    authority_id=authority.authority_id,
+                )
+            )
+        if authority.pinpoint not in opinion_text:
+            findings.append(
+                _finding(
+                    "pinpoint-not-found",
+                    authority.document_path,
+                    "asserted pinpoint is absent from the usable authority text",
+                    authority_id=authority.authority_id,
+                )
+            )
+        if (
+            authority.later_history_status != "checked"
+            or authority.rule_of_orderliness_status == "unknown"
+            or authority.event_date_status == "unknown"
+            or authority.precedential_status == "unknown"
+        ):
+            findings.append(
+                _finding(
+                    "authority-status-unresolved",
+                    authority.yaml_path,
+                    "required authority status remains stale or unknown",
+                    authority_id=authority.authority_id,
+                )
+            )
+    return sorted(findings, key=lambda finding: finding["finding_id"])
+
+
+def _canonical_json(value: Any) -> bytes:
+    return (
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
+def _markdown(report: dict[str, Any]) -> bytes:
+    lines = [
+        "# Authority audit findings",
+        "",
+        f"Status: {report['status']}",
+        f"Corpus: {report['corpus_id']}",
+        "",
+    ]
+    if not report["findings"]:
+        lines.append("No deterministic authority findings.")
+    else:
+        for finding in report["findings"]:
+            lines.extend(
+                (
+                    f"## {finding['finding_id']}",
+                    "",
+                    f"- Check: {finding['check_id']}",
+                    f"- Severity: {finding['severity']}",
+                    f"- Location: {finding['location']}",
+                    f"- Message: {finding['message']}",
+                    "",
+                )
+            )
+    return ("\n".join(lines).rstrip() + "\n").encode("utf-8")
+
+
+def _yaml_string(value: str) -> str:
+    return json.dumps(value, ensure_ascii=False)
+
+
+def _receipt(corpus: AuthorityCorpus, status: str) -> bytes:
+    lines = [
+        "schema_version: 1",
+        f"status: {_yaml_string(status)}",
+        f"corpus_id: {_yaml_string(corpus.corpus_id)}",
+        f"corpus_yaml_path: {_yaml_string(corpus.yaml_path)}",
+        f"corpus_yaml_sha256: {_yaml_string(corpus.yaml_sha256)}",
+        "authorities:",
+    ]
+    for authority in corpus.authorities:
+        lines.extend(
+            (
+                f"  - authority_id: {_yaml_string(authority.authority_id)}",
+                f"    citation: {_yaml_string(authority.citation)}",
+                f"    document_path: {_yaml_string(authority.document_path)}",
+                f"    sha256: {_yaml_string(authority.sha256)}",
+                f"    authority_yaml_path: {_yaml_string(authority.yaml_path)}",
+                f"    authority_yaml_sha256: {_yaml_string(authority.yaml_sha256)}",
+                f"    source_id: {_yaml_string(authority.source.source_id)}",
+                f"    source_yaml_path: {_yaml_string(authority.source.yaml_path)}",
+                f"    source_yaml_sha256: {_yaml_string(authority.source.yaml_sha256)}",
+                f"    checked_through: {_yaml_string(authority.source.checked_through)}",
+            )
+        )
+    return ("\n".join(lines) + "\n").encode("utf-8")
+
+
+def run_and_publish_authority_audit(
+    *,
+    invocation: ValidatedInvocation,
+    corpus_documentation_path: str,
+    run_id: str,
+    skill_version: str,
+) -> AuthorityAuditResult:
+    """Run one deterministic offline authority audit and publish its reports."""
+
+    if (
+        _RUN_ID.fullmatch(run_id or "") is None
+        or _VERSION.fullmatch(skill_version or "") is None
+    ):
+        _fail("invalid-authority-audit-invocation")
+    corpus = load_verified_authority_corpus(
+        invocation, corpus_documentation_path
+    )
+    try:
+        target_path = invocation.target[1]
+        filing_bytes = _read(
+            target_path,
+            invocation.runtime["max_input_bytes"],
+            "invalid-filing-content",
+        )
+        filing_text = filing_bytes.decode("utf-8", errors="strict")
+    except AuthorityAuditError:
+        raise
+    except (AttributeError, IndexError, UnicodeError):
+        _fail("invalid-filing-content")
+    candidates = extract_eyecite_candidates(filing_text)
+    findings = _audit_findings(filing_text, candidates, corpus)
+    status = "failed" if findings else "passed"
+    exit_class = "findings" if findings else "passed"
+    report = {
+        "schema_version": 1,
+        "status": status,
+        "corpus_id": corpus.corpus_id,
+        "target": target_path.name,
+        "target_sha256": hashlib.sha256(filing_bytes).hexdigest(),
+        "candidates": list(candidates),
+        "findings": findings,
+    }
+    report_bytes = _canonical_json(report)
+    try:
+        output = OutputRun.start(
+            invocation,
+            run_id=run_id,
+            skill_version=skill_version,
+            mode="append-immutable",
+            input_manifest=build_input_manifest(invocation),
+        )
+        output.write("reports/authority-audit.json", report_bytes)
+        output.write("reports/authority-audit.md", _markdown(report))
+        output.write("run-receipt.yaml", _receipt(corpus, exit_class))
+        output.complete()
+    except (OutputError, InvocationError, OSError, ValueError):
+        _fail("output-publication-failed")
+    return AuthorityAuditResult(
+        status=status,
+        exit_class=exit_class,
+        findings=tuple(findings),
     )

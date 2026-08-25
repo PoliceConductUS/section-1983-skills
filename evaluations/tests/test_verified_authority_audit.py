@@ -77,7 +77,7 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
     def tearDown(self):
         self.temporary_directory.cleanup()
 
-    def invocation(self):
+    def invocation(self, output=None):
         return validate_invocation(
             {
                 "version": 1,
@@ -90,7 +90,7 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
                         "root": str(self.authorities),
                     },
                 ],
-                "output": {"root": str(self.output)},
+                "output": {"root": str(output or self.output)},
                 "runtime": {"max_seconds": 60, "max_input_bytes": 5_242_880},
                 "internet": "disabled",
                 "isolation": {
@@ -143,6 +143,18 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
 
         self.assertEqual(captured.exception.code, "authority-content-mismatch")
         self.assertEqual(captured.exception.exit_class, "invalid")
+        self.assertEqual(list(self.output.iterdir()), [])
+
+    def test_missing_selected_corpus_yaml_is_unavailable_before_output(self):
+        (self.authorities / "selected.CORPUS.yaml").unlink()
+
+        with self.assertRaises(AuthorityAuditError) as captured:
+            load_verified_authority_corpus(
+                self.invocation(), "selected.CORPUS.yaml"
+            )
+
+        self.assertEqual(captured.exception.code, "corpus-documentation-unavailable")
+        self.assertEqual(captured.exception.exit_class, "unavailable")
         self.assertEqual(list(self.output.iterdir()), [])
 
     def test_eyecite_extracts_and_resolves_without_claiming_verification(self):
@@ -247,6 +259,42 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
             {finding["check_id"] for finding in result.findings},
             {"visual-review-required"},
         )
+
+    def test_report_bytes_are_deterministic_and_transient_files_are_output_local(self):
+        second_output = self.root / "second-output"
+        second_output.mkdir()
+
+        first = run_and_publish_authority_audit(
+            invocation=self.invocation(),
+            corpus_documentation_path="selected.CORPUS.yaml",
+            run_id="authority-audit-repeat",
+            skill_version="1.0.0",
+        )
+        second = run_and_publish_authority_audit(
+            invocation=self.invocation(second_output),
+            corpus_documentation_path="selected.CORPUS.yaml",
+            run_id="authority-audit-repeat",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(first, second)
+        for relative_path in (
+            "reports/authority-audit.json",
+            "reports/authority-audit.md",
+            "run-receipt.yaml",
+            ".skill-runs/authority-audit-repeat/manifest.json",
+        ):
+            self.assertEqual(
+                (self.output / relative_path).read_bytes(),
+                (second_output / relative_path).read_bytes(),
+            )
+        for output in (self.output, second_output):
+            temp = output / "temp"
+            self.assertTrue(temp.is_dir())
+            self.assertEqual(
+                [path for path in temp.rglob("*") if path.is_file()],
+                [],
+            )
 
 
 if __name__ == "__main__":

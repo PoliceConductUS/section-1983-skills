@@ -1,4 +1,3 @@
-import copy
 import importlib.util
 import json
 import shutil
@@ -161,7 +160,8 @@ class JudicialReasoningProfileValidatorTest(unittest.TestCase):
             "left_proposition": "Changed proposition",
             "left_source_id": "different-source",
             "left_source_date": "2026-01-01",
-            "issue": "different-issue",
+            "left_issue": "different-issue",
+            "right_posture": "different-posture",
         }
         for field, replacement in fields.items():
             value = self.fixture("complete-profile")

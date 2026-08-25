@@ -74,12 +74,14 @@
       "left_proposition": "The order analyzes each asserted element before addressing remedy.",
       "left_source_id": "opinion-source",
       "left_source_date": "2026-06-01",
+      "left_issue": "pleading-elements",
+      "left_posture": "motion-to-dismiss",
       "right_record_id": "philosophy-record",
       "right_proposition": "A public article describes careful issue framing.",
       "right_source_id": "article-source",
       "right_source_date": "2025-05-01",
-      "issue": "pleading-elements",
-      "posture": "motion-to-dismiss",
+      "right_issue": "pleading-elements",
+      "right_posture": "public-article",
       "similarities": ["Both records expressly describe issue organization."],
       "differences": [
         "Only the opinion records reasoning in an adjudicated matter."

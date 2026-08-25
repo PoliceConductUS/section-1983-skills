@@ -15,10 +15,10 @@
 
 ## 3. Judicial profile domain validation
 
-- [ ] 3.1 RED-test exact source classes, attribution, adoption-only limits,
+- [x] 3.1 RED-test exact source classes, attribution, adoption-only limits,
       cross-class comparisons, neutral transfers, hostile role fields, bounds,
       and immutable-package compatibility.
-- [ ] 3.2 Implement and GREEN the install-local deterministic validator.
+- [x] 3.2 Implement and GREEN the install-local deterministic validator.
 
 ## 4. Acquisition and package publication boundary
 

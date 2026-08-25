@@ -16,3 +16,10 @@ coverage without adding CaseGraph or ambient filesystem authority.
   packet
 - **THEN** the skill identifies the member by stable document ID and does not
   silently treat the result as whole-packet coverage
+
+#### Scenario: A current public filing skill is installed independently
+
+- **WHEN** any currently published skill that drafts or reviews a filing is
+  copied without the repository around it
+- **THEN** its package retains the install-local FilingPacket contract and its
+  entrypoint links to that contract

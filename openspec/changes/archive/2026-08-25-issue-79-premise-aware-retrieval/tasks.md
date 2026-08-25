@@ -22,5 +22,5 @@
 
 - [x] 4.1 Run focused tests, corpus checks, governance, and full validation.
 - [x] 4.2 Perform whole-story review and archive OpenSpec.
-- [ ] 4.3 Verify exact remote head/checks and mark the PR ready while leaving
+- [x] 4.3 Verify exact remote head/checks and mark the PR ready while leaving
       the PR and Issue #79 open.

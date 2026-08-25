@@ -1,0 +1,17 @@
+version: 1
+id: wrong-date
+source:
+  source_id: synthetic-wrong-date
+  text: |
+    The amendment became effective on January 1, 2025, after the 2024 event.
+  sha256: ccf0196ef5e0205b45e68925e7bb6bbeb2671be82d76894d888e04795cc549a8
+challenged_text: The 2025 amendment governed the 2024 event.
+expected_propositions:
+  - proposition_id: wrong-date-1
+    correctness: verified
+    groundedness: misgrounded
+    source_voice: majority-holding
+pass_allowed: false
+reason:
+  The cited amendment postdates the event and cannot ground the asserted
+  temporal application.

@@ -1,0 +1,15 @@
+version: 1
+id: party-argument-as-holding
+source:
+  source_id: synthetic-party-voice
+  text: |
+    The defendant argues that the search was reasonable. The court rejects that argument.
+  sha256: a697b59be866ae4a2f82bea8aa06a0d416db8272851d875ff3e30d9444e39e40
+challenged_text: The court held that the search was reasonable.
+expected_propositions:
+  - proposition_id: party-voice-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: party-argument
+pass_allowed: false
+reason: The cited words are a rejected party argument, not the court's holding.

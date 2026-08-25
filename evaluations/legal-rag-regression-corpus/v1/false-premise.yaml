@@ -1,0 +1,17 @@
+version: 1
+id: false-premise
+source:
+  source_id: synthetic-false-premise
+  text: |
+    The docket identifies Judge Alex Record, not Judge Jordan Example.
+  sha256: 09c0b29a565e9b8fe57150691fad8c7341116f9bb48e4a5034b3a7c660013717
+challenged_text: The assigned judge is Jordan Example.
+expected_propositions:
+  - proposition_id: false-premise-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: factual-or-procedural-background
+pass_allowed: false
+reason:
+  The false identity premise must be corrected to Judge Alex Record before
+  research continues.

@@ -5,6 +5,29 @@ The normative machine-readable record is
 entry for every atomic proposition rather than one aggregate entry for a
 citation or sentence.
 
+## Independent legal-RAG supervision
+
+A generation stage or material-revision stage cannot certify its own authority
+work. Run a separate non-mutating `audit-authorities` invocation against the
+exact immutable draft bytes and exact selected authority-source bytes. Declare
+the draft folder as `filing-source`, authority folders as `verified-authority`,
+and a new output folder distinct from the generation stage's output folder.
+Changed input invalidates the prior result.
+
+The record preserves both stage and invocation identities, optional model or
+provider identity, exact role/path/SHA-256 input fingerprints, selected source
+identities, UTC execution time, and distinct output-folder fingerprints. It
+distinguishes successful independent execution, unavailable execution, malformed
+output, unresolved source gaps, incorrect propositions, misgrounded
+propositions, ungrounded propositions, and completed grounded propositions.
+Generator self-review, a missing independent stage, reused output, changed
+input, unavailable execution, malformed output, and unresolved or failed
+propositions never pass.
+
+`human_approval` is always `not-provided`. An AI-only audit is not human
+approval and cannot make a filing decision. Credentials, tokens, provider
+continuation state, conversation IDs, and session IDs are prohibited.
+
 ## Required proposition results
 
 - `correctness`: `verified`, `incorrect`, or `unresolved`.
@@ -44,3 +67,9 @@ treatment symbol is not source support.
 JSON-schema conformance validates shape and vocabulary only. It does not decide
 correctness, groundedness, source voice, applicability, litigation strategy, or
 filing readiness.
+
+Historical benchmark results must identify the provider, product, version,
+dates, query distribution, sample size, complete query provenance, and
+limitations. Never represent a prior result as a current vendor reliability
+rate. Optional live-provider work remains separate from the deterministic
+synthetic corpus.

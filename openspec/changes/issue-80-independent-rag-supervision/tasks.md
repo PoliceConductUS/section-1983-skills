@@ -14,9 +14,9 @@
 
 ## 3. Implementation
 
-- [ ] 3.1 Extend the audit record schema and installed instructions.
-- [ ] 3.2 Implement the pure deterministic supervision classifier.
-- [ ] 3.3 Add the complete versioned YAML corpus and governance checks.
+- [x] 3.1 Extend the audit record schema and installed instructions.
+- [x] 3.2 Implement the pure deterministic supervision classifier.
+- [x] 3.3 Add the complete versioned YAML corpus and governance checks.
 
 ## 4. Completion
 

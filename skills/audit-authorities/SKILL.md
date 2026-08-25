@@ -317,6 +317,35 @@ court-safe rewrite.
 Every returned artifact must identify the actual approved source identity and
 checked date used.
 
+## Independent legal-RAG supervision
+
+A generation stage or material-revision stage cannot certify its own filing-near
+authority work. Start a separate non-mutating audit stage with a new invocation.
+Read the exact immutable draft through `filing-source`, read the exact selected
+source bytes through `verified-authority`, and use a new output folder distinct
+from the generation output folder. Put every audit cache, download, extraction,
+staging, working file, process current directory, and temporary environment
+location beneath that new output folder's `temp/`.
+
+Record generation stage and audit stage identities, invocation identities, model
+or provider identity when available, exact input fingerprints, source
+identities, execution times, and distinct output-folder fingerprints. Changed
+input, generator self-review, a missing independent stage, reused output,
+unavailable independent execution, malformed output, and any unresolved or
+failed proposition do not pass. Never record credentials, tokens, provider
+continuation state, conversation IDs, or session IDs.
+
+AI may assemble research and audit records. Litigation strategy and filing
+approval are human-reserved. The AI-only record uses
+`human_approval: not-provided`; a grounded audit is not human approval or a
+filing-ready determination.
+
+The versioned synthetic legal-RAG corpus is deterministic and
+network-independent. Any optional live-provider benchmark is separate. Report
+historical benchmark results with provider, product, version, dates, complete
+query provenance, query distribution, sample size, and limitations. Never
+present a historical result as a current vendor reliability rate.
+
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated

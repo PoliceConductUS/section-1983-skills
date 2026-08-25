@@ -1,0 +1,17 @@
+version: 1
+id: superseded-panel
+source:
+  source_id: synthetic-superseded-panel
+  text: |
+    The panel held that notice was unnecessary. The en banc court vacated the panel opinion.
+  sha256: f775cb88ea659e1786ed5a5939af21b4bc35a82ba8a2168b35e8f8745292a05f
+challenged_text: The panel holding remains controlling law.
+expected_propositions:
+  - proposition_id: superseded-panel-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: majority-holding
+pass_allowed: false
+reason:
+  The en banc court vacated the panel opinion, so its holding is not
+  controlling.

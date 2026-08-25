@@ -1,0 +1,17 @@
+version: 1
+id: lower-court-as-appellate-voice
+source:
+  source_id: synthetic-lower-court-voice
+  text: |
+    The district court concluded that the complaint was timely. We do not reach timeliness.
+  sha256: f01c381242f131025a2871d16c712d17a3aaafcece2d4e48095a8a5ed2a002c9
+challenged_text: The appellate court held that the complaint was timely.
+expected_propositions:
+  - proposition_id: lower-court-voice-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: lower-court-ruling-under-review
+pass_allowed: false
+reason:
+  The appellate court reports the lower-court ruling and expressly does not
+  decide it.

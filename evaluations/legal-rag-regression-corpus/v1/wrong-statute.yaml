@@ -1,0 +1,16 @@
+version: 1
+id: wrong-statute
+source:
+  source_id: synthetic-wrong-statute
+  text: |
+    The opinion construes Fictional Code section 10, not section 20.
+  sha256: 949833c8ec645bafcc540b5e275a5c8b8e734de1beca54e377eaeee0dcbccb46
+challenged_text:
+  Fictional Code section 20 requires notice, citing only this opinion.
+expected_propositions:
+  - proposition_id: wrong-statute-1
+    correctness: verified
+    groundedness: misgrounded
+    source_voice: majority-holding
+pass_allowed: false
+reason: The opinion construes a different statutory provision.

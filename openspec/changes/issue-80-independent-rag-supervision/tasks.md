@@ -8,9 +8,9 @@
 
 ## 2. TDD contract
 
-- [ ] 2.1 RED-test independent stage provenance and exact-byte invalidation.
-- [ ] 2.2 RED-test fail-closed result classes and the human-reserved boundary.
-- [ ] 2.3 RED-test the complete versioned synthetic fixture taxonomy.
+- [x] 2.1 RED-test independent stage provenance and exact-byte invalidation.
+- [x] 2.2 RED-test fail-closed result classes and the human-reserved boundary.
+- [x] 2.3 RED-test the complete versioned synthetic fixture taxonomy.
 
 ## 3. Implementation
 

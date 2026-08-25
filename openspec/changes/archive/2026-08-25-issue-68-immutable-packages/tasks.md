@@ -46,5 +46,5 @@
       review.
 - [x] 7.2 Record verification and retrospective evidence and archive the owning
       OpenSpec change.
-- [ ] 7.3 Push the verified archive and mark the PR ready without closing the
+- [x] 7.3 Push the verified archive and mark the PR ready without closing the
       issue or PR.

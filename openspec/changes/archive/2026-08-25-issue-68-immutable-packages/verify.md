@@ -41,4 +41,7 @@ Additional checks completed with exit status 0:
 - `python3 -m py_compile scripts/immutable_folder_package.py scripts/static_role_binding.py evaluations/tests/test_immutable_folder_packages.py`
 - `git diff --check codex/issue-66-filing-packets...HEAD`
 
-GitHub exact-head checks are recorded after the archived change is pushed.
+GitHub Actions run `32804469734` completed successfully for archived branch head
+`46b80376109953486688c22ca7c4bf8a6e5b781f`. PR #81 was then marked ready for
+review while both the PR and Issue #68 remained open. The final documentation-
+only task-status commit also requires an exact-head validation pass.

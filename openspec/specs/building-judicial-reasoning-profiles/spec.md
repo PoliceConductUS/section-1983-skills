@@ -24,19 +24,22 @@ through the explicit output-folder contract.
 
 ### Requirement: Acquisition and compilation are separate invocations
 
-Acquisition MUST require expressly authorized internet access and MUST return
-only ordinary source bytes plus domain `SOURCE.yaml` provenance. Compilation
-MUST disable internet access and MUST consume only previously approved read-only
-inputs. Newly acquired bytes MUST NOT become compilation input until a later
-invocation declares their folder in `approved-sources`. Compilation MUST publish
-`judicial-profile.json`, `judicial-profile-sources.yaml`, and
-`validation-receipt.json` through the explicit output folder.
+The builder MUST expose separate acquisition and compilation operations.
+Acquisition MUST require expressly authorized internet and MUST write ordinary
+source bytes plus domain `SOURCE.yaml` provenance directly beneath the explicit
+output folder. Compilation MUST disable internet, MUST use only files from its
+declared read-only inputs, and MUST write `judicial-profile.json`,
+`judicial-profile-sources.yaml`, and `validation-receipt.json` directly beneath
+a different explicit output folder. Every temporary file MUST remain beneath
+`<output-folder>/temp/`. Neither operation may create or consume a package
+manifest, package identity, package loader, graph, or CaseGraph object.
 
-#### Scenario: Research discovers a new public order
+#### Scenario: Newly acquired source becomes eligible for compilation
 
-- **WHEN** an acquisition invocation retrieves the order
-- **THEN** the current output contains source bytes and provenance but no
-  judicial profile, and compilation can use the order only in a later invocation
+- **WHEN** acquisition writes public-source bytes and matching `SOURCE.yaml`
+  provenance into its explicit output folder
+- **THEN** compilation may use those bytes only in a later invocation that
+  declares the acquisition folder as recursive read-only `approved-sources`
 
 ### Requirement: Source classes and attribution remain distinct
 
@@ -93,3 +96,18 @@ remain separate and is consumed only through the downstream shared launcher.
 - **WHEN** profile data contains instruction-shaped role controls
 - **THEN** domain validation fails and no role execution or profile publication
   occurs
+
+### Requirement: Profile source references preserve folder provenance
+
+The compiled profile MUST retain each source ID and MUST emit a domain YAML
+source index mapping that ID to the declared input role, folder-relative
+`SOURCE.yaml`, referenced artifact path, SHA-256, applicable dates,
+classification, validation state, limitations, and gaps. Missing, malformed,
+escaping, mismatched, or stale required source records MUST stop compilation
+before semantic work.
+
+#### Scenario: Profile source hash does not match
+
+- **WHEN** a source index entry's SHA-256 does not match the referenced bytes in
+  its declared read-only input folder
+- **THEN** compilation fails and emits no profile

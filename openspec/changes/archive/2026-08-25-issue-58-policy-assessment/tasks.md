@@ -8,25 +8,25 @@
 
 ## 2. Catalog and source boundary
 
-- [ ] 2.1 Test the exact six-role offline contract, catalog validation, and
+- [x] 2.1 Test the exact six-role offline contract, catalog validation, and
       selected source YAML/hash binding.
-- [ ] 2.2 Implement strict catalog, identity, date, and source gates.
+- [x] 2.2 Implement strict catalog, identity, date, and source gates.
 
 ## 3. Assessment states
 
-- [ ] 3.1 Test applicability, violation, and evidence states; actor/phase units;
+- [x] 3.1 Test applicability, violation, and evidence states; actor/phase units;
       dates; conflicting evidence; and unsupported nonviolation findings.
-- [ ] 3.2 Implement deterministic assessment and gap validation.
+- [x] 3.2 Implement deterministic assessment and gap validation.
 
 ## 4. Output boundary
 
-- [ ] 4.1 Test deterministic plans, input preservation, trusted publication,
+- [x] 4.1 Test deterministic plans, input preservation, trusted publication,
       output escape, and output-local temporary work.
-- [ ] 4.2 Document later folder handoff and no-liability boundary.
+- [x] 4.2 Document later folder handoff and no-liability boundary.
 
 ## 5. Verification
 
-- [ ] 5.1 Run focused tests, full validation, and whole-story review.
-- [ ] 5.2 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 5.1 Run focused tests, full validation, and whole-story review.
+- [x] 5.2 Record verification and retrospective evidence and archive OpenSpec.
 - [ ] 5.3 Verify exact remote head/checks and mark the PR ready while leaving
       the PR and Issue #58 open.

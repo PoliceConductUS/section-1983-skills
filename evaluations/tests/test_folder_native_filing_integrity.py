@@ -278,6 +278,27 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
         self.assertEqual(captured.exception.exit_class, "unavailable")
         self.assertEqual(list(self.output.iterdir()), [])
 
+    def test_source_yaml_cannot_redefine_its_selected_folder_role(self):
+        documentation = self.inputs["exhibit"] / "exhibit-a.SOURCE.yaml"
+        documentation.write_text(
+            documentation.read_text().replace(
+                "classification: exhibit\n", "classification: authority\n"
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(FilingIntegrityError) as captured:
+            run_and_publish_filing_integrity(
+                invocation=self.invocation(),
+                selection=self.selection(),
+                run_id="filing-integrity-role-mismatch",
+                skill_version="1.0.0",
+            )
+
+        self.assertEqual(captured.exception.code, "invalid-source-documentation")
+        self.assertEqual(captured.exception.exit_class, "invalid")
+        self.assertEqual(list(self.output.iterdir()), [])
+
     def test_outputs_are_deterministic_and_all_transient_files_are_output_local(self):
         second_output = self.root / "second-output"
         second_output.mkdir()

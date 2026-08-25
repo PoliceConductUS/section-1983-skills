@@ -8,6 +8,9 @@ from pathlib import Path
 
 import yaml
 
+from scripts.skill_output_writer import OutputRun
+from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
+
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 SKILL = REPOSITORY / "skills" / "collecting-police-policy-sources"
@@ -87,8 +90,21 @@ class CollectingPolicePolicySourcesTest(unittest.TestCase):
         )
         for item in first["artifacts"]:
             self.assertIsInstance(item["bytes"], bytes)
+            self.assertIsInstance(item["internet_sources"], list)
             self.assertFalse(Path(item["path"]).is_absolute())
             self.assertNotIn("..", Path(item["path"]).parts)
+
+        ordinary = artifact(first, "sources/model-use-of-force.txt")
+        self.assertEqual(
+            ordinary["internet_sources"],
+            [
+                {
+                    "url": "https://example.invalid/model-use-of-force",
+                    "retrieved_at": "2026-08-25T12:00:00Z",
+                    "sha256": hashlib.sha256(ordinary["bytes"]).hexdigest(),
+                }
+            ],
+        )
 
         source_yaml = yaml.safe_load(
             artifact(first, "sources/model-use-of-force.SOURCE.yaml")["bytes"]
@@ -172,30 +188,93 @@ class CollectingPolicePolicySourcesTest(unittest.TestCase):
         gap = fixture("version-gap.json")["gap"]
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            input_root = root / "input"
             output_root = root / "output"
-            input_root.mkdir()
             output_root.mkdir()
-            original = input_root / "identity.yaml"
-            original.write_text("department: Fictional Police Department\n")
-            before = original.read_bytes()
+            role_roots = {}
+            for role in (
+                "department-identity",
+                "jurisdiction",
+                "approved-source-system",
+                "research-scope",
+            ):
+                role_root = root / role
+                role_root.mkdir()
+                (role_root / "input.yaml").write_text(f"role: {role}\n")
+                role_roots[role] = role_root
+            before = {
+                role: (role_root / "input.yaml").read_bytes()
+                for role, role_root in role_roots.items()
+            }
+
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "collecting-police-policy-sources",
+                    "inputs": [
+                        {"role": role, "root": str(role_roots[role])}
+                        for role in (
+                            "department-identity",
+                            "jurisdiction",
+                            "approved-source-system",
+                            "research-scope",
+                        )
+                    ],
+                    "output": {"root": str(output_root)},
+                    "runtime": {
+                        "max_seconds": 60,
+                        "max_input_bytes": 1048576,
+                    },
+                    "internet": "authorized",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            run = OutputRun.start(
+                invocation,
+                run_id="123e4567-e89b-42d3-a456-426614174000",
+                skill_version="1.0.0",
+                mode="append-immutable",
+                input_manifest=build_input_manifest(invocation),
+            )
+            configuration = run.process_configuration()
+            expected_temp = str(output_root.resolve() / "temp")
+            self.assertEqual(configuration["cwd"], expected_temp)
+            self.assertEqual(
+                set(configuration["environment"].values()),
+                {expected_temp},
+            )
 
             plan = records.build_collection_plan(
                 [proposal()], [gap], "2026-08-25"
             )
             for item in plan["artifacts"]:
-                destination = output_root / item["path"]
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                destination.write_bytes(item["bytes"])
+                run.write(
+                    item["path"],
+                    item["bytes"],
+                    internet_sources=item["internet_sources"],
+                )
+            receipt = run.complete()
 
-            self.assertEqual(original.read_bytes(), before)
+            self.assertTrue(receipt["internet"]["used"])
+            self.assertEqual(
+                {
+                    role: (role_root / "input.yaml").read_bytes()
+                    for role, role_root in role_roots.items()
+                },
+                before,
+            )
             self.assertTrue(
                 all(
                     path == output_root or output_root in path.parents
                     for path in output_root.rglob("*")
                 )
             )
-            self.assertFalse((input_root / "temp").exists())
+            self.assertFalse(
+                any((role_root / "temp").exists() for role_root in role_roots.values())
+            )
 
 
 if __name__ == "__main__":

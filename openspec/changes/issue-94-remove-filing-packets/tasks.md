@@ -4,7 +4,7 @@
 
 - [x] 1.1 Correct live Issues #66, #68, and #71 and create Issue #94.
 - [x] 1.2 Create the stacked worktree and OpenSpec design.
-- [ ] 1.3 Push the design commit and open the stacked draft PR.
+- [x] 1.3 Push the design commit and open the stacked draft PR.
 
 ## 2. Deletion tests
 

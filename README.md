@@ -124,7 +124,12 @@ registry, graph, or case-management runtime is required.
     `audit-authorities` invocation must verify every proposed authority use.
 11. Use `building-municipal-monell-profiles` to organize validated policy,
     assessment, case-record, and authority input folders into a five-domain
-    evidence profile without deciding Monell liability or selecting a theory.
+    evidence profile without deciding Monell liability or selecting a theory. In
+    a later invocation, supply that ordinary output folder as the
+    `municipal-profile` role to complaint drafting, city Rule 12 planning,
+    written discovery, deposition outlines, or adversarial review. Each consumer
+    must validate the profile files and preserve its own record, authority,
+    target, and strategy boundaries.
 12. Add `building-litigation-alignment-overlays` before an amended complaint,
     leave package, or other filing that should consume the current docket's
     actual adversary positions and judicial treatment.

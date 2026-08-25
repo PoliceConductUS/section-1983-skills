@@ -216,6 +216,20 @@ class BuildingMunicipalMonellProfilesTest(unittest.TestCase):
         self.assertTrue(
             all(item["source_sha256"] for item in profile["evidence"])
         )
+        validation = json.loads(
+            artifact(plan, "municipal-profile-validation.json")["bytes"]
+        )
+        self.assertEqual(
+            validation["artifact_hashes"],
+            {
+                path: hashlib.sha256(artifact(plan, path)["bytes"]).hexdigest()
+                for path in (
+                    "municipal-profile.yaml",
+                    "municipal-profile-gaps.yaml",
+                    "municipal-profile.md",
+                )
+            },
+        )
         self.assertNotIn("element_satisfied", json.dumps(profile))
         self.assertNotIn("liability", json.dumps(profile).lower())
 

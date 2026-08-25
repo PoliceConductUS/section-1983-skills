@@ -42,7 +42,7 @@ def folder_contract(skill, input_roles, target_policy, target_roles, internet):
 APPROVED_FOLDER_CONTRACTS = {
     "adversarial-filing-review": folder_contract(
         "adversarial-filing-review",
-        ["filing", "approved-sources"],
+        ["filing", "approved-sources", "municipal-profile"],
         "required",
         ["filing"],
         "authorized",
@@ -184,7 +184,7 @@ APPROVED_FOLDER_CONTRACTS = {
     ),
     "drafting-section-1983-complaints": folder_contract(
         "drafting-section-1983-complaints",
-        ["record", "authorities", "filing"],
+        ["record", "authorities", "filing", "municipal-profile"],
         "optional",
         ["filing"],
         "disabled",
@@ -198,7 +198,7 @@ APPROVED_FOLDER_CONTRACTS = {
     ),
     "drafting-section-1983-deposition-outlines": folder_contract(
         "drafting-section-1983-deposition-outlines",
-        ["record", "authorities", "discovery"],
+        ["record", "authorities", "discovery", "municipal-profile"],
         "optional",
         ["record"],
         "disabled",
@@ -219,7 +219,7 @@ APPROVED_FOLDER_CONTRACTS = {
     ),
     "drafting-section-1983-written-discovery": folder_contract(
         "drafting-section-1983-written-discovery",
-        ["record", "authorities", "claim-map"],
+        ["record", "authorities", "claim-map", "municipal-profile"],
         "optional",
         ["claim-map"],
         "disabled",
@@ -253,7 +253,7 @@ APPROVED_FOLDER_CONTRACTS = {
     ),
     "rrd-rule12-city": folder_contract(
         "rrd-rule12-city",
-        ["motion", "record", "authorities"],
+        ["motion", "record", "authorities", "municipal-profile"],
         "required",
         ["motion"],
         "disabled",

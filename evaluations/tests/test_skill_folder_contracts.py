@@ -19,7 +19,12 @@ from scripts.validate_governance import (
 REPOSITORY = Path(__file__).resolve().parents[2]
 
 CONTRACTS = {
-    "adversarial-filing-review": (["filing", "approved-sources"], "required", ["filing"], "authorized"),
+    "adversarial-filing-review": (
+        ["filing", "approved-sources", "municipal-profile"],
+        "required",
+        ["filing"],
+        "authorized",
+    ),
     "analyzing-police-policy-sources": (
         [
             "department-identity",
@@ -142,7 +147,7 @@ CONTRACTS = {
         "disabled",
     ),
     "drafting-section-1983-complaints": (
-        ["record", "authorities", "filing"],
+        ["record", "authorities", "filing", "municipal-profile"],
         "optional",
         ["filing"],
         "disabled",
@@ -154,7 +159,7 @@ CONTRACTS = {
         "disabled",
     ),
     "drafting-section-1983-deposition-outlines": (
-        ["record", "authorities", "discovery"],
+        ["record", "authorities", "discovery", "municipal-profile"],
         "optional",
         ["record"],
         "disabled",
@@ -172,7 +177,7 @@ CONTRACTS = {
         "disabled",
     ),
     "drafting-section-1983-written-discovery": (
-        ["record", "authorities", "claim-map"],
+        ["record", "authorities", "claim-map", "municipal-profile"],
         "optional",
         ["claim-map"],
         "disabled",
@@ -193,7 +198,12 @@ CONTRACTS = {
     "horan-bad-words": (["filing"], "required", ["filing"], "disabled"),
     "rrd": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
     "rrd-rule12": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
-    "rrd-rule12-city": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
+    "rrd-rule12-city": (
+        ["motion", "record", "authorities", "municipal-profile"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
     "rrd-rule12-officers": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
     "section-1983-drafting": (
         ["record", "authorities", "strategy", "filing"],

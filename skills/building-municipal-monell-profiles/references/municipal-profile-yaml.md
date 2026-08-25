@@ -17,4 +17,5 @@ liability conclusion, legal sufficiency, or selected theory.
 
 `municipal-profile-gaps.yaml` contains strict ordered `gap_id`, `domain`, and
 `description` records. `municipal-profile-validation.json` records deterministic
-source hashes, upstream hashes, input fingerprints, and every output record ID.
+hashes for the profile YAML, gap YAML, and Markdown, plus source hashes,
+upstream hashes, input fingerprints, and every output record ID.

@@ -22,6 +22,12 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `record` contains the approved facts, chronology, exhibits, and claim map.
 - `authorities` contains approved constitutional, statutory, and procedural law.
 - `filing` contains any complaint or amendment being drafted or audited.
+- `municipal-profile` contains the four validated ordinary Issue #31 output
+  files when municipal allegations are within scope.
+
+For municipal allegations, read
+[municipal profile consumption](references/municipal-profile-consumption.md)
+before drafting or revision.
 
 Target is optional in `filing`; without one, draft from the supplied record and
 user request. Internet is `disabled`. Return complaint content or mechanical

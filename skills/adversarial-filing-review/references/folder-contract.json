@@ -1,7 +1,7 @@
 {
   "version": 1,
   "skill": "adversarial-filing-review",
-  "input_roles": ["filing", "approved-sources"],
+  "input_roles": ["filing", "approved-sources", "municipal-profile"],
   "target": { "policy": "required", "roles": ["filing"] },
   "internet": "authorized",
   "output": { "mode": "append-immutable" }

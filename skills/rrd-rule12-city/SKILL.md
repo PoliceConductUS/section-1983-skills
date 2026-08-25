@@ -23,6 +23,12 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `motion` contains the municipality's Rule 12 motion and ordered arguments.
 - `record` contains the operative pleading and approved Monell record.
 - `authorities` contains approved Rule 12, constitutional, and Monell law.
+- `municipal-profile` contains the four validated ordinary Issue #31 output
+  files.
+
+Read
+[municipal profile consumption](references/municipal-profile-consumption.md)
+before mapping the motion's attacks.
 
 Target is required in `motion`. Internet is `disabled`. Return the city-motion
 RRD as a canonical output-relative path and deterministic bytes; only the

@@ -5,7 +5,15 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.immutable_folder_package import PackageError, load_folder_package
+from scripts.immutable_folder_package import (
+    PackageError,
+    load_folder_package,
+    publish_folder_package,
+)
+from scripts.validate_folder_invocation import (
+    validate_installed_skill_invocation,
+    validate_invocation,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -145,6 +153,115 @@ class ImmutableFolderPackageLoaderTest(unittest.TestCase):
                         max_bytes=4096,
                     )
                 self.assertEqual(captured.exception.code, expected)
+
+
+class ImmutableFolderPackagePublisherTest(unittest.TestCase):
+    def _envelope(self, root: Path):
+        context = root / "context"
+        authorities = root / "authorities"
+        filing = root / "filing"
+        output = root / "output"
+        for folder in (context, authorities, filing, output):
+            folder.mkdir()
+        (context / "facts.txt").write_text("fictional source\n")
+        return {
+            "version": 1,
+            "skill": "drafting-section-1983-complaints",
+            "inputs": [
+                {"role": "record", "root": str(context)},
+                {"role": "authorities", "root": str(authorities)},
+                {"role": "filing", "root": str(filing)},
+            ],
+            "output": {"root": str(output)},
+            "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
+            "internet": "disabled",
+            "isolation": {
+                "inputs": "read-only",
+                "output": "read-write",
+                "undeclared": "none",
+            },
+        }
+
+    def test_publisher_writes_one_complete_reloadable_package_and_preserves_inputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            envelope = self._envelope(root)
+            invocation = validate_installed_skill_invocation(
+                envelope,
+                ROOT / "skills" / "drafting-section-1983-complaints",
+            )
+            before = (root / "context" / "facts.txt").read_bytes()
+            receipt = publish_folder_package(
+                invocation,
+                package_kind="judicial-profile",
+                package_id="generated-judicial-profile",
+                created_at="2026-08-24T13:00:00Z",
+                freshness={"checked_through": "2026-08-24", "retrieved_on": "2026-08-24"},
+                sources=[
+                    {
+                        "role": "source-package",
+                        "source_id": "fictional-source-profile",
+                        "fingerprint": "1" * 64,
+                    }
+                ],
+                members=[
+                    {
+                        "id": "profile",
+                        "role": "primary",
+                        "classification": "profile",
+                        "path": "profile.json",
+                        "media_type": "application/json",
+                        "contents": '{"fictional":true}\n',
+                    },
+                    {
+                        "id": "validation-receipt",
+                        "role": "receipt",
+                        "classification": "validation-receipt",
+                        "path": "validation-receipt.json",
+                        "media_type": "application/json",
+                        "contents": '{"status":"passed"}\n',
+                    },
+                ],
+                validation={
+                    "status": "passed",
+                    "validator": "example-validator",
+                    "version": "1",
+                    "validated_at": "2026-08-24T13:00:00Z",
+                    "receipt_member_id": "validation-receipt",
+                },
+                operation="build-profile",
+                run_id="package-run-1",
+                skill_version="1",
+            )
+            package = load_folder_package(
+                root / "output" / "packages" / "generated-judicial-profile",
+                accepted_kinds={"judicial-profile"},
+                max_bytes=4096,
+            )
+            self.assertEqual(package.sources[0]["fingerprint"], "1" * 64)
+            self.assertEqual(package.producer["operation"], "build-profile")
+            self.assertEqual(len(receipt["artifacts"]), 3)
+            self.assertEqual((root / "context" / "facts.txt").read_bytes(), before)
+
+    def test_publisher_rejects_invocation_not_bound_to_installed_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            invocation = validate_invocation(self._envelope(root))
+            with self.assertRaises(PackageError) as captured:
+                publish_folder_package(
+                    invocation,
+                    package_kind="judicial-profile",
+                    package_id="generated-profile",
+                    created_at="2026-08-24T13:00:00Z",
+                    freshness={"checked_through": None, "retrieved_on": None},
+                    sources=[],
+                    members=[],
+                    validation={},
+                    operation="build-profile",
+                    run_id="package-run-2",
+                    skill_version="1",
+                )
+            self.assertEqual(captured.exception.code, "unbound-package-invocation")
 
             with self.assertRaises(PackageError) as captured:
                 load_folder_package(

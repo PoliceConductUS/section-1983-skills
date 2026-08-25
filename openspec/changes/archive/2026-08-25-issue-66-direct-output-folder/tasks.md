@@ -18,5 +18,5 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run focused and full validation, archive the correction, push, and
+- [x] 4.1 Run focused and full validation, archive the correction, push, and
       mark PR #77 ready while leaving the PR and Issue #66 open.

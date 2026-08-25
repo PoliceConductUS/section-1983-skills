@@ -7,9 +7,9 @@
 
 ## 2. RED
 
-- [ ] 2.1 Require direct manifest/document paths and reject the nested packet
+- [x] 2.1 Require direct manifest/document paths and reject the nested packet
       namespace.
-- [ ] 2.2 Require loader support for trusted-host receipt and temp namespaces.
+- [x] 2.2 Require loader support for trusted-host receipt and temp namespaces.
 
 ## 3. GREEN
 

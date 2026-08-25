@@ -45,6 +45,7 @@ class FilingPacketTest(unittest.TestCase):
         for path in (
             "filing-packet.json",
             ".skill-runs/foreign/manifest.json",
+            "temp/intermediate.tmp",
             "filing-packets/nested/document.md",
             "/absolute.md",
             ".",
@@ -111,6 +112,7 @@ class FilingPacketTest(unittest.TestCase):
                 "dot": lambda value: value["documents"][1].update(path="."),
                 "manifest-member": lambda value: value["documents"][1].update(path="filing-packet.json"),
                 "reserved-run": lambda value: value["documents"][1].update(path=".skill-runs/member.txt"),
+                "reserved-temp": lambda value: value["documents"][1].update(path="temp/member.txt"),
                 "reserved-packets": lambda value: value["documents"][1].update(path="filing-packets/member.txt"),
                 "double-slash": lambda value: value["documents"][1].update(path="nested//member.txt"),
                 "trailing-slash": lambda value: value["documents"][1].update(path="nested/"),
@@ -148,6 +150,25 @@ class FilingPacketTest(unittest.TestCase):
             with self.assertRaises(FilingPacketError) as captured:
                 load_filing_packet(packet, authorized_roles={"main"})
             self.assertEqual(captured.exception.code, "aliased-filing-packet-member")
+
+    def test_loader_excludes_host_control_namespaces_and_rejects_other_unlisted_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "packet"
+            shutil.copytree(FIXTURES / "complaint", root)
+            run_root = root / ".skill-runs" / "packet-run"
+            run_root.mkdir(parents=True)
+            (run_root / "manifest.json").write_text('{"status":"success"}\n')
+            temp_root = root / "temp" / "packet-run"
+            temp_root.mkdir(parents=True)
+            (temp_root / "intermediate.tmp").write_bytes(b"transient\n")
+
+            packet = load_filing_packet(root, authorized_roles={"main"})
+            self.assertEqual(packet.root, root.resolve())
+
+            (root / "unlisted.txt").write_bytes(b"not a packet member\n")
+            with self.assertRaises(FilingPacketError) as captured:
+                load_filing_packet(root, authorized_roles={"main"})
+            self.assertEqual(captured.exception.code, "unlisted-filing-packet-member")
 
     def test_target_is_whole_packet_or_exact_manifest_member(self):
         packet = load_filing_packet(FIXTURES / "multi-exhibit", authorized_roles={"main", "exhibit"})
@@ -204,10 +225,14 @@ class FilingPacketTest(unittest.TestCase):
                 run_id="33333333-3333-4333-8333-333333333333",
                 skill_version="1",
             )
-            packet_root = output / "filing-packets" / "revised-complaint"
-            revised = load_filing_packet(packet_root, authorized_roles={"main"})
+            revised = load_filing_packet(output, authorized_roles={"main"})
             self.assertEqual(revised.provenance["source_packet_sha256"], source_packet.manifest_sha256)
             self.assertEqual(len(receipt["artifacts"]), 2)
+            self.assertEqual(
+                {artifact["path"] for artifact in receipt["artifacts"]},
+                {"amended-complaint.md", "filing-packet.json"},
+            )
+            self.assertFalse((output / "filing-packets").exists())
             self.assertEqual(before, {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()})
 
     def test_publication_rejects_an_invocation_not_bound_to_an_installed_skill(self):

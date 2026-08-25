@@ -190,11 +190,12 @@ class PremiseAwareAuthorityRetrievalTest(unittest.TestCase):
         self.assertIn("omits", gap_record["coverage_limit"])
 
     def test_skill_states_candidate_only_boundary_and_complete_frame(self):
-        text = "\n".join(
+        text = " ".join(
             path.read_text(encoding="utf-8")
             for path in SKILL.rglob("*")
             if path.is_file() and path.suffix in {".md", ".py"}
         ).casefold()
+        text = " ".join(text.split())
         for required in (
             "retrieval lead",
             "governing jurisdiction",

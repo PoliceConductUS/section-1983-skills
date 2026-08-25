@@ -254,6 +254,79 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
         self.assertEqual(captured.exception.code, "invalid-source-documentation")
         self.assertEqual(list(self.output.iterdir()), [])
 
+    def test_initial_mechanical_failures_are_stable_findings_not_legal_judgments(self):
+        target = self.inputs["filing-source"] / "complaint.json"
+        filing = json.loads(target.read_text())
+        filing["section_owners"].pop("jury-demand")
+        filing["exhibit_references"] = [
+            {
+                "exhibit_id": "missing-exhibit",
+                "paragraph_start": 3,
+                "paragraph_end": 2,
+                "short_form": "the attachment",
+            }
+        ]
+        filing["docket_citations"] = [
+            {"docket_entry": 29, "docket_page": 2, "appendix_page": 99}
+        ]
+        filing["persistent_citations"] = [
+            {
+                "id": "cite-one",
+                "type": "authority",
+                "target": "authority-one",
+                "visible_text": "Synthetic Authority",
+                "status": "resolved",
+            },
+            {
+                "id": "cite-one",
+                "type": "record",
+                "target": "missing-record",
+                "visible_text": "Record citation",
+                "status": "unresolved",
+            },
+        ]
+        filing["filing_gates"] = [
+            {"id": "gate-one", "status": "open", "message": "Resolve gate."}
+        ]
+        target.write_text(json.dumps(filing, sort_keys=True), encoding="utf-8")
+        self.write_source_yaml(
+            documentation_role="filing-index",
+            documentation_path="filing.SOURCE.yaml",
+            source_id="filing-current",
+            source_role="filing-source",
+            source_path="complaint.json",
+            classification="filing",
+        )
+
+        result = run_and_publish_filing_integrity(
+            invocation=self.invocation(),
+            selection=self.selection(),
+            run_id="filing-integrity-findings",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(result.status, "failed")
+        self.assertEqual(result.exit_class, "findings")
+        check_ids = {finding["check_id"] for finding in result.findings}
+        self.assertTrue(
+            {
+                "section-owner",
+                "exhibit-paragraph-range",
+                "exhibit-reference",
+                "internal-short-form",
+                "docket-appendix-consistency",
+                "persistent-citation-id",
+                "persistent-citation-target",
+                "open-filing-gate",
+            }.issubset(check_ids)
+        )
+        report = json.loads(
+            (self.output / "reports/filing-integrity.json").read_text()
+        )
+        self.assertEqual(report["status"], "failed")
+        self.assertNotIn("legal_sufficiency", report)
+        self.assertNotIn("filing_ready", report)
+
 
 if __name__ == "__main__":
     unittest.main()

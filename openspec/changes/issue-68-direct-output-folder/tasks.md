@@ -13,8 +13,8 @@
 
 ## 3. GREEN
 
-- [ ] 3.1 Remove the nested package prefix and update the loader.
-- [ ] 3.2 Update public guidance and current durable specifications.
+- [x] 3.1 Remove the nested package prefix and update the loader.
+- [x] 3.2 Update public guidance and current durable specifications.
 
 ## 4. Verification
 

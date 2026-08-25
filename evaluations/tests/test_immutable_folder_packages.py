@@ -75,7 +75,16 @@ class ImmutableFolderPackageStructureTest(unittest.TestCase):
         )
         path_pattern = re.compile(package["$defs"]["member"]["properties"]["path"]["pattern"])
         self.assertIsNotNone(path_pattern.fullmatch("profiles/example.json"))
-        for path in ("package-manifest.json", "/absolute", "../escape", "a/../b", "a//b", "a\\b"):
+        for path in (
+            "package-manifest.json",
+            ".skill-runs/foreign/manifest.json",
+            "temp/intermediate.tmp",
+            "/absolute",
+            "../escape",
+            "a/../b",
+            "a//b",
+            "a\\b",
+        ):
             self.assertIsNone(path_pattern.fullmatch(path), path)
 
     def test_four_fictional_package_families_have_complete_manifests(self):

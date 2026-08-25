@@ -13,7 +13,8 @@ Every immutable profile, overlay, or research-corpus folder MUST contain one
 version-1 `package-manifest.json` with stable package identity, package kind,
 creation time, freshness dates, producer identity, logical sources, complete
 ordered member identity, hashes, validation status, and receipt identity. The
-manifest MUST list every non-manifest file exactly once.
+manifest MUST list every non-manifest file outside the writer-owned
+`.skill-runs/` and `temp/` namespaces exactly once.
 
 #### Scenario: An unlisted file appears in a package
 
@@ -35,19 +36,27 @@ inventory.
 - **THEN** the validated snapshot retains the original verified bytes and the
   role run receives neither the replacement nor an unverified reread
 
-### Requirement: Regeneration publishes a complete new package
+### Requirement: Regeneration publishes the explicit output folder
 
-Only the trusted host MAY publish package output. It MUST require an
-installed-contract-bound invocation, write every proposed member plus the
-manifest through one complete output run beneath the explicit output root, and
-MUST NOT mutate a consumed package or context input.
+Only the trusted host MAY publish folder output. It MUST require an
+installed-contract-bound invocation whose caller supplied one absolute output
+root, or stop and ask for that root before execution. It MUST write every
+proposed member and `package-manifest.json` directly beneath that exact fresh
+output root through one complete output run. It MUST NOT create an intermediate
+`packages/<package-id>/` namespace, mutate a consumed folder or context input,
+or relocate output through CaseGraph, Git, a registry, or an ambient path.
+
+Writer-owned `.skill-runs/` receipt files and `temp/` transient files are not
+package artifacts. Every other regular file beneath the output root MUST appear
+exactly once in `package-manifest.json`.
 
 #### Scenario: A profile package is regenerated
 
 - **WHEN** a builder creates a new complete package from declared read-only
-  inputs
-- **THEN** the output has its own fingerprint and preserves source package IDs
-  and fingerprints while every input remains byte-for-byte unchanged
+  inputs and one caller-selected fresh output folder
+- **THEN** `package-manifest.json` and all members appear directly beneath that
+  output folder, the folder has its own fingerprint and preserves source package
+  IDs and fingerprints, and every input remains byte-for-byte unchanged
 
 ### Requirement: Static role behavior remains separate from profile data
 

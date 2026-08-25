@@ -101,7 +101,7 @@
         "path": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^(?!package-manifest\\.json$)(?!/)(?![\\s\\S]*\\\\)(?![\\s\\S]*\\u0000)(?!\\.{1,2}(?:/|$))(?![\\s\\S]*/\\.{1,2}(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
+          "pattern": "^(?!package-manifest\\.json$)(?!(?:\\.[Ss][Kk][Ii][Ll][Ll]-[Rr][Uu][Nn][Ss]|[Tt][Ee][Mm][Pp])(?:/|$))(?!/)(?![\\s\\S]*\\\\)(?![\\s\\S]*\\u0000)(?!\\.{1,2}(?:/|$))(?![\\s\\S]*/\\.{1,2}(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*/$)[\\s\\S]+$"
         },
         "media_type": { "type": "string", "minLength": 1 },
         "size": { "type": "integer", "minimum": 0 },

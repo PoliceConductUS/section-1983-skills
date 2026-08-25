@@ -16,6 +16,7 @@ from scripts.validate_folder_invocation import ValidatedInvocation, build_input_
 
 
 MANIFEST_NAME = "package-manifest.json"
+CONTROL_NAMESPACES = frozenset({".skill-runs", "temp"})
 _IDENTIFIER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _CLASSIFICATIONS = frozenset(
@@ -118,6 +119,7 @@ def _relative_path(value: Any) -> PurePosixPath:
         or path.as_posix() != value
         or not path.parts
         or any(part in {"", ".", ".."} for part in path.parts)
+        or path.parts[0].casefold() in CONTROL_NAMESPACES
         or value == MANIFEST_NAME
     ):
         _fail("invalid-package-member")
@@ -244,9 +246,22 @@ def _read_member(root: Path, value: Any, max_bytes: int) -> PackageMember:
 def _complete_membership(root: Path, listed: set[str]) -> None:
     actual = set()
     identities = set()
+    for control_name in CONTROL_NAMESPACES:
+        control_path = root / control_name
+        if control_path.is_symlink() or (
+            control_path.exists() and not control_path.is_dir()
+        ):
+            _fail("invalid-package-control-namespace")
     try:
         for path in root.rglob("*"):
             relative = path.relative_to(root).as_posix()
+            top_level = relative.split("/", 1)[0].casefold()
+            if top_level in CONTROL_NAMESPACES:
+                if path.is_symlink():
+                    _fail("invalid-package-control-namespace")
+                if path.is_dir() or path.is_file():
+                    continue
+                _fail("invalid-package-control-namespace")
             if path.is_symlink():
                 _fail("aliased-package-member")
             if path.is_dir():
@@ -502,7 +517,6 @@ def publish_folder_package(
         "validation": normalized_validation,
     }
     input_manifest = build_input_manifest(invocation)
-    prefix = f"packages/{package_id}"
     run = OutputRun.start(
         invocation,
         run_id=run_id,
@@ -512,8 +526,8 @@ def publish_folder_package(
     )
     try:
         for member, contents in proposed:
-            run.write(f"{prefix}/{member['path']}", contents)
-        run.write(f"{prefix}/{MANIFEST_NAME}", _canonical_bytes(manifest))
+            run.write(member["path"], contents)
+        run.write(MANIFEST_NAME, _canonical_bytes(manifest))
         return run.complete()
     except Exception:
         try:

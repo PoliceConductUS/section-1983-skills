@@ -1,9 +1,9 @@
 # Immutable Folder Packages
 
-An immutable folder package is an ordinary directory containing
-`package-manifest.json` and the regular files listed by that manifest. This
-contract is independent of CaseGraph, Git, a package registry, and any ambient
-workspace convention.
+An immutable folder package is the caller-selected output directory itself. It
+contains `package-manifest.json` and the regular files listed by that manifest
+directly beneath that root. This contract is independent of CaseGraph, Git, a
+package registry, and any ambient workspace convention.
 
 ## Trusted-host boundary
 
@@ -20,11 +20,14 @@ fingerprint is the SHA-256 of the exact manifest bytes, whose complete member
 inventory binds every member's SHA-256 and size.
 
 Only the trusted host may publish a package. Publication requires an invocation
-bound to an installed folder contract and writes one complete package beneath
-`packages/<package-id>/` in the caller's explicit fresh output folder. Inputs
-remain recursively read-only. Regeneration creates a complete replacement
-package with a new fingerprint and preserves declared source package identities
-and fingerprints.
+bound to an installed folder contract and writes every member plus
+`package-manifest.json` directly beneath the caller's explicit fresh output
+folder. It does not add a `packages/<package-id>/` namespace. Inputs remain
+recursively read-only. Regeneration requires another fresh output folder,
+creates a complete replacement package with a new fingerprint, and preserves
+declared source package identities and fingerprints. `.skill-runs/` contains
+trusted-host receipts, and `temp/` is the invocation's only transient workspace;
+neither is a package member.
 
 ## Manifest fields
 

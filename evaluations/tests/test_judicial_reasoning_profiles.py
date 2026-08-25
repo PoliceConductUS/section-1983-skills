@@ -68,7 +68,43 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
         self.assertIn("name: building-judicial-reasoning-profiles", skill)
         self.assertIn("Use when", skill)
         self.assertIn("$building-judicial-reasoning-profiles", metadata)
-        self.assertNotIn("Scholer", skill + metadata)
+        self.assertNotIn("Scho" + "ler", skill + metadata)
+
+    def test_current_repository_has_no_embedded_real_judge_dependency(self):
+        removed_name = "drafting-for-judge-" + "scho" + "ler"
+        removed_person = "scho" + "ler"
+        self.assertFalse((ROOT / "skills" / removed_name).exists())
+        roots = (
+            ROOT / "README.md",
+            ROOT / "JUDGE_OVERLAYS.md",
+            ROOT / "governance",
+            ROOT / "skills",
+            ROOT / "scripts",
+            ROOT / "evaluations" / "tests",
+            ROOT / "openspec" / "specs",
+        )
+        findings = []
+        for root in roots:
+            paths = root.rglob("*") if root.is_dir() else (root,)
+            for path in paths:
+                if (
+                    not path.is_file()
+                    or path.suffix not in {".json", ".md", ".py", ".yaml", ".yml"}
+                    or path == Path(__file__)
+                ):
+                    continue
+                text = path.read_text(encoding="utf-8").casefold()
+                if removed_name in text or removed_person in text:
+                    findings.append(path.relative_to(ROOT).as_posix())
+        self.assertEqual(findings, [])
+        self.assertIn(
+            "building-judicial-reasoning-profiles",
+            (ROOT / "skills" / "section-1983-drafting" / "SKILL.md").read_text(),
+        )
+        self.assertIn(
+            "skills/building-judicial-reasoning-profiles/SKILL.md",
+            (ROOT / "JUDGE_OVERLAYS.md").read_text(),
+        )
 
     def test_skill_separates_acquisition_compilation_and_role_behavior(self):
         text = (SKILL / "SKILL.md").read_text().lower()

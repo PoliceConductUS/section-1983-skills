@@ -31,8 +31,8 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
         )
         self.opinion = self.authorities / "iqbal.txt"
         self.opinion.write_text(
-            "At page 678: A claim has facial plausibility when the plaintiff "
-            "pleads factual content.\n",
+            "[page 678]\nA claim has facial plausibility when the plaintiff "
+            "pleads factual content.\n[page 679]\nAdditional text.\n",
             encoding="utf-8",
         )
         digest = hashlib.sha256(self.opinion.read_bytes()).hexdigest()
@@ -232,6 +232,36 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
             {"missing-authority", "quotation-not-found"},
         )
         self.assertTrue(all(finding["severity"] == "hard" for finding in result.findings))
+
+    def test_quotation_must_occur_at_the_asserted_pinpoint(self):
+        original_digest = hashlib.sha256(self.opinion.read_bytes()).hexdigest()
+        self.opinion.write_text(
+            "[page 678]\nDifferent text.\n[page 679]\n"
+            "A claim has facial plausibility when the plaintiff pleads factual content.\n",
+            encoding="utf-8",
+        )
+        replacement_digest = hashlib.sha256(self.opinion.read_bytes()).hexdigest()
+        for path in (
+            self.authorities / "iqbal.SOURCE.yaml",
+            self.authorities / "iqbal.AUTHORITY.yaml",
+        ):
+            path.write_text(
+                path.read_text().replace(original_digest, replacement_digest),
+                encoding="utf-8",
+            )
+
+        result = run_and_publish_authority_audit(
+            invocation=self.invocation(),
+            corpus_documentation_path="selected.CORPUS.yaml",
+            run_id="authority-audit-pinpoint",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(result.exit_class, "findings")
+        self.assertEqual(
+            {finding["check_id"] for finding in result.findings},
+            {"quotation-pinpoint-mismatch"},
+        )
 
     def test_persistent_markup_resolves_by_authority_id_and_unusable_text_never_passes(self):
         (self.filing / "motion.md").write_text(

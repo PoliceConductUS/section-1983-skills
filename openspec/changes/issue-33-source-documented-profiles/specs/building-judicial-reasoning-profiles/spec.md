@@ -19,6 +19,8 @@ manifest, package identity, package loader, graph, or CaseGraph object.
 - **THEN** compilation may use those bytes only in a later invocation that
   declares the acquisition folder as recursive read-only `approved-sources`
 
+## ADDED Requirements
+
 ### Requirement: Profile source references preserve folder provenance
 
 The compiled profile MUST retain each source ID and MUST emit a domain YAML

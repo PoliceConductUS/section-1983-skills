@@ -56,7 +56,7 @@ output run.
 - **THEN** the skill may report that Filing CI passed while preserving warnings
   and every other independent filing gate
 
-### Requirement: Installed checker resolution
+### Requirement: Packaged checker resolution
 
 The `filing-ci` skill SHALL ship a narrow deterministic wrapper with an explicit
 registry of checker IDs in its installed skill directory. The wrapper MUST

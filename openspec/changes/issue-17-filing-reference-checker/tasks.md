@@ -4,7 +4,7 @@
 
 - [x] 1.1 Correct live Issue #17 to the ordinary-folder/domain-YAML contract.
 - [x] 1.2 Create the stacked worktree and OpenSpec design.
-- [ ] 1.3 Push the design commit and open the stacked draft PR.
+- [x] 1.3 Push the design commit and open the stacked draft PR.
 
 ## 2. TDD correction
 

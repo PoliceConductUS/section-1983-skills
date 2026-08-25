@@ -8,26 +8,26 @@
 
 ## 2. Installed collection boundary
 
-- [ ] 2.1 Test the exact six-role, no-target, authorized-internet contract.
-- [ ] 2.2 Add the installable collector and source-documented-folder guidance.
+- [x] 2.1 Test the exact six-role, no-target, authorized-internet contract.
+- [x] 2.2 Add the installable collector and source-documented-folder guidance.
 
 ## 3. Source records and gaps
 
-- [ ] 3.1 Test strict fictional provenance, classifications, decision-date
+- [x] 3.1 Test strict fictional provenance, classifications, decision-date
       evidence/gaps, candidate identities, duplicates, and incomplete coverage.
-- [ ] 3.2 Implement deterministic validation and output-relative artifact plans.
+- [x] 3.2 Implement deterministic validation and output-relative artifact plans.
 
 ## 4. Separation and output boundary
 
-- [ ] 4.1 Test collector/auditor separation, changed content, mistaken identity,
+- [x] 4.1 Test collector/auditor separation, changed content, mistaken identity,
       unofficial sources, input preservation, output and temp confinement, and
       internet provenance.
-- [ ] 4.2 Document later `audit-authorities` handoff and no-verification
+- [x] 4.2 Document later `audit-authorities` handoff and no-verification
       boundary.
 
 ## 5. Verification
 
-- [ ] 5.1 Run focused tests, full validation, and whole-story review.
-- [ ] 5.2 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 5.1 Run focused tests, full validation, and whole-story review.
+- [x] 5.2 Record verification and retrospective evidence and archive OpenSpec.
 - [ ] 5.3 Verify exact remote head/checks and mark the PR ready while leaving
       the PR and Issue #60 open.

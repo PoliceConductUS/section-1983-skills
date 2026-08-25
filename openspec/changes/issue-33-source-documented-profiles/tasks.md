@@ -8,8 +8,8 @@
 
 ## 2. RED
 
-- [ ] 2.1 Reject package helpers and package-shaped skill surfaces.
-- [ ] 2.2 Require separate acquisition and compilation output folders with
+- [x] 2.1 Reject package helpers and package-shaped skill surfaces.
+- [x] 2.2 Require separate acquisition and compilation output folders with
       ordinary files, domain YAML, direct output, and output-local temp.
 
 ## 3. GREEN

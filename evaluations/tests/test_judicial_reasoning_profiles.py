@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 import shutil
 import tempfile
@@ -6,10 +7,7 @@ import unittest
 import uuid
 from pathlib import Path
 
-from scripts.immutable_folder_package import (
-    load_folder_package,
-    publish_folder_package,
-)
+from scripts.skill_output_writer import OutputRun
 from scripts.validate_folder_invocation import (
     InvocationError,
     build_input_manifest,
@@ -28,7 +26,7 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
             "SKILL.md",
             "agents/openai.yaml",
             "references/folder-contract.json",
-            "references/immutable-folder-package.md",
+            "references/source-documented-folders.md",
             "references/judicial-reasoning-profile.schema.json",
             "references/fixtures/complete-profile.json",
             "references/fixtures/thin-profile.json",
@@ -120,6 +118,20 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
         self.assertIn("static role", text)
         self.assertIn("does not predict", text)
         self.assertIn("does not generate", text)
+        self.assertIn("source.yaml", text)
+        self.assertIn("judicial-profile-sources.yaml", text)
+        self.assertIn("<output-folder>/temp", text)
+        self.assertNotIn("package-manifest.json", text)
+
+    def test_generic_package_layer_is_not_reintroduced(self):
+        rejected = (
+            ROOT / "scripts" / "immutable_folder_package.py",
+            ROOT / "governance" / "immutable-folder-package.schema.json",
+            SKILL / "references" / "immutable-folder-package.md",
+        )
+        for path in rejected:
+            with self.subTest(path=path.relative_to(ROOT)):
+                self.assertFalse(path.exists())
 
     def test_schema_and_fictional_fixtures_define_domain_contract(self):
         schema = json.loads(
@@ -319,28 +331,7 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
             },
         }
 
-    @staticmethod
-    def _receipt_member():
-        return {
-            "id": "validation-receipt",
-            "role": "receipt",
-            "classification": "validation-receipt",
-            "path": "validation-receipt.json",
-            "media_type": "application/json",
-            "contents": '{"status":"passed"}\n',
-        }
-
-    @staticmethod
-    def _validation():
-        return {
-            "status": "passed",
-            "validator": "judicial-profile-validator",
-            "version": "1",
-            "validated_at": "2026-08-25T12:00:00Z",
-            "receipt_member_id": "validation-receipt",
-        }
-
-    def test_acquisition_and_later_compilation_publish_separate_reloadable_packages(self):
+    def test_acquisition_and_later_compilation_publish_ordinary_source_documented_files(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             for name in (
@@ -370,40 +361,37 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
                 SKILL,
             )
             acquisition_inputs = build_input_manifest(acquisition)
-            publish_folder_package(
+            acquisition_run = OutputRun.start(
                 acquisition,
-                package_kind="source-package",
-                package_id="fictional-judge-source-package",
-                created_at="2026-08-25T12:00:00Z",
-                freshness={
-                    "checked_through": "2026-08-25",
-                    "retrieved_on": "2026-08-25",
-                },
-                sources=[],
-                members=[
-                    {
-                        "id": "public-order",
-                        "role": "source",
-                        "classification": "source",
-                        "path": "sources/public-order.txt",
-                        "media_type": "text/plain",
-                        "contents": "fictional public order\n",
-                    },
-                    self._receipt_member(),
-                ],
-                validation=self._validation(),
-                operation="acquisition",
-                run_id="judicial-acquisition-run",
+                run_id="11111111-1111-4111-8111-111111111111",
                 skill_version="1",
+                mode="fresh-regenerable",
+                input_manifest=acquisition_inputs,
             )
-            acquired = load_folder_package(
-                root / "acquisition-output",
-                accepted_kinds={"source-package"},
-                max_bytes=1_048_576,
+            source_bytes = b"fictional public order\n"
+            source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+            acquisition_run.write(
+                "sources/public-order/document.txt", source_bytes
             )
+            source_yaml = (
+                "schema_version: 1\n"
+                "source_id: public-order\n"
+                "artifact_path: document.txt\n"
+                f"sha256: {source_sha256}\n"
+                "url: https://example.invalid/public-order\n"
+                "retrieved_on: 2026-08-25\n"
+                "checked_through: 2026-08-25\n"
+                "classification: revealed_reasoning\n"
+                "validation_status: passed\n"
+                "limitations: []\n"
+                "gaps: []\n"
+            ).encode()
+            acquisition_run.write("sources/public-order/SOURCE.yaml", source_yaml)
+            acquisition_run.complete()
+            acquired_root = root / "acquisition-output"
             acquired_snapshot = {
-                path.relative_to(acquired.root).as_posix(): path.read_bytes()
-                for path in acquired.root.rglob("*")
+                path.relative_to(acquired_root).as_posix(): path.read_bytes()
+                for path in acquired_root.rglob("*")
                 if path.is_file()
             }
 
@@ -422,55 +410,69 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
                 SKILL / "scripts" / "validate_judicial_profiles.py"
             )
             validator.validate_profile_bytes(profile_bytes, max_bytes=1_048_576)
-            publish_folder_package(
+            compilation_run = OutputRun.start(
                 compilation,
-                package_kind="judicial-profile",
-                package_id="fictional-judge-profile-package",
-                created_at="2026-08-25T12:00:00Z",
-                freshness={"checked_through": "2026-08-25", "retrieved_on": None},
-                sources=[
-                    {
-                        "role": "approved-sources",
-                        "source_id": acquired.package_id,
-                        "fingerprint": acquired.fingerprint,
-                    }
-                ],
-                members=[
-                    {
-                        "id": "judicial-profile",
-                        "role": "primary",
-                        "classification": "profile",
-                        "path": "judicial-profile.json",
-                        "media_type": "application/json",
-                        "contents": profile_bytes,
-                    },
-                    self._receipt_member(),
-                ],
-                validation=self._validation(),
-                operation="compilation",
-                run_id="judicial-compilation-run",
+                run_id="22222222-2222-4222-8222-222222222222",
                 skill_version="1",
+                mode="fresh-regenerable",
+                input_manifest=build_input_manifest(compilation),
             )
-            compiled = load_folder_package(
-                root / "compilation-output",
-                accepted_kinds={"judicial-profile"},
-                max_bytes=1_048_576,
+            source_index = (
+                "schema_version: 1\n"
+                "profile_id: fictional-judge-example-profile\n"
+                "sources:\n"
+                "  - source_id: public-order\n"
+                "    input_role: approved-sources\n"
+                "    source_metadata_path: sources/public-order/SOURCE.yaml\n"
+                "    artifact_path: sources/public-order/document.txt\n"
+                f"    sha256: {source_sha256}\n"
+                "    checked_through: 2026-08-25\n"
+                "    classification: revealed_reasoning\n"
+                "    validation_status: passed\n"
+                "    limitations: []\n"
+                "    gaps: []\n"
+            ).encode()
+            compilation_run.write("judicial-profile.json", profile_bytes)
+            compilation_run.write("judicial-profile-sources.yaml", source_index)
+            compilation_run.write(
+                "validation-receipt.json",
+                b'{"status":"passed","validator":"judicial-profile-validator"}\n',
             )
+            compilation_run.complete()
 
-            self.assertEqual(acquired.package_kind, "source-package")
-            self.assertEqual(compiled.package_kind, "judicial-profile")
-            self.assertEqual(compiled.sources[0]["fingerprint"], acquired.fingerprint)
+            self.assertEqual(
+                (acquired_root / "sources/public-order/document.txt").read_bytes(),
+                source_bytes,
+            )
+            self.assertEqual(
+                (acquired_root / "sources/public-order/SOURCE.yaml").read_bytes(),
+                source_yaml,
+            )
+            self.assertEqual(
+                (root / "compilation-output/judicial-profile.json").read_bytes(),
+                profile_bytes,
+            )
+            self.assertEqual(
+                (root / "compilation-output/judicial-profile-sources.yaml").read_bytes(),
+                source_index,
+            )
             self.assertEqual(build_input_manifest(acquisition), acquisition_inputs)
             self.assertEqual(
                 {
-                    path.relative_to(acquired.root).as_posix(): path.read_bytes()
-                    for path in acquired.root.rglob("*")
+                    path.relative_to(acquired_root).as_posix(): path.read_bytes()
+                    for path in acquired_root.rglob("*")
                     if path.is_file()
                 },
                 acquired_snapshot,
             )
-            self.assertFalse((root / "acquisition-output" / "packages").exists())
-            self.assertFalse((root / "compilation-output" / "packages").exists())
+            self.assertFalse((acquired_root / "package-manifest.json").exists())
+            self.assertFalse(
+                (root / "compilation-output/package-manifest.json").exists()
+            )
+            self.assertEqual(
+                compilation_run.process_configuration()["cwd"],
+                str(compilation.output_root / "temp"),
+            )
 
     def test_current_output_cannot_be_same_run_approved_source(self):
         with tempfile.TemporaryDirectory() as directory:

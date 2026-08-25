@@ -1,7 +1,11 @@
 import json
 import re
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
+
+from scripts.immutable_folder_package import PackageError, load_folder_package
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -75,6 +79,117 @@ class ImmutableFolderPackageStructureTest(unittest.TestCase):
                 )
                 self.assertEqual(sorted(listed), actual)
                 self.assertIn(manifest["validation"]["receipt_member_id"], {member["id"] for member in manifest["members"]})
+
+
+class ImmutableFolderPackageLoaderTest(unittest.TestCase):
+    def test_loader_pins_complete_verified_member_bytes(self):
+        for kind in PACKAGE_KINDS:
+            with self.subTest(kind=kind):
+                package = load_folder_package(
+                    FIXTURES / kind,
+                    accepted_kinds={kind},
+                    max_bytes=4096,
+                )
+                self.assertEqual(
+                    (package.package_kind, package.package_id),
+                    (kind, f"fictional-{kind}"),
+                )
+                self.assertRegex(package.fingerprint, r"^[0-9a-f]{64}$")
+                self.assertEqual(package.fingerprint, package.manifest_sha256)
+                self.assertEqual(len(package.members), 2)
+                self.assertTrue(
+                    all(isinstance(member.contents, bytes) for member in package.members)
+                )
+                self.assertEqual(package.validation["status"], "passed")
+
+    def test_snapshot_does_not_reread_mutated_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "package"
+            shutil.copytree(FIXTURES / "judicial-profile", root)
+            package = load_folder_package(
+                root, accepted_kinds={"judicial-profile"}, max_bytes=4096
+            )
+            original = package.members[0].contents
+            (root / package.members[0].path).write_text("changed after validation")
+            self.assertEqual(package.members[0].contents, original)
+
+    def test_loader_rejects_incomplete_mismatched_aliased_and_oversized_packages(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            cases = {}
+            extra = base / "extra"
+            shutil.copytree(FIXTURES / "judicial-profile", extra)
+            (extra / "unlisted.txt").write_text("unlisted")
+            cases["unlisted-package-member"] = extra
+
+            mismatch = base / "mismatch"
+            shutil.copytree(FIXTURES / "judicial-profile", mismatch)
+            (mismatch / "profile.json").write_text("changed")
+            cases["package-member-mismatch"] = mismatch
+
+            alias = base / "alias"
+            shutil.copytree(FIXTURES / "judicial-profile", alias)
+            (alias / "profile.json").unlink()
+            (alias / "profile.json").symlink_to(
+                FIXTURES / "judicial-profile" / "profile.json"
+            )
+            cases["aliased-package-member"] = alias
+
+            for expected, root in cases.items():
+                with self.subTest(expected=expected), self.assertRaises(
+                    PackageError
+                ) as captured:
+                    load_folder_package(
+                        root,
+                        accepted_kinds={"judicial-profile"},
+                        max_bytes=4096,
+                    )
+                self.assertEqual(captured.exception.code, expected)
+
+            with self.assertRaises(PackageError) as captured:
+                load_folder_package(
+                    FIXTURES / "judicial-profile",
+                    accepted_kinds={"judicial-profile"},
+                    max_bytes=10,
+                )
+            self.assertEqual(captured.exception.code, "package-byte-limit")
+
+    def test_loader_rejects_malformed_contract_and_receipt_linkage(self):
+        mutations = {
+            "invalid-package-manifest": lambda value: value.update(
+                schema_version=True
+            ),
+            "unsupported-package-kind": lambda value: value.update(
+                package_kind="municipal-profile"
+            ),
+            "invalid-package-freshness": lambda value: value["freshness"].update(
+                checked_through="08/24/2026"
+            ),
+            "invalid-package-validation": lambda value: value["validation"].update(
+                status="failed"
+            ),
+            "invalid-package-validation-receipt": lambda value: value[
+                "validation"
+            ].update(receipt_member_id="profile"),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            for index, (expected, mutate) in enumerate(mutations.items()):
+                root = base / str(index)
+                shutil.copytree(FIXTURES / "judicial-profile", root)
+                manifest_path = root / "package-manifest.json"
+                value = json.loads(manifest_path.read_text())
+                mutate(value)
+                manifest_path.write_text(json.dumps(value))
+                with self.subTest(expected=expected), self.assertRaises(
+                    PackageError
+                ) as captured:
+                    load_folder_package(
+                        root,
+                        accepted_kinds={"judicial-profile"},
+                        max_bytes=4096,
+                    )
+                self.assertEqual(captured.exception.code, expected)
 
 
 if __name__ == "__main__":

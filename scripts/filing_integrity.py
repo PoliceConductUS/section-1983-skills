@@ -305,15 +305,28 @@ def _load_records(
     selection: FilingIntegritySelection,
 ) -> tuple[SourceRecord, ...]:
     entries = [
-        ("filing-index", selection.filing_documentation_path),
+        (
+            "filing-index",
+            selection.filing_documentation_path,
+            "filing-source",
+            "filing",
+        ),
         *(
-            ("record-reference", path)
+            ("record-reference", path, "record-reference", "record")
             for path in selection.record_documentation_paths
         ),
-        *(("exhibit", path) for path in selection.exhibit_documentation_paths),
-        ("docket-to-appendix", selection.docket_documentation_path),
         *(
-            ("verified-authority", path)
+            ("exhibit", path, "exhibit", "exhibit")
+            for path in selection.exhibit_documentation_paths
+        ),
+        (
+            "docket-to-appendix",
+            selection.docket_documentation_path,
+            "docket-to-appendix",
+            "docket-to-appendix",
+        ),
+        *(
+            ("verified-authority", path, "verified-authority", "authority")
             for path in selection.authority_documentation_paths
         ),
     ]
@@ -323,8 +336,16 @@ def _load_records(
             documentation_role=role,
             documentation_path=path,
         )
-        for role, path in entries
+        for role, path, _source_role, _classification in entries
     )
+    if any(
+        record.source_role != source_role
+        or record.classification != classification
+        for record, (_role, _path, source_role, classification) in zip(
+            records, entries, strict=True
+        )
+    ):
+        _fail("invalid-source-documentation")
     identities = {(record.source_id, record.source_role) for record in records}
     if len(identities) != len(records):
         _fail("invalid-source-documentation")

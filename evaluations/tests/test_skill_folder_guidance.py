@@ -36,7 +36,7 @@ class SkillFolderGuidanceTest(unittest.TestCase):
                         + " or ".join(f"`{role}`" for role in target_roles),
                         section,
                     )
-                policies = internet if isinstance(internet, list) else [internet]
+                policies = internet.values() if isinstance(internet, dict) else [internet]
                 for policy in policies:
                     self.assertIn(f"`{policy}`", section)
                 self.assertIn("canonical output-relative path", section)

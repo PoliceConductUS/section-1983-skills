@@ -13,8 +13,9 @@ Every public skill MUST link to a schema-valid install-local folder contract
 with exactly its approved ordered role set, target policy and target roles,
 allowed internet policy or policies, and `append-immutable` output mode. A
 single-operation skill declares one internet-policy string. A multi-operation
-skill may declare a nonempty unique array containing every and only permitted
-invocation policies; each invocation still selects exactly one:
+skill may declare a nonempty object mapping every operation name to its exact
+invocation policy; each invocation selects one known operation and its matching
+policy:
 
 | Skill                                             | Ordered input roles                                                         | Target policy and roles                       | Internet               |
 | ------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------- | ---------------------- |

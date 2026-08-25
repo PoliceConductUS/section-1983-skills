@@ -21,6 +21,9 @@
     "skill": {
       "$ref": "#/$defs/identifier"
     },
+    "operation": {
+      "$ref": "#/$defs/identifier"
+    },
     "inputs": {
       "type": "array",
       "minItems": 1,

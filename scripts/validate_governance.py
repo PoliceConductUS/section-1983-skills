@@ -87,7 +87,7 @@ APPROVED_FOLDER_CONTRACTS = {
         ],
         "none",
         [],
-        ["authorized", "disabled"],
+        {"acquisition": "authorized", "compilation": "disabled"},
     ),
     "drafting-false-arrest-complaints": folder_contract(
         "drafting-false-arrest-complaints",
@@ -753,10 +753,16 @@ def validate_folder_contract_document(document, expected_skill):
         internet_valid = internet in {"disabled", "authorized"}
     else:
         internet_valid = (
-            isinstance(internet, list)
+            isinstance(internet, dict)
             and bool(internet)
-            and all(policy in {"disabled", "authorized"} for policy in internet)
-            and len(internet) == len(set(internet))
+            and all(
+                isinstance(operation, str) and SAFE_ROLE.fullmatch(operation)
+                for operation in internet
+            )
+            and all(
+                policy in {"disabled", "authorized"}
+                for policy in internet.values()
+            )
         )
     if not internet_valid:
         errors.append("invalid-folder-contract-internet")

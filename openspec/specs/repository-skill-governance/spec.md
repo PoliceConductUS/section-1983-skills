@@ -393,11 +393,12 @@ helper write, and overwrite permissions in current public contracts.
 Every public `SKILL.md` MUST link to a schema-valid install-local
 `references/folder-contract.json` that states the exact ordered input roles,
 target policy and roles, allowed internet policy or policies, and declared
-output mode. A multi-operation skill MAY list a nonempty unique set of allowed
-internet policies, while each invocation MUST choose exactly one. The skill MUST
-also carry the compact recursive input-read-only, output-only, internet, and
-host-enforcement boundary. The full protocol SHALL remain in the repository's
-canonical execution owner and MUST NOT be copied into every skill.
+output mode. A multi-operation skill MAY map each operation name to its exact
+internet policy, while each invocation MUST choose one known operation and its
+matching policy. The skill MUST also carry the compact recursive
+input-read-only, output-only, internet, and host-enforcement boundary. The full
+protocol SHALL remain in the repository's canonical execution owner and MUST NOT
+be copied into every skill.
 
 #### Scenario: Skill is installed alone
 

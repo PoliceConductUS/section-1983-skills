@@ -48,7 +48,7 @@ CONTRACTS = {
         ],
         "none",
         [],
-        ["authorized", "disabled"],
+        {"acquisition": "authorized", "compilation": "disabled"},
     ),
     "building-litigation-alignment-overlays": (
         ["docket-snapshot", "filing"],
@@ -425,7 +425,10 @@ class SkillFolderContractsTest(unittest.TestCase):
                     inputs.append({"role": role, "root": str(role_root)})
                 output_root = root / "output"
                 output_root.mkdir()
-                invocation_internet = internet[0] if isinstance(internet, list) else internet
+                if isinstance(internet, dict):
+                    operation, invocation_internet = next(iter(internet.items()))
+                else:
+                    operation, invocation_internet = None, internet
                 envelope = {
                     "version": 1,
                     "skill": skill,
@@ -439,6 +442,8 @@ class SkillFolderContractsTest(unittest.TestCase):
                         "undeclared": "none",
                     },
                 }
+                if operation is not None:
+                    envelope["operation"] = operation
                 if target_policy == "required":
                     envelope["target"] = {
                         "role": target_roles[0],
@@ -477,6 +482,26 @@ class SkillFolderContractsTest(unittest.TestCase):
                                 ),
                             },
                             "contract-internet",
+                        )
+                    )
+                else:
+                    alternate_policy = (
+                        "disabled"
+                        if invocation_internet == "authorized"
+                        else "authorized"
+                    )
+                    mutations.append(
+                        (
+                            "operation-internet-mismatch",
+                            {**envelope, "internet": alternate_policy},
+                            "contract-internet",
+                        )
+                    )
+                    mutations.append(
+                        (
+                            "unknown-operation",
+                            {**envelope, "operation": "unknown-operation"},
+                            "contract-operation",
                         )
                     )
                 if target_policy == "required":

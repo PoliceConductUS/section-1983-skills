@@ -8,7 +8,7 @@
 
 ## 2. TDD correction
 
-- [ ] 2.1 RED-test a parseable noncanonical domain-YAML date.
+- [x] 2.1 RED-test a parseable noncanonical domain-YAML date.
 - [ ] 2.2 Restore the canonical date comparison to the date validator.
 - [ ] 2.3 Prove invalid date input creates no output and invokes no checker.
 

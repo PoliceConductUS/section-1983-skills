@@ -278,6 +278,28 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
         self.assertEqual(captured.exception.exit_class, "unavailable")
         self.assertEqual(list(self.output.iterdir()), [])
 
+    def test_parseable_noncanonical_date_is_invalid_before_checker_or_output(self):
+        documentation = self.inputs["filing-index"] / "filing.SOURCE.yaml"
+        documentation.write_text(
+            documentation.read_text().replace(
+                "checked_through: 2026-08-25\n",
+                "checked_through: 20260825\n",
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(FilingIntegrityError) as captured:
+            run_and_publish_filing_integrity(
+                invocation=self.invocation(),
+                selection=self.selection(),
+                run_id="filing-integrity-noncanonical-date",
+                skill_version="1.0.0",
+            )
+
+        self.assertEqual(captured.exception.code, "invalid-source-documentation")
+        self.assertEqual(captured.exception.exit_class, "invalid")
+        self.assertEqual(list(self.output.iterdir()), [])
+
     def test_source_yaml_cannot_redefine_its_selected_folder_role(self):
         documentation = self.inputs["exhibit"] / "exhibit-a.SOURCE.yaml"
         documentation.write_text(

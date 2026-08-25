@@ -33,5 +33,5 @@
 - [x] 5.2 Run focused and whole-repository verification and a fresh whole-story
       review.
 - [x] 5.3 Record verification/retrospective evidence and archive the change.
-- [ ] 5.4 Push the verified archive and mark the PR ready without closing
+- [x] 5.4 Push the verified archive and mark the PR ready without closing
       either.

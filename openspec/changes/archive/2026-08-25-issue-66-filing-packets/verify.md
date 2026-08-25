@@ -80,3 +80,11 @@ public FilingPacket package-boundary requirement to
 
 The archive commit, exact remote parity, GitHub validation, and draft-to-ready
 transition remain pending at this checkpoint. PR #77 and Issue #66 remain open.
+
+## Final readiness
+
+Archive commit `08884e3` was pushed, PR #77 resolved to that exact head, and its
+GitHub `Validate` job passed. PR #77 was then marked ready for review. PR #77
+and Issue #66 remain open under the requested close-on-merge policy. This final
+evidence update changes no implementation behavior and must receive its own
+exact-head GitHub validation after push.

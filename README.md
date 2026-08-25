@@ -61,6 +61,7 @@ work. `temp/` is not a durable artifact destination.
 | `auditing-section-1983-privilege-logs`            | Source-bounded privilege-log requirements and entry audit without invented metadata, privilege adjudication, or automatic waiver.                                          |
 | `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                            |
 | `building-judicial-reasoning-profiles`            | Generic builder for evidence-bounded Judicial Reasoning Profile files with domain YAML provenance from approved public sources.                                            |
+| `collecting-police-policy-sources`                | Bounded authorized collection of ordinary police-policy source files with adjacent YAML provenance and explicit coverage gaps.                                             |
 | `judicial-reviewer`                               | Findings-only review of comprehension, procedure, authority presentation, record traceability, and gaps under a validated judicial profile.                                |
 | `opposing-counsel`                                | Findings-only source-backed opposing-counsel simulation under a validated defense-counsel profile without impersonation or disposition.                                    |
 | `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
@@ -106,30 +107,33 @@ registry, graph, or case-management runtime is required.
 6. Use `building-judicial-reasoning-profiles` to acquire approved public sources
    with `SOURCE.yaml` provenance or compile validated profile files for the
    assigned judge. A later shared launcher owns profile-backed judicial review.
-7. Add `building-litigation-alignment-overlays` before an amended complaint,
+7. Use `collecting-police-policy-sources` for bounded authorized acquisition of
+   ordinary policy files and adjacent source YAML. Policy analysis remains a
+   separate later invocation over a reviewed read-only folder.
+8. Add `building-litigation-alignment-overlays` before an amended complaint,
    leave package, or other filing that should consume the current docket's
    actual adversary positions and judicial treatment.
-8. Add `building-defense-counsel-overlays` when an actual-adversary review
+9. Add `building-defense-counsel-overlays` when an actual-adversary review
    should consume validated professional history for the effective defense team.
    Keep that material out of the blind common-attack review.
-9. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
-   specialization. Those planners hand amendment work back to the applicable
-   complaint skills.
-10. For discovery, use `drafting-section-1983-written-discovery`,
+10. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
+    specialization. Those planners hand amendment work back to the applicable
+    complaint skills.
+11. For discovery, use `drafting-section-1983-written-discovery`,
     `auditing-section-1983-discovery-responses`,
     `drafting-section-1983-meet-and-confer`,
     `auditing-section-1983-privilege-logs`, or
     `drafting-section-1983-deposition-outlines` for its named task. The existing
     drafting entrypoint supplies routing and the shared coordination contract;
     each peer remains independently usable.
-11. Before treating legal work as filing-ready, run `audit-authorities`,
+12. Before treating legal work as filing-ready, run `audit-authorities`,
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-12. Run `adversarial-filing-review` in a fresh clean-room context after
+13. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-13. Run `filing-ci` after the applicable prose and authority audits, after each
+14. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.

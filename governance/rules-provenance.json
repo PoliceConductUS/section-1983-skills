@@ -85,6 +85,12 @@
       "rationale": "Classifies and compiles caller-approved public source material without supplying current procedural rule content."
     },
     {
+      "name": "collecting-police-policy-sources",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Collects source-documented police-policy files without supplying procedural rules or interpreting policy meaning."
+    },
+    {
       "name": "judicial-reviewer",
       "rules_mode": "runtime-sourced",
       "reviewed_on": "2026-08-25",

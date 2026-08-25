@@ -1,0 +1,7 @@
+interface:
+  display_name: "Collect Police-Policy Sources"
+  short_description: "Collect source-documented policy files"
+  default_prompt:
+    "Use $collecting-police-policy-sources to perform bounded authorized
+    research and return ordinary police-policy source files with YAML provenance
+    for later review."

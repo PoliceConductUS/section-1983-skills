@@ -171,6 +171,8 @@ def _date(value: str) -> None:
         parsed = date.fromisoformat(value)
     except ValueError:
         _fail("invalid-source-documentation")
+    if parsed.isoformat() != value:
+        _fail("invalid-source-documentation")
 
 
 def _required_input_path(
@@ -209,8 +211,6 @@ def _required_input_path(
     except (OSError, ValueError):
         _fail("invalid-source-documentation")
     return resolved
-    if parsed.isoformat() != value:
-        _fail("invalid-source-documentation")
 
 
 def _load_source_record(

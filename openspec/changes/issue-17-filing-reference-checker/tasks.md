@@ -9,14 +9,14 @@
 ## 2. TDD correction
 
 - [x] 2.1 RED-test a parseable noncanonical domain-YAML date.
-- [ ] 2.2 Restore the canonical date comparison to the date validator.
-- [ ] 2.3 Prove invalid date input creates no output and invokes no checker.
+- [x] 2.2 Restore the canonical date comparison to the date validator.
+- [x] 2.3 Prove invalid date input creates no output and invokes no checker.
 
 ## 3. Milestone verification
 
-- [ ] 3.1 Verify the exact six roles, target, internet, output, and temp policy.
-- [ ] 3.2 Verify all initial mechanical finding classes and stable results.
-- [ ] 3.3 Verify isolated installation and recursive input preservation.
+- [x] 3.1 Verify the exact six roles, target, internet, output, and temp policy.
+- [x] 3.2 Verify all initial mechanical finding classes and stable results.
+- [x] 3.3 Verify isolated installation and recursive input preservation.
 
 ## 4. Completion
 

@@ -3,6 +3,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from evaluations.tests.test_installed_filing_checks import complaint_document
 from scripts.filing_integrity import (
@@ -288,13 +289,15 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
             encoding="utf-8",
         )
 
-        with self.assertRaises(FilingIntegrityError) as captured:
-            run_and_publish_filing_integrity(
-                invocation=self.invocation(),
-                selection=self.selection(),
-                run_id="filing-integrity-noncanonical-date",
-                skill_version="1.0.0",
-            )
+        with mock.patch("scripts.filing_integrity._load_checker") as load_checker:
+            with self.assertRaises(FilingIntegrityError) as captured:
+                run_and_publish_filing_integrity(
+                    invocation=self.invocation(),
+                    selection=self.selection(),
+                    run_id="filing-integrity-noncanonical-date",
+                    skill_version="1.0.0",
+                )
+            load_checker.assert_not_called()
 
         self.assertEqual(captured.exception.code, "invalid-source-documentation")
         self.assertEqual(captured.exception.exit_class, "invalid")

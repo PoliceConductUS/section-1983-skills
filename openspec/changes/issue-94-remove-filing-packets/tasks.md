@@ -8,9 +8,9 @@
 
 ## 2. Deletion tests
 
-- [ ] 2.1 RED-test the exact obsolete FilingPacket implementation inventory.
-- [ ] 2.2 RED-test ordinary filing-folder skill and guidance behavior.
-- [ ] 2.3 RED-test rejection of replacement persistence abstractions.
+- [x] 2.1 RED-test the exact obsolete FilingPacket implementation inventory.
+- [x] 2.2 RED-test ordinary filing-folder skill and guidance behavior.
+- [x] 2.3 RED-test rejection of replacement persistence abstractions.
 
 ## 3. Remove obsolete persistence
 

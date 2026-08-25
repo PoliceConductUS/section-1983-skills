@@ -150,16 +150,17 @@ approving the proposition.
 For each key authority you rely on (and each adverse case you cite):
 
 1. Does the decision contain limiting language that narrows the rule?
-2. Is it criticized, limited, overruled, or abrogated?
-3. Are there later cases in your court that changed the test?
+2. Does selected later-history documentation show it was criticized, limited,
+   overruled, or abrogated?
+3. Do selected later cases in your court change the test?
 4. If your opponent cites the same case differently, who is right?
 
 Deliverable: "Undermining risk: LOW/MED/HIGH" + recommended swap/additional
 cite.
 
-_(If you have access to Shepard's/KeyCite, use it; if not, do a reasonable web
-check for "overruled", "abrogated by", "limited by" and later circuit
-authority.)_
+If the selected offline material is insufficient, return the gap. A distinct
+authorized freshness-research invocation may gather candidate citator or
+primary-source material, but a later offline audit must verify it before use.
 
 ### Stage 7 — Quote and parenthetical integrity
 

@@ -60,6 +60,7 @@ _RUN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _CITE_TAG = re.compile(r"<cite\b(?P<attributes>[^>]*)>(?P<text>.*?)</cite>", re.DOTALL)
 _CITE_ATTRIBUTE = re.compile(r'([a-z][a-z0-9_-]*)="([^"]+)"')
+_PAGE_MARKER = re.compile(r"(?m)^\[page (?P<pinpoint>[^\]\r\n]+)\][ \t]*$")
 _UNAVAILABLE_CODES = frozenset(
     {
         "authority-content-unavailable",
@@ -519,6 +520,17 @@ def _persistent_markup_findings(
     return findings
 
 
+def _pinpoint_segment(opinion_text: str, pinpoint: str) -> str | None:
+    markers = list(_PAGE_MARKER.finditer(opinion_text))
+    for index, marker in enumerate(markers):
+        if marker.group("pinpoint") != pinpoint:
+            continue
+        start = marker.end()
+        end = markers[index + 1].start() if index + 1 < len(markers) else len(opinion_text)
+        return opinion_text[start:end]
+    return None
+
+
 def _audit_findings(
     filing_text: str,
     candidates: tuple[dict[str, Any], ...],
@@ -582,7 +594,8 @@ def _audit_findings(
                 )
             )
             continue
-        if authority.quotation not in opinion_text:
+        quotation_present = authority.quotation in opinion_text
+        if not quotation_present:
             findings.append(
                 _finding(
                     "quotation-not-found",
@@ -591,12 +604,22 @@ def _audit_findings(
                     authority_id=authority.authority_id,
                 )
             )
-        if authority.pinpoint not in opinion_text:
+        pinpoint_segment = _pinpoint_segment(opinion_text, authority.pinpoint)
+        if pinpoint_segment is None:
             findings.append(
                 _finding(
                     "pinpoint-not-found",
                     authority.document_path,
                     "asserted pinpoint is absent from the usable authority text",
+                    authority_id=authority.authority_id,
+                )
+            )
+        elif quotation_present and authority.quotation not in pinpoint_segment:
+            findings.append(
+                _finding(
+                    "quotation-pinpoint-mismatch",
+                    authority.document_path,
+                    "asserted quotation occurs outside the asserted pinpoint",
                     authority_id=authority.authority_id,
                 )
             )

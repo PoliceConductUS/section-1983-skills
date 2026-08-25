@@ -100,14 +100,16 @@ until a later audit selects valid YAML and exact ordinary authority bytes from
 After the three gates pass, complete the remaining authority audit:
 
 1. Use the selected authority and source YAML plus the exact documented file.
-2. If later-history or identity confirmation requires another source, use
-   primary sources where available:
+2. If later-history or identity confirmation requires another source, return the
+   gap. A separately authorized `freshness-research` invocation may inspect
+   primary sources such as:
    - **SCOTUS**: Library of Congress
      (`tile.loc.gov/storage-services/service/ll/usrep/`)
    - **Fifth Circuit**: `ca5.uscourts.gov/opinions/`
    - **General**: CourtListener RECAP archive
-3. Preserve source and retrieval provenance in the returned audit and trusted-
-   host receipt.
+3. Freshness research returns candidate material and provenance for a later
+   audit; it does not certify good law. Preserve selected source provenance in
+   the audit and trusted-host receipt.
 4. Do not mark an authority verified merely because a PDF was downloaded.
    Verification requires identity, court, publication and binding status,
    proposition and pinpoint, holding classification, procedural posture,

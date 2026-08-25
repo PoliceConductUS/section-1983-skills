@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "profile_id": "fictional-judge-adoption-profile",
+  "checked_through": "2026-08-24",
+  "judge_identity": {
+    "subject_id": "judge-adoption",
+    "display_name": "Judge Adoption Example",
+    "fictional": true,
+    "source_id": "identity-source",
+    "checked_on": "2026-08-24"
+  },
+  "court_scope": {
+    "court_id": "example-district",
+    "jurisdiction": "Fictional Federal District",
+    "tenure_start": null,
+    "tenure_end": null,
+    "source_id": "court-source",
+    "checked_on": "2026-08-24"
+  },
+  "records": [
+    {
+      "id": "adoption-record",
+      "source_class": "revealed_reasoning",
+      "proposition": "The order adopts the recommendation without independent substantive analysis.",
+      "source_id": "adoption-source",
+      "source_date": "2026-07-01",
+      "issue": "pleading-elements",
+      "posture": "motion-to-dismiss",
+      "attribution": "adoption_only",
+      "permitted_uses": ["adoption history"],
+      "prohibited_uses": ["independent reasoning", "neutral transfer"]
+    }
+  ],
+  "comparisons": [],
+  "neutral_transfers": [],
+  "assumptions": [],
+  "gaps": [
+    {
+      "id": "adoption-not-independent",
+      "description": "Adoption-only material cannot support an independent neutral transfer.",
+      "source_ids": ["adoption-source"]
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "validator": "judicial-profile-validator",
+    "version": "1",
+    "validated_at": "2026-08-24T12:00:00Z"
+  }
+}

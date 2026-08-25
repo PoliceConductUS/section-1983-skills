@@ -1,0 +1,6 @@
+interface:
+  display_name: "Build Judicial Reasoning Profiles"
+  short_description: "Compile evidence-bounded judicial profiles"
+  default_prompt:
+    "Use $building-judicial-reasoning-profiles to compile approved public
+    sources into a Judicial Reasoning Profile package."

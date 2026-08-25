@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/judicial-reasoning-profile.schema.json",
+  "title": "Judicial Reasoning Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "checked_through",
+    "judge_identity",
+    "court_scope",
+    "records",
+    "comparisons",
+    "neutral_transfers",
+    "assumptions",
+    "gaps",
+    "validation"
+  ],
+  "properties": {
+    "schema_version": { "const": 1, "type": "integer" },
+    "profile_id": { "$ref": "#/$defs/identifier" },
+    "checked_through": { "$ref": "#/$defs/date" },
+    "judge_identity": { "$ref": "#/$defs/judgeIdentity" },
+    "court_scope": { "$ref": "#/$defs/courtScope" },
+    "records": { "type": "array", "items": { "$ref": "#/$defs/record" } },
+    "comparisons": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/comparison" }
+    },
+    "neutral_transfers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transfer" }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/annotatedGap" }
+    },
+    "gaps": { "type": "array", "items": { "$ref": "#/$defs/annotatedGap" } },
+    "validation": { "$ref": "#/$defs/validation" }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "date": { "type": "string", "format": "date" },
+    "nonempty": { "type": "string", "minLength": 1 },
+    "identifierArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/identifier" }
+    },
+    "stringArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/nonempty" }
+    },
+    "judgeIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject_id",
+        "display_name",
+        "fictional",
+        "source_id",
+        "checked_on"
+      ],
+      "properties": {
+        "subject_id": { "$ref": "#/$defs/identifier" },
+        "display_name": { "$ref": "#/$defs/nonempty" },
+        "fictional": { "type": "boolean" },
+        "source_id": { "$ref": "#/$defs/identifier" },
+        "checked_on": { "$ref": "#/$defs/date" }
+      }
+    },
+    "courtScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "court_id",
+        "jurisdiction",
+        "tenure_start",
+        "tenure_end",
+        "source_id",
+        "checked_on"
+      ],
+      "properties": {
+        "court_id": { "$ref": "#/$defs/identifier" },
+        "jurisdiction": { "$ref": "#/$defs/nonempty" },
+        "tenure_start": {
+          "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }]
+        },
+        "tenure_end": {
+          "oneOf": [{ "$ref": "#/$defs/date" }, { "type": "null" }]
+        },
+        "source_id": { "$ref": "#/$defs/identifier" },
+        "checked_on": { "$ref": "#/$defs/date" }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_class",
+        "proposition",
+        "source_id",
+        "source_date",
+        "issue",
+        "posture",
+        "attribution",
+        "permitted_uses",
+        "prohibited_uses"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "source_class": {
+          "enum": [
+            "revealed_reasoning",
+            "stated_philosophy",
+            "self_presentation",
+            "court_compliance"
+          ]
+        },
+        "proposition": { "$ref": "#/$defs/nonempty" },
+        "source_id": { "$ref": "#/$defs/identifier" },
+        "source_date": { "$ref": "#/$defs/date" },
+        "issue": { "$ref": "#/$defs/identifier" },
+        "posture": { "$ref": "#/$defs/identifier" },
+        "attribution": {
+          "enum": [
+            "independent_reasoning",
+            "adoption_only",
+            "recommendation",
+            "outcome_only"
+          ]
+        },
+        "permitted_uses": { "$ref": "#/$defs/stringArray" },
+        "prohibited_uses": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "left_record_id",
+        "left_proposition",
+        "left_source_id",
+        "left_source_date",
+        "right_record_id",
+        "right_proposition",
+        "right_source_id",
+        "right_source_date",
+        "issue",
+        "posture",
+        "similarities",
+        "differences",
+        "state"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "left_record_id": { "$ref": "#/$defs/identifier" },
+        "left_proposition": { "$ref": "#/$defs/nonempty" },
+        "left_source_id": { "$ref": "#/$defs/identifier" },
+        "left_source_date": { "$ref": "#/$defs/date" },
+        "right_record_id": { "$ref": "#/$defs/identifier" },
+        "right_proposition": { "$ref": "#/$defs/nonempty" },
+        "right_source_id": { "$ref": "#/$defs/identifier" },
+        "right_source_date": { "$ref": "#/$defs/date" },
+        "issue": { "$ref": "#/$defs/identifier" },
+        "posture": { "$ref": "#/$defs/identifier" },
+        "similarities": { "$ref": "#/$defs/stringArray" },
+        "differences": { "$ref": "#/$defs/stringArray" },
+        "state": {
+          "enum": ["aligned", "tension", "divergent", "indeterminate"]
+        }
+      }
+    },
+    "transfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "issue",
+        "posture",
+        "instruction",
+        "supporting_record_ids"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "issue": { "$ref": "#/$defs/identifier" },
+        "posture": { "$ref": "#/$defs/identifier" },
+        "instruction": { "$ref": "#/$defs/nonempty" },
+        "supporting_record_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        }
+      }
+    },
+    "annotatedGap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "source_ids"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "description": { "$ref": "#/$defs/nonempty" },
+        "source_ids": { "$ref": "#/$defs/identifierArray" }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "validator", "version", "validated_at"],
+      "properties": {
+        "status": { "const": "passed" },
+        "validator": { "$ref": "#/$defs/nonempty" },
+        "version": { "$ref": "#/$defs/nonempty" },
+        "validated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      }
+    }
+  }
+}

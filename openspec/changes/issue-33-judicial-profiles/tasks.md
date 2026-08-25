@@ -8,9 +8,9 @@
 
 ## 2. Generic public skill package
 
-- [ ] 2.1 RED-test the exact install-local surface, folder contract, public
+- [x] 2.1 RED-test the exact install-local surface, folder contract, public
       routes, fictional fixtures, and absence of a real-judge package.
-- [ ] 2.2 Add `building-judicial-reasoning-profiles` with generic instructions,
+- [x] 2.2 Add `building-judicial-reasoning-profiles` with generic instructions,
       UI metadata, schemas, references, and fictional fixtures.
 
 ## 3. Judicial profile domain validation

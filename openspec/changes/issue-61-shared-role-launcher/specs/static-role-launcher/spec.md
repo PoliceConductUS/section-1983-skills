@@ -1,60 +1,70 @@
-# static-role-launcher Delta
-
 ## ADDED Requirements
 
-### Requirement: Trusted host binds one protected role to immutable packages
+### Requirement: Trusted host binds one protected role to selected folder bytes
 
-The repository SHALL provide one trusted launcher that binds a protected static
-role contract to one validated profile package, one validated target package,
-exact declared context packages, an authorized operation, a bounded task, and
-one explicit output folder. Every package and role compatibility rule MUST pass
-before child dispatch. Profile, target, context, task, and child data MUST NOT
-alter role behavior or select executable process configuration.
+The repository SHALL provide one trusted launcher that binds a host-defined
+static role to an authorized operation, bounded task, ordered logical file
+selections from a validated folder invocation, declared internet policy, runtime
+limits, and one explicit output folder. Every selection MUST resolve through a
+declared recursive read-only input root before dispatch. Task and input data
+MUST NOT alter role behavior or select process configuration.
 
-#### Scenario: Profile contains behavior-shaped fields
+#### Scenario: Input YAML contains behavior-shaped fields
 
-- **WHEN** a valid immutable profile member contains capabilities, commands, or
-  instruction-shaped data
-- **THEN** the child request preserves those bytes only as profile data and the
-  protected role contract remains unchanged
+- **WHEN** a selected participant-data file requests capabilities, commands,
+  target mutation, or broader access
+- **THEN** the child request preserves it only as untrusted data and the static
+  role remains unchanged
 
-### Requirement: Child execution is fresh, isolated, and path-free
+### Requirement: Child request contains no absolute filesystem path
+
+The launcher MUST snapshot selected regular-file bytes, enforce the invocation
+byte limit, and build canonical UTF-8 request bytes containing only logical
+purpose, declared role, logical name, hash, size, and content. It MUST NOT send
+absolute roots, canonical local paths, repository paths, credentials,
+environment, commands, sessions, or prior conversation.
+
+#### Scenario: Selected file resides under a private absolute root
+
+- **WHEN** the launcher constructs the child request
+- **THEN** request bytes contain the logical selection and content but no
+  substring of the absolute input or output roots
+
+### Requirement: Child execution is fresh and output-temp confined
 
 Each launch MUST use one fresh process with scrubbed session state, no
-undeclared filesystem access, and only the static role's internet and capability
-policy. The child MUST receive canonical request bytes rather than filesystem
-paths. Its empty working directory and `TMPDIR`, `TMP`, and `TEMP` MUST all be
-inside the selected `<output-folder>/temp/<run-id>/` tree. Unavailable isolation
-or capability enforcement MUST fail before dispatch.
+undeclared filesystem access, and only the static role's internet/capability
+policy. The empty working directory and `TMPDIR`, `TMP`, and `TEMP` MUST all be
+`<output-folder>/temp/<run-id>/`. Unavailable enforcement MUST fail before
+dispatch.
 
 #### Scenario: Adapter cannot deny undeclared paths
 
-- **WHEN** the trusted adapter cannot attest to the required filesystem boundary
+- **WHEN** the trusted adapter cannot attest to the filesystem boundary
 - **THEN** the launcher returns `isolation-unavailable` without starting a child
 
 ### Requirement: Process and protocol failures are bounded
 
-The launcher MUST convert timeout, nonzero exit, oversized standard streams,
-invalid UTF-8, malformed JSON, unsupported output, or adapter failure into a
-stable bounded failure report without traceback, credentials, local paths, case
-excerpts, or fabricated findings.
+The launcher MUST convert timeout, nonzero exit, oversized streams, invalid
+UTF-8, malformed JSON, unsupported output, or adapter failure into stable
+bounded results without traceback, raw stream, credential, local path, case
+excerpt, or fabricated finding.
 
-#### Scenario: Child prints malformed output and a case path
+#### Scenario: Child prints malformed output and a local path
 
 - **WHEN** standard output is not valid UTF-8 JSON and standard error contains a
-  local path
-- **THEN** the returned failure identifies only the stable protocol class and
-  contains neither raw stream nor path
+  path
+- **THEN** the result identifies only the stable protocol class
 
-### Requirement: Output is advisory and inputs remain immutable
+### Requirement: Output is advisory and selected inputs remain immutable
 
 The role-specific validator MUST accept only the static role's exact advisory
-output schema and return proposed canonical output-relative artifacts. Only the
-trusted host may publish beneath the explicit output folder. The launcher MUST
-verify that profile, target, context, and public-reference bytes remain
-unchanged; any mutation fails the run.
+schema and return proposed canonical output-relative artifacts. Only the trusted
+host may publish beneath the explicit output folder. The launcher MUST verify
+that every selected input still matches its pre-dispatch hash and size; any
+change fails the run.
 
-#### Scenario: Child attempts to change the target
+#### Scenario: Child-side execution changes a selected target
 
-- **WHEN** target bytes differ after execution or output requests a target path
+- **WHEN** selected bytes differ after dispatch
 - **THEN** the run fails without a completed advisory result or target rewrite

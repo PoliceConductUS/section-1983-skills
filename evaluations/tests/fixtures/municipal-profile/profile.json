@@ -1,0 +1,85 @@
+{
+  "identity": {
+    "profile_id": "profile-fictional-city",
+    "municipality_id": "fictional-city",
+    "department_id": "fictional-police-department",
+    "checked_through": "2026-08-25"
+  },
+  "entities": [
+    {
+      "entity_id": "entity-city",
+      "entity_type": "municipality",
+      "name": "Fictional City",
+      "evidence_ids": ["evidence-formal-policy"]
+    },
+    {
+      "entity_id": "entity-department",
+      "entity_type": "department",
+      "name": "Fictional Police Department",
+      "evidence_ids": ["evidence-supervision"]
+    }
+  ],
+  "events": [
+    {
+      "event_id": "event-complaint",
+      "event_type": "complaint",
+      "event_date": "2025-02-01",
+      "entity_ids": ["entity-department"],
+      "evidence_ids": ["evidence-complaint-ia"],
+      "description": "A fictional complaint was recorded."
+    },
+    {
+      "event_id": "event-review",
+      "event_type": "corrective_review",
+      "event_date": "2025-03-01",
+      "entity_ids": ["entity-department"],
+      "evidence_ids": ["evidence-institutional-learning"],
+      "description": "A fictional corrective review was recorded."
+    }
+  ],
+  "chains": [
+    {
+      "chain_id": "chain-notice-correction",
+      "chain_type": "notice_corrective",
+      "event_ids": ["event-complaint", "event-review"],
+      "evidence_ids": [
+        "evidence-complaint-ia",
+        "evidence-institutional-learning"
+      ],
+      "question": "What, if anything, did the fictional complaint transmit to later review?"
+    }
+  ],
+  "comparisons": [
+    {
+      "comparison_id": "comparison-complaint-review",
+      "target_event_id": "event-complaint",
+      "candidate_event_ids": ["event-review"],
+      "feature_ids": ["feature-review-channel"],
+      "evidence_ids": ["evidence-complaint-ia", "evidence-institutional-learning"],
+      "question": "Which bounded similarities and differences require further review?"
+    }
+  ],
+  "contradictions": [
+    {
+      "contradiction_id": "contradiction-training-record",
+      "left_evidence_id": "evidence-training",
+      "right_evidence_id": "evidence-supervision",
+      "question": "Can the fictional training and supervision records be reconciled?"
+    }
+  ],
+  "similarity_features": [
+    {
+      "feature_id": "feature-review-channel",
+      "label": "Review channel",
+      "definition": "Whether the fictional record identifies a documented review channel.",
+      "evidence_ids": ["evidence-complaint-ia", "evidence-institutional-learning"]
+    }
+  ],
+  "gaps": [
+    {
+      "gap_id": "gap-recurrence-denominator",
+      "domain": "Recurrence",
+      "description": "The fictional record lacks a complete recurrence denominator."
+    }
+  ]
+}

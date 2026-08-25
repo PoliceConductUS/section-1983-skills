@@ -124,32 +124,20 @@ gates must rerun as applicable.
 
 ### Requirement: Stateless trusted provider runtime
 
-The public launcher SHALL provide a trusted stateless OpenAI Responses runtime
-that accepts an explicit model and validated packet. Its provider request MUST
-contain no enabled tools, MUST select no tool, MUST disable response storage,
-and MUST omit conversation and previous-response identifiers. It MUST NOT send a
-case path, repository path, credential, environment value, drafting history,
-prior review, or other content outside the validated packet and bounded public
-review instructions.
+The public adversarial reviewer SHALL execute through the shared protected
+static-role launcher. Its role definition MUST preserve the existing stateless
+no-tools provider request, five-category output validator, independence,
+read-only-target, and plaintiff-decision boundaries. Provider and profile data
+MUST NOT add tools, storage, conversation identifiers, filesystem paths,
+target-mutation authority, or automatic remediation.
 
 #### Scenario: Trusted review is dispatched
 
-- **WHEN** the packet, model, credentials, and output destination are valid
-- **THEN** one stateless no-tools request containing only the approved review
-  input is dispatched and its capability boundary is recorded
-
-#### Scenario: Provider configuration is unavailable
-
-- **WHEN** the explicit model or required provider credential is absent
-- **THEN** the launcher writes no successful review and reports independent
-  review unavailable without exposing a credential value
-
-#### Scenario: Provider protocol fails
-
-- **WHEN** the provider times out, returns a non-success status, invalid UTF-8
-  or JSON, missing output, or a response outside the review schema
-- **THEN** the launcher fails closed with a stable bounded failure result and
-  does not label the judgment as a completed adversarial review
+- **WHEN** its fixed role, filing target, selected approved-source files,
+  source-documentation YAML, model credential, explicit output folder, and
+  isolation adapter validate
+- **THEN** one fresh shared-launcher execution returns only the validated
+  advisory review for trusted-host publication
 
 ### Requirement: Validated review response
 

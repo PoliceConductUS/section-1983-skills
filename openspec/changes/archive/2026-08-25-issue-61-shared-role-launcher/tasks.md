@@ -34,7 +34,7 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Run focused tests, full validation, and whole-story review.
-- [ ] 6.2 Record verification and retrospective evidence and archive OpenSpec.
-- [ ] 6.3 Verify exact remote head/checks and mark PR #83 ready while leaving
+- [x] 6.1 Run focused tests, full validation, and whole-story review.
+- [x] 6.2 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 6.3 Verify exact remote head/checks and mark PR #83 ready while leaving
       the PR and Issue #61 open.

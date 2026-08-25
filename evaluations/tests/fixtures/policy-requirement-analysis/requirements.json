@@ -1,0 +1,124 @@
+{
+  "scope": {
+    "start_date": "2025-01-01",
+    "end_date": "2026-08-25"
+  },
+  "requirements": [
+    {
+      "requirement_id": "req-report-force",
+      "department_id": "fictional-police-department",
+      "policy_id": "policy-use-of-force",
+      "source_id": "src-adopted-use-of-force",
+      "effective": {
+        "start_date": "2025-01-01",
+        "end_date": null,
+        "gap": null
+      },
+      "quotation": "An officer must submit a force report before the end of the shift unless a supervisor documents an emergency extension.",
+      "pinpoint": "section 4.2",
+      "actor": "officer",
+      "triggers": ["the officer uses reportable force"],
+      "requirement_type": "mandatory",
+      "action": "submit a force report before the end of the shift",
+      "exceptions": ["a supervisor documents an emergency extension"],
+      "definitions": ["reportable force: force listed in section 2.1"],
+      "dependencies": ["policy-use-of-force:section-2.1"],
+      "cross_references": ["policy-use-of-force:section-7.3"],
+      "documentation_or_review": ["supervisor reviews the force report"],
+      "gaps": [],
+      "operative_markers": {
+        "condition_present": true,
+        "exception_present": true,
+        "discretion_present": false,
+        "cross_reference_present": true
+      }
+    },
+    {
+      "requirement_id": "req-no-retaliation",
+      "department_id": "fictional-police-department",
+      "policy_id": "policy-use-of-force",
+      "source_id": "src-adopted-use-of-force",
+      "effective": {
+        "start_date": "2025-01-01",
+        "end_date": null,
+        "gap": null
+      },
+      "quotation": "An officer must not retaliate against a person who requests medical care.",
+      "pinpoint": "section 5.1",
+      "actor": "officer",
+      "triggers": ["a person requests medical care"],
+      "requirement_type": "prohibited",
+      "action": "retaliate against the person",
+      "exceptions": [],
+      "definitions": [],
+      "dependencies": [],
+      "cross_references": [],
+      "documentation_or_review": [],
+      "gaps": [],
+      "operative_markers": {
+        "condition_present": true,
+        "exception_present": false,
+        "discretion_present": false,
+        "cross_reference_present": false
+      }
+    },
+    {
+      "requirement_id": "req-request-supervisor",
+      "department_id": "fictional-police-department",
+      "policy_id": "policy-use-of-force",
+      "source_id": "src-adopted-use-of-force",
+      "effective": {
+        "start_date": "2025-01-01",
+        "end_date": null,
+        "gap": null
+      },
+      "quotation": "An officer may request a supervisor at any time.",
+      "pinpoint": "section 6.1",
+      "actor": "officer",
+      "triggers": [],
+      "requirement_type": "permitted",
+      "action": "request a supervisor",
+      "exceptions": [],
+      "definitions": [],
+      "dependencies": [],
+      "cross_references": [],
+      "documentation_or_review": [],
+      "gaps": [],
+      "operative_markers": {
+        "condition_present": false,
+        "exception_present": false,
+        "discretion_present": false,
+        "cross_reference_present": false
+      }
+    },
+    {
+      "requirement_id": "req-supervisor-review",
+      "department_id": "fictional-police-department",
+      "policy_id": "policy-use-of-force",
+      "source_id": "src-adopted-use-of-force",
+      "effective": {
+        "start_date": "2025-01-01",
+        "end_date": null,
+        "gap": null
+      },
+      "quotation": "A supervisor may require additional review when the record is incomplete.",
+      "pinpoint": "section 7.3",
+      "actor": "supervisor",
+      "triggers": ["the record is incomplete"],
+      "requirement_type": "discretionary",
+      "action": "require additional review",
+      "exceptions": [],
+      "definitions": [],
+      "dependencies": [],
+      "cross_references": [],
+      "documentation_or_review": ["record the additional review decision"],
+      "gaps": [],
+      "operative_markers": {
+        "condition_present": true,
+        "exception_present": false,
+        "discretion_present": true,
+        "cross_reference_present": false
+      }
+    }
+  ]
+}

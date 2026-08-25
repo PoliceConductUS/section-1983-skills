@@ -90,6 +90,19 @@ CONTRACTS = {
         [],
         "authorized",
     ),
+    "collecting-legal-authority-sources": (
+        [
+            "legal-question",
+            "jurisdiction",
+            "court-hierarchy",
+            "relevant-date",
+            "seed-authority",
+            "approved-source-system",
+        ],
+        "none",
+        [],
+        "authorized",
+    ),
     "judicial-reviewer": (
         ["profile", "filing", "approved-sources"],
         "required",

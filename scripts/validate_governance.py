@@ -22,6 +22,7 @@ SOURCE_DOCUMENTED_SKILLS = (
     "building-defense-counsel-overlays",
     "building-judicial-reasoning-profiles",
     "building-litigation-alignment-overlays",
+    "collecting-legal-authority-sources",
     "collecting-police-policy-sources",
 )
 
@@ -125,6 +126,20 @@ APPROVED_FOLDER_CONTRACTS = {
             "jurisdiction",
             "approved-source-system",
             "research-scope",
+        ],
+        "none",
+        [],
+        "authorized",
+    ),
+    "collecting-legal-authority-sources": folder_contract(
+        "collecting-legal-authority-sources",
+        [
+            "legal-question",
+            "jurisdiction",
+            "court-hierarchy",
+            "relevant-date",
+            "seed-authority",
+            "approved-source-system",
         ],
         "none",
         [],

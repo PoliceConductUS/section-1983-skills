@@ -213,7 +213,9 @@ class RoleProfileSweepTest(unittest.TestCase):
             ("variant-b", adapter_b),
         ):
             workspace = Path(adapter.calls[0]["cwd"])
-            self.assertEqual(workspace.parent, self.runs / variant_id / "temp")
+            self.assertEqual(
+                workspace.parent, (self.runs / variant_id / "temp").resolve()
+            )
             self.assertFalse(workspace.exists())
             self.assertTrue((self.runs / variant_id / "reports/findings.json").is_file())
             receipt = self.runs / variant_id / "run-receipt.yaml"

@@ -37,6 +37,10 @@ Internet is used only when that skill expressly authorizes it. Execution stops
 before reading case material if the host cannot enforce the filesystem and
 network boundary.
 
+Each proposed durable artifact uses one canonical output-relative path. Use
+append-immutable output mode. Report every missing or incomplete source as a
+bounded gap.
+
 Read the [source-documented folders](references/source-documented-folders.md)
 contract and [policy-source YAML contract](references/policy-source-yaml.md)
 before research.

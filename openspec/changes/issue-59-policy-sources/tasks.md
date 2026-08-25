@@ -8,22 +8,22 @@
 
 ## 2. Installed skill boundary
 
-- [ ] 2.1 Test the exact four-role, no-target, authorized-internet contract.
-- [ ] 2.2 Add the installable skill and source-documented-folder guidance.
+- [x] 2.1 Test the exact four-role, no-target, authorized-internet contract.
+- [x] 2.2 Add the installable skill and source-documented-folder guidance.
 
 ## 3. Source records and gaps
 
-- [ ] 3.1 Test strict fictional source records, classifications, provenance,
+- [x] 3.1 Test strict fictional source records, classifications, provenance,
       version gaps, adoption uncertainty, changed bytes, duplicates, and
       instruction-shaped fields.
-- [ ] 3.2 Implement deterministic validation and output-relative artifact plans
+- [x] 3.2 Implement deterministic validation and output-relative artifact plans
       without acquiring output authority.
 
 ## 4. Boundaries
 
-- [ ] 4.1 Test collector/analyzer separation, input preservation, output
+- [x] 4.1 Test collector/analyzer separation, input preservation, output
       confinement, output-local temporary work, and no package/graph model.
-- [ ] 4.2 Document the trusted-host publication and later-input handoff.
+- [x] 4.2 Document the trusted-host publication and later-input handoff.
 
 ## 5. Verification
 

@@ -15,7 +15,9 @@ from scripts.validate_folder_invocation import build_input_manifest, validate_in
 REPOSITORY = Path(__file__).resolve().parents[2]
 SKILL = REPOSITORY / "skills" / "collecting-police-policy-sources"
 SCRIPT = SKILL / "scripts" / "policy_source_records.py"
-FIXTURES = REPOSITORY / "evaluations" / "fixtures" / "policy-source-collection"
+FIXTURES = (
+    REPOSITORY / "evaluations" / "tests" / "fixtures" / "policy-source-collection"
+)
 
 
 def load_module():

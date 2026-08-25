@@ -70,12 +70,14 @@ class FilingPacketTest(unittest.TestCase):
             "drafting-section-1983-rule-59e",
             "drafting-false-arrest-complaints",
             "audit-authorities",
-            "filing-ci",
             "adversarial-filing-review",
         ):
             text = (ROOT / "skills" / skill / "SKILL.md").read_text()
             self.assertIn("## FilingPacket boundary", text, skill)
             self.assertIn("never mutates the source packet", text, skill)
+        filing_ci = (ROOT / "skills" / "filing-ci" / "SKILL.md").read_text()
+        self.assertNotIn("## FilingPacket boundary", filing_ci)
+        self.assertIn("## Folder inputs and output", filing_ci)
 
     def test_four_packet_families_validate_with_stable_order_and_kind_role_split(self):
         cases = (

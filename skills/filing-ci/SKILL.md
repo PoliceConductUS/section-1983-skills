@@ -27,17 +27,17 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `verified-authority` contains selected authority bytes and `SOURCE.yaml`
   records.
 
-Target is required in `filing-source`. Internet is `disabled`. Return checker content
-and structured findings; only the trusted host derives the canonical
+Target is required in `filing-source`. Internet is `disabled`. Return checker
+content and structured findings; only the trusted host derives the canonical
 output-relative path and publishes the report append-immutable. Report an
 unavailable checker, filing, authority source, or current result as a gap and
 keep the filing gate open.
 
 ## Purpose
 
-Run a checker registered inside this installed skill directory and report whether
-its filing gate is current and open or passed. This skill orchestrates the
-checker; it does not reproduce the checker's determinations in prose.
+Run a checker registered inside this installed skill directory and report
+whether its filing gate is current and open or passed. This skill orchestrates
+the checker; it does not reproduce the checker's determinations in prose.
 
 ## Resolve declared inputs and installed checker
 
@@ -102,16 +102,16 @@ response for a fresh checker run.
 
 ## Filing gate and boundaries
 
-Keep the filing gate open when the installed checker or execution is unavailable,
-a required input is unresolved, promised output cannot be reliably interpreted,
-a result is stale, or a hard finding remains unresolved. Describe Filing CI as
-passed only after a current successful run for the controlling draft has no
-unresolved hard findings; preserve documented warnings and independent filing
-gates.
+Keep the filing gate open when the installed checker or execution is
+unavailable, a required input is unresolved, promised output cannot be reliably
+interpreted, a result is stale, or a hard finding remains unresolved. Describe
+Filing CI as passed only after a current successful run for the controlling
+draft has no unresolved hard findings; preserve documented warnings and
+independent filing gates.
 
-This skill owns only its registered deterministic checker logic. It does not
-own verified-authority-store verification, formatting, automatic correction,
-filing, or litigation judgment reserved to the user.
+This skill owns only its registered deterministic checker logic. It does not own
+verified-authority-store verification, formatting, automatic correction, filing,
+or litigation judgment reserved to the user.
 
 ## Independent quality-control stage
 

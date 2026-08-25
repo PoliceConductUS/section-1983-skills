@@ -14,8 +14,8 @@
 
 ## 3. GREEN
 
-- [ ] 3.1 Correct the skill, metadata, tests, public docs, and durable specs.
-- [ ] 3.2 Remove obsolete Issue #33 package artifacts.
+- [x] 3.1 Correct the skill, metadata, tests, public docs, and durable specs.
+- [x] 3.2 Remove obsolete Issue #33 package artifacts.
 
 ## 4. Verification
 

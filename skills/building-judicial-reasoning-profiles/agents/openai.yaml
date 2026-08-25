@@ -3,4 +3,4 @@ interface:
   short_description: "Compile evidence-bounded judicial profiles"
   default_prompt:
     "Use $building-judicial-reasoning-profiles to compile approved public
-    sources into a Judicial Reasoning Profile package."
+    sources into source-documented Judicial Reasoning Profile files."

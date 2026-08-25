@@ -35,12 +35,11 @@ filesystem and network boundary.
   relevant propositions have been checked.
 
 Target is none. Internet is `authorized` only for acquisition and `disabled` for
-compilation. Return every proposed package member under a canonical
-output-relative path; only the trusted host may publish it through the declared
-append-immutable skill boundary and complete fresh package publication. Report
-every incomplete source or profile field as a gap. Read the
-[immutable folder package](references/immutable-folder-package.md) contract and
-the
+compilation. Return every proposed artifact under a canonical output-relative
+path; only the trusted host may publish it through the declared append-immutable
+skill boundary. Report every incomplete source or profile field as a gap. Read
+the [source-documented folders](references/source-documented-folders.md)
+contract and the
 [Judicial Reasoning Profile schema](references/judicial-reasoning-profile.schema.json)
 before either operation.
 
@@ -49,11 +48,11 @@ before either operation.
 ### Acquisition operation
 
 Internet is `authorized` only when the invocation expressly enables it. Acquire
-only public material within the assigned source scope. Return source bytes and
-provenance for a complete source package; do not return a judicial profile and
-do not compile newly acquired material. The new package can become read-only
-`approved-sources` input only in a later invocation after approval and
-validation.
+only public material within the assigned source scope. Return each source's
+ordinary bytes and domain `SOURCE.yaml` provenance directly beneath the explicit
+output folder; do not return a judicial profile and do not compile newly
+acquired material. The output folder can become read-only `approved-sources`
+input only in a later invocation after approval and validation.
 
 If internet is disabled, do not acquire or silently refresh material. A paid,
 unavailable, ambiguous, or out-of-scope source remains a gap. Never incur a fee
@@ -62,10 +61,12 @@ without separate user authorization.
 ### Compilation operation
 
 Internet is `disabled`. Compile only the validated read-only inputs supplied at
-invocation start. Return one schema-valid profile member, classification and gap
-members when present, and a validation receipt for trusted-host publication as a
-complete `judicial-profile` package. Do not mutate, refresh, or reread an input
-package after validation.
+invocation start. Return `judicial-profile.json`,
+`judicial-profile-sources.yaml`, and `validation-receipt.json` directly beneath
+the explicit output folder. The YAML source index maps every profile source ID
+to its declared input role, folder-relative `SOURCE.yaml`, referenced artifact,
+SHA-256, applicable dates, classification, validation state, limitations, and
+gaps. Do not mutate or refresh an input folder.
 
 ## Preserve evidence classes
 
@@ -123,10 +124,10 @@ claims that a simulated role is the real participant.
 
 ## Return contract
 
-Return deterministic proposed relative paths and bytes, package kind, stable
-package ID, checked-through date, ordered logical sources and fingerprints, and
-domain-validation result. Only the trusted host constructs the common manifest
-and publishes the complete package. Report every unresolved identity,
-attribution, source, date, posture, comparison, transfer, or authority issue as
-a gap. Profile validity does not decide law, strategy, outcome, filing
-readiness, or what the user should file.
+Return deterministic proposed relative paths and bytes, checked-through date,
+YAML source records, ordered logical sources and fingerprints, and the domain-
+validation result. Only the trusted host publishes those files and the shared
+terminal run receipt. Report every unresolved identity, attribution, source,
+date, posture, comparison, transfer, or authority issue as a gap. Profile
+validity does not decide law, strategy, outcome, filing readiness, or what the
+user should file.

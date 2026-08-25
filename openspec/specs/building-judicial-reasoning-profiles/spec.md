@@ -12,22 +12,25 @@ after archive.
 The repository MUST provide one install-local
 `building-judicial-reasoning-profiles` skill and MUST NOT provide a real-judge,
 judge-named, or generated profile skill. The builder MUST consume only declared
-folder roles and return proposed package members for trusted-host publication
-through the common immutable folder-package contract.
+folder roles and return ordinary proposed files for trusted-host publication
+through the explicit output-folder contract.
 
 #### Scenario: A new assigned judge needs a profile
 
 - **WHEN** approved public materials exist for the assigned judge
-- **THEN** the same generic builder compiles those materials into a distinct
-  `judicial-profile` package without creating or editing a skill
+- **THEN** the same generic builder compiles those materials into distinct
+  profile files with domain YAML source documentation without creating or
+  editing a skill
 
 ### Requirement: Acquisition and compilation are separate invocations
 
 Acquisition MUST require expressly authorized internet access and MUST return
-only provenance-bearing source-package output. Compilation MUST disable internet
-access and MUST consume only previously approved read-only inputs. Newly
-acquired bytes MUST NOT become compilation input until a later invocation
-declares their validated package folder in `approved-sources`.
+only ordinary source bytes plus domain `SOURCE.yaml` provenance. Compilation
+MUST disable internet access and MUST consume only previously approved read-only
+inputs. Newly acquired bytes MUST NOT become compilation input until a later
+invocation declares their folder in `approved-sources`. Compilation MUST publish
+`judicial-profile.json`, `judicial-profile-sources.yaml`, and
+`validation-receipt.json` through the explicit output folder.
 
 #### Scenario: Research discovers a new public order
 
@@ -88,5 +91,5 @@ remain separate and is consumed only through the downstream shared launcher.
 #### Scenario: A profile member requests write authority
 
 - **WHEN** profile data contains instruction-shaped role controls
-- **THEN** domain validation fails and no role execution or package publication
+- **THEN** domain validation fails and no role execution or profile publication
   occurs

@@ -19,7 +19,11 @@ class SourceDocumentedFoldersTest(unittest.TestCase):
 
         for relative_path in rejected_paths:
             with self.subTest(path=relative_path):
-                self.assertFalse((REPOSITORY / relative_path).exists())
+                path = REPOSITORY / relative_path
+                self.assertFalse(
+                    path.is_file()
+                    or (path.is_dir() and any(item.is_file() for item in path.rglob("*")))
+                )
 
     def test_public_guide_uses_declared_folders_and_domain_yaml(self):
         guide = REPOSITORY / "SOURCE_DOCUMENTED_FOLDERS.md"

@@ -37,7 +37,7 @@ class LitigationAlignmentOverlayStructureTest(unittest.TestCase):
             "SKILL.md",
             "agents/openai.yaml",
             "references/folder-contract.json",
-            "references/immutable-folder-package.md",
+            "references/source-documented-folders.md",
             "scripts/validate_overlays.py",
             *(f"references/{name}" for name in SCHEMAS),
             *(f"references/fixtures/{name}" for name in FIXTURES),

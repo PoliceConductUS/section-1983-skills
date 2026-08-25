@@ -12,11 +12,11 @@
 
 ## 3. GREEN
 
-- [ ] 3.1 Remove package-only schemas, code, fixtures, specs, and docs.
-- [ ] 3.2 Correct overlays, governance, README, and folder-operation guidance.
+- [x] 3.1 Remove package-only schemas, code, fixtures, specs, and docs.
+- [x] 3.2 Correct overlays, governance, README, and folder-operation guidance.
 
 ## 4. Verification
 
 - [ ] 4.1 Run focused tests and full validation.
-- [ ] 4.2 Archive the OpenSpec change, review the complete diff, push, and verify
-      the exact remote head before marking PR #81 ready.
+- [ ] 4.2 Archive the OpenSpec change, review the complete diff, push, and
+      verify the exact remote head before marking PR #81 ready.

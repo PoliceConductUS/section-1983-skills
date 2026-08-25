@@ -11,10 +11,9 @@ membership format is introduced.
 Each domain skill names the YAML records it requires. A `SOURCE.yaml` may
 document one source unit; a profile builder may define a profile-specific YAML
 record. When applicable, those records carry folder-relative artifact paths,
-content hashes, provenance or retrieval identities, checked-through or
-retrieval dates, classifications, validation results, assumptions, and gaps.
-There is intentionally no generic root schema or required filename for every
-folder.
+content hashes, provenance or retrieval identities, checked-through or retrieval
+dates, classifications, validation results, assumptions, and gaps. There is
+intentionally no generic root schema or required filename for every folder.
 
 References are resolved only through the existing declared-input path boundary.
 A missing domain record, invalid YAML, escaping relative path, mismatched hash,

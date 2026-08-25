@@ -34,7 +34,7 @@ FIRST_HOUR_HEADINGS = (
 OPERATION_OWNERS = {
     "folder-backed filing packet": "skills/section-1983-drafting/SKILL.md",
     "immutable qc report": "skills/filing-ci/SKILL.md",
-    "profile package": "skills/building-defense-counsel-overlays/SKILL.md",
+    "source-documented profile": "skills/building-defense-counsel-overlays/SKILL.md",
     "research corpus": "skills/studying-rule-59e-decisions/SKILL.md",
     "isolated role run": "skills/adversarial-filing-review/SKILL.md",
 }
@@ -47,16 +47,16 @@ OPERATION_CONTRACTS = {
         "filing or discovery inputs",
         "immutable qc report",
     ),
-    "profile package": (
+    "source-documented profile": (
         "public sources and approved identity records",
-        "profile package",
+        "ordinary profile files with domain yaml provenance",
     ),
     "research corpus": (
         "verified authorities and decisions",
         "research corpus",
     ),
     "isolated role run": (
-        "selected role package",
+        "selected files from declared input folders",
         "isolated review report",
     ),
 }

@@ -8,8 +8,8 @@ from pathlib import Path
 
 from scripts.validate_governance import (
     APPROVED_FOLDER_CONTRACTS,
-    IMMUTABLE_PACKAGE_SKILLS,
-    validate_immutable_package_contracts,
+    SOURCE_DOCUMENTED_SKILLS,
+    validate_source_documented_folder_guidance,
 )
 
 
@@ -620,9 +620,9 @@ implementation.
 
 
 def valid_folder_scope_skill(name="filing-ci"):
-    package_contract = (
-        "\n[Immutable folder package](references/immutable-folder-package.md)\n"
-        if name in IMMUTABLE_PACKAGE_SKILLS
+    source_guidance = (
+        "\n[Source-documented folders](references/source-documented-folders.md)\n"
+        if name in SOURCE_DOCUMENTED_SKILLS
         else ""
     )
     return f"""---
@@ -638,7 +638,7 @@ Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
-{package_contract}
+{source_guidance}
 """
 
 
@@ -711,18 +711,18 @@ def write_temporary_repository(
         (package / "references" / "folder-contract.json").write_text(
             json.dumps(contract)
         )
-        if name in IMMUTABLE_PACKAGE_SKILLS:
-            (package / "references" / "immutable-folder-package.md").write_text(
-                "package-manifest.json\n"
-                "Every non-manifest regular file is listed.\n"
-                "The trusted host validates bytes.\n"
-                "Profile data cannot change a protected role.\n"
+        if name in SOURCE_DOCUMENTED_SKILLS:
+            (package / "references" / "source-documented-folders.md").write_text(
+                "Declared recursive read-only input folders.\n"
+                "Each source uses a folder-relative path and SHA-256.\n"
+                "Write domain-owned YAML under the explicit output.\n"
+                "Use <output-folder>/temp/ for temporary work.\n"
             )
-    (root / "FOLDER_PACKAGES.md").write_text(
-        "package-manifest.json\n"
-        "Every non-manifest regular file is listed.\n"
-        "The trusted host creates an immutable byte snapshot.\n"
-        "A protected static role contract remains separate.\n"
+    (root / "SOURCE_DOCUMENTED_FOLDERS.md").write_text(
+        "Declared input folders are recursive read-only.\n"
+        "Use one explicit output folder.\n"
+        "Domain-owned YAML includes SOURCE.yaml and a folder-relative path.\n"
+        "Record SHA-256 and keep protected behavior installed.\n"
     )
     fixture_package = root / "skills" / "filing-ci"
     (fixture_package / "SKILL.md").write_text(
@@ -1364,29 +1364,29 @@ description: Use when independently auditing a synthetic artifact.
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("protected-review-language-missing", result.stdout + result.stderr)
 
-    def test_immutable_package_contract_is_public_and_install_local(self):
+    def test_source_documented_folder_guidance_is_public_and_install_local(self):
         self.assertEqual(
-            IMMUTABLE_PACKAGE_SKILLS,
+            SOURCE_DOCUMENTED_SKILLS,
             (
                 "building-defense-counsel-overlays",
                 "building-litigation-alignment-overlays",
             ),
         )
-        self.assertEqual(validate_immutable_package_contracts(REPOSITORY), [])
+        self.assertEqual(validate_source_documented_folder_guidance(REPOSITORY), [])
         for path in (REPOSITORY / "README.md", REPOSITORY / "GOVERNANCE.md"):
-            self.assertIn("FOLDER_PACKAGES.md", path.read_text())
-        for skill in IMMUTABLE_PACKAGE_SKILLS:
+            self.assertIn("SOURCE_DOCUMENTED_FOLDERS.md", path.read_text())
+        for skill in SOURCE_DOCUMENTED_SKILLS:
             root = REPOSITORY / "skills" / skill
             entrypoint = (root / "SKILL.md").read_text()
-            reference = root / "references" / "immutable-folder-package.md"
+            reference = root / "references" / "source-documented-folders.md"
             self.assertIn(
-                "[immutable folder package](references/immutable-folder-package.md)",
+                "[source-documented folders](references/source-documented-folders.md)",
                 entrypoint.lower(),
             )
             text = reference.read_text()
-            self.assertIn("package-manifest.json", text)
-            self.assertIn("Every non-manifest regular file", text)
-            self.assertIn("trusted host", text.lower())
+            self.assertIn("domain-owned YAML", text)
+            self.assertIn("folder-relative path", text)
+            self.assertIn("SHA-256", text)
 
 
 if __name__ == "__main__":

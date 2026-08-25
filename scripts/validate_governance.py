@@ -16,7 +16,7 @@ FOLDER_CONTRACT_FIELDS = {
     "output",
 }
 SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-IMMUTABLE_PACKAGE_SKILLS = (
+SOURCE_DOCUMENTED_SKILLS = (
     "building-defense-counsel-overlays",
     "building-litigation-alignment-overlays",
 )
@@ -790,52 +790,56 @@ def validate_skill_folder_contracts(repository_root):
     return errors
 
 
-def validate_immutable_package_contracts(repository_root):
+def validate_source_documented_folder_guidance(repository_root):
     errors = []
-    guide = repository_root / "FOLDER_PACKAGES.md"
+    guide = repository_root / "SOURCE_DOCUMENTED_FOLDERS.md"
     try:
         guide_text = normalized(guide.read_text())
     except OSError:
-        return ["immutable-package-guide-missing"]
+        return ["source-documented-folder-guide-missing"]
     required = (
-        "package-manifest.json",
-        "every non-manifest regular file",
-        "trusted host",
-        "immutable byte snapshot",
-        "protected static role contract",
+        "declared input folders",
+        "recursive read-only",
+        "explicit output folder",
+        "domain-owned yaml",
+        "source.yaml",
+        "folder-relative path",
+        "sha-256",
+        "protected behavior",
     )
     if any(item not in guide_text for item in required):
-        errors.append("immutable-package-guide-incomplete")
-    for skill in IMMUTABLE_PACKAGE_SKILLS:
-        package = repository_root / "skills" / skill
-        reference = package / "references" / "immutable-folder-package.md"
+        errors.append("source-documented-folder-guide-incomplete")
+    for skill in SOURCE_DOCUMENTED_SKILLS:
+        skill_root = repository_root / "skills" / skill
+        reference = skill_root / "references" / "source-documented-folders.md"
         try:
-            entrypoint = (package / "SKILL.md").read_text().lower()
+            entrypoint = (skill_root / "SKILL.md").read_text().lower()
             reference_text = normalized(reference.read_text())
             if (
                 reference.is_symlink()
                 or reference.resolve().parent != reference.parent.resolve()
             ):
-                errors.append(f"immutable-package-reference-invalid: {skill}")
+                errors.append(f"source-documented-folder-reference-invalid: {skill}")
                 continue
         except (OSError, RuntimeError):
-            errors.append(f"immutable-package-reference-missing: {skill}")
+            errors.append(f"source-documented-folder-reference-missing: {skill}")
             continue
         if (
-            "[immutable folder package](references/immutable-folder-package.md)"
+            "[source-documented folders](references/source-documented-folders.md)"
             not in entrypoint
         ):
-            errors.append(f"immutable-package-link-missing: {skill}")
+            errors.append(f"source-documented-folder-link-missing: {skill}")
         if any(
             item not in reference_text
             for item in (
-                "package-manifest.json",
-                "every non-manifest regular file",
-                "trusted host",
-                "profile data cannot change a protected role",
+                "recursive read-only input folders",
+                "folder-relative path",
+                "sha-256",
+                "domain-owned yaml",
+                "<output-folder>/temp/",
             )
         ):
-            errors.append(f"immutable-package-reference-incomplete: {skill}")
+            errors.append(f"source-documented-folder-reference-incomplete: {skill}")
     return errors
 
 
@@ -848,7 +852,7 @@ def validate_repository(repository_root):
     errors.extend(validate_quality_control_contracts(repository_root))
     errors.extend(validate_folder_scope_contracts(repository_root))
     errors.extend(validate_skill_folder_contracts(repository_root))
-    errors.extend(validate_immutable_package_contracts(repository_root))
+    errors.extend(validate_source_documented_folder_guidance(repository_root))
     return errors
 
 

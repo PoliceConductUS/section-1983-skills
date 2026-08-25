@@ -21,8 +21,8 @@ Each domain contract MUST name and validate the YAML records required for its
 source units and derived artifacts. Applicable records MUST preserve
 folder-relative artifact references, hashes, provenance or retrieval identity,
 checked-through or retrieval dates, classifications, validation state,
-assumptions, and gaps. The repository MUST NOT require one generic root
-manifest or one generic YAML schema for every folder.
+assumptions, and gaps. The repository MUST NOT require one generic root manifest
+or one generic YAML schema for every folder.
 
 #### Scenario: A source reference is invalid
 

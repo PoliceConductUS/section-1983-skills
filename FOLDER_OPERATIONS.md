@@ -197,13 +197,13 @@ receipt remains a gap; the output is not filing-ready.
 
 The same folder contract supports these portable patterns:
 
-| Operation                   | Logical input and immutable output                                    | Owning skill contract                                                                    |
-| --------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| folder-backed filing packet | filing packet inputs become a versioned drafting or audit output      | [`section-1983-drafting`](skills/section-1983-drafting/SKILL.md)                         |
-| immutable QC report         | filing or discovery inputs produce an immutable QC report             | [`filing-ci`](skills/filing-ci/SKILL.md)                                                 |
-| profile package             | public sources and approved identity records become a profile package | [`building-defense-counsel-overlays`](skills/building-defense-counsel-overlays/SKILL.md) |
-| research corpus             | verified authorities and decisions become a research corpus           | [`studying-rule-59e-decisions`](skills/studying-rule-59e-decisions/SKILL.md)             |
-| isolated role run           | a selected role package becomes an isolated review report             | [`adversarial-filing-review`](skills/adversarial-filing-review/SKILL.md)                 |
+| Operation                   | Logical input and immutable output                                                                     | Owning skill contract                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| folder-backed filing packet | filing packet inputs become a versioned drafting or audit output                                       | [`section-1983-drafting`](skills/section-1983-drafting/SKILL.md)                         |
+| immutable QC report         | filing or discovery inputs produce an immutable QC report                                              | [`filing-ci`](skills/filing-ci/SKILL.md)                                                 |
+| source-documented profile   | public sources and approved identity records become ordinary profile files with domain YAML provenance | [`building-defense-counsel-overlays`](skills/building-defense-counsel-overlays/SKILL.md) |
+| research corpus             | verified authorities and decisions become a research corpus                                            | [`studying-rule-59e-decisions`](skills/studying-rule-59e-decisions/SKILL.md)             |
+| isolated role run           | selected files from declared input folders become an isolated review report                            | [`adversarial-filing-review`](skills/adversarial-filing-review/SKILL.md)                 |
 
 For reproducibility, generated artifacts use hashes and manifests; researched
 material records checked-through dates and retrieval provenance. The skills do

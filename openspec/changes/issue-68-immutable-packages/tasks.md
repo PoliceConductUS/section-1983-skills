@@ -14,10 +14,10 @@
 
 ## 3. Validation and immutable snapshots
 
-- [ ] 3.1 RED-test malformed versions and dates, missing/extra/aliased/escaping
+- [x] 3.1 RED-test malformed versions and dates, missing/extra/aliased/escaping
       members, hashes, receipt linkage, validation failure, byte limits,
       freshness, and post-validation source mutation.
-- [ ] 3.2 Implement and GREEN the standard-library package loader and frozen
+- [x] 3.2 Implement and GREEN the standard-library package loader and frozen
       byte snapshot.
 
 ## 4. Regeneration and publication

@@ -100,7 +100,11 @@ def _manifest_value(root: Path) -> tuple[dict[str, Any], bytes]:
         selected_root = root.resolve(strict=True)
         if not selected_root.is_dir():
             _fail("invalid-filing-packet-root")
-        manifest_bytes = (selected_root / MANIFEST_NAME).read_bytes()
+        manifest_path = selected_root / MANIFEST_NAME
+        resolved_manifest = manifest_path.resolve(strict=True)
+        if resolved_manifest != manifest_path:
+            _fail("aliased-filing-packet-manifest")
+        manifest_bytes = manifest_path.read_bytes()
         value = json.loads(
             manifest_bytes.decode("utf-8", errors="strict"),
             object_pairs_hook=_json_object,
@@ -128,7 +132,10 @@ def _validated_document(root: Path, value: Any, roles: frozenset[str]) -> dict[s
     ):
         _fail("invalid-filing-packet-document")
     try:
-        path = (root / Path(*relative.parts)).resolve(strict=True)
+        selected_path = root / Path(*relative.parts)
+        path = selected_path.resolve(strict=True)
+        if path != selected_path:
+            _fail("aliased-filing-packet-member")
         path.relative_to(root)
         if not path.is_file():
             _fail("missing-filing-packet-member")
@@ -149,7 +156,7 @@ def load_filing_packet(packet_root, *, authorized_roles) -> ValidatedFilingPacke
     value, manifest_bytes = _manifest_value(root)
     if type(value) is not dict or set(value) != {"schema_version", "packet_id", "documents", "provenance"}:
         _fail("invalid-filing-packet-manifest")
-    if value["schema_version"] != 1 or not _identifier(value["packet_id"]):
+    if type(value["schema_version"]) is not int or value["schema_version"] != 1 or not _identifier(value["packet_id"]):
         _fail("invalid-filing-packet-manifest")
     provenance = value["provenance"]
     if type(provenance) is not dict or set(provenance) != {"input_manifest_sha256", "source_packet_sha256"}:
@@ -238,6 +245,11 @@ def publish_filing_packet(
     """Publish one complete proposed packet through the shared output writer."""
     if not isinstance(invocation, ValidatedInvocation) or not _identifier(packet_id):
         _fail("invalid-filing-packet-invocation")
+    if (
+        invocation.contract_target_policy not in {"required", "optional", "none"}
+        or invocation.contract_target_roles is None
+    ):
+        _fail("unbound-filing-packet-invocation")
     roles = _authorized_roles(authorized_roles)
     proposed = _proposed_documents(documents, roles)
     if source_packet is not None:

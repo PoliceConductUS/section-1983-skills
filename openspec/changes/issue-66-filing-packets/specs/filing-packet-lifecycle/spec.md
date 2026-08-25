@@ -10,8 +10,8 @@ canonical relative member paths, exact byte sizes, and lowercase SHA-256 values.
 It MUST contain exactly one main document and MUST resolve every listed member
 inside the declared packet root with matching bytes. The manifest and members
 MUST be regular files at their canonical logical paths, not symbolic-link or
-other filesystem aliases. The published schema and runtime validator MUST
-accept the same version and member-path language.
+other filesystem aliases. The published schema and runtime validator MUST accept
+the same version and member-path language.
 
 #### Scenario: An amended complaint changes packet role
 
@@ -30,8 +30,8 @@ accept the same version and member-path language.
 #### Scenario: Schema and runtime validate the same manifest values
 
 - **WHEN** a manifest uses a boolean schema version, the manifest filename, a
-  reserved output namespace, a noncanonical path, or a NUL-containing path as
-  a member path
+  reserved output namespace, a noncanonical path, or a NUL-containing path as a
+  member path
 - **THEN** both the public schema and runtime validator reject that value
 
 ### Requirement: Packet generation and revision preserve source inputs

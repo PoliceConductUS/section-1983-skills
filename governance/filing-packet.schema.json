@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "packet_id", "documents", "provenance"],
   "properties": {
-    "schema_version": { "const": 1 },
+    "schema_version": { "const": 1, "type": "integer" },
     "packet_id": { "$ref": "#/$defs/identifier" },
     "documents": {
       "type": "array",
@@ -44,7 +44,7 @@
         "path": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+          "pattern": "^(?!filing-packet\\.json$)(?!(?:\\.skill-runs|filing-packets)(?:/|$))(?!/)(?!.*\\\\)(?!.*\\u0000)(?!\\.{1,2}(?:/|$))(?!.*\\/\\.{1,2}(?:/|$))(?!.*//)(?!.*\\/$).+$"
         },
         "sha256": { "$ref": "#/$defs/sha256" },
         "size": { "type": "integer", "minimum": 0 }

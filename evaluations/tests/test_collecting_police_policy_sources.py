@@ -162,6 +162,41 @@ class CollectingPolicePolicySourcesTest(unittest.TestCase):
             records.build_collection_plan([injected], [], "2026-08-25")
         self.assertEqual(captured.exception.code, "invalid-source-record")
 
+    def test_validator_rejects_detached_documentation_and_unknown_duplicates(self):
+        records = load_module()
+        plan = records.build_collection_plan([proposal()], [], "2026-08-25")
+
+        detached = copy.deepcopy(plan)
+        documentation = artifact(
+            detached, "sources/model-use-of-force.SOURCE.yaml"
+        )
+        documentation["path"] = "other/model-use-of-force.SOURCE.yaml"
+        candidates = yaml.safe_load(
+            artifact(detached, "policy-source-candidates.yaml")["bytes"]
+        )
+        candidates["sources"][0]["source_documentation_path"] = documentation[
+            "path"
+        ]
+        artifact(detached, "policy-source-candidates.yaml")["bytes"] = (
+            yaml.safe_dump(candidates, sort_keys=False).encode("utf-8")
+        )
+        with self.assertRaises(records.PolicySourceError) as captured:
+            records.validate_collection_plan(detached)
+        self.assertEqual(captured.exception.code, "invalid-source-yaml")
+
+        unknown_duplicate = copy.deepcopy(plan)
+        documentation = artifact(
+            unknown_duplicate, "sources/model-use-of-force.SOURCE.yaml"
+        )
+        source_yaml = yaml.safe_load(documentation["bytes"])
+        source_yaml["duplicate_of"] = ["src-not-in-collection"]
+        documentation["bytes"] = yaml.safe_dump(source_yaml, sort_keys=False).encode(
+            "utf-8"
+        )
+        with self.assertRaises(records.PolicySourceError) as captured:
+            records.validate_collection_plan(unknown_duplicate)
+        self.assertEqual(captured.exception.code, "invalid-source-yaml")
+
         analyzed = proposal()
         analyzed["requirements"] = [{"duty": "must"}]
         with self.assertRaises(records.PolicySourceError) as captured:

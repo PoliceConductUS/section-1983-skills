@@ -7,7 +7,7 @@
 
 ## 2. Sweep RED and GREEN
 
-- [ ] 2.1 Test validated variants, identical targets, N fresh launches, distinct
+- [x] 2.1 Test validated variants, identical targets, N fresh launches, distinct
       outputs, receipts, failures, and order-independent comparison.
 - [ ] 2.2 Implement one-run publication and deterministic comparison through the
       shared launcher and output writer.

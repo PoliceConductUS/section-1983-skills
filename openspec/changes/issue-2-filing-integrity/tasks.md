@@ -7,7 +7,7 @@
 
 ## 2. Folder and YAML boundary
 
-- [ ] 2.1 Test the exact six-role skill contract, fixed installed checker, and
+- [x] 2.1 Test the exact six-role skill contract, fixed installed checker, and
       strict selected YAML/source validation.
 - [ ] 2.2 Implement the folder-native checker registry and domain validators.
 

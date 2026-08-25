@@ -4,7 +4,7 @@
 
 - [x] 1.1 Define authority separation, package compatibility, process isolation,
       output/temp confinement, and adversarial-review migration.
-- [ ] 1.2 Push the OpenSpec design and open a draft PR stacked on Issue #33.
+- [x] 1.2 Push the OpenSpec design and open a draft PR stacked on Issue #33.
 
 ## 2. Static role and launch-request validation
 

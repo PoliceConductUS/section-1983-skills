@@ -21,5 +21,5 @@
 ## 4. Verification
 
 - [x] 4.1 Run focused and full validation and review the corrected boundary.
-- [ ] 4.2 Write verification and retrospective evidence, archive this change,
+- [x] 4.2 Write verification and retrospective evidence, archive this change,
       push, and mark PR #73 ready while leaving the PR and Issue #65 open.

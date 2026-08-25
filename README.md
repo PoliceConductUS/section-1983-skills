@@ -53,7 +53,7 @@ work. `temp/` is not a durable artifact destination.
 | `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
 | `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
 | `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
-| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and packaged install-local mechanical check.                                          |
+| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and fixed install-local mechanical check.                                             |
 | `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
 | `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                             |
 | `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                   |
@@ -70,7 +70,7 @@ work. `temp/` is not a durable artifact destination.
 | `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
 | `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
 | `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
-| `filing-ci`                                       | Runs registered packaged deterministic filing checks and preserves a fail-closed filing gate.                                                                              |
+| `filing-ci`                                       | Runs fixed installed deterministic filing checks over declared folders and preserves a fail-closed filing gate.                                                            |
 
 ## How the skills compose
 
@@ -137,7 +137,7 @@ registry, graph, or case-management runtime is required.
 For every complaint, `drafting-section-1983-complaints` must read its
 install-local `references/complaint-contract.md` and
 `references/complaint-structure-contract.json` before drafting, revision, or
-audit. If the package or either reference is unavailable, the result is
+audit. If the installed skill or either reference is unavailable, the result is
 **complaint contract unavailable** and complaint work stops; no routing or
 specialization skill supplies a fallback.
 
@@ -149,7 +149,7 @@ The ownership boundaries are deliberate: the umbrella routes; complaint skills
 establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; discovery peers draft or
 audit only their named artifacts; the authority and writing skills are final
-gates, and Filing CI adds a separate packaged integrity gate.
+gates, and Filing CI adds a separate folder-scoped integrity gate.
 
 ### Trusted adversarial-review runtime
 
@@ -185,9 +185,10 @@ The canonical JSON complaint contract drives the install-local
 `scripts/check_complaint.py` mechanical checker. It does not decide fact truth,
 legal sufficiency, authority fit, material analogy, strategy, or filing
 readiness. Filing CI dispatches only checker IDs registered inside its installed
-package; an absent, unknown, unavailable, or incompatible checker returns an
-honest unavailable result. Neither helper accepts a command, executable, or
-output folder, and only the trusted host publishes returned report bytes.
+skill directory; an absent, unknown, unavailable, or incompatible checker
+returns an honest unavailable result. Neither helper accepts a command,
+executable, or output folder, and only the trusted host publishes returned
+report bytes.
 
 ## Invocation inputs and portability
 

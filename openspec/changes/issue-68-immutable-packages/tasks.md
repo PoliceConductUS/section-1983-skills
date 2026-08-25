@@ -28,9 +28,9 @@
 
 ## 5. Protected role binding
 
-- [ ] 5.1 RED-test static role schema, package-kind/freshness compatibility, and
+- [x] 5.1 RED-test static role schema, package-kind/freshness compatibility, and
       hostile profile data that attempts to alter behavior.
-- [ ] 5.2 Implement and GREEN canonical static-role validation and immutable
+- [x] 5.2 Implement and GREEN canonical static-role validation and immutable
       role/profile binding without child execution.
 
 ## 6. Governance and current skills

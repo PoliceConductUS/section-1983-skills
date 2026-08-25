@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import shutil
@@ -356,8 +357,6 @@ class StaticRoleBindingTest(unittest.TestCase):
             manifest = json.loads(manifest_path.read_text())
             (root / "profile.json").write_bytes(hostile)
             manifest["members"][0]["size"] = len(hostile)
-            import hashlib
-
             manifest["members"][0]["sha256"] = hashlib.sha256(hostile).hexdigest()
             manifest_path.write_text(json.dumps(manifest))
             package = load_folder_package(

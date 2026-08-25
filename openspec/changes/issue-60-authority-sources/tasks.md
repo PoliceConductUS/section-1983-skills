@@ -4,7 +4,7 @@
 
 - [x] 1.1 Correct live Issue #60 to the folder-only contract.
 - [x] 1.2 Create the stacked worktree and OpenSpec design.
-- [ ] 1.3 Push the design commit and open the stacked draft PR.
+- [x] 1.3 Push the design commit and open the stacked draft PR.
 
 ## 2. Installed collection boundary
 

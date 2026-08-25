@@ -196,6 +196,26 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
             records.validate_collection_plan(unknown)
         self.assertEqual(captured.exception.code, "invalid-source-yaml")
 
+        second = proposal()
+        second["source_id"] = "src-second-opinion"
+        second["artifact_path"] = "sources/second-opinion.txt"
+        second["source_documentation_path"] = "sources/second-opinion.SOURCE.yaml"
+        second["result_identity"] = "example-invalid:second-opinion"
+        duplicate_identity = records.build_collection_plan(
+            [proposal(), second], [], "2026-08-25"
+        )
+        second_documentation = artifact(
+            duplicate_identity, "sources/second-opinion.SOURCE.yaml"
+        )
+        second_yaml = yaml.safe_load(second_documentation["bytes"])
+        second_yaml["result_identity"] = "example-invalid:fictional-opinion"
+        second_documentation["bytes"] = yaml.safe_dump(
+            second_yaml, sort_keys=False
+        ).encode()
+        with self.assertRaises(records.AuthoritySourceError) as captured:
+            records.validate_collection_plan(duplicate_identity)
+        self.assertEqual(captured.exception.code, "duplicate-result-identity")
+
     def test_helper_has_no_filesystem_network_or_output_authority(self):
         source = SCRIPT.read_text()
         for forbidden in (

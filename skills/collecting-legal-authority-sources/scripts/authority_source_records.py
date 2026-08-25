@@ -310,6 +310,20 @@ def _internet_source(value, code):
     }
 
 
+def _validate_result_identities(documents):
+    result_identities = {}
+    for document in documents:
+        result_identities.setdefault(document["result_identity"], []).append(document)
+    for duplicates in result_identities.values():
+        if len(duplicates) > 1:
+            source_ids = {document["source_id"] for document in duplicates}
+            if not any(
+                source_ids & set(document["duplicate_of"])
+                for document in duplicates
+            ):
+                _fail("duplicate-result-identity")
+
+
 def build_collection_plan(sources, gaps, checked_through):
     """Return deterministic output-relative artifacts without writing them."""
     if type(sources) is not list or type(gaps) is not list:
@@ -334,14 +348,7 @@ def build_collection_plan(sources, gaps, checked_through):
         for duplicate in document["duplicate_of"]
     ):
         _fail("invalid-source-record")
-    result_identities = {}
-    for document, _ in prepared:
-        result_identities.setdefault(document["result_identity"], []).append(document)
-    for documents in result_identities.values():
-        if len(documents) > 1:
-            ids = {document["source_id"] for document in documents}
-            if not any(ids & set(document["duplicate_of"]) for document in documents):
-                _fail("duplicate-result-identity")
+    _validate_result_identities([document for document, _ in prepared])
 
     originals = {source["source_id"]: source for source in sources}
     artifacts = []
@@ -569,6 +576,7 @@ def validate_collection_plan(plan):
         for duplicate in document["duplicate_of"]
     ):
         _fail("invalid-source-yaml")
+    _validate_result_identities(documents)
     gaps = _load_yaml(by_path["authority-source-gaps.yaml"], "invalid-gap-index")
     if (
         set(gaps) != {"version", "checked_through", "gaps"}

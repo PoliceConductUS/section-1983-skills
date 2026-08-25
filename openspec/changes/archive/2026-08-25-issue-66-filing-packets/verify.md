@@ -64,3 +64,19 @@
 PASS for archive. Final readiness requires the archived durable specifications,
 fresh repository validation, a pushed archive commit, and exact remote/check
 verification. PR #77 and Issue #66 remain open under the close-on-merge policy.
+
+## Archive verification
+
+The repository-local OpenSpec CLI archived this change as
+`2026-08-25-issue-66-filing-packets`. It created the durable
+`filing-packet-lifecycle` specification with four requirements and added the
+public FilingPacket package-boundary requirement to
+`repository-skill-governance`.
+
+- `npm run validate` passed formatting, 27 drafting tests, 503 evaluation tests,
+  discovery of 22 skills, all 24 durable OpenSpec specifications, corpus
+  evaluation, and governance validation.
+- `git diff --check` passed after archival and durable-spec formatting.
+
+The archive commit, exact remote parity, GitHub validation, and draft-to-ready
+transition remain pending at this checkpoint. PR #77 and Issue #66 remain open.

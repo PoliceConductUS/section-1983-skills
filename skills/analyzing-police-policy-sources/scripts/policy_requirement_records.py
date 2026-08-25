@@ -12,6 +12,8 @@ import yaml
 
 
 _ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_UTC = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
+_URL = re.compile(r"^https?://[^\s/@]+(?::\d+)?(?:/[^\s]*)?$")
 _SOURCE_FIELDS = {
     "version", "source_id", "artifact_path", "sha256", "source_url", "query",
     "filters", "checked_date", "retrieved_at", "result_identity", "classification",
@@ -27,6 +29,20 @@ _REQ_FIELDS = {
 }
 _MARKERS = {"condition_present", "exception_present", "discretion_present", "cross_reference_present"}
 _TYPES = {"mandatory", "prohibited", "permitted", "discretionary"}
+_CLASSIFICATIONS = {
+    "adopted_policy",
+    "statute",
+    "regulation",
+    "collective_bargaining",
+    "accreditation",
+    "model_policy",
+    "training_material",
+    "form",
+    "guidance",
+    "comparison_source",
+}
+_ADOPTION = {"documented", "uncertain", "rejected", "not_applicable"}
+_REVIEW = {"candidate", "rejected"}
 _GAP_TYPES = {
     "missing_page", "illegible_text", "unresolved_history", "uncertain_adoption",
     "ambiguous_cross_reference", "uncertain_effective_date",
@@ -56,7 +72,12 @@ def _identifier(value, code):
 
 
 def _text(value, code):
-    if not isinstance(value, str) or not value.strip() or len(value) > 4096:
+    if (
+        not isinstance(value, str)
+        or not value.strip()
+        or len(value) > 4096
+        or any(ord(character) < 32 and character not in "\t\n\r" for character in value)
+    ):
         _fail(code)
     return value
 
@@ -74,7 +95,7 @@ def _iso_date(value, code):
 
 
 def _relative(value, code):
-    if not isinstance(value, str) or not value or "\\" in value:
+    if not isinstance(value, str) or not value or "\\" in value or "\x00" in value:
         _fail(code)
     path = PurePosixPath(value)
     if path.is_absolute() or any(part in {"", ".", ".."} for part in path.parts):
@@ -89,6 +110,23 @@ def _strings(value, code):
     if len(result) != len(set(result)):
         _fail(code)
     return result
+
+
+def _url(value, code):
+    if (
+        not isinstance(value, str)
+        or len(value) > 2048
+        or _URL.fullmatch(value) is None
+        or ".." in value.split("/", 3)[2]
+    ):
+        _fail(code)
+    return value
+
+
+def _timestamp(value, code):
+    if not isinstance(value, str) or _UTC.fullmatch(value) is None:
+        _fail(code)
+    return value
 
 
 def _selected_source(value):
@@ -107,11 +145,38 @@ def _selected_source(value):
         _fail("invalid-source-yaml")
     source_id = _identifier(source["source_id"], "invalid-source-yaml")
     artifact_path = _relative(source["artifact_path"], "invalid-source-yaml")
-    if PurePosixPath(artifact_path).parent != PurePosixPath(metadata_path).parent:
+    artifact = PurePosixPath(artifact_path)
+    metadata = PurePosixPath(metadata_path)
+    if (
+        artifact.parts[0] != "sources"
+        or metadata.parts[0] != "sources"
+        or artifact.parent != metadata.parent
+        or artifact_path == metadata_path
+    ):
         _fail("invalid-source-yaml")
     sha256 = hashlib.sha256(selection["artifact_bytes"]).hexdigest()
     if source["sha256"] != sha256:
         _fail("source-hash-mismatch")
+    _url(source["source_url"], "invalid-source-yaml")
+    _text(source["query"], "invalid-source-yaml")
+    _strings(source["filters"], "invalid-source-yaml")
+    _iso_date(source["checked_date"], "invalid-source-yaml")
+    _timestamp(source["retrieved_at"], "invalid-source-yaml")
+    _text(source["result_identity"], "invalid-source-yaml")
+    if (
+        source["classification"] not in _CLASSIFICATIONS
+        or source["adoption_relationship"] not in _ADOPTION
+        or source["review_state"] not in _REVIEW
+        or source["retrieval_result"] != "retrieved"
+    ):
+        _fail("invalid-source-yaml")
+    _strings(source["limitations"], "invalid-source-yaml")
+    duplicate_of = [
+        _identifier(value, "invalid-source-yaml")
+        for value in _strings(source["duplicate_of"], "invalid-source-yaml")
+    ]
+    if source_id in duplicate_of:
+        _fail("invalid-source-yaml")
     approval = _exact(selection["approval"], {"state", "approved_on", "approved_by"}, "invalid-approval")
     if approval["state"] != "approved_for_analysis":
         _fail("invalid-approval")
@@ -119,6 +184,8 @@ def _selected_source(value):
     _text(approval["approved_by"], "invalid-approval")
     if source["classification"] != "adopted_policy" or source["adoption_relationship"] != "documented":
         _fail("source-not-adopted-policy")
+    if source["review_state"] != "candidate":
+        _fail("source-not-approved")
     effective = _exact(source["effective_date"], {"status", "date", "evidence", "gap"}, "invalid-source-yaml")
     if effective["status"] != "documented" or effective["gap"] is not None:
         _fail("uncertain-effective-date")

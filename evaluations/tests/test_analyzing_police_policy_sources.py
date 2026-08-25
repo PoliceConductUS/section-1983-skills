@@ -192,6 +192,46 @@ class AnalyzingPolicePolicySourcesTest(unittest.TestCase):
             )
         self.assertEqual(captured.exception.code, "source-hash-mismatch")
 
+    def test_source_yaml_requires_valid_provenance_and_review_state(self):
+        records = load_module()
+        data = fixture()
+
+        missing = selected_source()
+        missing_document = yaml.safe_load(missing["source_yaml_bytes"])
+        missing_document.pop("source_url")
+        missing["source_yaml_bytes"] = yaml.safe_dump(
+            missing_document, sort_keys=False
+        ).encode()
+        with self.assertRaises(records.PolicyRequirementError) as captured:
+            records.build_analysis_plan(
+                [missing], data["requirements"], [], data["scope"]
+            )
+        self.assertEqual(captured.exception.code, "invalid-source-yaml")
+
+        malformed = selected_source()
+        malformed_document = yaml.safe_load(malformed["source_yaml_bytes"])
+        malformed_document["source_url"] = "not a source URL"
+        malformed["source_yaml_bytes"] = yaml.safe_dump(
+            malformed_document, sort_keys=False
+        ).encode()
+        with self.assertRaises(records.PolicyRequirementError) as captured:
+            records.build_analysis_plan(
+                [malformed], data["requirements"], [], data["scope"]
+            )
+        self.assertEqual(captured.exception.code, "invalid-source-yaml")
+
+        rejected = selected_source()
+        rejected_document = yaml.safe_load(rejected["source_yaml_bytes"])
+        rejected_document["review_state"] = "rejected"
+        rejected["source_yaml_bytes"] = yaml.safe_dump(
+            rejected_document, sort_keys=False
+        ).encode()
+        with self.assertRaises(records.PolicyRequirementError) as captured:
+            records.build_analysis_plan(
+                [rejected], data["requirements"], [], data["scope"]
+            )
+        self.assertEqual(captured.exception.code, "source-not-approved")
+
     def test_gaps_remain_explicit_and_do_not_invent_requirements(self):
         records = load_module()
         data = fixture()

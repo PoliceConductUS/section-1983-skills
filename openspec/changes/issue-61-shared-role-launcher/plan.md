@@ -2,9 +2,9 @@
 
 ## Goal
 
-Launch one protected static litigation role against selected ordinary files
-from declared read-only input folders in a fresh isolated process and return
-only bounded advisory output.
+Launch one protected static litigation role against selected ordinary files from
+declared read-only input folders in a fresh isolated process and return only
+bounded advisory output.
 
 ## Constraints
 
@@ -18,8 +18,8 @@ only bounded advisory output.
 
 ## Tasks
 
-1. Specify and implement static role, task, logical-selection, and
-   exact-byte snapshot binding.
+1. Specify and implement static role, task, logical-selection, and exact-byte
+   snapshot binding.
 2. Specify and implement adapter attestation, run-scoped output-temp workspace,
    bounded request/response, and stable failures.
 3. Specify and implement role-specific advisory output plus post-dispatch input

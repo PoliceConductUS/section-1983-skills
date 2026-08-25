@@ -56,7 +56,7 @@ excerpt, or fabricated finding.
   path
 - **THEN** the result identifies only the stable protocol class
 
-### Requirement: Output is advisory and selected inputs remain immutable
+### Requirement: Output is advisory and selected inputs remain unchanged
 
 The role-specific validator MUST accept only the static role's exact advisory
 schema and return proposed canonical output-relative artifacts. Only the trusted

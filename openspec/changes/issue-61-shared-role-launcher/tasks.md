@@ -28,9 +28,9 @@
 
 ## 5. Adversarial review
 
-- [ ] 5.1 RED-test the five categories, independence, read-only target,
+- [x] 5.1 RED-test the five categories, independence, read-only target,
       plaintiff decisions, and provider failures through the launcher.
-- [ ] 5.2 Migrate the reviewer without adding an arbitrary command surface.
+- [x] 5.2 Migrate the reviewer without adding an arbitrary command surface.
 
 ## 6. Verification
 

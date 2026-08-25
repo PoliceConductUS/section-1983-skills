@@ -40,6 +40,10 @@ JUDICIAL_FIXTURES = (
     / "references"
     / "fixtures"
 )
+ROLE_FIXTURES = {
+    name: REPOSITORY / "skills" / name / "references" / "fixtures"
+    for name in ("opposing-counsel", "judicial-reviewer")
+}
 
 
 class FakeAdapter:
@@ -320,11 +324,11 @@ class ProfileConditionedRoleTest(unittest.TestCase):
         self.assertEqual(output["findings"][0]["category"], "authority-presentation")
         self.assertEqual(binding.definition.capabilities, ())
 
-    def test_disposition_emitted_is_rejected_for_each_role(self):
+    def test_checked_in_disposition_fixture_is_rejected_for_each_role(self):
         cases = (
             (
+                "opposing-counsel",
                 "opposing-counsel-findings",
-                "source-backed-attack",
                 "SRC-MOTION-CURRENT",
                 self.counsel_profile,
                 self.counsel_output,
@@ -337,8 +341,8 @@ class ProfileConditionedRoleTest(unittest.TestCase):
                 "opposing-counsel-simulation",
             ),
             (
+                "judicial-reviewer",
                 "judicial-review-findings",
-                "comprehension",
                 "opinion-source",
                 self.judicial_profile,
                 self.judicial_output,
@@ -352,8 +356,8 @@ class ProfileConditionedRoleTest(unittest.TestCase):
             ),
         )
         for (
+            role,
             output_kind,
-            category,
             source_id,
             profile_root,
             output_root,
@@ -366,11 +370,10 @@ class ProfileConditionedRoleTest(unittest.TestCase):
                 invocation = self.invocation(profile_root, output_root)
                 profile = load_profile(invocation=invocation, **load_arguments)
                 approved = self.approved_source(invocation, source_id)
-                response = {
-                    "output_kind": output_kind,
-                    "findings": [finding(category, source_id)],
-                    "disposition-emitted": "dismiss",
-                }
+                response = json.loads(
+                    (ROLE_FIXTURES[role] / "disposition-emitted.json").read_text()
+                )
+                self.assertEqual(response["output_kind"], output_kind)
                 definition = build_definition(
                     adapter=FakeAdapter(response),
                     profile=profile,
@@ -379,24 +382,58 @@ class ProfileConditionedRoleTest(unittest.TestCase):
                 with self.assertRaises(RoleLaunchError):
                     definition.output_validator(response)
 
-    def test_profile_behavior_override_fails_before_role_launch(self):
-        hostile = json.loads(
-            (self.judicial_profile / "judicial-profile.json").read_text()
+    def test_checked_in_profile_override_fixture_fails_before_role_launch(self):
+        cases = (
+            (
+                "opposing-counsel",
+                self.counsel_profile,
+                self.counsel_output,
+                "defense-counsel-overlay.json",
+                load_opposing_counsel_profile,
+                {
+                    "overlay_path": "defense-counsel-overlay.json",
+                    "snapshot_path": "counsel-research-snapshot.json",
+                },
+                "invalid-opposing-counsel-profile",
+            ),
+            (
+                "judicial-reviewer",
+                self.judicial_profile,
+                self.judicial_output,
+                "judicial-profile.json",
+                load_judicial_reviewer_profile,
+                {
+                    "profile_path": "judicial-profile.json",
+                    "source_index_path": "judicial-profile-sources.yaml",
+                },
+                "invalid-judicial-profile",
+            ),
         )
-        hostile["capabilities"] = ["emit-disposition", "write-target"]
-        (self.judicial_profile / "judicial-profile.json").write_text(
-            json.dumps(hostile), encoding="utf-8"
-        )
-        invocation = self.invocation(self.judicial_profile, self.judicial_output)
+        for (
+            role,
+            profile_root,
+            output_root,
+            profile_filename,
+            load_profile,
+            load_arguments,
+            expected_code,
+        ) in cases:
+            with self.subTest(role=role):
+                hostile = json.loads((profile_root / profile_filename).read_text())
+                hostile.update(
+                    json.loads(
+                        (ROLE_FIXTURES[role] / "profile-override.json").read_text()
+                    )
+                )
+                (profile_root / profile_filename).write_text(
+                    json.dumps(hostile), encoding="utf-8"
+                )
+                invocation = self.invocation(profile_root, output_root)
 
-        with self.assertRaises(RoleLaunchError) as captured:
-            load_judicial_reviewer_profile(
-                invocation=invocation,
-                profile_path="judicial-profile.json",
-                source_index_path="judicial-profile-sources.yaml",
-            )
+                with self.assertRaises(RoleLaunchError) as captured:
+                    load_profile(invocation=invocation, **load_arguments)
 
-        self.assertEqual(captured.exception.code, "invalid-judicial-profile")
+                self.assertEqual(captured.exception.code, expected_code)
 
 
 class PublicRoleSkillStructureTest(unittest.TestCase):
@@ -407,6 +444,8 @@ class PublicRoleSkillStructureTest(unittest.TestCase):
             "references/finding-schema.json",
             "references/folder-contract.json",
             "references/static-role-instructions.md",
+            "references/fixtures/disposition-emitted.json",
+            "references/fixtures/profile-override.json",
         }
         for name, operation in (
             ("opposing-counsel", "opposing-counsel-simulation"),

@@ -20,7 +20,7 @@
 
 ## 4. Completion
 
-- [ ] 4.1 Run focused tests, full validation, and whole-story review.
-- [ ] 4.2 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 4.1 Run focused tests, full validation, and whole-story review.
+- [x] 4.2 Record verification and retrospective evidence and archive OpenSpec.
 - [ ] 4.3 Verify exact remote head/checks and mark the PR ready while leaving
       the PR and Issue #17 open.

@@ -1,0 +1,26 @@
+{
+  "source": {
+    "source_id": "src-model-use-of-force",
+    "artifact_path": "sources/model-use-of-force.txt",
+    "source_documentation_path": "sources/model-use-of-force.SOURCE.yaml",
+    "artifact_text": "Fictional model policy. An agency may adopt this text.\n",
+    "source_url": "https://example.invalid/model-use-of-force",
+    "query": "fictional model use of force policy",
+    "filters": ["official-source-system", "fictional-fixture"],
+    "checked_date": "2026-08-25",
+    "retrieved_at": "2026-08-25T12:00:00Z",
+    "result_identity": "example-invalid:model-use-of-force",
+    "classification": "model_policy",
+    "adoption_relationship": "uncertain",
+    "review_state": "candidate",
+    "retrieval_result": "retrieved",
+    "effective_date": {
+      "status": "missing",
+      "date": null,
+      "evidence": null,
+      "gap": "No adoption or effective-date record was located."
+    },
+    "limitations": ["Fictional fixture", "No department adoption evidence"],
+    "duplicate_of": []
+  }
+}

@@ -124,13 +124,28 @@ def _relative_path(value: Any) -> PurePosixPath:
     return path
 
 
-def _manifest(root: Path) -> tuple[dict[str, Any], bytes]:
+def _bounded_bytes(path: Path, limit: int) -> bytes:
+    try:
+        if path.stat().st_size > limit:
+            _fail("package-byte-limit")
+        with path.open("rb") as source:
+            contents = source.read(limit + 1)
+    except PackageError:
+        raise
+    except OSError:
+        _fail("invalid-package-root")
+    if len(contents) > limit:
+        _fail("package-byte-limit")
+    return contents
+
+
+def _manifest(root: Path, max_bytes: int) -> tuple[dict[str, Any], bytes]:
     try:
         selected = root / MANIFEST_NAME
         resolved = selected.resolve(strict=True)
         if resolved != selected:
             _fail("aliased-package-manifest")
-        contents = selected.read_bytes()
+        contents = _bounded_bytes(selected, max_bytes)
         value = json.loads(
             contents.decode("utf-8", errors="strict"), object_pairs_hook=_object
         )
@@ -189,7 +204,7 @@ def _validate_sources(value: Any) -> tuple[Mapping[str, str], ...]:
     return tuple(result)
 
 
-def _read_member(root: Path, value: Any) -> PackageMember:
+def _read_member(root: Path, value: Any, max_bytes: int) -> PackageMember:
     required = {"id", "role", "classification", "path", "media_type", "size", "sha256"}
     if type(value) is not dict or set(value) != required:
         _fail("invalid-package-member")
@@ -205,6 +220,8 @@ def _read_member(root: Path, value: Any) -> PackageMember:
         or _SHA256.fullmatch(value["sha256"]) is None
     ):
         _fail("invalid-package-member")
+    if value["size"] > max_bytes:
+        _fail("package-byte-limit")
     relative = _relative_path(value["path"])
     try:
         selected = root / Path(*relative.parts)
@@ -214,7 +231,7 @@ def _read_member(root: Path, value: Any) -> PackageMember:
         resolved.relative_to(root)
         if not resolved.is_file():
             _fail("missing-package-member")
-        contents = resolved.read_bytes()
+        contents = _bounded_bytes(resolved, max_bytes)
     except PackageError:
         raise
     except (OSError, RuntimeError, ValueError):
@@ -274,7 +291,7 @@ def load_folder_package(
     except (OSError, RuntimeError, ValueError, TypeError):
         _fail("invalid-package-root")
 
-    value, manifest_bytes = _manifest(selected_root)
+    value, manifest_bytes = _manifest(selected_root, max_bytes)
     required = {
         "schema_version",
         "package_kind",
@@ -302,7 +319,13 @@ def load_folder_package(
     sources = _validate_sources(value["sources"])
     if type(value["members"]) is not list or not value["members"]:
         _fail("invalid-package-members")
-    members = tuple(_read_member(selected_root, item) for item in value["members"])
+    remaining_bytes = max_bytes - len(manifest_bytes)
+    loaded_members = []
+    for item in value["members"]:
+        member = _read_member(selected_root, item, remaining_bytes)
+        loaded_members.append(member)
+        remaining_bytes -= member.size
+    members = tuple(loaded_members)
     ids = [member.id for member in members]
     paths = [member.path for member in members]
     if len(ids) != len(set(ids)) or len(paths) != len(set(paths)):

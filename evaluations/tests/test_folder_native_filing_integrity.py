@@ -191,6 +191,13 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
         self.assertNotIn("skill package", text)
         self.assertNotIn("casegraph", text)
 
+    def test_readme_describes_filing_ci_as_folder_native_not_packaged(self):
+        readme = (REPOSITORY / "README.md").read_text().casefold()
+        self.assertNotIn("registered packaged deterministic filing checks", readme)
+        self.assertNotIn("packaged integrity gate", readme)
+        self.assertNotIn("registered inside its installed package", readme)
+        self.assertIn("fixed installed deterministic filing checks", readme)
+
     def test_valid_selected_source_yaml_publishes_outputs_and_preserves_inputs(self):
         before = self.input_snapshot()
 

@@ -6,7 +6,8 @@ source:
     On summary judgment, the court weighed admissible evidence after discovery.
   sha256: 246e9e9592d1ba1e58869e9c36c3ced873cc6a577f9a597905fc3df6a7132327
 challenged_text:
-  At Rule 12, the court may weigh disputed evidence, citing only this decision.
+  A complaint must plausibly state a claim, citing only this post-discovery
+  decision.
 expected_propositions:
   - proposition_id: wrong-posture-1
     correctness: verified
@@ -14,5 +15,5 @@ expected_propositions:
     source_voice: majority-holding
 pass_allowed: false
 reason:
-  A post-discovery summary-judgment ruling does not ground the asserted Rule 12
-  standard.
+  The post-discovery ruling does not state or ground the asserted Rule 12
+  pleading standard.

@@ -3,9 +3,10 @@ id: wrong-date
 source:
   source_id: synthetic-wrong-date
   text: |
-    The amendment became effective on January 1, 2025, after the 2024 event.
-  sha256: ccf0196ef5e0205b45e68925e7bb6bbeb2671be82d76894d888e04795cc549a8
-challenged_text: The 2025 amendment governed the 2024 event.
+    The notice amendment became effective on January 1, 2025, after the 2024 event.
+  sha256: 21df74ca16e63fe88c7cc3e4396e0c12e1f40c67a1d1700f547598a17b6d371d
+challenged_text:
+  Notice was required for the 2024 event, citing only the 2025 amendment.
 expected_propositions:
   - proposition_id: wrong-date-1
     correctness: verified
@@ -13,5 +14,5 @@ expected_propositions:
     source_voice: majority-holding
 pass_allowed: false
 reason:
-  The cited amendment postdates the event and cannot ground the asserted
-  temporal application.
+  The cited amendment postdates the event and cannot ground the asserted notice
+  requirement.

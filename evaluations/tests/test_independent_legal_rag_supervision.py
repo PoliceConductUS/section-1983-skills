@@ -189,6 +189,14 @@ class IndependentLegalRagSupervisionTest(unittest.TestCase):
         ]
         cases.append(("generator-self-review", self_review, current_fingerprints()))
 
+        same_invocation = record()
+        same_invocation["audit_stage"]["invocation_id"] = same_invocation[
+            "generation_stage"
+        ]["invocation_id"]
+        cases.append(
+            ("generator-self-review", same_invocation, current_fingerprints())
+        )
+
         missing = record()
         missing.pop("audit_stage")
         cases.append(("missing-independent-stage", missing, current_fingerprints()))
@@ -321,6 +329,9 @@ class IndependentLegalRagSupervisionTest(unittest.TestCase):
                 )
                 self.assertEqual((fixture["version"], fixture["id"]), (1, fixture_id))
                 self.assertEqual(
+                    set(fixture["source"]), {"source_id", "text", "sha256"}
+                )
+                self.assertEqual(
                     hashlib.sha256(fixture["source"]["text"].encode("utf-8")).hexdigest(),
                     fixture["source"]["sha256"],
                 )
@@ -349,6 +360,15 @@ class IndependentLegalRagSupervisionTest(unittest.TestCase):
                         {"grounded", "misgrounded", "ungrounded", "not-applicable"},
                     )
                     self.assertIn(proposition_result["source_voice"], SOURCE_VOICES)
+                    if proposition_result["correctness"] == "verified":
+                        self.assertIn(
+                            proposition_result["groundedness"],
+                            {"grounded", "misgrounded", "ungrounded"},
+                        )
+                    else:
+                        self.assertEqual(
+                            proposition_result["groundedness"], "not-applicable"
+                        )
 
 
 if __name__ == "__main__":

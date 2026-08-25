@@ -1,9 +1,9 @@
 # Design: Municipal profile consumers
 
-## Exact folder roles
+## Declared profile role
 
-The following installed skills add `municipal-profile` to their existing exact
-recursive read-only roles:
+The following installed skills declare `municipal-profile` as their only
+optional recursive read-only role in addition to their existing required roles:
 
 - `drafting-section-1983-complaints`;
 - `rrd-rule12-city`;
@@ -11,9 +11,13 @@ recursive read-only roles:
 - `drafting-section-1983-deposition-outlines`; and
 - `adversarial-filing-review`.
 
-Each skill retains its current target policy and internet policy. Every durable
-write remains beneath the one caller-declared output folder, and every temporary
-byte and process temporary location remains beneath `<output-folder>/temp/`.
+Omitting the optional role preserves the skill's existing non-profile behavior.
+When the assigned task requests municipal-profile use, that role becomes
+semantically required: the consumer must not substitute an empty folder or
+continue without a valid profile. Each skill retains its current target policy
+and internet policy. Every durable write remains beneath the one caller-declared
+output folder, and every temporary byte and process temporary location remains
+beneath `<output-folder>/temp/`.
 
 ## Validation boundary
 

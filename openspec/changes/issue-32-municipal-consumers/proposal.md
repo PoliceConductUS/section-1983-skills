@@ -8,9 +8,10 @@ profile as proof, law, or a completed Monell element.
 
 ## What changes
 
-- Add one exact recursive read-only `municipal-profile` input role to complaint,
-  city Rule 12, written-discovery, deposition-outline, and adversarial-review
-  consumers.
+- Add `municipal-profile` as the one declared optional recursive read-only role
+  for complaint, city Rule 12, written-discovery, deposition-outline, and
+  adversarial-review consumers. Existing non-profile invocations remain valid;
+  assigned profile work requires the role and a complete valid profile.
 - Require the four ordinary Issue #31 output files and validate their versions,
   identities, hashes, record IDs, checked-through date, and passing result
   before specialized work.

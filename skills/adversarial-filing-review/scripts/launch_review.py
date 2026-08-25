@@ -1,5 +1,6 @@
 import argparse
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -802,15 +803,96 @@ def _approved_source_fingerprints(approved_sources_root):
     return fingerprints
 
 
-def _validate_approved_sources(packet, approved_sources_root):
+def _profile_validator_module():
+    path = Path(__file__).with_name("validate_municipal_profile_input.py")
+    specification = importlib.util.spec_from_file_location(
+        "adversarial_municipal_profile_input", path
+    )
+    if specification is None or specification.loader is None:
+        raise ReviewLaunchError(
+            "invalid-municipal-profile",
+            "municipal profile validator is unavailable",
+        )
+    module = importlib.util.module_from_spec(specification)
+    try:
+        specification.loader.exec_module(module)
+    except (ImportError, OSError, ValueError) as error:
+        raise ReviewLaunchError(
+            "invalid-municipal-profile",
+            "municipal profile validator is unavailable",
+        ) from error
+    return module
+
+
+def _municipal_profile_files(
+    root,
+    actual_folder_fingerprint,
+    expected_folder_fingerprint,
+    earliest_checked_through,
+):
+    resolved_root = _input_root(root)
+    names = (
+        "municipal-profile.yaml",
+        "municipal-profile-gaps.yaml",
+        "municipal-profile.md",
+        "municipal-profile-validation.json",
+    )
+    files = {}
+    try:
+        for name in names:
+            path = (resolved_root / name).resolve(strict=True)
+            if not path.is_file() or not _within(path, resolved_root):
+                raise OSError
+            files[name] = path.read_bytes()
+        validator = _profile_validator_module()
+        validator.validate_profile_files(
+            files,
+            actual_folder_fingerprint=actual_folder_fingerprint,
+            expected_folder_fingerprint=expected_folder_fingerprint,
+            earliest_checked_through=earliest_checked_through,
+        )
+    except ReviewLaunchError:
+        raise
+    except (OSError, TypeError, ValueError) as error:
+        raise ReviewLaunchError(
+            "invalid-municipal-profile",
+            "municipal profile validation failed",
+        ) from error
+    return files
+
+
+def _validate_approved_sources(packet, approved_sources_root, profile_files=None):
     available = _approved_source_fingerprints(approved_sources_root)
+    profile_available = {
+        f"municipal-profile:{name}": (
+            hashlib.sha256(contents).hexdigest(),
+            contents,
+        )
+        for name, contents in (profile_files or {}).items()
+    }
+    supplied_profile = set()
     for source in packet["sources"]:
         content = source["content"].encode("utf-8")
-        if (source["sha256"], content) not in available:
+        fingerprint = (source["sha256"], content)
+        if source["role"] == "municipal-profile":
+            supplied_profile.add(source["id"])
+            permitted = profile_available.get(source["id"]) == fingerprint
+        else:
+            permitted = fingerprint in available
+        if not permitted:
             raise ReviewLaunchError(
-                "approved-source-unavailable",
+                (
+                    "invalid-municipal-profile"
+                    if source["role"] == "municipal-profile"
+                    else "approved-source-unavailable"
+                ),
                 "approved packet source is unavailable",
             )
+    if supplied_profile != set(profile_available):
+        raise ReviewLaunchError(
+            "invalid-municipal-profile",
+            "review packet does not contain the complete validated municipal profile",
+        )
 
 
 def _receipt(packet, filing_target, model, run_time, run_id, outcome, failure_id=None):
@@ -878,6 +960,10 @@ def execute_trusted_review(
     approved_sources_root,
     filing_target,
     internet_policy,
+    municipal_profile_root=None,
+    actual_profile_folder_fingerprint=None,
+    expected_profile_folder_fingerprint=None,
+    earliest_profile_checked_through=None,
     timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
     transport=None,
     now=None,
@@ -887,7 +973,28 @@ def execute_trusted_review(
     resolved_filing_root = _input_root(filing_root)
     resolved_sources_root = _input_root(approved_sources_root)
     _filing_artifact(resolved_filing_root, filing_target, validated)
-    _validate_approved_sources(validated, resolved_sources_root)
+    profile_arguments = (
+        municipal_profile_root,
+        actual_profile_folder_fingerprint,
+        expected_profile_folder_fingerprint,
+        earliest_profile_checked_through,
+    )
+    if any(value is not None for value in profile_arguments) and not all(
+        value is not None for value in profile_arguments
+    ):
+        raise ReviewLaunchError(
+            "invalid-municipal-profile",
+            "municipal profile inputs are incomplete",
+        )
+    profile_files = None
+    if municipal_profile_root is not None:
+        profile_files = _municipal_profile_files(
+            municipal_profile_root,
+            actual_profile_folder_fingerprint,
+            expected_profile_folder_fingerprint,
+            earliest_profile_checked_through,
+        )
+    _validate_approved_sources(validated, resolved_sources_root, profile_files)
     if internet_policy != "authorized":
         raise ReviewLaunchError(
             "internet-not-authorized",
@@ -959,6 +1066,10 @@ def _parser():
     parser.add_argument("--model", required=True)
     parser.add_argument("--filing-root", required=True)
     parser.add_argument("--approved-sources-root", required=True)
+    parser.add_argument("--municipal-profile-root")
+    parser.add_argument("--actual-profile-folder-fingerprint")
+    parser.add_argument("--expected-profile-folder-fingerprint")
+    parser.add_argument("--earliest-profile-checked-through")
     parser.add_argument("--filing-target", required=True)
     parser.add_argument(
         "--internet-policy",
@@ -1006,6 +1117,10 @@ def main(
             api_key=environment.get("OPENAI_API_KEY", ""),
             filing_root=arguments.filing_root,
             approved_sources_root=arguments.approved_sources_root,
+            municipal_profile_root=arguments.municipal_profile_root,
+            actual_profile_folder_fingerprint=arguments.actual_profile_folder_fingerprint,
+            expected_profile_folder_fingerprint=arguments.expected_profile_folder_fingerprint,
+            earliest_profile_checked_through=arguments.earliest_profile_checked_through,
             filing_target=arguments.filing_target,
             internet_policy=arguments.internet_policy,
             timeout_seconds=arguments.timeout_seconds,

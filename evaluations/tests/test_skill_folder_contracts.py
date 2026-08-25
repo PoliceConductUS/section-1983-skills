@@ -17,10 +17,17 @@ from scripts.validate_governance import (
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
+OPTIONAL_INPUT_ROLES = {
+    "adversarial-filing-review": ["municipal-profile"],
+    "drafting-section-1983-complaints": ["municipal-profile"],
+    "drafting-section-1983-deposition-outlines": ["municipal-profile"],
+    "drafting-section-1983-written-discovery": ["municipal-profile"],
+    "rrd-rule12-city": ["municipal-profile"],
+}
 
 CONTRACTS = {
     "adversarial-filing-review": (
-        ["filing", "approved-sources", "municipal-profile"],
+        ["filing", "approved-sources"],
         "required",
         ["filing"],
         "authorized",
@@ -147,7 +154,7 @@ CONTRACTS = {
         "disabled",
     ),
     "drafting-section-1983-complaints": (
-        ["record", "authorities", "filing", "municipal-profile"],
+        ["record", "authorities", "filing"],
         "optional",
         ["filing"],
         "disabled",
@@ -159,7 +166,7 @@ CONTRACTS = {
         "disabled",
     ),
     "drafting-section-1983-deposition-outlines": (
-        ["record", "authorities", "discovery", "municipal-profile"],
+        ["record", "authorities", "discovery"],
         "optional",
         ["record"],
         "disabled",
@@ -177,7 +184,7 @@ CONTRACTS = {
         "disabled",
     ),
     "drafting-section-1983-written-discovery": (
-        ["record", "authorities", "claim-map", "municipal-profile"],
+        ["record", "authorities", "claim-map"],
         "optional",
         ["claim-map"],
         "disabled",
@@ -199,7 +206,7 @@ CONTRACTS = {
     "rrd": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
     "rrd-rule12": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
     "rrd-rule12-city": (
-        ["motion", "record", "authorities", "municipal-profile"],
+        ["motion", "record", "authorities"],
         "required",
         ["motion"],
         "disabled",
@@ -222,7 +229,7 @@ CONTRACTS = {
 
 def expected_contract(skill, values):
     input_roles, target_policy, target_roles, internet = values
-    return {
+    contract = {
         "version": 1,
         "skill": skill,
         "input_roles": input_roles,
@@ -230,6 +237,9 @@ def expected_contract(skill, values):
         "internet": internet,
         "output": {"mode": "append-immutable"},
     }
+    if skill in OPTIONAL_INPUT_ROLES:
+        contract["optional_input_roles"] = OPTIONAL_INPUT_ROLES[skill]
+    return contract
 
 
 def schema_errors(instance, schema, path="$"):

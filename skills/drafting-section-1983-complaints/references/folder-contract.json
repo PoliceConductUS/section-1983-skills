@@ -1,7 +1,8 @@
 {
   "version": 1,
   "skill": "drafting-section-1983-complaints",
-  "input_roles": ["record", "authorities", "filing", "municipal-profile"],
+  "input_roles": ["record", "authorities", "filing"],
+  "optional_input_roles": ["municipal-profile"],
   "target": { "policy": "optional", "roles": ["filing"] },
   "internet": "disabled",
   "output": { "mode": "append-immutable" }

@@ -2,6 +2,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,10 +13,25 @@ from evaluations.tests.test_building_municipal_monell_profiles import (
     build,
     load_module as load_builder,
 )
+from evaluations.tests.test_adversarial_review_runtime import (
+    TransportSpy,
+    launcher_module,
+    packet,
+)
+from scripts.validate_folder_invocation import (
+    InvocationError,
+    validate_installed_skill_invocation,
+)
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
-VALIDATOR = REPOSITORY / "scripts" / "validate_municipal_profile_input.py"
+VALIDATOR = (
+    REPOSITORY
+    / "skills"
+    / "adversarial-filing-review"
+    / "scripts"
+    / "validate_municipal_profile_input.py"
+)
 CONSUMERS = {
     "drafting-section-1983-complaints": {
         "roles": ["record", "authorities", "filing", "municipal-profile"],
@@ -73,6 +89,20 @@ def fingerprint(value):
     return hashlib.sha256(value.encode()).hexdigest()
 
 
+def packet_with_profile(files):
+    value = packet()
+    for name, contents in sorted(files.items()):
+        value["sources"].append(
+            {
+                "id": f"municipal-profile:{name}",
+                "role": "municipal-profile",
+                "content": contents.decode("utf-8"),
+                "sha256": hashlib.sha256(contents).hexdigest(),
+            }
+        )
+    return value
+
+
 class MunicipalProfileConsumersTest(unittest.TestCase):
     def test_each_consumer_adds_only_the_profile_role(self):
         for name, expected in CONSUMERS.items():
@@ -86,21 +116,80 @@ class MunicipalProfileConsumersTest(unittest.TestCase):
                         / "folder-contract.json"
                     ).read_text()
                 )
-                self.assertEqual(contract["input_roles"], expected["roles"])
+                self.assertEqual(contract["input_roles"], expected["roles"][:-1])
+                self.assertEqual(
+                    contract["optional_input_roles"], ["municipal-profile"]
+                )
                 self.assertEqual(contract["target"], expected["target"])
                 self.assertEqual(contract["internet"], expected["internet"])
                 self.assertEqual(contract["output"], {"mode": "append-immutable"})
+
+    def test_optional_profile_role_does_not_break_existing_non_profile_invocations(self):
+        skill = "drafting-section-1983-complaints"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            required = []
+            for role in ("record", "authorities", "filing"):
+                folder = root / role
+                folder.mkdir()
+                required.append({"role": role, "root": str(folder)})
+            output = root / "output"
+            output.mkdir()
+            envelope = {
+                "version": 1,
+                "skill": skill,
+                "inputs": required,
+                "output": {"root": str(output)},
+                "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
+                "internet": "disabled",
+                "isolation": {
+                    "inputs": "read-only",
+                    "output": "read-write",
+                    "undeclared": "none",
+                },
+            }
+            package = REPOSITORY / "skills" / skill
+            self.assertEqual(
+                [role for role, _ in validate_installed_skill_invocation(envelope, package).inputs],
+                ["record", "authorities", "filing"],
+            )
+
+            profile = root / "municipal-profile"
+            profile.mkdir()
+            with_profile = copy.deepcopy(envelope)
+            with_profile["inputs"].append(
+                {"role": "municipal-profile", "root": str(profile)}
+            )
+            self.assertEqual(
+                [
+                    role
+                    for role, _ in validate_installed_skill_invocation(
+                        with_profile, package
+                    ).inputs
+                ],
+                ["record", "authorities", "filing", "municipal-profile"],
+            )
+
+            unknown = copy.deepcopy(envelope)
+            other = root / "other"
+            other.mkdir()
+            unknown["inputs"].append({"role": "other", "root": str(other)})
+            with self.assertRaises(InvocationError) as captured:
+                validate_installed_skill_invocation(unknown, package)
+            self.assertEqual(captured.exception.code, "contract-input-roles")
 
     def test_each_consumer_has_install_local_profile_instructions(self):
         for name, expected in CONSUMERS.items():
             with self.subTest(skill=name):
                 root = REPOSITORY / "skills" / name
-                entrypoint = (root / "SKILL.md").read_text().lower()
+                entrypoint = " ".join((root / "SKILL.md").read_text().lower().split())
                 reference = root / "references" / "municipal-profile-consumption.md"
                 self.assertIn(
                     "[municipal profile consumption](references/municipal-profile-consumption.md)",
                     entrypoint,
                 )
+                self.assertIn("only optional input role", entrypoint)
+                self.assertIn("never substitute an empty folder", entrypoint)
                 text = " ".join(reference.read_text().lower().split())
                 self.assertIn("municipal-profile-validation.json", text)
                 self.assertIn("folder fingerprint", text)
@@ -271,6 +360,90 @@ class MunicipalProfileConsumersTest(unittest.TestCase):
                 earliest_checked_through="2025-01-01",
             )
         self.assertEqual(captured.exception.code, "invalid-profile")
+
+    def test_adversarial_runtime_validates_and_receives_supplied_profile(self):
+        launcher = launcher_module()
+        files = profile_files()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            filing = root / "filing"
+            sources = root / "approved-sources"
+            profile = root / "municipal-profile"
+            filing.mkdir()
+            sources.mkdir()
+            profile.mkdir()
+            review_packet = packet_with_profile(files)
+            (filing / "filing.md").write_text(review_packet["draft"]["content"])
+            (sources / "SRC-1.txt").write_text(
+                review_packet["sources"][0]["content"]
+            )
+            for name, contents in files.items():
+                (profile / name).write_bytes(contents)
+
+            transport = TransportSpy()
+            current = fingerprint("current-profile-folder")
+            result = launcher.execute_trusted_review(
+                review_packet,
+                model="gpt-synthetic",
+                api_key="secret-test-key",
+                filing_root=filing,
+                approved_sources_root=sources,
+                municipal_profile_root=profile,
+                actual_profile_folder_fingerprint=current,
+                expected_profile_folder_fingerprint=current,
+                earliest_profile_checked_through="2025-01-01",
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=transport,
+            )
+            self.assertEqual(result["outcome"], "completed")
+            self.assertEqual(len(transport.calls), 1)
+            self.assertIn(b"municipal-profile.yaml", transport.calls[0][0])
+
+            misnamed_packet = packet_with_profile(files)
+            misnamed_packet["sources"][-1]["id"] = "municipal-profile:other.yaml"
+            blocked_transport = TransportSpy()
+            with self.assertRaises(launcher.ReviewLaunchError) as captured:
+                launcher.execute_trusted_review(
+                    misnamed_packet,
+                    model="gpt-synthetic",
+                    api_key="secret-test-key",
+                    filing_root=filing,
+                    approved_sources_root=sources,
+                    municipal_profile_root=profile,
+                    actual_profile_folder_fingerprint=current,
+                    expected_profile_folder_fingerprint=current,
+                    earliest_profile_checked_through="2025-01-01",
+                    filing_target="filing.md",
+                    internet_policy="authorized",
+                    transport=blocked_transport,
+                )
+            self.assertEqual(captured.exception.finding_id, "invalid-municipal-profile")
+            self.assertEqual(blocked_transport.calls, [])
+
+            changed = yaml.safe_load((profile / "municipal-profile.yaml").read_bytes())
+            changed["evidence"][0]["proposition"] = "Changed before review."
+            (profile / "municipal-profile.yaml").write_text(
+                yaml.safe_dump(changed, sort_keys=False)
+            )
+            blocked_transport = TransportSpy()
+            with self.assertRaises(launcher.ReviewLaunchError) as captured:
+                launcher.execute_trusted_review(
+                    review_packet,
+                    model="gpt-synthetic",
+                    api_key="secret-test-key",
+                    filing_root=filing,
+                    approved_sources_root=sources,
+                    municipal_profile_root=profile,
+                    actual_profile_folder_fingerprint=current,
+                    expected_profile_folder_fingerprint=current,
+                    earliest_profile_checked_through="2025-01-01",
+                    filing_target="filing.md",
+                    internet_policy="authorized",
+                    transport=blocked_transport,
+                )
+            self.assertEqual(captured.exception.finding_id, "invalid-municipal-profile")
+            self.assertEqual(blocked_transport.calls, [])
 
 
 if __name__ == "__main__":

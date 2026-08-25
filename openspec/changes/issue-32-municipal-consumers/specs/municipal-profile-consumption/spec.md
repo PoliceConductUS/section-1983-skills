@@ -4,14 +4,17 @@
 
 ### Requirement: Applicable consumers declare the profile folder
 
-Each applicable consumer MUST add exactly one recursive read-only
-`municipal-profile` role while retaining its existing target and internet
-policies. The applicable consumers are complaint, city Rule 12,
-written-discovery, deposition-outline, and adversarial-review skills.
+Each applicable consumer MUST declare exactly one optional recursive read-only
+`municipal-profile` role while retaining its existing required roles, target
+policy, and internet policy. The applicable consumers are complaint, city Rule
+12, written-discovery, deposition-outline, and adversarial-review skills. A task
+that requests profile use MUST supply the role and pass validation; omission
+preserves only the consumer's existing non-profile behavior.
 
 #### Scenario: A consumer is invoked with the exact roles
 
-- **WHEN** the trusted host validates the skill's complete declared folder set
+- **WHEN** the trusted host validates the skill's required roles and supplied
+  optional profile role
 - **THEN** the consumer may inspect the ordinary municipal-profile files without
   acquiring access to any undeclared path
 

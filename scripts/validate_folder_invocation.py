@@ -29,6 +29,7 @@ _ENVELOPE_FIELDS = frozenset(
 _CONTRACT_FIELDS = frozenset(
     {"version", "skill", "input_roles", "target", "internet", "output"}
 )
+_OPTIONAL_CONTRACT_FIELDS = frozenset({"optional_input_roles"})
 _MAX_CONTRACT_BYTES = 65_536
 
 
@@ -62,7 +63,11 @@ def _is_identifier(value: Any) -> bool:
 
 
 def _require_exact_object(value: Any, required: set[str], allowed: set[str], code: str) -> dict[str, Any]:
-    if type(value) is not dict or set(value) != required or not set(value).issubset(allowed):
+    if (
+        type(value) is not dict
+        or not required.issubset(value)
+        or not set(value).issubset(allowed)
+    ):
         _fail(code)
     return value
 
@@ -129,7 +134,7 @@ def _validate_skill_contract(value: Any) -> dict[str, Any]:
     contract = _require_exact_object(
         value,
         set(_CONTRACT_FIELDS),
-        set(_CONTRACT_FIELDS),
+        set(_CONTRACT_FIELDS | _OPTIONAL_CONTRACT_FIELDS),
         "invalid-skill-contract",
     )
     if type(contract["version"]) is not int or contract["version"] != 1:
@@ -142,6 +147,15 @@ def _validate_skill_contract(value: Any) -> dict[str, Any]:
         or not input_roles
         or any(not _is_identifier(role) for role in input_roles)
         or len(input_roles) != len(set(input_roles))
+    ):
+        _fail("invalid-skill-contract")
+    optional_input_roles = contract.get("optional_input_roles", [])
+    if (
+        type(optional_input_roles) is not list
+        or ("optional_input_roles" in contract and not optional_input_roles)
+        or any(not _is_identifier(role) for role in optional_input_roles)
+        or len(optional_input_roles) != len(set(optional_input_roles))
+        or set(optional_input_roles) & set(input_roles)
     ):
         _fail("invalid-skill-contract")
     target = _require_exact_object(
@@ -220,7 +234,12 @@ def validate_installed_skill_invocation(
     inputs = envelope.get("inputs")
     if type(inputs) is not list or any(type(item) is not dict for item in inputs):
         return validate_invocation(envelope)
-    if [item.get("role") for item in inputs] != contract["input_roles"]:
+    supplied_roles = [item.get("role") for item in inputs]
+    optional_roles = contract.get("optional_input_roles", [])
+    expected_roles = contract["input_roles"] + [
+        role for role in optional_roles if role in supplied_roles
+    ]
+    if supplied_roles != expected_roles:
         _fail("contract-input-roles")
     contract_internet = contract["internet"]
     if isinstance(contract_internet, str):

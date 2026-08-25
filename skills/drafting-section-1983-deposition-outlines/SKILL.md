@@ -24,6 +24,11 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `municipal-profile` contains the four validated ordinary Issue #31 output
   files when municipal examination topics are within scope.
 
+`municipal-profile` is the only optional input role. Omit it for outlines
+without municipal-profile work. If the assigned task requests profile use, the
+role and a valid complete profile are required; never substitute an empty
+folder.
+
 For municipal examination topics, read
 [municipal profile consumption](references/municipal-profile-consumption.md)
 before building the outline.

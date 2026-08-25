@@ -26,6 +26,10 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `municipal-profile` contains the four validated ordinary Issue #31 output
   files when the filing presents a municipal theory.
 
+`municipal-profile` is the only optional input role. Omit it for non-profile
+review. If the assigned review requests municipal-profile use, the role and a
+valid complete profile are required; never substitute an empty folder.
+
 Validate each selected source and YAML record under
 [the approved-source documentation contract](references/approved-source-documentation.md).
 When municipal-profile input is supplied, also read

@@ -651,16 +651,8 @@ def _validate_sequence_binding(
         _fail("invalid-sequence-link")
     output = binding.invocation.output_root.resolve()
     for previous in previous_outputs:
-        try:
-            output.relative_to(previous)
+        if output.is_relative_to(previous) or previous.is_relative_to(output):
             _fail("invalid-sequence-output")
-        except ValueError:
-            pass
-        try:
-            previous.relative_to(output)
-            _fail("invalid-sequence-output")
-        except ValueError:
-            pass
     return binding
 
 

@@ -38,6 +38,8 @@ Result:
 - Every retrieved ordinary file has adjacent domain YAML with matching SHA-256,
   URL, retrieval time, classification, proposed adoption relationship,
   effective-date evidence or gap, limitations, and duplicate relationships.
+- PyYAML 6.0.3 is pinned in the checked-in Python runtime requirements used by
+  local and GitHub validation.
 - The shared writer publishes artifacts only beneath the explicit output folder,
   records internet provenance, and binds cwd, `TMPDIR`, `TMP`, and `TEMP` to
   `<output-folder>/temp/`.

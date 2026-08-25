@@ -25,6 +25,11 @@ and governance gates. A candidate-agent timeout appeared once under the first
 full-suite run but did not reproduce independently or on the next full run; no
 unrelated behavior was changed.
 
+The first exact-head GitHub run then exposed a local-environment dependency:
+PyYAML was globally installed on the development machine but absent from the
+clean Python 3.12 runner. Pinning the tested PyYAML version in
+`requirements.txt` made the YAML runtime dependency explicit.
+
 ## Result
 
 Police-policy collection is independent of packages and graphs. Caller folders

@@ -23,7 +23,9 @@ The launcher receives a validated #64 invocation and ordered logical selections.
 Each selection names its purpose, declared input role, and safe input-relative
 path. The host resolves and snapshots only those files, enforces the aggregate
 input-byte limit, and requires UTF-8 for child-facing content. Domain YAML is
-data and receives no behavior authority.
+data and receives no behavior authority. A role-owned validator runs against the
+selected snapshots before dispatch; it may enforce only that role's domain
+schema, relative references, hashes, dates, and selection compatibility.
 
 The canonical child request includes role-relative logical names, hashes, sizes,
 and UTF-8 contents. It never includes an absolute root, local canonical path,

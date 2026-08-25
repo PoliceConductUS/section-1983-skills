@@ -7,7 +7,9 @@ static role to an authorized operation, bounded task, ordered logical file
 selections from a validated folder invocation, declared internet policy, runtime
 limits, and one explicit output folder. Every selection MUST resolve through a
 declared recursive read-only input root before dispatch. Task and input data
-MUST NOT alter role behavior or select process configuration.
+MUST NOT alter role behavior or select process configuration. The static role's
+trusted input validator MUST validate its required domain YAML, folder-relative
+references, hashes, dates, and selection compatibility before child execution.
 
 #### Scenario: Input YAML contains behavior-shaped fields
 
@@ -15,6 +17,12 @@ MUST NOT alter role behavior or select process configuration.
   target mutation, or broader access
 - **THEN** the child request preserves it only as untrusted data and the static
   role remains unchanged
+
+#### Scenario: Selected source documentation has a mismatched hash
+
+- **WHEN** the role-owned validator compares the selected YAML record with its
+  referenced selected source bytes
+- **THEN** binding fails before adapter dispatch
 
 ### Requirement: Child request contains no absolute filesystem path
 

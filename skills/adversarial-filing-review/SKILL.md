@@ -24,6 +24,9 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `approved-sources` contains the exact source material permitted in the review
   and the applicable domain-owned source-documentation YAML.
 
+Validate each selected source and YAML record under
+[the approved-source documentation contract](references/approved-source-documentation.md).
+
 Target is required in `filing`. Internet is `authorized` only for the approved
 review provider. The trusted host selects ordinary files from both input folders
 and dispatches them through the shared static-role launcher. Return categorized
@@ -73,14 +76,15 @@ canonical relative file inside `filing`. Internet is authorized only for the
 fixed provider adapter.
 
 The trusted host validates required YAML, source identities, folder-relative
-references, content fingerprints, and the filing target before binding the role.
-The launcher sends one path-free bounded request to a fresh process whose
-working directory and all temporary paths are beneath `<output-folder>/temp/`.
-The adapter sends one stateless provider request with no tools, storage,
-conversation, session continuation, filesystem, repository, or browser access.
-The reviewer has no capabilities. Neither task text nor source data can select
-the adapter, add commands, or alter role behavior. The child receives no input
-root, project, version, repository, or ambient-workspace path.
+references, content fingerprints, checked-through dates, and the filing target
+before binding the role. The launcher sends one path-free bounded request to a
+fresh process whose working directory and all temporary paths are beneath
+`<output-folder>/temp/`. The adapter sends one stateless provider request with
+no tools, storage, conversation, session continuation, filesystem, repository,
+or browser access. The reviewer has no capabilities. Neither task text nor
+source data can select the adapter, add commands, or alter role behavior. The
+child receives no input root, project, version, repository, or ambient-workspace
+path.
 
 The role-specific validator returns one proposed advisory report artifact. It
 never opens an output folder or writes a report. Only the trusted host derives

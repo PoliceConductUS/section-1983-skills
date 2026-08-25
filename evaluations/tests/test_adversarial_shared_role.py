@@ -300,6 +300,37 @@ class AdversarialSharedRoleTest(unittest.TestCase):
                         "Synthetic approved record.\n", encoding="utf-8"
                     )
 
+    def test_source_documentation_cannot_change_after_validation(self):
+        invocation = self.invocation()
+        records = load_approved_source_records(
+            invocation=invocation,
+            documentation_paths=("SOURCE.yaml",),
+            minimum_checked_through="2026-08-01",
+        )
+        (self.sources / "SOURCE.yaml").write_text(
+            "schema_version: 1\nsource_id: FORGED\n", encoding="utf-8"
+        )
+        adapter = FakeAdapter()
+
+        with self.assertRaises(RoleLaunchError) as captured:
+            bind_role_launch(
+                build_adversarial_review_definition(
+                    adapter=adapter,
+                    approved_sources=records,
+                ),
+                invocation=invocation,
+                task=validate_role_task(
+                    {
+                        "operation": "review-filing",
+                        "instructions": "Review the selected synthetic filing.",
+                    }
+                ),
+                selections=self.selections(),
+            )
+
+        self.assertEqual(captured.exception.code, "invalid-source-selection")
+        self.assertEqual(adapter.calls, [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -143,6 +143,7 @@ class RoleLaunchDefinition:
     output_kind: str
     public_instructions: bytes
     adapter: Any
+    input_validator: Callable[[tuple[SelectedInputSnapshot, ...]], None]
     output_validator: Callable[[Any], tuple[ProposedArtifact, ...]]
     max_stdout_bytes: int
     max_stderr_bytes: int
@@ -193,6 +194,7 @@ def _validate_definition(definition: RoleLaunchDefinition) -> None:
         or type(definition.public_instructions) is not bytes
         or not definition.public_instructions
         or len(definition.public_instructions) > _MAX_ROLE_INSTRUCTION_BYTES
+        or not callable(definition.input_validator)
         or not callable(definition.output_validator)
         or not callable(getattr(definition.adapter, "attest", None))
         or not callable(getattr(definition.adapter, "launch", None))
@@ -315,6 +317,14 @@ def bind_role_launch(
         )
         remaining -= snapshot.size
         snapshots.append(snapshot)
+    try:
+        validation_result = definition.input_validator(tuple(snapshots))
+    except RoleLaunchError:
+        raise
+    except BaseException:
+        _fail("role-input-invalid")
+    if validation_result is not None:
+        _fail("role-input-invalid")
     return BoundRoleLaunch(
         definition=definition,
         invocation=invocation,

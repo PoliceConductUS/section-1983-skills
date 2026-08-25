@@ -5,12 +5,14 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import uuid
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any, Mapping
+
+from scripts.skill_output_writer import OutputRun
+from scripts.validate_folder_invocation import ValidatedInvocation, build_input_manifest
 
 
 MANIFEST_NAME = "package-manifest.json"
@@ -162,13 +164,8 @@ def _validate_producer(value: Any) -> Mapping[str, str]:
         or not isinstance(value["version"], str)
         or not value["version"]
         or not _identifier(value["operation"])
-        or not isinstance(value["run_id"], str)
+        or not _identifier(value["run_id"])
     ):
-        _fail("invalid-package-producer")
-    try:
-        if str(uuid.UUID(value["run_id"])) != value["run_id"]:
-            _fail("invalid-package-producer")
-    except ValueError:
         _fail("invalid-package-producer")
     return MappingProxyType(dict(value))
 
@@ -348,3 +345,156 @@ def load_folder_package(
         manifest_sha256=fingerprint,
         fingerprint=fingerprint,
     )
+
+
+def _canonical_bytes(value: Any) -> bytes:
+    try:
+        return json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+    except (TypeError, ValueError, UnicodeError):
+        _fail("invalid-package-json")
+
+
+def _proposed_members(value: Any) -> tuple[tuple[dict[str, Any], bytes], ...]:
+    if type(value) is not list or not value:
+        _fail("invalid-package-members")
+    result = []
+    required = {"id", "role", "classification", "path", "media_type", "contents"}
+    for item in value:
+        if type(item) is not dict or set(item) != required:
+            _fail("invalid-package-member")
+        if (
+            not _identifier(item["id"])
+            or not _identifier(item["role"])
+            or item["classification"] not in _CLASSIFICATIONS
+            or not isinstance(item["media_type"], str)
+            or not item["media_type"]
+        ):
+            _fail("invalid-package-member")
+        path = _relative_path(item["path"]).as_posix()
+        contents = item["contents"]
+        if isinstance(contents, str):
+            contents = contents.encode("utf-8")
+        if not isinstance(contents, bytes):
+            _fail("invalid-package-contents")
+        result.append(
+            (
+                {
+                    "id": item["id"],
+                    "role": item["role"],
+                    "classification": item["classification"],
+                    "path": path,
+                    "media_type": item["media_type"],
+                    "size": len(contents),
+                    "sha256": _sha256(contents),
+                },
+                contents,
+            )
+        )
+    ids = [item[0]["id"] for item in result]
+    paths = [item[0]["path"] for item in result]
+    if len(ids) != len(set(ids)) or len(paths) != len(set(paths)):
+        _fail("duplicate-package-member")
+    return tuple(result)
+
+
+def _publication_validation(value: Any, members) -> dict[str, str]:
+    if (
+        type(value) is not dict
+        or set(value)
+        != {"status", "validator", "version", "validated_at", "receipt_member_id"}
+        or value["status"] != "passed"
+        or not isinstance(value["validator"], str)
+        or not value["validator"]
+        or not isinstance(value["version"], str)
+        or not value["version"]
+        or not _timestamp(value["validated_at"])
+        or not _identifier(value["receipt_member_id"])
+    ):
+        _fail("invalid-package-validation")
+    receipt = next(
+        (item[0] for item in members if item[0]["id"] == value["receipt_member_id"]),
+        None,
+    )
+    if receipt is None or receipt["classification"] != "validation-receipt":
+        _fail("invalid-package-validation-receipt")
+    return dict(value)
+
+
+def publish_folder_package(
+    invocation: ValidatedInvocation,
+    *,
+    package_kind: str,
+    package_id: str,
+    created_at: str,
+    freshness,
+    sources,
+    members,
+    validation,
+    operation: str,
+    run_id: str,
+    skill_version: str,
+) -> dict[str, Any]:
+    """Publish one complete package beneath an explicit fresh output folder."""
+    if not isinstance(invocation, ValidatedInvocation):
+        _fail("invalid-package-invocation")
+    if (
+        invocation.contract_target_policy not in {"required", "optional", "none"}
+        or invocation.contract_target_roles is None
+    ):
+        _fail("unbound-package-invocation")
+    if (
+        not _identifier(package_kind)
+        or not _identifier(package_id)
+        or not _timestamp(created_at)
+        or not _identifier(operation)
+        or not _identifier(run_id)
+        or not isinstance(skill_version, str)
+        or not skill_version
+    ):
+        _fail("invalid-package-publication")
+    normalized_freshness = dict(_validate_freshness(freshness))
+    normalized_sources = [dict(item) for item in _validate_sources(sources)]
+    proposed = _proposed_members(members)
+    normalized_validation = _publication_validation(validation, proposed)
+    manifest = {
+        "schema_version": 1,
+        "package_kind": package_kind,
+        "package_id": package_id,
+        "created_at": created_at,
+        "freshness": normalized_freshness,
+        "producer": {
+            "name": invocation.skill,
+            "version": skill_version,
+            "operation": operation,
+            "run_id": run_id,
+        },
+        "sources": normalized_sources,
+        "members": [item for item, _ in proposed],
+        "validation": normalized_validation,
+    }
+    input_manifest = build_input_manifest(invocation)
+    prefix = f"packages/{package_id}"
+    run = OutputRun.start(
+        invocation,
+        run_id=run_id,
+        skill_version=skill_version,
+        mode="fresh-regenerable",
+        input_manifest=input_manifest,
+    )
+    try:
+        for member, contents in proposed:
+            run.write(f"{prefix}/{member['path']}", contents)
+        run.write(f"{prefix}/{MANIFEST_NAME}", _canonical_bytes(manifest))
+        return run.complete()
+    except Exception:
+        try:
+            run.fail("folder-package-publication", "publish")
+        except Exception:
+            pass
+        raise

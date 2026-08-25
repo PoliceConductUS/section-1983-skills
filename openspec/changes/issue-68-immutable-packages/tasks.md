@@ -22,9 +22,9 @@
 
 ## 4. Regeneration and publication
 
-- [ ] 4.1 RED-test installed-contract binding, complete publication, source
+- [x] 4.1 RED-test installed-contract binding, complete publication, source
       provenance, output confinement, and input preservation.
-- [ ] 4.2 Implement and GREEN package publication through `OutputRun`.
+- [x] 4.2 Implement and GREEN package publication through `OutputRun`.
 
 ## 5. Protected role binding
 

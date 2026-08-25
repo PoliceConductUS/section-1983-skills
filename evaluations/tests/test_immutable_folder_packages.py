@@ -154,6 +154,51 @@ class ImmutableFolderPackageLoaderTest(unittest.TestCase):
                     )
                 self.assertEqual(captured.exception.code, expected)
 
+            with self.assertRaises(PackageError) as captured:
+                load_folder_package(
+                    FIXTURES / "judicial-profile",
+                    accepted_kinds={"judicial-profile"},
+                    max_bytes=10,
+                )
+            self.assertEqual(captured.exception.code, "package-byte-limit")
+
+    def test_loader_rejects_malformed_contract_and_receipt_linkage(self):
+        mutations = {
+            "invalid-package-manifest": lambda value: value.update(
+                schema_version=True
+            ),
+            "unsupported-package-kind": lambda value: value.update(
+                package_kind="municipal-profile"
+            ),
+            "invalid-package-freshness": lambda value: value["freshness"].update(
+                checked_through="08/24/2026"
+            ),
+            "invalid-package-validation": lambda value: value["validation"].update(
+                status="failed"
+            ),
+            "invalid-package-validation-receipt": lambda value: value[
+                "validation"
+            ].update(receipt_member_id="profile"),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            for index, (expected, mutate) in enumerate(mutations.items()):
+                root = base / str(index)
+                shutil.copytree(FIXTURES / "judicial-profile", root)
+                manifest_path = root / "package-manifest.json"
+                value = json.loads(manifest_path.read_text())
+                mutate(value)
+                manifest_path.write_text(json.dumps(value))
+                with self.subTest(expected=expected), self.assertRaises(
+                    PackageError
+                ) as captured:
+                    load_folder_package(
+                        root,
+                        accepted_kinds={"judicial-profile"},
+                        max_bytes=4096,
+                    )
+                self.assertEqual(captured.exception.code, expected)
+
 
 class ImmutableFolderPackagePublisherTest(unittest.TestCase):
     def _envelope(self, root: Path):
@@ -262,51 +307,6 @@ class ImmutableFolderPackagePublisherTest(unittest.TestCase):
                     skill_version="1",
                 )
             self.assertEqual(captured.exception.code, "unbound-package-invocation")
-
-            with self.assertRaises(PackageError) as captured:
-                load_folder_package(
-                    FIXTURES / "judicial-profile",
-                    accepted_kinds={"judicial-profile"},
-                    max_bytes=10,
-                )
-            self.assertEqual(captured.exception.code, "package-byte-limit")
-
-    def test_loader_rejects_malformed_contract_and_receipt_linkage(self):
-        mutations = {
-            "invalid-package-manifest": lambda value: value.update(
-                schema_version=True
-            ),
-            "unsupported-package-kind": lambda value: value.update(
-                package_kind="municipal-profile"
-            ),
-            "invalid-package-freshness": lambda value: value["freshness"].update(
-                checked_through="08/24/2026"
-            ),
-            "invalid-package-validation": lambda value: value["validation"].update(
-                status="failed"
-            ),
-            "invalid-package-validation-receipt": lambda value: value[
-                "validation"
-            ].update(receipt_member_id="profile"),
-        }
-        with tempfile.TemporaryDirectory() as directory:
-            base = Path(directory)
-            for index, (expected, mutate) in enumerate(mutations.items()):
-                root = base / str(index)
-                shutil.copytree(FIXTURES / "judicial-profile", root)
-                manifest_path = root / "package-manifest.json"
-                value = json.loads(manifest_path.read_text())
-                mutate(value)
-                manifest_path.write_text(json.dumps(value))
-                with self.subTest(expected=expected), self.assertRaises(
-                    PackageError
-                ) as captured:
-                    load_folder_package(
-                        root,
-                        accepted_kinds={"judicial-profile"},
-                        max_bytes=4096,
-                    )
-                self.assertEqual(captured.exception.code, expected)
 
 
 if __name__ == "__main__":

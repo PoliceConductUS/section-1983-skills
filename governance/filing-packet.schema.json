@@ -44,7 +44,7 @@
         "path": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^(?!filing-packet\\.json$)(?!(?:\\.skill-runs|filing-packets)(?:/|$))(?!/)(?![\\s\\S]*\\\\)(?![\\s\\S]*\\u0000)(?!\\.{1,2}(?:/|$))(?![\\s\\S]*\\/\\.{1,2}(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*\\/$)[\\s\\S]+$"
+          "pattern": "^(?!filing-packet\\.json$)(?!(?:\\.[Ss][Kk][Ii][Ll][Ll]-[Rr][Uu][Nn][Ss]|[Tt][Ee][Mm][Pp]|filing-packets)(?:/|$))(?!/)(?![\\s\\S]*\\\\)(?![\\s\\S]*\\u0000)(?!\\.{1,2}(?:/|$))(?![\\s\\S]*\\/\\.{1,2}(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*\\/$)[\\s\\S]+$"
         },
         "sha256": { "$ref": "#/$defs/sha256" },
         "size": { "type": "integer", "minimum": 0 }

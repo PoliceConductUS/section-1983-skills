@@ -13,8 +13,8 @@
 
 ## 3. GREEN
 
-- [ ] 3.1 Update publisher, loader, path grammar, and schema.
-- [ ] 3.2 Update current public guidance and durable specification.
+- [x] 3.1 Update publisher, loader, path grammar, and schema.
+- [x] 3.2 Update current public guidance and durable specification.
 
 ## 4. Verification
 

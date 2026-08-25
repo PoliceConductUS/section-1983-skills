@@ -39,20 +39,27 @@ the same version and member-path language.
   member path
 - **THEN** both the public schema and runtime validator reject that value
 
-### Requirement: Packet generation and revision preserve source inputs
+### Requirement: Revisions publish to the explicit output folder
 
-The trusted host MUST publish a complete proposed FilingPacket beneath the
-explicit output folder without mutating a source packet or context input. A
-revision MUST record the validated source packet fingerprint and every output
-MUST record the logical input-manifest fingerprint. Publication MUST receive an
-invocation already bound to one installed skill's exact folder contract; a
-generic folder-valid invocation MUST fail closed before starting an output run.
+A generation or revision invocation MUST receive one caller-selected absolute
+fresh output folder, or stop and ask for it before work. The trusted host MUST
+publish every proposed document and `filing-packet.json` directly beneath that
+exact folder through one complete output run. It MUST NOT create an intermediate
+`filing-packets/<packet-id>/` namespace or mutate the source packet. A revision
+MUST record the validated source packet fingerprint and every output MUST record
+the logical input-manifest fingerprint. Publication MUST receive an invocation
+already bound to one installed skill's exact folder contract; a generic
+folder-valid invocation MUST fail closed before starting an output run.
+
+Writer-owned `.skill-runs/` receipts and `temp/` transient files are not packet
+members. Every other regular file beneath the output root MUST resolve from and
+match `filing-packet.json`.
 
 #### Scenario: A source packet is revised
 
 - **WHEN** a drafting operation proposes changed and unchanged packet members
-- **THEN** the host creates a new complete packet and the source packet remains
-  byte-for-byte unchanged
+- **THEN** the host creates the new complete packet directly in the selected
+  output folder and the source packet remains byte-for-byte unchanged
 
 #### Scenario: A generic invocation requests publication
 

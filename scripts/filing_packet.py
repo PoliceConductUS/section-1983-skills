@@ -15,6 +15,7 @@ from scripts.validate_folder_invocation import ValidatedInvocation, build_input_
 
 MANIFEST_NAME = "filing-packet.json"
 PACKET_PREFIX = "filing-packets"
+CONTROL_NAMESPACES = frozenset({".skill-runs", "temp"})
 ROLES = frozenset({"main", "appendix", "exhibit", "proposed-order", "other"})
 _IDENTIFIER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -85,7 +86,7 @@ def _relative_path(value: Any) -> PurePosixPath:
         or path.as_posix() != value
         or not path.parts
         or any(part in {"", ".", ".."} for part in path.parts)
-        or path.parts[0] in {".skill-runs", PACKET_PREFIX}
+        or path.parts[0].casefold() in CONTROL_NAMESPACES | {PACKET_PREFIX}
         or value == MANIFEST_NAME
     ):
         _fail("invalid-filing-packet-path")
@@ -150,6 +151,42 @@ def _validated_document(root: Path, value: Any, roles: frozenset[str]) -> dict[s
     return dict(value)
 
 
+def _validate_complete_membership(root: Path, listed_paths: set[str]) -> None:
+    actual_paths = set()
+    for control_name in CONTROL_NAMESPACES:
+        control_path = root / control_name
+        if control_path.is_symlink() or (
+            control_path.exists() and not control_path.is_dir()
+        ):
+            _fail("invalid-filing-packet-control-namespace")
+    try:
+        for path in root.rglob("*"):
+            relative = path.relative_to(root).as_posix()
+            top_level = relative.split("/", 1)[0].casefold()
+            if top_level in CONTROL_NAMESPACES:
+                if path.is_symlink():
+                    _fail("invalid-filing-packet-control-namespace")
+                if path.is_dir() or path.is_file():
+                    continue
+                _fail("invalid-filing-packet-control-namespace")
+            if path.is_symlink():
+                _fail("aliased-filing-packet-member")
+            if path.is_dir():
+                continue
+            if not path.is_file():
+                _fail("invalid-filing-packet-member")
+            if relative != MANIFEST_NAME:
+                actual_paths.add(relative)
+    except FilingPacketError:
+        raise
+    except (OSError, RuntimeError, ValueError):
+        _fail("invalid-filing-packet-root")
+    if actual_paths - listed_paths:
+        _fail("unlisted-filing-packet-member")
+    if listed_paths - actual_paths:
+        _fail("missing-filing-packet-member")
+
+
 def load_filing_packet(packet_root, *, authorized_roles) -> ValidatedFilingPacket:
     """Load and verify one complete FilingPacket under a declared root."""
     roles = _authorized_roles(authorized_roles)
@@ -183,6 +220,7 @@ def load_filing_packet(packet_root, *, authorized_roles) -> ValidatedFilingPacke
         _fail("duplicate-filing-packet-member")
     if sum(document["role"] == "main" for document in documents) != 1:
         _fail("invalid-filing-packet-main")
+    _validate_complete_membership(root, set(paths))
     return ValidatedFilingPacket(
         root=root,
         packet_id=value["packet_id"],
@@ -270,18 +308,17 @@ def publish_filing_packet(
         "provenance": provenance,
         "schema_version": 1,
     }
-    prefix = f"{PACKET_PREFIX}/{packet_id}"
     run = OutputRun.start(
         invocation,
         run_id=run_id,
         skill_version=skill_version,
-        mode="append-immutable",
+        mode="fresh-regenerable",
         input_manifest=input_manifest,
     )
     try:
         for document, contents in proposed:
-            run.write(f"{prefix}/{document['path']}", contents)
-        run.write(f"{prefix}/{MANIFEST_NAME}", _canonical_bytes(manifest))
+            run.write(document["path"], contents)
+        run.write(MANIFEST_NAME, _canonical_bytes(manifest))
         return run.complete()
     except Exception:
         try:

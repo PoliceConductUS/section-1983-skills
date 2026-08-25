@@ -17,11 +17,14 @@ exact relative path of one manifest-listed document. A member result never
 silently counts as whole-packet coverage.
 
 Drafting and revision read source packets and context folders as recursively
-read-only inputs. The trusted host publishes a complete new packet beneath
-`filing-packets/<packet-id>/` in the caller's explicit output folder through one
-append-immutable output run. Revision provenance records the source manifest
-SHA-256 and every output records the logical input-manifest SHA-256. Source
-packet bytes never change.
+read-only inputs. The caller supplies the full absolute path of a fresh output
+folder, or the skill asks for it before work begins. The trusted host publishes
+every document and `filing-packet.json` directly in that folder through one
+fresh-regenerable output run. It does not add a `filing-packets/<packet-id>/`
+namespace. Revision provenance records the source manifest SHA-256 and every
+output records the logical input-manifest SHA-256. Source packet bytes never
+change. `.skill-runs/` contains trusted-host receipts, and `temp/` is the
+invocation's only transient workspace; neither is a packet member.
 
 Mechanical filing readiness requires every member to validate and every
 configured packet-level gate to pass while covering the whole packet or every

@@ -3,7 +3,7 @@
 ## 1. Design and stack
 
 - [x] 1.1 Approve the immutable package and protected role-binding design.
-- [ ] 1.2 Push the OpenSpec design and open a draft PR stacked on Issue #66.
+- [x] 1.2 Push the OpenSpec design and open a draft PR stacked on Issue #66.
 
 ## 2. Package schema and fixtures
 

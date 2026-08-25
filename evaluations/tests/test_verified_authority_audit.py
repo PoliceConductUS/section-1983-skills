@@ -5,7 +5,9 @@ from pathlib import Path
 
 from scripts.verified_authority_audit import (
     AuthorityAuditError,
+    extract_eyecite_candidates,
     load_verified_authority_corpus,
+    run_and_publish_authority_audit,
 )
 from scripts.validate_folder_invocation import validate_invocation
 
@@ -142,6 +144,109 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
         self.assertEqual(captured.exception.code, "authority-content-mismatch")
         self.assertEqual(captured.exception.exit_class, "invalid")
         self.assertEqual(list(self.output.iterdir()), [])
+
+    def test_eyecite_extracts_and_resolves_without_claiming_verification(self):
+        candidates = extract_eyecite_candidates(
+            "Ashcroft v. Iqbal, 556 U.S. 662, 678 (2009). "
+            "Iqbal, 556 U.S. at 679. Id. at 680. Iqbal, supra, at 681."
+        )
+
+        self.assertEqual(
+            [candidate["kind"] for candidate in candidates],
+            ["full", "short", "id", "supra"],
+        )
+        self.assertEqual(
+            {candidate["resolved_citation"] for candidate in candidates},
+            {"556 U.S. 662"},
+        )
+        self.assertTrue(all("verified" not in candidate for candidate in candidates))
+
+    def test_valid_audit_publishes_folder_native_reports_and_preserves_inputs(self):
+        before = {
+            path.relative_to(self.root).as_posix(): path.read_bytes()
+            for root in (self.filing, self.authorities)
+            for path in root.rglob("*")
+            if path.is_file()
+        }
+
+        result = run_and_publish_authority_audit(
+            invocation=self.invocation(),
+            corpus_documentation_path="selected.CORPUS.yaml",
+            run_id="authority-audit-one",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(result.status, "passed")
+        self.assertEqual(result.exit_class, "passed")
+        self.assertEqual(result.findings, ())
+        report = self.output / "reports/authority-audit.json"
+        self.assertTrue(report.is_file())
+        self.assertTrue((self.output / "reports/authority-audit.md").is_file())
+        self.assertTrue((self.output / "run-receipt.yaml").is_file())
+        self.assertNotIn(str(self.root), report.read_text())
+        after = {
+            path.relative_to(self.root).as_posix(): path.read_bytes()
+            for root in (self.filing, self.authorities)
+            for path in root.rglob("*")
+            if path.is_file()
+        }
+        self.assertEqual(before, after)
+
+    def test_missing_authority_and_bad_quote_are_stable_hard_findings(self):
+        (self.filing / "motion.md").write_text(
+            "Monell v. Department of Social Services, 436 U.S. 658 (1978).\n",
+            encoding="utf-8",
+        )
+        authority_yaml = self.authorities / "iqbal.AUTHORITY.yaml"
+        authority_yaml.write_text(
+            authority_yaml.read_text().replace(
+                "quotation: A claim has facial plausibility when the plaintiff pleads factual content.\n",
+                "quotation: This quotation is not in the opinion.\n",
+            ),
+            encoding="utf-8",
+        )
+
+        result = run_and_publish_authority_audit(
+            invocation=self.invocation(),
+            corpus_documentation_path="selected.CORPUS.yaml",
+            run_id="authority-audit-findings",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(result.status, "failed")
+        self.assertEqual(result.exit_class, "findings")
+        self.assertEqual(
+            {finding["check_id"] for finding in result.findings},
+            {"missing-authority", "quotation-not-found"},
+        )
+        self.assertTrue(all(finding["severity"] == "hard" for finding in result.findings))
+
+    def test_persistent_markup_resolves_by_authority_id_and_unusable_text_never_passes(self):
+        (self.filing / "motion.md").write_text(
+            '<cite id="cite-iqbal" authority="ashcroft-v-iqbal">'
+            "Ashcroft v. Iqbal, 556 U.S. 662, 678 (2009)</cite>.\n",
+            encoding="utf-8",
+        )
+        authority_yaml = self.authorities / "iqbal.AUTHORITY.yaml"
+        authority_yaml.write_text(
+            authority_yaml.read_text().replace(
+                "text_layer_status: usable\n", "text_layer_status: unusable\n"
+            ),
+            encoding="utf-8",
+        )
+
+        result = run_and_publish_authority_audit(
+            invocation=self.invocation(),
+            corpus_documentation_path="selected.CORPUS.yaml",
+            run_id="authority-audit-visual",
+            skill_version="1.0.0",
+        )
+
+        self.assertEqual(result.exit_class, "findings")
+        self.assertEqual(
+            {finding["check_id"] for finding in result.findings},
+            {"visual-review-required"},
+        )
 
 
 if __name__ == "__main__":

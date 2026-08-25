@@ -27,10 +27,11 @@
 
 ## 5. Verification and archive
 
-- [ ] 5.1 RED-test and correct manifest/member alias rejection, exact schema-
+- [x] 5.1 RED-test and correct manifest/member alias rejection, exact schema-
       runtime agreement, installed-contract-bound publication, and complete
       current-skill package coverage found during review.
-- [ ] 5.2 Run focused and whole-repository verification and independent review.
+- [x] 5.2 Run focused and whole-repository verification and a fresh whole-story
+      review.
 - [ ] 5.3 Record verification/retrospective evidence and archive the change.
 - [ ] 5.4 Push the verified archive and mark the PR ready without closing
       either.

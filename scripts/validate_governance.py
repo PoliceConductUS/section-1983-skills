@@ -153,7 +153,18 @@ APPROVED_FOLDER_CONTRACTS = {
         "disabled",
     ),
     "filing-ci": folder_contract(
-        "filing-ci", ["filing", "authorities"], "required", ["filing"], "disabled"
+        "filing-ci",
+        [
+            "filing-source",
+            "filing-index",
+            "record-reference",
+            "exhibit",
+            "docket-to-appendix",
+            "verified-authority",
+        ],
+        "required",
+        ["filing-source"],
+        "disabled",
     ),
     "horan-bad-words": folder_contract(
         "horan-bad-words", ["filing"], "required", ["filing"], "disabled"

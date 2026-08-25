@@ -28,7 +28,7 @@ def _unavailable(checker_id, reason):
 
 
 def _contract():
-    path = Path(__file__).resolve().parents[1] / "references" / "packaged-complaint-checker.json"
+    path = Path(__file__).resolve().parents[1] / "references" / "complaint-checker-contract.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -186,7 +186,7 @@ def run_filing_ci(filing_root, filing_target, authorities_root, checker_id):
         "status": status,
         "target": target,
         "target_sha256": hashlib.sha256(content).hexdigest(),
-        "authority_role": "authorities",
+        "authority_role": "verified-authority",
         "findings": findings,
     }
     return {

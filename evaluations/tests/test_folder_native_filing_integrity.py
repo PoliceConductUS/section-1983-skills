@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from evaluations.tests.test_packaged_filing_checks import complaint_document
+from evaluations.tests.test_installed_filing_checks import complaint_document
 from scripts.filing_integrity import (
     FilingIntegrityError,
     FilingIntegritySelection,

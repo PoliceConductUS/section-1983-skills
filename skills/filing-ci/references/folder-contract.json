@@ -1,8 +1,15 @@
 {
   "version": 1,
   "skill": "filing-ci",
-  "input_roles": ["filing", "authorities"],
-  "target": { "policy": "required", "roles": ["filing"] },
+  "input_roles": [
+    "filing-source",
+    "filing-index",
+    "record-reference",
+    "exhibit",
+    "docket-to-appendix",
+    "verified-authority"
+  ],
+  "target": { "policy": "required", "roles": ["filing-source"] },
   "internet": "disabled",
   "output": { "mode": "append-immutable" }
 }

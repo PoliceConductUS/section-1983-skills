@@ -312,7 +312,7 @@ class RoleProfileSweepTest(unittest.TestCase):
             task=validate_role_task(
                 {
                     "operation": "opposing-counsel-simulation",
-                    "instructions": "Return findings only.",
+                    "instructions": "Return source-bounded findings only.",
                 }
             ),
             selections=(

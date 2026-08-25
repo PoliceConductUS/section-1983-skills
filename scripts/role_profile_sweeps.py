@@ -128,7 +128,9 @@ def _definition_signature(binding: BoundRoleLaunch) -> tuple[Any, ...]:
         definition.public_instructions,
         definition.max_stdout_bytes,
         definition.max_stderr_bytes,
+        type(definition.adapter),
         binding.task.operation,
+        binding.task.instructions,
     )
 
 
@@ -354,6 +356,34 @@ def _launch_variant(
                 artifacts=(),
             )
     return result, findings
+
+
+def run_role_attack(
+    *,
+    variant: SweepVariant,
+    launcher_version: str,
+    producer_version: str,
+) -> RoleRunRecord:
+    """Run and publish one already validated fixed-role attack."""
+
+    _validate_version(launcher_version)
+    _validate_version(producer_version)
+    if (
+        not isinstance(variant, SweepVariant)
+        or not _valid_identifier(variant.variant_id)
+        or not isinstance(variant.binding, BoundRoleLaunch)
+        or not _purpose_inputs(variant.binding, "profile")
+        or len(_purpose_inputs(variant.binding, "filing-target")) != 1
+    ):
+        _fail("invalid-attack")
+    result, findings = _launch_variant(variant)
+    return _publish_run(
+        variant=variant,
+        result=result,
+        findings=findings,
+        launcher_version=launcher_version,
+        producer_version=producer_version,
+    )
 
 
 def _finding_key(finding: dict[str, Any]) -> tuple[str, str, str]:

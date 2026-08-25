@@ -4,7 +4,7 @@
 
 - [x] 1.1 Correct the live Issue #57 package and manifest language.
 - [x] 1.2 Create the stacked worktree and OpenSpec design.
-- [ ] 1.3 Push the design commit and open the stacked draft PR.
+- [x] 1.3 Push the design commit and open the stacked draft PR.
 
 ## 2. Source boundary
 

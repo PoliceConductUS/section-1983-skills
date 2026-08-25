@@ -206,6 +206,29 @@ class ImmutableFolderPackageLoaderTest(unittest.TestCase):
                     )
                 self.assertEqual(captured.exception.code, expected)
 
+    def test_loader_excludes_only_trusted_host_control_namespaces(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "output"
+            shutil.copytree(FIXTURES / "judicial-profile", root)
+            run_root = root / ".skill-runs" / "profile-run"
+            run_root.mkdir(parents=True)
+            (run_root / "manifest.json").write_text('{"status":"success"}\n')
+            temp_root = root / "temp" / "profile-run"
+            temp_root.mkdir(parents=True)
+            (temp_root / "intermediate.tmp").write_bytes(b"transient bytes\n")
+
+            package = load_folder_package(
+                root,
+                accepted_kinds={"judicial-profile"},
+                max_bytes=4096,
+            )
+
+            self.assertEqual(package.root, root.resolve())
+            self.assertEqual(
+                {member.path for member in package.members},
+                {"profile.json", "validation-receipt.json"},
+            )
+
     def test_byte_limit_is_enforced_before_oversized_bytes_are_read(self):
         root = FIXTURES / "judicial-profile"
         manifest_path = root / "package-manifest.json"
@@ -316,14 +339,24 @@ class ImmutableFolderPackagePublisherTest(unittest.TestCase):
                 run_id="package-run-1",
                 skill_version="1",
             )
+            output_root = root / "output"
             package = load_folder_package(
-                root / "output" / "packages" / "generated-judicial-profile",
+                output_root,
                 accepted_kinds={"judicial-profile"},
                 max_bytes=4096,
             )
             self.assertEqual(package.sources[0]["fingerprint"], "1" * 64)
             self.assertEqual(package.producer["operation"], "build-profile")
             self.assertEqual(len(receipt["artifacts"]), 3)
+            self.assertEqual(
+                {artifact["path"] for artifact in receipt["artifacts"]},
+                {
+                    "package-manifest.json",
+                    "profile.json",
+                    "validation-receipt.json",
+                },
+            )
+            self.assertFalse((output_root / "packages").exists())
             self.assertEqual((root / "context" / "facts.txt").read_bytes(), before)
 
     def test_publisher_rejects_invocation_not_bound_to_installed_contract(self):

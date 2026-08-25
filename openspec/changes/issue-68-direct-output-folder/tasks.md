@@ -6,9 +6,9 @@
 
 ## 2. RED
 
-- [ ] 2.1 Require publisher artifacts and reload paths directly beneath the
+- [x] 2.1 Require publisher artifacts and reload paths directly beneath the
       invocation output root.
-- [ ] 2.2 Require complete membership while excluding only trusted-host control
+- [x] 2.2 Require complete membership while excluding only trusted-host control
       namespaces.
 
 ## 3. GREEN

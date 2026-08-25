@@ -1,6 +1,6 @@
 ## MODIFIED Requirements
 
-### Requirement: Acquisition and compilation remain separate folder operations
+### Requirement: Acquisition and compilation are separate invocations
 
 The builder MUST expose separate acquisition and compilation operations.
 Acquisition MUST require expressly authorized internet and MUST write ordinary

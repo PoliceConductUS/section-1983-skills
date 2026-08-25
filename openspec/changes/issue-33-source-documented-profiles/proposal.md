@@ -6,7 +6,7 @@ The implemented builder correctly separated behavior from participant data but
 published and consumed that data through the now-removed package layer. Issue
 #33 must use the folder/YAML contract established by corrected Issue #68.
 
-## Changes
+## What Changes
 
 - Replace the install-local package reference with source-documented-folder
   guidance.

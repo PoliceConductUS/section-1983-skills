@@ -1,4 +1,5 @@
 import hashlib
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -288,6 +289,21 @@ class VerifiedAuthorityAuditTest(unittest.TestCase):
         self.assertEqual(
             {finding["check_id"] for finding in result.findings},
             {"visual-review-required"},
+        )
+        report = json.loads(
+            (self.output / "reports/authority-audit.json").read_text()
+        )
+        self.assertEqual(
+            report["persistent_citations"],
+            [
+                {
+                    "authority_id": "ashcroft-v-iqbal",
+                    "authority_yaml_path": "iqbal.AUTHORITY.yaml",
+                    "citation_id": "cite-iqbal",
+                    "document_path": "iqbal.txt",
+                    "source_yaml_path": "iqbal.SOURCE.yaml",
+                }
+            ],
         )
 
     def test_report_bytes_are_deterministic_and_transient_files_are_output_local(self):

@@ -512,6 +512,7 @@ def validate_collection_plan(plan: Any) -> bool:
     ):
         _fail("invalid-candidate-index")
     source_ids = []
+    source_documents = []
     expected_paths = set(fixed_paths)
     for candidate in candidates["sources"]:
         entry = _exact(candidate, _CANDIDATE_FIELDS, "invalid-candidate-index")
@@ -520,6 +521,14 @@ def validate_collection_plan(plan: Any) -> bool:
             entry["source_documentation_path"], "invalid-candidate-index"
         )
         artifact_path = _relative(entry["artifact_path"], "invalid-candidate-index")
+        documentation_logical = PurePosixPath(documentation_path)
+        artifact_logical = PurePosixPath(artifact_path)
+        if (
+            documentation_logical.parts[0] != "sources"
+            or documentation_logical.parent != artifact_logical.parent
+            or not documentation_logical.name.endswith(".SOURCE.yaml")
+        ):
+            _fail("invalid-source-yaml")
         if documentation_path not in by_path or artifact_path not in by_path:
             _fail("invalid-candidate-index")
         document = _validate_source_yaml(
@@ -549,9 +558,17 @@ def validate_collection_plan(plan: Any) -> bool:
         ):
             _fail("invalid-internet-source")
         source_ids.append(source_id)
+        source_documents.append(document)
         expected_paths.update({documentation_path, artifact_path})
     if source_ids != sorted(source_ids) or len(source_ids) != len(set(source_ids)):
         _fail("invalid-candidate-index")
+    known_source_ids = set(source_ids)
+    if any(
+        duplicate not in known_source_ids
+        for document in source_documents
+        for duplicate in document["duplicate_of"]
+    ):
+        _fail("invalid-source-yaml")
 
     gaps = _load_yaml(by_path["policy-source-gaps.yaml"], "invalid-gap-index")
     if (

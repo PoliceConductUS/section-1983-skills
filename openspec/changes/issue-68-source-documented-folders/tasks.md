@@ -7,8 +7,8 @@
 
 ## 2. RED
 
-- [ ] 2.1 Require removal of the generic package layer.
-- [ ] 2.2 Require public ordinary-folder and domain-YAML guidance.
+- [x] 2.1 Require removal of the generic package layer.
+- [x] 2.2 Require public ordinary-folder and domain-YAML guidance.
 
 ## 3. GREEN
 

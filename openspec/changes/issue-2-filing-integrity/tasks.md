@@ -19,9 +19,9 @@
 
 ## 4. Output boundary
 
-- [ ] 4.1 Test JSON, Markdown, YAML receipt, input preservation, output
+- [x] 4.1 Test JSON, Markdown, YAML receipt, input preservation, output
       confinement, and output-local temporary work.
-- [ ] 4.2 Publish through the existing explicit output writer.
+- [x] 4.2 Publish through the existing explicit output writer.
 
 ## 5. Verification
 

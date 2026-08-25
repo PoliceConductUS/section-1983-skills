@@ -50,6 +50,14 @@ _RUN_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _MAX_SOURCE_DOCUMENT_BYTES = 65_536
 _MAX_SELECTIONS = 64
+_UNAVAILABLE_CODES = frozenset(
+    {
+        "checker-unavailable",
+        "output-publication-failed",
+        "source-content-unavailable",
+        "source-documentation-unavailable",
+    }
+)
 
 
 class FilingIntegrityError(ValueError):
@@ -58,6 +66,7 @@ class FilingIntegrityError(ValueError):
     def __init__(self, code: str):
         super().__init__(code)
         self.code = code
+        self.exit_class = "unavailable" if code in _UNAVAILABLE_CODES else "invalid"
 
 
 def _fail(code: str) -> None:
@@ -162,6 +171,44 @@ def _date(value: str) -> None:
         parsed = date.fromisoformat(value)
     except ValueError:
         _fail("invalid-source-documentation")
+
+
+def _required_input_path(
+    invocation: ValidatedInvocation,
+    role: str,
+    relative_path: str,
+    *,
+    missing_code: str,
+) -> Path:
+    if not isinstance(relative_path, str) or not relative_path:
+        _fail("invalid-source-documentation")
+    segments = relative_path.split("/")
+    if (
+        "\\" in relative_path
+        or "\x00" in relative_path
+        or re.match(r"^[A-Za-z]:/", relative_path) is not None
+        or any(segment in {"", ".", ".."} for segment in segments)
+    ):
+        _fail("invalid-source-documentation")
+    roots = dict(invocation.inputs)
+    root = roots.get(role)
+    if root is None:
+        _fail("invalid-source-documentation")
+    candidate = root
+    try:
+        for segment in segments:
+            candidate = candidate / segment
+            if candidate.is_symlink():
+                _fail("invalid-source-documentation")
+        resolved = candidate.resolve(strict=True)
+        resolved.relative_to(root)
+    except FilingIntegrityError:
+        raise
+    except FileNotFoundError:
+        _fail(missing_code)
+    except (OSError, ValueError):
+        _fail("invalid-source-documentation")
+    return resolved
     if parsed.isoformat() != value:
         _fail("invalid-source-documentation")
 
@@ -173,8 +220,11 @@ def _load_source_record(
     documentation_path: str,
 ) -> SourceRecord:
     try:
-        document_path = resolve_input_path(
-            invocation, documentation_role, documentation_path
+        document_path = _required_input_path(
+            invocation,
+            documentation_role,
+            documentation_path,
+            missing_code="source-documentation-unavailable",
         )
         if not document_path.is_file():
             _fail("invalid-source-documentation")
@@ -194,8 +244,11 @@ def _load_source_record(
         ):
             _fail("invalid-source-documentation")
         _date(values["checked_through"])
-        content_path = resolve_input_path(
-            invocation, values["source_role"], values["path"]
+        content_path = _required_input_path(
+            invocation,
+            values["source_role"],
+            values["path"],
+            missing_code="source-content-unavailable",
         )
         if not content_path.is_file():
             _fail("invalid-source-documentation")

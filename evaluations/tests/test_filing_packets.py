@@ -1,5 +1,6 @@
 import copy
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -12,7 +13,10 @@ from scripts.filing_packet import (
     publish_filing_packet,
     resolve_filing_packet_target,
 )
-from scripts.validate_folder_invocation import validate_invocation
+from scripts.validate_folder_invocation import (
+    validate_installed_skill_invocation,
+    validate_invocation,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,7 +29,28 @@ class FilingPacketTest(unittest.TestCase):
             (ROOT / "governance" / "filing-packet.schema.json").read_text()
         )
         self.assertFalse(schema["additionalProperties"])
-        self.assertEqual(schema["properties"]["schema_version"], {"const": 1})
+        self.assertEqual(
+            schema["properties"]["schema_version"],
+            {"const": 1, "type": "integer"},
+        )
+        member_path_pattern = re.compile(
+            schema["$defs"]["document"]["properties"]["path"]["pattern"]
+        )
+        for path in ("motion.md", "exhibits/exhibit-a.pdf"):
+            self.assertIsNotNone(member_path_pattern.fullmatch(path), path)
+        for path in (
+            "filing-packet.json",
+            ".skill-runs/foreign/manifest.json",
+            "filing-packets/nested/document.md",
+            "/absolute.md",
+            "../outside.md",
+            "inside/../outside.md",
+            "inside//document.md",
+            "inside/",
+            "inside\\document.md",
+            "inside\x00document.md",
+        ):
+            self.assertIsNone(member_path_pattern.fullmatch(path), path)
         for path in (
             ROOT / "README.md",
             ROOT / "GOVERNANCE.md",
@@ -40,6 +65,7 @@ class FilingPacketTest(unittest.TestCase):
             "audit-authorities",
             "filing-ci",
             "adversarial-filing-review",
+            "drafting-for-judge-scholer",
         ):
             text = (ROOT / "skills" / skill / "SKILL.md").read_text()
             self.assertIn("## FilingPacket boundary", text, skill)
@@ -69,12 +95,19 @@ class FilingPacketTest(unittest.TestCase):
             shutil.copytree(FIXTURES / "multi-exhibit", root)
             original = json.loads((root / "filing-packet.json").read_text())
             mutations = {
+                "boolean-version": lambda value: value.update(schema_version=True),
                 "two-main": lambda value: value["documents"][1].update(role="main"),
                 "duplicate-id": lambda value: value["documents"][1].update(id="motion"),
                 "unauthorized-role": lambda value: value["documents"][1].update(role="appendix"),
                 "missing-member": lambda value: value["documents"][1].update(path="missing.txt"),
                 "wrong-hash": lambda value: value["documents"][1].update(sha256="f" * 64),
                 "traversal": lambda value: value["documents"][1].update(path="../outside.txt"),
+                "manifest-member": lambda value: value["documents"][1].update(path="filing-packet.json"),
+                "reserved-run": lambda value: value["documents"][1].update(path=".skill-runs/member.txt"),
+                "reserved-packets": lambda value: value["documents"][1].update(path="filing-packets/member.txt"),
+                "double-slash": lambda value: value["documents"][1].update(path="nested//member.txt"),
+                "trailing-slash": lambda value: value["documents"][1].update(path="nested/"),
+                "nul": lambda value: value["documents"][1].update(path="nested\x00member.txt"),
             }
             for label, mutate in mutations.items():
                 value = copy.deepcopy(original)
@@ -82,6 +115,32 @@ class FilingPacketTest(unittest.TestCase):
                 (root / "filing-packet.json").write_text(json.dumps(value))
                 with self.subTest(label=label), self.assertRaises(FilingPacketError):
                     load_filing_packet(root, authorized_roles={"main", "exhibit"})
+
+    def test_loader_rejects_symlinked_manifest_and_member_aliases(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            packet = root / "external-manifest"
+            shutil.copytree(FIXTURES / "complaint", packet)
+            external_manifest = root / "external-filing-packet.json"
+            (packet / "filing-packet.json").replace(external_manifest)
+            (packet / "filing-packet.json").symlink_to(external_manifest)
+            with self.assertRaises(FilingPacketError) as captured:
+                load_filing_packet(packet, authorized_roles={"main"})
+            self.assertEqual(
+                captured.exception.code, "aliased-filing-packet-manifest"
+            )
+
+            packet = root / "internal-member"
+            shutil.copytree(FIXTURES / "complaint", packet)
+            manifest_path = packet / "filing-packet.json"
+            manifest = json.loads(manifest_path.read_text())
+            original_path = manifest["documents"][0]["path"]
+            (packet / "member-alias.md").symlink_to(original_path)
+            manifest["documents"][0]["path"] = "member-alias.md"
+            manifest_path.write_text(json.dumps(manifest))
+            with self.assertRaises(FilingPacketError) as captured:
+                load_filing_packet(packet, authorized_roles={"main"})
+            self.assertEqual(captured.exception.code, "aliased-filing-packet-member")
 
     def test_target_is_whole_packet_or_exact_manifest_member(self):
         packet = load_filing_packet(FIXTURES / "multi-exhibit", authorized_roles={"main", "exhibit"})
@@ -97,21 +156,31 @@ class FilingPacketTest(unittest.TestCase):
             root = Path(directory)
             source = root / "source"
             context = root / "context"
+            authorities = root / "authorities"
             output = root / "output"
             shutil.copytree(FIXTURES / "complaint", source)
             context.mkdir()
+            authorities.mkdir()
             output.mkdir()
             (context / "facts.txt").write_text("approved context\n")
             before = {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()}
-            invocation = validate_invocation({
+            envelope = {
                 "version": 1,
-                "skill": "synthetic-packet-drafter",
-                "inputs": [{"role": "filing", "root": str(source)}, {"role": "record", "root": str(context)}],
+                "skill": "drafting-section-1983-complaints",
+                "inputs": [
+                    {"role": "record", "root": str(context)},
+                    {"role": "authorities", "root": str(authorities)},
+                    {"role": "filing", "root": str(source)},
+                ],
                 "output": {"root": str(output)},
                 "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
                 "internet": "disabled",
                 "isolation": {"inputs": "read-only", "output": "read-write", "undeclared": "none"},
-            })
+            }
+            invocation = validate_installed_skill_invocation(
+                envelope,
+                ROOT / "skills" / "drafting-section-1983-complaints",
+            )
             source_packet = load_filing_packet(source, authorized_roles={"main"})
             receipt = publish_filing_packet(
                 invocation,
@@ -133,6 +202,43 @@ class FilingPacketTest(unittest.TestCase):
             self.assertEqual(revised.provenance["source_packet_sha256"], source_packet.manifest_sha256)
             self.assertEqual(len(receipt["artifacts"]), 2)
             self.assertEqual(before, {path.relative_to(source): path.read_bytes() for path in source.rglob("*") if path.is_file()})
+
+    def test_publication_rejects_an_invocation_not_bound_to_an_installed_skill(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            filing = root / "filing"
+            output = root / "output"
+            filing.mkdir()
+            output.mkdir()
+            invocation = validate_invocation({
+                "version": 1,
+                "skill": "synthetic-packet-drafter",
+                "inputs": [{"role": "filing", "root": str(filing)}],
+                "output": {"root": str(output)},
+                "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
+                "internet": "disabled",
+                "isolation": {"inputs": "read-only", "output": "read-write", "undeclared": "none"},
+            })
+            with self.assertRaises(FilingPacketError) as captured:
+                publish_filing_packet(
+                    invocation,
+                    packet_id="unbound-packet",
+                    documents=[{
+                        "id": "motion",
+                        "kind": "motion",
+                        "role": "main",
+                        "path": "motion.md",
+                        "contents": "# Motion\n",
+                    }],
+                    authorized_roles={"main"},
+                    source_packet=None,
+                    run_id="44444444-4444-4444-8444-444444444444",
+                    skill_version="1",
+                )
+            self.assertEqual(
+                captured.exception.code, "unbound-filing-packet-invocation"
+            )
+            self.assertEqual(list(output.iterdir()), [])
 
     def test_filing_readiness_requires_every_gate_to_cover_every_member(self):
         packet = load_filing_packet(FIXTURES / "multi-exhibit", authorized_roles={"main", "exhibit"})

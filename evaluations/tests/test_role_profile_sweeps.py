@@ -2,6 +2,7 @@ import json
 import shutil
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 from scripts.role_profile_sweeps import (
@@ -9,6 +10,7 @@ from scripts.role_profile_sweeps import (
     RoleSweepError,
     SweepVariant,
     compare_role_runs,
+    run_role_attack,
     run_role_sequence,
     run_role_sweep,
 )
@@ -49,6 +51,10 @@ class FakeAdapter:
             exit_code=0,
             timed_out=False,
         )
+
+
+class OtherFakeAdapter(FakeAdapter):
+    pass
 
 
 def finding(finding_id, category, analysis, *, source_id="source-one"):
@@ -248,6 +254,23 @@ class RoleProfileSweepTest(unittest.TestCase):
         )
         self.assertEqual(before, self.input_snapshot())
 
+    def test_attack_runs_one_bound_role_and_publishes_ordinary_files(self):
+        variant, adapter = self.variant(
+            "variant-a", [finding("a", "authority-attack", "Attack analysis.")]
+        )
+
+        record = run_role_attack(
+            variant=variant,
+            launcher_version="1.0.0",
+            producer_version="1.0.0",
+        )
+
+        self.assertEqual(record.status, "success")
+        self.assertEqual(record.variant_id, "variant-a")
+        self.assertEqual(len(adapter.calls), 1)
+        self.assertTrue((self.runs / "variant-a/reports/findings.json").is_file())
+        self.assertTrue((self.runs / "variant-a/run-receipt.yaml").is_file())
+
     def test_failed_variant_is_visible_and_never_becomes_negative_evidence(self):
         variant_a, adapter_a = self.variant(
             "variant-a", [finding("a", "authority-attack", "Available analysis.")]
@@ -324,6 +347,46 @@ class RoleProfileSweepTest(unittest.TestCase):
             )
         self.assertEqual(captured.exception.code, "invalid-sweep-output")
         self.assertEqual(wrong_adapter.calls, [])
+
+    def test_sweep_rejects_adapter_class_or_task_changes_before_dispatch(self):
+        variant_a, adapter_a = self.variant("variant-a", [])
+        variant_b, adapter_b = self.variant("variant-b", [])
+        other_adapter = OtherFakeAdapter(
+            {"output_kind": "synthetic-findings", "findings": []}
+        )
+        other_binding = replace(
+            variant_b.binding,
+            definition=replace(variant_b.binding.definition, adapter=other_adapter),
+        )
+        with self.assertRaises(RoleSweepError) as captured:
+            run_role_sweep(
+                variants=(variant_a, SweepVariant("variant-b", other_binding)),
+                comparison_invocation=self.invocation(self.comparison),
+                launcher_version="1.0.0",
+                producer_version="1.0.0",
+            )
+        self.assertEqual(captured.exception.code, "sweep-role-mismatch")
+
+        changed_task = replace(
+            variant_b.binding,
+            task=validate_role_task(
+                {
+                    "operation": "opposing-counsel-simulation",
+                    "instructions": "A different comparison task.",
+                }
+            ),
+        )
+        with self.assertRaises(RoleSweepError) as captured:
+            run_role_sweep(
+                variants=(variant_a, SweepVariant("variant-b", changed_task)),
+                comparison_invocation=self.invocation(self.comparison),
+                launcher_version="1.0.0",
+                producer_version="1.0.0",
+            )
+        self.assertEqual(captured.exception.code, "sweep-role-mismatch")
+        self.assertEqual(adapter_a.calls, [])
+        self.assertEqual(adapter_b.calls, [])
+        self.assertEqual(other_adapter.calls, [])
 
     def test_sequence_rebinds_persisted_file_into_a_fresh_role_invocation(self):
         sequence_root = self.root / "sequence-output"

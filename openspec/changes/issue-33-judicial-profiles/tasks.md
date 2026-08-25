@@ -4,7 +4,7 @@
 
 - [x] 1.1 Approve the generic builder, two-phase operation, source-class, and
       protected-role design.
-- [ ] 1.2 Push the OpenSpec design and open a draft PR stacked on Issue #68.
+- [x] 1.2 Push the OpenSpec design and open a draft PR stacked on Issue #68.
 
 ## 2. Generic public skill package
 

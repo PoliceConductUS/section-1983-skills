@@ -8,21 +8,21 @@
 
 ## 2. Static role and launch request
 
-- [ ] 2.1 RED-test role, task, operation, logical input selection, internet,
+- [x] 2.1 RED-test role, task, operation, logical input selection, internet,
       cardinality, UTF-8, byte limit, and path-free request contracts.
 - [ ] 2.2 Implement deterministic pre-dispatch binding without package or graph
       abstractions.
 
 ## 3. Fresh isolated process
 
-- [ ] 3.1 RED-test fresh-process attestation, output-local temp cwd, scrubbed
+- [x] 3.1 RED-test fresh-process attestation, output-local temp cwd, scrubbed
       state, no untrusted command, timeout, exit, UTF-8, JSON, and stream
       bounds.
 - [ ] 3.2 Implement the trusted adapter protocol and bounded launcher.
 
 ## 4. Advisory output and input immutability
 
-- [ ] 4.1 RED-test role-specific output, stable failures, output confinement,
+- [x] 4.1 RED-test role-specific output, stable failures, output confinement,
       and unchanged selected input files.
 - [ ] 4.2 Implement advisory artifact return and post-dispatch input checks.
 

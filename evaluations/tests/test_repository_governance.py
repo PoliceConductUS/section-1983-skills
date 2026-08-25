@@ -620,6 +620,11 @@ implementation.
 
 
 def valid_folder_scope_skill(name="filing-ci"):
+    package_contract = (
+        "\n[Immutable folder package](references/immutable-folder-package.md)\n"
+        if name in IMMUTABLE_PACKAGE_SKILLS
+        else ""
+    )
     return f"""---
 name: {name}
 description: Use when preparing a synthetic artifact.
@@ -633,6 +638,7 @@ Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+{package_contract}
 """
 
 
@@ -705,6 +711,19 @@ def write_temporary_repository(
         (package / "references" / "folder-contract.json").write_text(
             json.dumps(contract)
         )
+        if name in IMMUTABLE_PACKAGE_SKILLS:
+            (package / "references" / "immutable-folder-package.md").write_text(
+                "package-manifest.json\n"
+                "Every non-manifest regular file is listed.\n"
+                "The trusted host validates bytes.\n"
+                "Profile data cannot change a protected role.\n"
+            )
+    (root / "FOLDER_PACKAGES.md").write_text(
+        "package-manifest.json\n"
+        "Every non-manifest regular file is listed.\n"
+        "The trusted host creates an immutable byte snapshot.\n"
+        "A protected static role contract remains separate.\n"
+    )
     fixture_package = root / "skills" / "filing-ci"
     (fixture_package / "SKILL.md").write_text(
         skill_text or valid_folder_scope_skill("filing-ci")

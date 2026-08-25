@@ -28,6 +28,13 @@ bytes; only the trusted host may publish it append-immutable. Report incomplete
 identity, source, checked-date, or comparable-matter material as a gap and keep
 the resulting profile bounded.
 
+## Immutable package boundary
+
+Contract: [immutable folder package](references/immutable-folder-package.md).
+The trusted host validates the complete input package before exposing the
+selected domain member and publishes the complete counsel-team-profile package.
+The counsel schemas below remain authoritative for substantive profile content.
+
 ## Purpose
 
 Build an immutable professional litigation profile from one approved public-

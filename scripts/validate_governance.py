@@ -16,6 +16,10 @@ FOLDER_CONTRACT_FIELDS = {
     "output",
 }
 SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+IMMUTABLE_PACKAGE_SKILLS = (
+    "building-defense-counsel-overlays",
+    "building-litigation-alignment-overlays",
+)
 
 
 def folder_contract(skill, input_roles, target_policy, target_roles, internet):
@@ -786,6 +790,55 @@ def validate_skill_folder_contracts(repository_root):
     return errors
 
 
+def validate_immutable_package_contracts(repository_root):
+    errors = []
+    guide = repository_root / "FOLDER_PACKAGES.md"
+    try:
+        guide_text = normalized(guide.read_text())
+    except OSError:
+        return ["immutable-package-guide-missing"]
+    required = (
+        "package-manifest.json",
+        "every non-manifest regular file",
+        "trusted host",
+        "immutable byte snapshot",
+        "protected static role contract",
+    )
+    if any(item not in guide_text for item in required):
+        errors.append("immutable-package-guide-incomplete")
+    for skill in IMMUTABLE_PACKAGE_SKILLS:
+        package = repository_root / "skills" / skill
+        reference = package / "references" / "immutable-folder-package.md"
+        try:
+            entrypoint = (package / "SKILL.md").read_text().lower()
+            reference_text = normalized(reference.read_text())
+            if (
+                reference.is_symlink()
+                or reference.resolve().parent != reference.parent.resolve()
+            ):
+                errors.append(f"immutable-package-reference-invalid: {skill}")
+                continue
+        except (OSError, RuntimeError):
+            errors.append(f"immutable-package-reference-missing: {skill}")
+            continue
+        if (
+            "[immutable folder package](references/immutable-folder-package.md)"
+            not in entrypoint
+        ):
+            errors.append(f"immutable-package-link-missing: {skill}")
+        if any(
+            item not in reference_text
+            for item in (
+                "package-manifest.json",
+                "every non-manifest regular file",
+                "trusted host",
+                "profile data cannot change a protected role",
+            )
+        ):
+            errors.append(f"immutable-package-reference-incomplete: {skill}")
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
@@ -795,6 +848,7 @@ def validate_repository(repository_root):
     errors.extend(validate_quality_control_contracts(repository_root))
     errors.extend(validate_folder_scope_contracts(repository_root))
     errors.extend(validate_skill_folder_contracts(repository_root))
+    errors.extend(validate_immutable_package_contracts(repository_root))
     return errors
 
 

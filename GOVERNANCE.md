@@ -104,6 +104,15 @@ counts as whole-packet coverage. Filing readiness requires every member and
 every configured packet-level gate to validate, but remains a mechanical result
 that does not decide filing or legal judgment.
 
+Profile, overlay, and research-corpus packages follow
+[FOLDER_PACKAGES.md](FOLDER_PACKAGES.md). Every non-manifest regular file is a
+hashed manifest member, validation pins immutable bytes, and only the trusted
+host may publish a complete package beneath the explicit output folder. Domain
+schemas remain authoritative for domain content. Profile data cannot alter a
+protected static role's capabilities, prohibitions, internet policy,
+target-mutation boundary, or output authority. Package handling is folder-native
+and does not depend on CaseGraph, Git, or ambient workspace access.
+
 This repository retains public skill instructions and repository-specific
 validation or evaluation support. General-purpose executable tooling for rule
 retrieval, citation verification, evidence processing, filing inspection, or

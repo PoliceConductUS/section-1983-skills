@@ -35,9 +35,9 @@
 
 ## 6. Governance and current skills
 
-- [ ] 6.1 Link current counsel and litigation-alignment packages to the shared
+- [x] 6.1 Link current counsel and litigation-alignment packages to the shared
       contract while retaining domain validators.
-- [ ] 6.2 Update README, governance, deterministic validation, and durable
+- [x] 6.2 Update README, governance, deterministic validation, and durable
       OpenSpec deltas.
 
 ## 7. Verification and archive

@@ -28,6 +28,13 @@ deterministic bytes; only the trusted host may publish it append-immutable.
 Report missing actors, sources, filing pins, or docket coverage as a gap rather
 than refreshing or enlarging the snapshot.
 
+## Immutable package boundary
+
+Contract: [immutable folder package](references/immutable-folder-package.md).
+The trusted host validates the complete input package before exposing the
+selected domain member and publishes the complete litigation-alignment package.
+The domain schemas below remain authoritative for substantive overlay content.
+
 ## Purpose
 
 Transform one approved immutable docket snapshot into a source-backed, versioned

@@ -87,6 +87,12 @@ manifest that fixes member identity, order, kind, packet role, path, hash, and
 revision provenance. Source packets remain read-only; the trusted host publishes
 a complete new packet beneath the explicit output folder.
 
+Profile, overlay, and research-corpus workflows use
+[immutable folder packages](FOLDER_PACKAGES.md): ordinary folders with one
+complete hashed manifest, frozen member bytes, explicit freshness, and a
+protected static-role boundary. These packages are folder-native and do not
+depend on CaseGraph or Git.
+
 1. Start with `section-1983-drafting` for routing, localization, and writing
    rules.
 2. For factual declarations and exhibit-foundation preparation supporting

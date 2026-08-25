@@ -150,7 +150,17 @@ def _validate_skill_contract(value: Any) -> dict[str, Any]:
         or (target["policy"] != "none" and not target_roles)
     ):
         _fail("invalid-skill-contract")
-    if contract["internet"] not in {"disabled", "authorized"}:
+    internet = contract["internet"]
+    if isinstance(internet, str):
+        internet_valid = internet in {"disabled", "authorized"}
+    else:
+        internet_valid = (
+            type(internet) is list
+            and bool(internet)
+            and all(policy in {"disabled", "authorized"} for policy in internet)
+            and len(internet) == len(set(internet))
+        )
+    if not internet_valid:
         _fail("invalid-skill-contract")
     output = _require_exact_object(
         contract["output"],
@@ -198,7 +208,10 @@ def validate_installed_skill_invocation(
         return validate_invocation(envelope)
     if [item.get("role") for item in inputs] != contract["input_roles"]:
         _fail("contract-input-roles")
-    if envelope.get("internet") != contract["internet"]:
+    allowed_internet = contract["internet"]
+    if isinstance(allowed_internet, str):
+        allowed_internet = [allowed_internet]
+    if envelope.get("internet") not in allowed_internet:
         _fail("contract-internet")
     target_policy = contract["target"]["policy"]
     target = envelope.get("target")

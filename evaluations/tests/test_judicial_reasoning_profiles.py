@@ -376,9 +376,10 @@ class JudicialReasoningProfileOperationBoundaryTest(unittest.TestCase):
                 SKILL,
             )
             profile_bytes = (FIXTURES / "complete-profile.json").read_bytes()
-            JudicialReasoningProfileValidatorTest.module.validate_profile_bytes(
-                profile_bytes, max_bytes=1_048_576
+            validator = JudicialReasoningProfileValidatorTest._load(
+                SKILL / "scripts" / "validate_judicial_profiles.py"
             )
+            validator.validate_profile_bytes(profile_bytes, max_bytes=1_048_576)
             publish_folder_package(
                 compilation,
                 package_kind="judicial-profile",

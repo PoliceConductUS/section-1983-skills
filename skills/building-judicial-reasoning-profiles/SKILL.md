@@ -16,10 +16,14 @@ static role variants and does not predict a judicial outcome.
 
 Contract: [folder contract](references/folder-contract.json).
 
-Only caller-declared input folders are available and recursively read-only.
-Writes occur only beneath the caller-declared output folder. Internet is used
-only when that skill expressly authorizes it. Execution stops before reading
-case material if the host cannot enforce the filesystem and network boundary.
+Only caller-declared input folders are available and recursively read-only. The
+caller supplies the exact absolute output-folder path or execution stops to ask
+for it. Writes occur only beneath that output folder. Every transient file,
+working copy, cache, download, generated intermediate, and process temporary
+file stays beneath `<output-folder>/temp`; no other temporary location is
+available. Internet is used only when that operation expressly authorizes it.
+Execution stops before reading case material if the host cannot enforce the
+filesystem and network boundary.
 
 ## Inputs and package output
 

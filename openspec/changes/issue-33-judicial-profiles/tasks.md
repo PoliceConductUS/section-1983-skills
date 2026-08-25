@@ -22,10 +22,10 @@
 
 ## 4. Acquisition and package publication boundary
 
-- [ ] 4.1 RED-test separate acquisition and compilation invocations, explicit
+- [x] 4.1 RED-test separate acquisition and compilation invocations, explicit
       internet policy, common package loading/publication, and input
       preservation.
-- [ ] 4.2 Implement and GREEN repository trusted-host composition without adding
+- [x] 4.2 Implement and GREEN repository trusted-host composition without adding
       acquisition, launcher, or repository behavior to the skill helper.
 
 ## 5. Remove embedded real-judge dependencies

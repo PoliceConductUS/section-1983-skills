@@ -8,6 +8,6 @@
     "verified-authorities"
   ],
   "target": { "policy": "none", "roles": [] },
-  "internet": "authorized",
+  "internet": ["authorized", "disabled"],
   "output": { "mode": "append-immutable" }
 }

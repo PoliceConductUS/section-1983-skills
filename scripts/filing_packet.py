@@ -83,6 +83,7 @@ def _relative_path(value: Any) -> PurePosixPath:
     if (
         path.is_absolute()
         or path.as_posix() != value
+        or not path.parts
         or any(part in {"", ".", ".."} for part in path.parts)
         or path.parts[0] in {".skill-runs", PACKET_PREFIX}
         or value == MANIFEST_NAME

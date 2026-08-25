@@ -8,8 +8,8 @@
 
 ## 2. Folder and YAML boundary
 
-- [ ] 2.1 Test the exact two-role operation contract and strict selected YAML.
-- [ ] 2.2 Implement deterministic authority selection over ordinary files.
+- [x] 2.1 Test the exact two-role operation contract and strict selected YAML.
+- [x] 2.2 Implement deterministic authority selection over ordinary files.
 
 ## 3. Citation gate
 

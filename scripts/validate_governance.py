@@ -44,10 +44,10 @@ APPROVED_FOLDER_CONTRACTS = {
     ),
     "audit-authorities": folder_contract(
         "audit-authorities",
-        ["filing", "authorities"],
+        ["filing-source", "verified-authority"],
         "required",
-        ["filing"],
-        "authorized",
+        ["filing-source"],
+        {"audit": "disabled", "freshness-research": "authorized"},
     ),
     "auditing-section-1983-discovery-responses": folder_contract(
         "auditing-section-1983-discovery-responses",

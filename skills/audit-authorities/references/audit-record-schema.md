@@ -19,11 +19,12 @@ audit_item:
   citations:
     - raw_citation: "Case Name, 123 F.3d 456, 460 (5th Cir. 2019)."
       authority_type: "case" # case | statute | rule | regulation | secondary
-      verified_unit_path: "/canonical/verified/cases/case-name"
-      source_metadata_path: "/canonical/verified/cases/case-name/SOURCE.yaml"
-      cited_document_path: "/canonical/verified/cases/case-name/documents/opinion.pdf"
+      authority_id: "case-name"
+      authority_yaml_path: "case-name/AUTHORITY.yaml"
+      source_metadata_path: "case-name/SOURCE.yaml"
+      cited_document_path: "case-name/documents/opinion.pdf"
       binding_level: "binding" # binding | persuasive | nonbinding
-      binding_metadata: true # exact spec.binding value from SOURCE.yaml
+      binding_status: "binding" # exact authority YAML value
       posture_in_authority: "appeal-from-12b6"
       pinpoint_claimed: "p. 460"
   verification:

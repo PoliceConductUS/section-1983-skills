@@ -36,9 +36,10 @@ Deliverable: proposition statement + type.
 
 For each cited authority:
 
-1. Record and verify the canonical authority-unit path and its `SOURCE.yaml`.
-2. Record `spec.binding` and confirm it is an explicit boolean whose value is
-   legally correct for the governing court.
+1. Record and verify the selected authority YAML, `SOURCE.yaml`, and exact
+   relative document path inside `verified-authority`.
+2. Record the explicit binding status and confirm it is legally correct for the
+   governing court.
 3. Confirm the case exists (correct caption, reporter, court, year).
 4. Confirm you're using the correct version/source (official reporter vs slip
    opinion vs Westlaw/Lexis).
@@ -51,8 +52,8 @@ For each cited authority:
 
 Fail conditions:
 
-- case not found under the canonical verified-case root,
-- missing or ambiguous `spec.binding`,
+- case not found in the selected corpus YAML,
+- missing or ambiguous authority status,
 - wrong case,
 - wrong year,
 - wrong court,

@@ -303,6 +303,24 @@ def _yaml_bytes(document: dict[str, Any]) -> bytes:
     ).encode("utf-8")
 
 
+def _internet_source(value: Any, code: str) -> dict[str, str]:
+    record = _exact(value, frozenset({"url", "retrieved_at", "sha256"}), code)
+    retrieved_at = record["retrieved_at"]
+    sha256 = record["sha256"]
+    if (
+        not isinstance(retrieved_at, str)
+        or _UTC.fullmatch(retrieved_at) is None
+        or not isinstance(sha256, str)
+        or _SHA256.fullmatch(sha256) is None
+    ):
+        _fail(code)
+    return {
+        "url": _url(record["url"], code),
+        "retrieved_at": retrieved_at,
+        "sha256": sha256,
+    }
+
+
 def build_collection_plan(
     sources: list[dict[str, Any]], gaps: list[dict[str, Any]], checked_through: str
 ) -> dict[str, Any]:
@@ -333,10 +351,31 @@ def build_collection_plan(
     original_by_id = {source["source_id"]: source for source in sources}
     artifacts = []
     candidates = []
+    candidate_internet_sources = []
     for document, documentation_path in prepared:
         contents = bytes(original_by_id[document["source_id"]]["artifact_bytes"])
-        artifacts.append({"path": document["artifact_path"], "bytes": contents})
-        artifacts.append({"path": documentation_path, "bytes": _yaml_bytes(document)})
+        internet_sources = [
+            {
+                "url": document["source_url"],
+                "retrieved_at": document["retrieved_at"],
+                "sha256": document["sha256"],
+            }
+        ]
+        candidate_internet_sources.extend(internet_sources)
+        artifacts.append(
+            {
+                "path": document["artifact_path"],
+                "bytes": contents,
+                "internet_sources": internet_sources,
+            }
+        )
+        artifacts.append(
+            {
+                "path": documentation_path,
+                "bytes": _yaml_bytes(document),
+                "internet_sources": internet_sources,
+            }
+        )
         candidates.append(
             {
                 "source_id": document["source_id"],
@@ -364,6 +403,7 @@ def build_collection_plan(
                         "sources": candidates,
                     }
                 ),
+                "internet_sources": candidate_internet_sources,
             },
             {
                 "path": "policy-source-gaps.yaml",
@@ -374,6 +414,7 @@ def build_collection_plan(
                         "gaps": gap_records,
                     }
                 ),
+                "internet_sources": [],
             },
         ]
     )
@@ -437,12 +478,25 @@ def validate_collection_plan(plan: Any) -> bool:
     if type(value["artifacts"]) is not list:
         _fail("invalid-plan")
     by_path = {}
+    internet_by_path = {}
     for artifact in value["artifacts"]:
-        item = _exact(artifact, frozenset({"path", "bytes"}), "invalid-plan")
+        item = _exact(
+            artifact,
+            frozenset({"path", "bytes", "internet_sources"}),
+            "invalid-plan",
+        )
         path = _relative(item["path"], "invalid-plan")
-        if path in by_path or not isinstance(item["bytes"], bytes):
+        if (
+            path in by_path
+            or not isinstance(item["bytes"], bytes)
+            or type(item["internet_sources"]) is not list
+        ):
             _fail("invalid-plan")
         by_path[path] = item["bytes"]
+        internet_by_path[path] = [
+            _internet_source(source, "invalid-internet-source")
+            for source in item["internet_sources"]
+        ]
     fixed_paths = {"policy-source-candidates.yaml", "policy-source-gaps.yaml"}
     if not fixed_paths.issubset(by_path):
         _fail("invalid-plan")
@@ -482,6 +536,18 @@ def validate_collection_plan(plan: Any) -> bool:
             _fail("invalid-candidate-index")
         if hashlib.sha256(by_path[artifact_path]).hexdigest() != document["sha256"]:
             _fail("hash-mismatch")
+        expected_internet_source = [
+            {
+                "url": document["source_url"],
+                "retrieved_at": document["retrieved_at"],
+                "sha256": document["sha256"],
+            }
+        ]
+        if (
+            internet_by_path[artifact_path] != expected_internet_source
+            or internet_by_path[documentation_path] != expected_internet_source
+        ):
+            _fail("invalid-internet-source")
         source_ids.append(source_id)
         expected_paths.update({documentation_path, artifact_path})
     if source_ids != sorted(source_ids) or len(source_ids) != len(set(source_ids)):
@@ -499,6 +565,19 @@ def validate_collection_plan(plan: Any) -> bool:
     gap_ids = [record["gap_id"] for record in gap_records]
     if gap_ids != sorted(gap_ids) or len(gap_ids) != len(set(gap_ids)):
         _fail("invalid-gap-index")
+    expected_candidate_sources = [
+        internet_by_path[candidate["artifact_path"]]
+        for candidate in candidates["sources"]
+    ]
+    expected_candidate_sources = [
+        source for sources in expected_candidate_sources for source in sources
+    ]
+    if (
+        internet_by_path["policy-source-candidates.yaml"]
+        != expected_candidate_sources
+        or internet_by_path["policy-source-gaps.yaml"]
+    ):
+        _fail("invalid-internet-source")
     if set(by_path) != expected_paths:
         _fail("invalid-plan")
     return True

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 from dataclasses import dataclass
 from datetime import date
@@ -431,11 +432,21 @@ def extract_eyecite_candidates(text: str) -> tuple[dict[str, Any], ...]:
         from eyecite import get_citations, resolve_citations
     except (ImportError, OSError):
         _fail("eyecite-unavailable")
+    overlap_logger = logging.getLogger("eyecite.helpers")
+
+    class ExpectedOverlapFilter(logging.Filter):
+        def filter(self, record: logging.LogRecord) -> bool:
+            return not record.getMessage().startswith("Unknown overlap case.")
+
+    overlap_filter = ExpectedOverlapFilter()
+    overlap_logger.addFilter(overlap_filter)
     try:
         citations = list(get_citations(text))
         resources = resolve_citations(citations)
     except Exception:
         _fail("eyecite-unavailable")
+    finally:
+        overlap_logger.removeFilter(overlap_filter)
     resolved: dict[int, str] = {}
     for resource, resource_citations in resources.items():
         canonical = resource.citation.matched_text()
@@ -483,22 +494,24 @@ def _finding(
     return finding
 
 
-def _persistent_markup_findings(
+def _persistent_markup(
     filing_text: str, authorities: dict[str, AuthorityRecord]
-) -> list[dict[str, Any]]:
+) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     findings = []
+    resolutions = []
     seen_ids: set[str] = set()
     for index, match in enumerate(_CITE_TAG.finditer(filing_text)):
         attributes = dict(_CITE_ATTRIBUTE.findall(match.group("attributes")))
         location = f"persistent_citations[{index}]"
         citation_id = attributes.get("id")
         authority_id = attributes.get("authority")
-        if (
+        valid_citation_id = not (
             set(attributes) != {"id", "authority"}
             or citation_id is None
             or _IDENTIFIER.fullmatch(citation_id) is None
             or citation_id in seen_ids
-        ):
+        )
+        if not valid_citation_id:
             findings.append(
                 _finding(
                     "persistent-citation-id",
@@ -517,7 +530,28 @@ def _persistent_markup_findings(
                     authority_id=authority_id,
                 )
             )
-    return findings
+        elif valid_citation_id:
+            authority = authorities[authority_id]
+            if authority.citation not in match.group("text"):
+                findings.append(
+                    _finding(
+                        "persistent-citation-text",
+                        location,
+                        "visible citation text does not identify the selected authority",
+                        authority_id=authority_id,
+                    )
+                )
+            else:
+                resolutions.append(
+                    {
+                        "authority_id": authority.authority_id,
+                        "authority_yaml_path": authority.yaml_path,
+                        "citation_id": citation_id,
+                        "document_path": authority.document_path,
+                        "source_yaml_path": authority.source.yaml_path,
+                    }
+                )
+    return findings, resolutions
 
 
 def _pinpoint_segment(opinion_text: str, pinpoint: str) -> str | None:
@@ -535,6 +569,7 @@ def _audit_findings(
     filing_text: str,
     candidates: tuple[dict[str, Any], ...],
     corpus: AuthorityCorpus,
+    markup_findings: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     authorities_by_id = {
         authority.authority_id: authority for authority in corpus.authorities
@@ -542,7 +577,7 @@ def _audit_findings(
     authorities_by_citation = {
         authority.citation: authority for authority in corpus.authorities
     }
-    findings = _persistent_markup_findings(filing_text, authorities_by_id)
+    findings = list(markup_findings)
     resolved_citations = {
         candidate["resolved_citation"]
         for candidate in candidates
@@ -740,7 +775,13 @@ def run_and_publish_authority_audit(
     except (AttributeError, IndexError, UnicodeError):
         _fail("invalid-filing-content")
     candidates = extract_eyecite_candidates(filing_text)
-    findings = _audit_findings(filing_text, candidates, corpus)
+    markup_findings, persistent_citations = _persistent_markup(
+        filing_text,
+        {authority.authority_id: authority for authority in corpus.authorities},
+    )
+    findings = _audit_findings(
+        filing_text, candidates, corpus, markup_findings
+    )
     status = "failed" if findings else "passed"
     exit_class = "findings" if findings else "passed"
     report = {
@@ -751,6 +792,7 @@ def run_and_publish_authority_audit(
         "target_sha256": hashlib.sha256(filing_bytes).hexdigest(),
         "candidates": list(candidates),
         "findings": findings,
+        "persistent_citations": persistent_citations,
     }
     report_bytes = _canonical_json(report)
     try:

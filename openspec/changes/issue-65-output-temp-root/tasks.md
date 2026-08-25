@@ -7,9 +7,9 @@
 
 ## 2. RED
 
-- [ ] 2.1 Add tests that require staging beneath `temp/<run-id>/` and reject
+- [x] 2.1 Add tests that require staging beneath `temp/<run-id>/` and reject
       public `temp/` artifact paths.
-- [ ] 2.2 Add tests for exact trusted-host working-directory and temporary
+- [x] 2.2 Add tests for exact trusted-host working-directory and temporary
       environment configuration.
 
 ## 3. GREEN

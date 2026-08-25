@@ -75,6 +75,9 @@ class SkillOutputWriterTest(unittest.TestCase):
     def run_directory(self, run_id):
         return self.output_root / ".skill-runs" / run_id
 
+    def temp_directory(self, run_id):
+        return self.output_root / "temp" / run_id
+
     def make_relocated_invocation(self, name, *, internet="disabled"):
         relocated_root = self.root / name
         record_root = relocated_root / "record"
@@ -239,6 +242,39 @@ class SkillOutputWriterTest(unittest.TestCase):
             hashlib.sha256(output.read_bytes()).hexdigest(),
             "f2289de8b83919a1c37faf51771976cb2e4d8b487544ce76936d34963266d8fd",
         )
+
+    def test_run_uses_only_reserved_output_temp_for_staging_and_process_work(self):
+        run = self.start_run("temp-root-run")
+
+        expected_temp_root = self.output_root / "temp"
+        expected_run_temp = expected_temp_root / "temp-root-run"
+        self.assertTrue(expected_run_temp.is_dir())
+        self.assertFalse((self.run_directory("temp-root-run") / "staging").exists())
+        self.assertEqual(
+            run.process_configuration(),
+            {
+                "cwd": str(expected_temp_root),
+                "environment": {
+                    "TEMP": str(expected_temp_root),
+                    "TMP": str(expected_temp_root),
+                    "TMPDIR": str(expected_temp_root),
+                },
+            },
+        )
+
+        run.write("reports/result.md", b"durable output\n")
+        self.assertEqual(list(expected_run_temp.iterdir()), [])
+
+    def test_public_artifacts_cannot_use_reserved_temp_namespace(self):
+        run = self.start_run("reserved-temp-run")
+        before = self.snapshot_tree()
+
+        self.assert_error(
+            lambda: run.write("temp/semantic-work.txt", b"not durable\n"),
+            "invalid-output-path",
+        )
+
+        self.assertEqual(self.snapshot_tree(), before)
 
     def test_append_immutable_writes_bytes_beside_prior_output(self):
         prior = self.output_root / "prior.txt"

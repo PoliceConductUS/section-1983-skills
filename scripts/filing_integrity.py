@@ -310,6 +310,96 @@ def _load_checker() -> ModuleType:
     return module
 
 
+def _checker_context(
+    invocation: ValidatedInvocation, records: tuple[SourceRecord, ...]
+) -> dict[str, Any]:
+    docket_records = [
+        record for record in records if record.classification == "docket-to-appendix"
+    ]
+    if len(docket_records) != 1:
+        _fail("invalid-docket-index")
+    docket_record = docket_records[0]
+    try:
+        docket_path = resolve_input_path(
+            invocation, docket_record.source_role, docket_record.content_path
+        )
+        docket_value = json.loads(
+            _read(
+                docket_path,
+                invocation.runtime["max_input_bytes"],
+                "invalid-docket-index",
+            ).decode("utf-8", errors="strict")
+        )
+    except FilingIntegrityError:
+        raise
+    except (InvocationError, UnicodeError, ValueError, json.JSONDecodeError):
+        _fail("invalid-docket-index")
+    if type(docket_value) is not dict or set(docket_value) != {"entries"}:
+        _fail("invalid-docket-index")
+    entries = docket_value["entries"]
+    required = {
+        "docket_entry",
+        "docket_page",
+        "appendix_start",
+        "appendix_end",
+        "source_id",
+    }
+    if type(entries) is not list:
+        _fail("invalid-docket-index")
+    normalized_entries = []
+    for entry in entries:
+        if (
+            type(entry) is not dict
+            or set(entry) != required
+            or any(
+                type(entry[key]) is not int or entry[key] < 1
+                for key in (
+                    "docket_entry",
+                    "docket_page",
+                    "appendix_start",
+                    "appendix_end",
+                )
+            )
+            or entry["appendix_end"] < entry["appendix_start"]
+            or not isinstance(entry["source_id"], str)
+            or _SOURCE_ID.fullmatch(entry["source_id"]) is None
+        ):
+            _fail("invalid-docket-index")
+        normalized_entries.append(entry)
+    return {
+        "authority_ids": sorted(
+            record.source_id
+            for record in records
+            if record.source_role == "verified-authority"
+        ),
+        "docket_entries": sorted(
+            normalized_entries,
+            key=lambda entry: (
+                entry["docket_entry"],
+                entry["docket_page"],
+                entry["appendix_start"],
+                entry["appendix_end"],
+                entry["source_id"],
+            ),
+        ),
+        "docket_ids": sorted(
+            record.source_id
+            for record in records
+            if record.source_role == "docket-to-appendix"
+        ),
+        "exhibit_ids": sorted(
+            record.source_id
+            for record in records
+            if record.source_role == "exhibit"
+        ),
+        "record_ids": sorted(
+            record.source_id
+            for record in records
+            if record.source_role == "record-reference"
+        ),
+    }
+
+
 def _markdown(report: dict[str, Any]) -> bytes:
     lines = [
         "# Filing integrity findings",
@@ -390,12 +480,14 @@ def run_and_publish_filing_integrity(
     filing = next(record for record in records if record.classification == "filing")
     checker = _load_checker()
     roots = dict(invocation.inputs)
+    context = _checker_context(invocation, records)
     try:
         checker_result = checker.run_filing_ci(
             roots["filing-source"],
             filing.content_path,
             roots["verified-authority"],
             selection.checker_id,
+            context,
         )
     except BaseException:
         _fail("checker-unavailable")

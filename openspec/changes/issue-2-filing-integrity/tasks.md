@@ -15,7 +15,7 @@
 
 - [x] 3.1 Test section, paragraph, exhibit, docket/appendix, citation-ID, and
       filing-gate fixtures with stable exit classes.
-- [ ] 3.2 Implement the initial read-only mechanical finding set.
+- [x] 3.2 Implement the initial read-only mechanical finding set.
 
 ## 4. Output boundary
 

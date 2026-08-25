@@ -23,6 +23,6 @@
 
 - [x] 4.1 Update exact folder-contract governance and public composition.
 - [x] 4.2 Run focused tests, full validation, and whole-story review.
-- [ ] 4.3 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 4.3 Record verification and retrospective evidence and archive OpenSpec.
 - [ ] 4.4 Verify exact remote head/checks and mark the PR ready while leaving
       the PR and Issue #32 open.

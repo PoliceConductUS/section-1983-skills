@@ -16,7 +16,7 @@
 
 - [x] 3.1 Test that only a selected persisted prior output may cross to a later
       fresh invocation and that prior output remains unchanged.
-- [ ] 3.2 Implement bounded artifact-only sequence validation and execution.
+- [x] 3.2 Implement bounded artifact-only sequence validation and execution.
 
 ## 4. Verification
 

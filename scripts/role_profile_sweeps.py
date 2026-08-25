@@ -8,7 +8,7 @@ import re
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from scripts.skill_output_writer import OutputError, OutputRun
 from scripts.static_role_launcher import (
@@ -78,6 +78,28 @@ class RoleRunRecord:
 class SweepResult:
     runs: tuple[RoleRunRecord, ...]
     comparison: ProposedArtifact
+
+
+@dataclass(frozen=True)
+class PersistedArtifact:
+    hop_id: str
+    output_root: Path
+    path: str
+    sha256: str
+    size: int
+
+
+@dataclass(frozen=True)
+class SequenceHop:
+    hop_id: str
+    prior_artifact_path: str
+    binder: Callable[[PersistedArtifact], BoundRoleLaunch]
+
+
+@dataclass(frozen=True)
+class SequenceResult:
+    status: str
+    runs: tuple[RoleRunRecord, ...]
 
 
 def _valid_identifier(value: Any) -> bool:
@@ -317,6 +339,23 @@ def _publish_run(
     )
 
 
+def _launch_variant(
+    variant: SweepVariant,
+) -> tuple[RoleLaunchResult, tuple[dict[str, Any], ...]]:
+    result = launch_static_role(variant.binding, run_id=str(uuid.uuid4()))
+    findings: tuple[dict[str, Any], ...] = ()
+    if result.success:
+        try:
+            findings = _extract_findings(result.artifacts)
+        except RoleSweepError as error:
+            result = RoleLaunchResult(
+                success=False,
+                code=error.code,
+                artifacts=(),
+            )
+    return result, findings
+
+
 def _finding_key(finding: dict[str, Any]) -> tuple[str, str, str]:
     return (
         finding["category"],
@@ -459,17 +498,7 @@ def run_role_sweep(
     ordered = _validate_variants(variants, comparison_invocation)
     records: list[RoleRunRecord] = []
     for variant in ordered:
-        result = launch_static_role(variant.binding, run_id=str(uuid.uuid4()))
-        findings: tuple[dict[str, Any], ...] = ()
-        if result.success:
-            try:
-                findings = _extract_findings(result.artifacts)
-            except RoleSweepError as error:
-                result = RoleLaunchResult(
-                    success=False,
-                    code=error.code,
-                    artifacts=(),
-                )
+        result, findings = _launch_variant(variant)
         records.append(
             _publish_run(
                 variant=variant,
@@ -486,3 +515,203 @@ def run_role_sweep(
         producer_version=producer_version,
     )
     return SweepResult(runs=tuple(records), comparison=comparison)
+
+
+def _relative_artifact_path(value: Any) -> tuple[str, ...]:
+    if not isinstance(value, str) or not value:
+        _fail("invalid-sequence-link")
+    parts = tuple(value.split("/"))
+    if (
+        "\\" in value
+        or value.startswith("/")
+        or any(part in {"", ".", ".."} for part in parts)
+        or parts[0] in {"temp", ".skill-runs"}
+    ):
+        _fail("invalid-sequence-link")
+    return parts
+
+
+def _tree_snapshot(root: Path) -> tuple[tuple[Any, ...], ...]:
+    records: list[tuple[Any, ...]] = []
+    try:
+        canonical = root.resolve(strict=True)
+        for path in sorted(canonical.rglob("*")):
+            relative = path.relative_to(canonical).as_posix()
+            if path.is_symlink():
+                _fail("invalid-sequence-link")
+            if path.is_dir():
+                records.append(("directory", relative))
+            elif path.is_file():
+                contents = path.read_bytes()
+                records.append(
+                    (
+                        "file",
+                        relative,
+                        len(contents),
+                        hashlib.sha256(contents).hexdigest(),
+                    )
+                )
+            else:
+                _fail("invalid-sequence-link")
+    except RoleSweepError:
+        raise
+    except (OSError, ValueError):
+        _fail("invalid-sequence-link")
+    return tuple(records)
+
+
+def _persisted_artifact(
+    run: RoleRunRecord, *, hop_id: str, relative_path: str
+) -> PersistedArtifact:
+    _relative_artifact_path(relative_path)
+    matches = [artifact for artifact in run.artifacts if artifact.path == relative_path]
+    if len(matches) != 1:
+        _fail("invalid-sequence-link")
+    artifact = matches[0]
+    try:
+        root = run.output_root.resolve(strict=True)
+        path = (root / relative_path).resolve(strict=True)
+        if path.parent == root:
+            contained = True
+        else:
+            path.relative_to(root)
+            contained = True
+        contents = path.read_bytes()
+    except (OSError, ValueError):
+        _fail("invalid-sequence-link")
+    if (
+        not contained
+        or not path.is_file()
+        or len(contents) != artifact.size
+        or hashlib.sha256(contents).hexdigest() != artifact.sha256
+    ):
+        _fail("invalid-sequence-link")
+    return PersistedArtifact(
+        hop_id=hop_id,
+        output_root=root,
+        path=relative_path,
+        sha256=artifact.sha256,
+        size=artifact.size,
+    )
+
+
+def _validate_sequence_binding(
+    binding: Any,
+    prior: PersistedArtifact,
+    previous_outputs: set[Path],
+) -> BoundRoleLaunch:
+    if not isinstance(binding, BoundRoleLaunch):
+        _fail("invalid-sequence-link")
+    matches = [
+        item
+        for item in binding.inputs
+        if item.path == prior.path
+        and item.sha256 == prior.sha256
+        and item.size == prior.size
+    ]
+    if len(matches) != 1:
+        _fail("invalid-sequence-link")
+    selected = matches[0]
+    roots = {
+        role: root.resolve()
+        for role, root in binding.invocation.inputs
+        if role == selected.role
+    }
+    if roots != {selected.role: prior.output_root}:
+        _fail("invalid-sequence-link")
+    output = binding.invocation.output_root.resolve()
+    for previous in previous_outputs:
+        try:
+            output.relative_to(previous)
+            _fail("invalid-sequence-output")
+        except ValueError:
+            pass
+        try:
+            previous.relative_to(output)
+            _fail("invalid-sequence-output")
+        except ValueError:
+            pass
+    return binding
+
+
+def run_role_sequence(
+    *,
+    first: SweepVariant,
+    hops: tuple[SequenceHop, ...],
+    launcher_version: str,
+    producer_version: str,
+) -> SequenceResult:
+    """Run fresh role hops joined only by selected persisted ordinary files."""
+
+    _validate_version(launcher_version)
+    _validate_version(producer_version)
+    if (
+        not isinstance(first, SweepVariant)
+        or not _valid_identifier(first.variant_id)
+        or not isinstance(first.binding, BoundRoleLaunch)
+        or type(hops) is not tuple
+    ):
+        _fail("invalid-sequence")
+    hop_ids = {first.variant_id}
+    for hop in hops:
+        if (
+            not isinstance(hop, SequenceHop)
+            or not _valid_identifier(hop.hop_id)
+            or hop.hop_id in hop_ids
+            or not callable(hop.binder)
+        ):
+            _fail("invalid-sequence")
+        _relative_artifact_path(hop.prior_artifact_path)
+        hop_ids.add(hop.hop_id)
+
+    records: list[RoleRunRecord] = []
+    result, findings = _launch_variant(first)
+    records.append(
+        _publish_run(
+            variant=first,
+            result=result,
+            findings=findings,
+            launcher_version=launcher_version,
+            producer_version=producer_version,
+        )
+    )
+    if not result.success:
+        return SequenceResult(status="failure", runs=tuple(records))
+
+    previous_outputs = {records[0].output_root.resolve()}
+    for hop in hops:
+        prior_run = records[-1]
+        prior = _persisted_artifact(
+            prior_run,
+            hop_id=prior_run.variant_id,
+            relative_path=hop.prior_artifact_path,
+        )
+        prior_tree = _tree_snapshot(prior.output_root)
+        try:
+            binding = hop.binder(prior)
+        except BaseException:
+            _fail("invalid-sequence-link")
+        binding = _validate_sequence_binding(binding, prior, previous_outputs)
+        if _tree_snapshot(prior.output_root) != prior_tree:
+            _fail("prior-output-mutated")
+        variant = SweepVariant(variant_id=hop.hop_id, binding=binding)
+        hop_result, hop_findings = _launch_variant(variant)
+        if _tree_snapshot(prior.output_root) != prior_tree:
+            hop_result = RoleLaunchResult(
+                success=False,
+                code="prior-output-mutated",
+                artifacts=(),
+            )
+            hop_findings = ()
+        record = _publish_run(
+            variant=variant,
+            result=hop_result,
+            findings=hop_findings,
+            launcher_version=launcher_version,
+            producer_version=producer_version,
+        )
+        records.append(record)
+        previous_outputs.add(record.output_root.resolve())
+        if not hop_result.success:
+            return SequenceResult(status="failure", runs=tuple(records))
+    return SequenceResult(status="complete", runs=tuple(records))

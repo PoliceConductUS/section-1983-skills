@@ -25,7 +25,7 @@
       "event_type": "complaint",
       "event_date": "2025-02-01",
       "entity_ids": ["entity-department"],
-      "evidence_ids": ["evidence-complaint-ia"],
+      "evidence_ids": ["evidence-complaint-internal-affairs"],
       "description": "A fictional complaint was recorded."
     },
     {
@@ -43,7 +43,7 @@
       "chain_type": "notice_corrective",
       "event_ids": ["event-complaint", "event-review"],
       "evidence_ids": [
-        "evidence-complaint-ia",
+        "evidence-complaint-internal-affairs",
         "evidence-institutional-learning"
       ],
       "question": "What, if anything, did the fictional complaint transmit to later review?"
@@ -55,7 +55,10 @@
       "target_event_id": "event-complaint",
       "candidate_event_ids": ["event-review"],
       "feature_ids": ["feature-review-channel"],
-      "evidence_ids": ["evidence-complaint-ia", "evidence-institutional-learning"],
+      "evidence_ids": [
+        "evidence-complaint-internal-affairs",
+        "evidence-institutional-learning"
+      ],
       "question": "Which bounded similarities and differences require further review?"
     }
   ],
@@ -72,7 +75,10 @@
       "feature_id": "feature-review-channel",
       "label": "Review channel",
       "definition": "Whether the fictional record identifies a documented review channel.",
-      "evidence_ids": ["evidence-complaint-ia", "evidence-institutional-learning"]
+      "evidence_ids": [
+        "evidence-complaint-internal-affairs",
+        "evidence-institutional-learning"
+      ]
     }
   ],
   "gaps": [

@@ -29,6 +29,6 @@ counterevidence, uncertainty, and domain boundaries across ordinary input files.
 
 ## Non-goals
 
-- No package, graph, source collection, Monell-liability decision, legal advice,
-  theory selection, allegation drafting, filing edit, or embedded real municipal
+- No source collection, Monell-liability decision, legal advice, theory
+  selection, allegation drafting, filing edit, or embedded real municipal
   conclusion.

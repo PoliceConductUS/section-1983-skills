@@ -8,22 +8,22 @@
 
 ## 2. Input boundary
 
-- [ ] 2.1 Test the exact seven-role offline contract, upstream validation,
+- [x] 2.1 Test the exact seven-role offline contract, upstream validation,
       selected source YAML/hash binding, and exact input fingerprints.
-- [ ] 2.2 Implement strict source, validation, identity, and fingerprint gates.
+- [x] 2.2 Implement strict source, validation, identity, and fingerprint gates.
 
 ## 3. Profile model
 
-- [ ] 3.1 Test the five domains, all institutional categories, support
+- [x] 3.1 Test the five domains, all institutional categories, support
       directions, entities, events, chains, comparisons, contradictions,
       similarity features, and gaps.
-- [ ] 3.2 Implement deterministic cross-record and domain validation.
+- [x] 3.2 Implement deterministic cross-record and domain validation.
 
 ## 4. Output and legal boundary
 
-- [ ] 4.1 Test deterministic plans, input preservation, output and temp
+- [x] 4.1 Test deterministic plans, input preservation, output and temp
       confinement, and no proof or liability conclusion.
-- [ ] 4.2 Document later consumer handoff and reserved litigation choices.
+- [x] 4.2 Document later consumer handoff and reserved litigation choices.
 
 ## 5. Verification
 

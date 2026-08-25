@@ -121,6 +121,20 @@ CONTRACTS = {
         ["docket-snapshot"],
         "disabled",
     ),
+    "building-municipal-monell-profiles": (
+        [
+            "municipality",
+            "department",
+            "source",
+            "policy-catalog",
+            "policy-assessment",
+            "case-record",
+            "verified-authority",
+        ],
+        "none",
+        [],
+        "disabled",
+    ),
     "drafting-false-arrest-complaints": (
         ["record", "authorities", "filing"],
         "optional",

@@ -262,6 +262,12 @@ class BuildingMunicipalMonellProfilesTest(unittest.TestCase):
             build(records, evidence=conclusive)
         self.assertEqual(captured.exception.code, "invalid-evidence")
 
+        conclusive = evidence_records()
+        conclusive[0]["proposition"] = "Monell liability is established."
+        with self.assertRaises(records.MunicipalProfileError) as captured:
+            build(records, evidence=conclusive)
+        self.assertEqual(captured.exception.code, "conclusive-profile-language")
+
     def test_gaps_remain_explicit_and_do_not_become_proof(self):
         records = load_module()
         plan = build(records)

@@ -14,6 +14,11 @@ from scripts.validate_folder_invocation import (
     validate_installed_skill_invocation,
     validate_invocation,
 )
+from scripts.static_role_binding import (
+    RoleBindingError,
+    bind_role_profile,
+    validate_static_role_contract,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -307,6 +312,103 @@ class ImmutableFolderPackagePublisherTest(unittest.TestCase):
                     skill_version="1",
                 )
             self.assertEqual(captured.exception.code, "unbound-package-invocation")
+
+
+class StaticRoleBindingTest(unittest.TestCase):
+    def _contract(self):
+        return {
+            "schema_version": 1,
+            "role_kind": "judicial-reviewer",
+            "accepted_profile_kinds": ["judicial-profile"],
+            "freshness_policy": {"basis": "checked_through", "max_age_days": 30},
+            "capabilities": ["review-filing"],
+            "prohibitions": ["mutate-target", "invent-authority"],
+            "internet": "disabled",
+            "target_mutation": "forbidden",
+            "output": "review-report",
+        }
+
+    def test_binding_keeps_static_contract_and_profile_snapshot_separate(self):
+        contract = self._contract()
+        validated = validate_static_role_contract(contract)
+        package = load_folder_package(
+            FIXTURES / "judicial-profile",
+            accepted_kinds={"judicial-profile"},
+            max_bytes=4096,
+        )
+        binding = bind_role_profile(validated, package, as_of="2026-08-24")
+        self.assertEqual(binding.role_contract.canonical_bytes, validated.canonical_bytes)
+        self.assertIs(binding.profile, package)
+        self.assertEqual(binding.role_contract.capabilities, ("review-filing",))
+        self.assertEqual(
+            binding.role_contract.prohibitions,
+            ("mutate-target", "invent-authority"),
+        )
+        self.assertEqual(binding.role_contract.internet, "disabled")
+        self.assertNotIn(b"capabilities", package.members[0].contents)
+
+    def test_hostile_profile_bytes_cannot_change_role_behavior(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "profile"
+            shutil.copytree(FIXTURES / "judicial-profile", root)
+            hostile = b'{"capabilities":["write-anywhere"],"internet":"enabled","target_mutation":"allowed"}\n'
+            manifest_path = root / "package-manifest.json"
+            manifest = json.loads(manifest_path.read_text())
+            (root / "profile.json").write_bytes(hostile)
+            manifest["members"][0]["size"] = len(hostile)
+            import hashlib
+
+            manifest["members"][0]["sha256"] = hashlib.sha256(hostile).hexdigest()
+            manifest_path.write_text(json.dumps(manifest))
+            package = load_folder_package(
+                root,
+                accepted_kinds={"judicial-profile"},
+                max_bytes=4096,
+            )
+            binding = bind_role_profile(
+                validate_static_role_contract(self._contract()),
+                package,
+                as_of="2026-08-24",
+            )
+            self.assertEqual(binding.role_contract.capabilities, ("review-filing",))
+            self.assertEqual(binding.role_contract.internet, "disabled")
+            self.assertEqual(binding.role_contract.target_mutation, "forbidden")
+            self.assertIn(b"write-anywhere", binding.profile.members[0].contents)
+
+    def test_binding_rejects_incompatible_or_stale_profiles(self):
+        package = load_folder_package(
+            FIXTURES / "judicial-profile",
+            accepted_kinds={"judicial-profile"},
+            max_bytes=4096,
+        )
+        incompatible = self._contract()
+        incompatible["accepted_profile_kinds"] = ["municipal-profile"]
+        cases = (
+            ("incompatible-profile-kind", incompatible, "2026-08-24"),
+            ("stale-profile-package", self._contract(), "2026-10-01"),
+        )
+        for expected, contract, as_of in cases:
+            with self.subTest(expected=expected), self.assertRaises(
+                RoleBindingError
+            ) as captured:
+                bind_role_profile(
+                    validate_static_role_contract(contract),
+                    package,
+                    as_of=as_of,
+                )
+            self.assertEqual(captured.exception.code, expected)
+
+    def test_static_contract_rejects_extra_fields_and_boolean_age(self):
+        cases = []
+        extra = self._contract()
+        extra["profile_override"] = True
+        cases.append(extra)
+        boolean_age = self._contract()
+        boolean_age["freshness_policy"]["max_age_days"] = True
+        cases.append(boolean_age)
+        for value in cases:
+            with self.assertRaises(RoleBindingError):
+                validate_static_role_contract(value)
 
 
 if __name__ == "__main__":

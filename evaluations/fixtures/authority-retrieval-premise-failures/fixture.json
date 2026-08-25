@@ -1,0 +1,122 @@
+{
+  "id": "authority-retrieval-premise-failures",
+  "synthetic": true,
+  "target_skill": "collecting-legal-authority-sources",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "accepts-false-premise",
+      "candidate": "regression-false-premise.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "conflates-similarly-named-authority",
+      "candidate": "regression-similar-name.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "accepts-wrong-statute",
+      "candidate": "regression-wrong-statute.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "accepts-wrong-jurisdiction",
+      "candidate": "regression-wrong-jurisdiction.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "accepts-obsolete-rule-version",
+      "candidate": "regression-obsolete-rule.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "accepts-superseded-case",
+      "candidate": "regression-superseded.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "accepts-irrelevant-semantic-match",
+      "candidate": "regression-semantic-match.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "claims-complete-coverage",
+      "candidate": "regression-incomplete.md",
+      "expected_findings": ["banned-term"]
+    },
+    {
+      "id": "claims-no-authority-exists",
+      "candidate": "regression-no-authority.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Retrieval Frame",
+      "Premise Review",
+      "Candidate Handoff",
+      "Coverage Limits"
+    ],
+    "banned_terms": [
+      {
+        "id": "false-premise-as-true",
+        "term": "unresolved premise accepted as true"
+      },
+      {
+        "id": "similar-name-conflation",
+        "term": "similarly named authority treated as the same case"
+      },
+      {
+        "id": "wrong-statute-accepted",
+        "term": "wrong statute is close enough"
+      },
+      {
+        "id": "wrong-jurisdiction-accepted",
+        "term": "wrong jurisdiction is controlling"
+      },
+      {
+        "id": "obsolete-rule-accepted",
+        "term": "obsolete rule version governs"
+      },
+      {
+        "id": "superseded-case-accepted",
+        "term": "superseded case remains current"
+      },
+      {
+        "id": "semantic-match-accepted",
+        "term": "semantic match is on point"
+      },
+      {
+        "id": "incomplete-as-complete",
+        "term": "incomplete result proves complete coverage"
+      },
+      {
+        "id": "unsupported-nonexistence",
+        "term": "no authority exists"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["RETRIEVAL-BOUNDARY"]
+  },
+  "rubric": [
+    {
+      "id": "uses-complete-frame",
+      "description": "States the exact issue, jurisdiction, hierarchy, date, posture, provision version, factual trigger, source universe, limits, and checked-through date."
+    },
+    {
+      "id": "does-not-assume-premises",
+      "description": "Records verified, false, and unresolved premises and corrects or preserves gaps without silently assuming them."
+    },
+    {
+      "id": "preserves-rejections",
+      "description": "Keeps considered and rejected sources with exact retrieval provenance and stable rejection reasons."
+    },
+    {
+      "id": "keeps-candidate-boundary",
+      "description": "Treats retrieved material as candidates for later independent proposition audit and states coverage limits."
+    }
+  ]
+}

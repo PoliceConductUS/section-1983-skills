@@ -8,15 +8,15 @@
 
 ## 2. TDD contract
 
-- [ ] 2.1 RED-test retrieval frames and premise status relationships.
-- [ ] 2.2 RED-test source provenance, retrieval order, rejections, and gaps.
-- [ ] 2.3 RED-test every required synthetic retrieval failure mode.
+- [x] 2.1 RED-test retrieval frames and premise status relationships.
+- [x] 2.2 RED-test source provenance, retrieval order, rejections, and gaps.
+- [x] 2.3 RED-test every required synthetic retrieval failure mode.
 
 ## 3. Implementation
 
-- [ ] 3.1 Extend the pure artifact planner and strict domain YAML records.
-- [ ] 3.2 Harden the installed skill and reference documentation.
-- [ ] 3.3 Add the bounded passing/regression fixture.
+- [x] 3.1 Extend the pure artifact planner and strict domain YAML records.
+- [x] 3.2 Harden the installed skill and reference documentation.
+- [x] 3.3 Add the bounded passing/regression fixture.
 
 ## 4. Completion
 

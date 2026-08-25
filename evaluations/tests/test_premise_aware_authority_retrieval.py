@@ -98,7 +98,10 @@ class PremiseAwareAuthorityRetrievalTest(unittest.TestCase):
         premise_document = yaml.safe_load(
             artifact(plan, "authority-retrieval-premises.yaml")["bytes"]
         )
-        self.assertEqual(premise_document["premises"], premises())
+        self.assertEqual(
+            premise_document["premises"],
+            sorted(premises(), key=lambda item: item["premise_id"]),
+        )
 
         source_yaml = yaml.safe_load(
             artifact(plan, "sources/fictional-opinion-mirror.SOURCE.yaml")["bytes"]

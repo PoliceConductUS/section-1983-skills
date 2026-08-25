@@ -12,10 +12,7 @@
     "procedural_posture": "Rule 12(b)(6)",
     "statute_or_rule_version": "42 U.S.C. 1983 effective 2025-06-15",
     "material_factual_trigger": "The complaint alleges action without advance notice.",
-    "source_universe": [
-      "fictional-official-search",
-      "fictional-court-search"
-    ],
+    "source_universe": ["fictional-official-search", "fictional-court-search"],
     "access_and_cost_limits": [
       "public sources only",
       "no paid database access"
@@ -23,4 +20,3 @@
     "checked_through": "2026-08-25"
   }
 }
-

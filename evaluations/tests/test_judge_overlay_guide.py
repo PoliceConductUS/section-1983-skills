@@ -14,7 +14,7 @@ README_PATH = REPOSITORY_ROOT / "README.md"
 GUIDE_PATH = REPOSITORY_ROOT / "JUDGE_OVERLAYS.md"
 REQUIRED_GUIDE_TARGETS = {
     "OVERLAYS.md",
-    "skills/drafting-for-judge-scholer/SKILL.md",
+    "skills/building-judicial-reasoning-profiles/SKILL.md",
     "skills/studying-rule-59e-decisions/references/decision-corpus.schema.json",
     "skills/studying-rule-59e-decisions/references/transfer-card.schema.json",
     "skills/studying-rule-59e-decisions/scripts/validate_corpus.py",
@@ -61,11 +61,13 @@ def replace_phrase(markdown, phrase, replacement):
 
 
 STRUCTURAL_CONTRACT = normalize(
-    "The existing "
-    "[Scholer overlay](skills/drafting-for-judge-scholer/SKILL.md) is a "
-    "structural example only. It separates judicial authorship stages, "
-    "preserves evidence strength, and adds no judge-specific proposition when "
-    "qualifying support is absent. Do not copy its substantive conclusions."
+    "The generic "
+    "[Judicial Reasoning Profile builder]"
+    "(skills/building-judicial-reasoning-profiles/SKILL.md) is the structural "
+    "contract. It separates judicial authorship stages, preserves evidence "
+    "strength, and adds no judge-specific proposition when qualifying support "
+    "is absent. Profiles remain data; do not create a judge-named skill or copy "
+    "a profile's substantive conclusions into role behavior."
 )
 
 
@@ -350,7 +352,7 @@ class JudgeOverlayGuideTest(unittest.TestCase):
 
     def assert_no_private_or_real_conclusion(self, guide):
         structural = section(guide, "Structural example only")
-        self.assertIn("Scholer", structural)
+        self.assertIn("Judicial Reasoning Profile builder", structural)
         structural_prose = normalize(structural)
         self.assertEqual(structural_prose, STRUCTURAL_CONTRACT)
         guide_without_urls = re.sub(r"https?://[^\s)>]+", "", guide)
@@ -368,7 +370,6 @@ class JudgeOverlayGuideTest(unittest.TestCase):
             "",
             guide,
         )
-        self.assertNotIn("scholer", normalize(without_structural))
         judge_names = set(re.findall(r"\bJudge [A-Z][A-Za-z'-]+\b", without_structural))
         self.assertLessEqual(judge_names, {"Judge Example"})
         self.assertNotRegex(
@@ -392,7 +393,7 @@ class JudgeOverlayGuideTest(unittest.TestCase):
         unsafe = self.guide + '\n<a href="../outside.md">outside</a>\n'
         unsafe += (
             "\n~~~markdown\n"
-            "[decoy](skills/drafting-for-judge-scholer/SKILL.md)\n"
+            "[decoy](skills/building-judicial-reasoning-profiles/SKILL.md)\n"
             "~~~\n"
         )
         with self.assertRaises(AssertionError):
@@ -582,7 +583,8 @@ class JudgeOverlayGuideTest(unittest.TestCase):
 
     def test_examples_and_structural_reference_exclude_private_conclusions(self):
         self.assertIn("structural example only", self.prose)
-        self.assertIn("do not copy its substantive conclusions", self.prose)
+        self.assertIn("profiles remain data", self.prose)
+        self.assertIn("do not create a judge-named skill", self.prose)
         self.assert_no_private_or_real_conclusion(self.guide)
         for unsafe in (
             "/private/tmp/client-record",
@@ -595,29 +597,32 @@ class JudgeOverlayGuideTest(unittest.TestCase):
         structural_mutation = replace_phrase(
             self.guide,
             "structural example only",
-            "structural example only. Judge Scholer usually denies Rule 59 motions. "
+            "structural example only. Judge Example usually denies Rule 59 motions. "
             "Source: /private/tmp/client-record",
         )
         with self.assertRaises(AssertionError):
             self.assert_no_private_or_real_conclusion(structural_mutation)
         for conclusion in (
-            "Judge Scholer has a tendency to deny Rule 59 motions.",
-            "Judge Scholer has a preference for denying Rule 59 motions.",
-            "Judge Scholer outcomes favor denial of Rule 59 motions.",
+            "Judge Example has a tendency to deny Rule 59 motions.",
+            "Judge Example has a preference for denying Rule 59 motions.",
+            "Judge Example outcomes favor denial of Rule 59 motions.",
         ):
             mutated = replace_phrase(
-                self.guide, "Do not copy its substantive conclusions.", conclusion
+                self.guide,
+                "Do not create a judge-named skill or copy a profile's substantive conclusions into role behavior.",
+                conclusion,
             )
             with self.subTest(conclusion=conclusion), self.assertRaises(AssertionError):
                 self.assert_no_private_or_real_conclusion(mutated)
         for hidden in (
-            "\n```text\nJudge Scholer has a tendency to deny Rule 59 motions.\n```",
-            "\n    Judge Scholer has a preference for denying Rule 59 motions.",
+            "\n```text\nJudge Example has a tendency to deny Rule 59 motions.\n```",
+            "\n    Judge Example has a preference for denying Rule 59 motions.",
         ):
             mutated = replace_phrase(
                 self.guide,
-                "Do not copy its substantive conclusions.",
-                f"Do not copy its substantive conclusions.{hidden}",
+                "Do not create a judge-named skill or copy a profile's substantive conclusions into role behavior.",
+                "Do not create a judge-named skill or copy a profile's substantive conclusions into role behavior."
+                + hidden,
             )
             with self.subTest(hidden=hidden), self.assertRaises(AssertionError):
                 self.assert_no_private_or_real_conclusion(mutated)

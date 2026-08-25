@@ -253,7 +253,9 @@ gap: One fictional candidate lacks a complete motion-disposition pair.
 
 ## Structural example only
 
-The existing [Scholer overlay](skills/drafting-for-judge-scholer/SKILL.md) is a
-structural example only. It separates judicial authorship stages, preserves
+The generic
+[Judicial Reasoning Profile builder](skills/building-judicial-reasoning-profiles/SKILL.md)
+is the structural contract. It separates judicial authorship stages, preserves
 evidence strength, and adds no judge-specific proposition when qualifying
-support is absent. Do not copy its substantive conclusions.
+support is absent. Profiles remain data; do not create a judge-named skill or
+copy a profile's substantive conclusions into role behavior.

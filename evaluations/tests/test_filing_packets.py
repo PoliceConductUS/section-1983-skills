@@ -72,7 +72,6 @@ class FilingPacketTest(unittest.TestCase):
             "audit-authorities",
             "filing-ci",
             "adversarial-filing-review",
-            "drafting-for-judge-scholer",
         ):
             text = (ROOT / "skills" / skill / "SKILL.md").read_text()
             self.assertIn("## FilingPacket boundary", text, skill)

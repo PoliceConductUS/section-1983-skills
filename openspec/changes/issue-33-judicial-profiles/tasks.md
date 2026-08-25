@@ -30,9 +30,9 @@
 
 ## 5. Remove embedded real-judge dependencies
 
-- [ ] 5.1 RED-test current public routes, active specs, governance, and generic
+- [x] 5.1 RED-test current public routes, active specs, governance, and generic
       receipt tests for complete removal of the embedded judge skill.
-- [ ] 5.2 Delete the real-judge package and migrate every current dependency to
+- [x] 5.2 Delete the real-judge package and migrate every current dependency to
       the generic builder or synthetic static-role fixture.
 
 ## 6. Verification and archive

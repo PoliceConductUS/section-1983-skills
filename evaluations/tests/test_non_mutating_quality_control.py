@@ -21,7 +21,6 @@ QUALITY_CONTROL_SKILLS = {
     "auditing-section-1983-discovery-responses",
     "auditing-section-1983-privilege-logs",
     "drafting-false-arrest-complaints",
-    "drafting-for-judge-scholer",
     "drafting-section-1983-complaints",
     "drafting-section-1983-rule-59e",
     "filing-ci",

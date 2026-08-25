@@ -14,9 +14,9 @@ fails closed when support is insufficient.
 
 The repository SHALL publish a concise judge-overlay authoring guide, route to
 it from README with confined relative links, and link it to the general case-
-overlay lifecycle. The guide MUST use the existing Scholer overlay only as a
-structural example and MUST NOT generalize or copy its judge-specific
-conclusions.
+overlay lifecycle. The guide MUST use the generic Judicial Reasoning Profile
+builder as its structural contract and MUST NOT create a judge-named skill or
+copy profile data into role behavior.
 
 The judge guide MUST define when to create, reuse, refresh, rebuild, and
 supersede a judge overlay. Assignment or reassignment, a changed official rule,
@@ -28,8 +28,9 @@ version and its source identities.
 #### Scenario: Maintainer starts a new overlay
 
 - **WHEN** a maintainer follows the README route
-- **THEN** the maintainer reaches the repository guide, general lifecycle, and
-  existing local corpus, validator, transfer-card, and worked-example sources
+- **THEN** the maintainer reaches the repository guide, general lifecycle,
+  generic profile builder, local corpus validator, transfer-card, and
+  worked-example sources
 
 #### Scenario: Assigned judge or official procedure changes
 

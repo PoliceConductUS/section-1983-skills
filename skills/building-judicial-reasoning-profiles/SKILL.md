@@ -12,20 +12,19 @@ Build participant-specific profile data without creating participant-specific
 skills. This skill does not generate judge-named skills, agent instructions, or
 static role variants and does not predict a judicial outcome.
 
-## Folder-scoped execution
+## Folder inputs and output
 
 Contract: [folder contract](references/folder-contract.json).
 
 Only caller-declared input folders are available and recursively read-only. The
 caller supplies the exact absolute output-folder path or execution stops to ask
-for it. Writes occur only beneath that output folder. Every transient file,
-working copy, cache, download, generated intermediate, and process temporary
-file stays beneath `<output-folder>/temp`; no other temporary location is
-available. Internet is used only when that operation expressly authorizes it.
+for it. Writes occur only beneath the caller-declared output folder. Every
+transient file, working copy, cache, download, generated intermediate, and
+process temporary file stays beneath `<output-folder>/temp`; no other temporary
+location is available. Internet is used only when that skill expressly
+authorizes it. The selected operation further restricts that authority.
 Execution stops before reading case material if the host cannot enforce the
 filesystem and network boundary.
-
-## Inputs and package output
 
 - `judge-identity` contains approved public identity records.
 - `court-scope` contains the applicable court, jurisdiction, tenure, and
@@ -35,8 +34,11 @@ filesystem and network boundary.
 - `verified-authorities` contains authorities whose identity, text, status, and
   relevant propositions have been checked.
 
-There is no target. Only the trusted host may publish returned artifacts beneath
-the explicit output folder. Read the
+Target is none. Internet is `authorized` only for acquisition and `disabled` for
+compilation. Return every proposed package member under a canonical
+output-relative path; only the trusted host may publish it through the declared
+append-immutable skill boundary and complete fresh package publication. Report
+every incomplete source or profile field as a gap. Read the
 [immutable folder package](references/immutable-folder-package.md) contract and
 the
 [Judicial Reasoning Profile schema](references/judicial-reasoning-profile.schema.json)

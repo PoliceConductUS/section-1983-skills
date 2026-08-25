@@ -28,12 +28,17 @@ class SkillFolderGuidanceTest(unittest.TestCase):
                 section = self.section(skill)
                 for role in roles:
                     self.assertIn(f"`{role}`", section)
-                self.assertIn(
-                    f"target is {target_policy} in "
-                    + " or ".join(f"`{role}`" for role in target_roles),
-                    section,
-                )
-                self.assertIn(f"internet is `{internet}`", section)
+                if target_policy == "none":
+                    self.assertIn("target is none", section)
+                else:
+                    self.assertIn(
+                        f"target is {target_policy} in "
+                        + " or ".join(f"`{role}`" for role in target_roles),
+                        section,
+                    )
+                policies = internet if isinstance(internet, list) else [internet]
+                for policy in policies:
+                    self.assertIn(f"`{policy}`", section)
                 self.assertIn("canonical output-relative path", section)
                 self.assertIn("append-immutable", section)
                 self.assertIn("only the trusted host", section)

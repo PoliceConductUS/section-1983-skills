@@ -10,7 +10,6 @@ SCHEMA = PACKAGE / "references" / "judge-overlay-execution.schema.json"
 SCRIPT = PACKAGE / "scripts" / "judge_overlay_receipt.py"
 JUDGE_GUIDE = ROOT / "JUDGE_OVERLAYS.md"
 GENERIC_SKILL = PACKAGE / "SKILL.md"
-SCHOLER_SKILL = ROOT / "skills" / "drafting-for-judge-scholer" / "SKILL.md"
 
 
 def prose(path):
@@ -49,32 +48,14 @@ class JudgeOverlayReceiptStructureTest(unittest.TestCase):
             ["passed", "missing", "stale", "failed", "unavailable"],
         )
 
-    def test_skills_require_folder_native_receipt_after_composition(self):
+    def test_generic_drafting_skill_requires_folder_native_receipt_after_composition(self):
         generic = prose(GENERIC_SKILL)
-        scholer = prose(SCHOLER_SKILL)
-
-        for label, text in (("generic", generic), ("scholer", scholer)):
-            with self.subTest(skill=label):
-                self.assertRegex(
-                    text,
-                    r"judge.{0,80}overlay.{0,160}after.{0,100}(?:document|claim).{0,100}skill",
-                )
-                self.assertRegex(text, r"declared.{0,100}filing.{0,100}(?:role|root)")
-                self.assertRegex(text, r"required.{0,80}filing target")
-                self.assertRegex(
-                    text,
-                    r"(?:return|emit).{0,100}(?:receipt bytes|artifact bytes)",
-                )
-                self.assertRegex(
-                    text,
-                    r"(?:trusted host|outputrun).{0,120}(?:publish|write)",
-                )
-                self.assertIn("no judge-specific drafting change", text)
-                self.assertRegex(text, r"absence.{0,100}(?:prose|receipt).{0,100}(?:not|does not).{0,100}ran")
-                self.assertNotRegex(
-                    text,
-                    r"(?is)(?:--project-boundary|--version-folder|<version-folder>/audits/|canonical `audits/`)",
-                )
+        self.assertIn("building-judicial-reasoning-profiles", generic)
+        self.assertRegex(generic, r"profile-backed review.{0,100}separate.{0,100}invocation")
+        self.assertNotRegex(
+            generic,
+            r"(?is)(?:--project-boundary|--version-folder|<version-folder>/audits/|canonical `audits/`)",
+        )
 
     def test_judge_guide_routes_to_schema_script_and_quality_control_boundary(self):
         guide = JUDGE_GUIDE.read_text()

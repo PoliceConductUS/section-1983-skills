@@ -1367,6 +1367,7 @@ description: Use when independently auditing a synthetic artifact.
         self.assertEqual(
             SOURCE_DOCUMENTED_SKILLS,
             (
+                "analyzing-police-policy-sources",
                 "building-defense-counsel-overlays",
                 "building-judicial-reasoning-profiles",
                 "building-litigation-alignment-overlays",

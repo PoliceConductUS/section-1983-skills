@@ -17,6 +17,7 @@ FOLDER_CONTRACT_FIELDS = {
 }
 SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SOURCE_DOCUMENTED_SKILLS = (
+    "analyzing-police-policy-sources",
     "building-defense-counsel-overlays",
     "building-judicial-reasoning-profiles",
     "building-litigation-alignment-overlays",
@@ -62,6 +63,18 @@ APPROVED_FOLDER_CONTRACTS = {
         ["privilege-log", "served-discovery", "authorities"],
         "required",
         ["privilege-log"],
+        "disabled",
+    ),
+    "analyzing-police-policy-sources": folder_contract(
+        "analyzing-police-policy-sources",
+        [
+            "department-identity",
+            "jurisdiction",
+            "policy-source",
+            "analysis-scope",
+        ],
+        "none",
+        [],
         "disabled",
     ),
     "building-defense-counsel-overlays": folder_contract(

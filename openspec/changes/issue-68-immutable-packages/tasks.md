@@ -7,9 +7,9 @@
 
 ## 2. Package schema and fixtures
 
-- [ ] 2.1 RED-test the strict public envelope, complete membership, four
+- [x] 2.1 RED-test the strict public envelope, complete membership, four
       fictional package families, and domain-artifact retention.
-- [ ] 2.2 Add the public package schema and fictional judicial, counsel-team,
+- [x] 2.2 Add the public package schema and fictional judicial, counsel-team,
       litigation-alignment, and municipal fixtures.
 
 ## 3. Validation and immutable snapshots

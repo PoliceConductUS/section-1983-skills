@@ -543,8 +543,8 @@ class ComplaintContractCompositionTest(unittest.TestCase):
                 / "complaint.md"
             )
             mutated, replacements = re.subn(
-                r"do not draft, revise, or\s+audit the complaint\. Do not\s+"
-                r"invent or reconstruct the missing requirements\.",
+                r"do not\s+draft,\s+revise,\s+or\s+audit\s+the\s+complaint\.\s+"
+                r"Do not\s+invent\s+or\s+reconstruct\s+the\s+missing\s+requirements\.",
                 "may draft, revise, or audit the complaint. Do not invent or "
                 "reconstruct the missing requirements.",
                 complaint.read_text(encoding="utf-8"),

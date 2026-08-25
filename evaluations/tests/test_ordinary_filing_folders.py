@@ -46,7 +46,9 @@ class OrdinaryFilingFoldersTest(unittest.TestCase):
 
     def test_filing_skills_use_ordinary_folders_and_explicit_targets(self):
         for skill in FILING_SKILLS:
-            text = (ROOT / "skills" / skill / "SKILL.md").read_text().lower()
+            text = " ".join(
+                (ROOT / "skills" / skill / "SKILL.md").read_text().lower().split()
+            )
             with self.subTest(skill=skill):
                 self.assertIn("## filing folder boundary", text)
                 self.assertIn("ordinary files", text)

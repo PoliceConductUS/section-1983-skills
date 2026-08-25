@@ -54,15 +54,15 @@ The skill is layered the way the law varies: an invariant writing system, a
 uniform federal baseline per document type, and a protocol for the
 district-by-district layer that cannot be authored in advance.
 
-## FilingPacket boundary
+## Filing folder boundary
 
-When a declared filing folder is a FilingPacket, follow
-[the folder-backed FilingPacket contract](references/filing-packet-contract.md).
-Validate \`filing-packet.json\` and every hashed member before work. The
-manifest targets the whole packet; any document target must be one exact
-manifest-listed member. Member review does not count as whole-packet coverage.
-Drafting or revision returns proposed members for trusted-host publication as a
-complete new packet and never mutates the source packet.
+Filing inputs are ordinary files in declared recursive read-only folders. When
+the task targets one file, identify its declared input role and folder-relative
+path. A whole-folder task must expressly identify the ordinary files in scope;
+there is no folder-wide manifest. Never mutate an input. Return proposed files
+for trusted-host publication directly beneath the exact output folder, and keep
+all cache, extraction, staging, working-directory, and temporary bytes beneath
+`<output-folder>/temp/`.
 
 ## Skill routing and precedence
 
@@ -81,9 +81,10 @@ Load each applicable skill once, in this order:
    when approved public sources support one. Profile-backed review remains a
    separate downstream invocation.
 6. Add `building-litigation-alignment-overlays` before drafting an amended
-   complaint, leave-to-amend package, or other filing that should consume actual
-   adversary attacks or judicial treatment from the current approved docket
-   snapshot. A stale or failing overlay produces no specialized drafting change.
+   complaint, motion for leave to amend, or other filing that should consume
+   actual adversary attacks or judicial treatment from the current approved
+   docket snapshot. A stale or failing overlay produces no specialized drafting
+   change.
 7. Add `building-defense-counsel-overlays` when an actual-adversary review
    should consume validated professional litigation history for the effective
    counsel team. Keep every counsel overlay out of the blind common-attack
@@ -150,17 +151,17 @@ rhetorical argument is a small part of any document, if present at all.
    strategy is supplied, report the gap and ask the user whether to proceed
    without one before drafting. Follow its objective and relief hierarchy,
    argument-structure directives (which theory leads, which corroborates,
-   claim-lane rules), filing-packet requirements, and prescribed audits. If the
+   claim-lane rules), filing-folder requirements, and prescribed audits. If the
    work surfaces a reason to depart — a new fact, a better authority, a
    structural problem — do not deviate silently: propose the change and proceed
    only per the user's decision.
 2. Route. For a complaint, amended complaint, or amendment proffer, before any
    drafting use the [complaint route](references/documents/complaint.md), load
    drafting-section-1983-complaints, and require that skill to read both of its
-   canonical references. If the canonical package or either reference cannot be
-   read, report **complaint contract unavailable** and do not draft, revise, or
-   audit the complaint. Do not invent or reconstruct the missing requirements.
-   For discovery, select the applicable peer skill above and apply
+   canonical references. If the canonical complaint skill or either reference
+   cannot be read, report **complaint contract unavailable** and do not draft,
+   revise, or audit the complaint. Do not invent or reconstruct the missing
+   requirements. For discovery, select the applicable peer skill above and apply
    `references/discovery-coordination-contract.md`. For another filing, identify
    the document from the user's request or docket event using
    `references/case-map.md`, which maps events to responsive documents and

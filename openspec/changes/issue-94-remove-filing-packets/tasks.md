@@ -14,16 +14,16 @@
 
 ## 3. Remove obsolete persistence
 
-- [ ] 3.1 Delete implementation, schema, fixtures, tests, and public guide.
-- [ ] 3.2 Delete install-local references and current skill sections.
-- [ ] 3.3 Remove the active lifecycle specification and current governance
+- [x] 3.1 Delete implementation, schema, fixtures, tests, and public guide.
+- [x] 3.2 Delete install-local references and current skill sections.
+- [x] 3.3 Remove the active lifecycle specification and current governance
       rules.
 
 ## 4. Ordinary folder contracts
 
-- [ ] 4.1 Document explicit role-relative targets and ordinary files.
-- [ ] 4.2 Preserve recursive read-only inputs and direct output-root writes.
-- [ ] 4.3 Preserve exclusive `<output-folder>/temp/` temporary use.
+- [x] 4.1 Document explicit role-relative targets and ordinary files.
+- [x] 4.2 Preserve recursive read-only inputs and direct output-root writes.
+- [x] 4.3 Preserve exclusive `<output-folder>/temp/` temporary use.
 
 ## 5. Verification
 

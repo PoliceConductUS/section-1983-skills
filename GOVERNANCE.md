@@ -93,16 +93,15 @@ mode. Repository validation compares each contract with the approved skill
 matrix. Composing skills does not combine their contracts or enlarge either
 skill's filesystem or network authority.
 
-Folder-backed FilingPacket generation and review follow
-[FILING_PACKETS.md](FILING_PACKETS.md). The manifest is the packet membership,
-order, identity, kind, role, path, and hash authority. Exactly one member is
-`main`; every other role requires express operation authorization. A source
-packet is recursively read-only, and revision publishes a complete new packet
-with source and logical-input fingerprints. Whole-packet review targets the
-manifest; a member review targets one exact listed file and never silently
-counts as whole-packet coverage. Filing readiness requires every member and
-every configured packet-level gate to validate, but remains a mechanical result
-that does not decide filing or legal judgment.
+Filing generation and review use ordinary filing folders. Every input folder is
+recursively read-only. A task targeting one file identifies its declared input
+role and folder-relative path; a whole-folder task expressly names the ordinary
+files in scope. There is no folder-wide manifest, loader, registry, inferred
+membership, or shared filing-folder object. A revision reads the prior output
+through a new declared input and publishes new files beneath a different exact
+output folder. All temporary work stays beneath `<output-folder>/temp/`.
+Filing-readiness statements cover only expressly reviewed files and configured
+gates and do not decide filing or legal judgment.
 
 Profile, overlay, and research-corpus data follow
 [SOURCE_DOCUMENTED_FOLDERS.md](SOURCE_DOCUMENTED_FOLDERS.md). The invocation's

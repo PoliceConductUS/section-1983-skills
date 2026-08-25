@@ -43,7 +43,7 @@ bytes and bounded limits. Timeout, nonzero exit, invalid UTF-8, malformed JSON,
 oversized output, or adapter failure becomes a stable failure code without raw
 streams, paths, credentials, case excerpts, or fabricated findings.
 
-## Output and immutability
+## Output and read-only input verification
 
 A role-specific validator accepts only its exact advisory schema and returns
 canonical output-relative paths and bytes. The launcher never writes durable

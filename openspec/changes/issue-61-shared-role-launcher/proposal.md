@@ -4,7 +4,7 @@
 
 Issue #61 must replace the one-off adversarial-review dispatch boundary with one
 trusted launcher that composes protected static role behavior with selected
-immutable bytes from declared read-only input folders. The earlier package-
+exact file snapshots from declared read-only input folders. The earlier package-
 shaped design is rejected.
 
 ## What Changes

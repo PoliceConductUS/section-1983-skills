@@ -20,7 +20,7 @@
       bounds.
 - [x] 3.2 Implement the trusted adapter protocol and bounded launcher.
 
-## 4. Advisory output and input immutability
+## 4. Advisory output and read-only inputs
 
 - [x] 4.1 RED-test role-specific output, stable failures, output confinement,
       and unchanged selected input files.

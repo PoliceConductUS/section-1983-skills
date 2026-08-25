@@ -1,14 +1,19 @@
+import hashlib
 import json
 import tempfile
 import unittest
 import uuid
 from pathlib import Path
 
-from scripts.adversarial_review_role import build_adversarial_review_definition
+from scripts.adversarial_review_role import (
+    build_adversarial_review_definition,
+    load_approved_source_records,
+)
 from scripts.static_role_launcher import (
     AdapterAttestation,
     AdapterResult,
     InputSelection,
+    RoleLaunchError,
     bind_role_launch,
     build_child_request_bytes,
     launch_static_role,
@@ -112,8 +117,16 @@ class AdversarialSharedRoleTest(unittest.TestCase):
         (self.sources / "record.txt").write_text(
             "Synthetic approved record.\n", encoding="utf-8"
         )
+        source_hash = hashlib.sha256(
+            (self.sources / "record.txt").read_bytes()
+        ).hexdigest()
         (self.sources / "SOURCE.yaml").write_text(
-            "schema_version: 1\nsource_id: SRC-1\npath: record.txt\n",
+            "schema_version: 1\n"
+            "source_id: SRC-1\n"
+            "role: record\n"
+            "path: record.txt\n"
+            f"sha256: {source_hash}\n"
+            "checked_through: 2026-08-25\n",
             encoding="utf-8",
         )
 
@@ -151,12 +164,18 @@ class AdversarialSharedRoleTest(unittest.TestCase):
         )
 
     def binding(self, adapter):
+        invocation = self.invocation()
+        records = load_approved_source_records(
+            invocation=invocation,
+            documentation_paths=("SOURCE.yaml",),
+            minimum_checked_through="2026-08-01",
+        )
         return bind_role_launch(
             build_adversarial_review_definition(
                 adapter=adapter,
-                approved_source_ids=("SRC-1",),
+                approved_sources=records,
             ),
-            invocation=self.invocation(),
+            invocation=invocation,
             task=validate_role_task(
                 {
                     "operation": "review-filing",
@@ -247,6 +266,39 @@ class AdversarialSharedRoleTest(unittest.TestCase):
         self.assertEqual((provider_result.success, provider_result.code), (False, "adapter-failed"))
         self.assertNotIn(str(self.root), invalid_result.code)
         self.assertNotIn(str(self.root), provider_result.code)
+
+    def test_source_documentation_hash_and_checked_through_fail_before_dispatch(self):
+        cases = (
+            (
+                "source-content-mismatch",
+                lambda: (self.sources / "record.txt").write_text(
+                    "Changed source.\n", encoding="utf-8"
+                ),
+            ),
+            (
+                "stale-source-documentation",
+                lambda: None,
+            ),
+        )
+        for expected, mutate in cases:
+            with self.subTest(expected=expected):
+                mutate()
+                minimum = (
+                    "2026-09-01"
+                    if expected == "stale-source-documentation"
+                    else "2026-08-01"
+                )
+                with self.assertRaises(RoleLaunchError) as captured:
+                    load_approved_source_records(
+                        invocation=self.invocation(),
+                        documentation_paths=("SOURCE.yaml",),
+                        minimum_checked_through=minimum,
+                    )
+                self.assertEqual(captured.exception.code, expected)
+                if expected == "source-content-mismatch":
+                    (self.sources / "record.txt").write_text(
+                        "Synthetic approved record.\n", encoding="utf-8"
+                    )
 
 
 if __name__ == "__main__":

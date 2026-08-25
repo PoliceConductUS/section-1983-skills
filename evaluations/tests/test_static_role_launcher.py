@@ -132,7 +132,7 @@ class StaticRoleLauncherTest(unittest.TestCase):
         )
 
     @staticmethod
-    def definition(adapter):
+    def definition(adapter, *, input_validator=lambda _inputs: None):
         return RoleLaunchDefinition(
             role_id="judicial-reviewer",
             operations=("review-filing",),
@@ -149,12 +149,33 @@ class StaticRoleLauncherTest(unittest.TestCase):
             output_kind="judicial-review-report",
             public_instructions=b"Apply only the protected judicial-review role.\n",
             adapter=adapter,
+            input_validator=input_validator,
             output_validator=lambda value: validate_advisory_output(
                 value, expected_kind="judicial-review-report"
             ),
             max_stdout_bytes=65_536,
             max_stderr_bytes=8_192,
         )
+
+    def test_role_owned_input_validation_runs_before_dispatch(self):
+        adapter = FakeAdapter()
+        validated = []
+
+        def validate_inputs(inputs):
+            validated.append(inputs)
+            raise RoleLaunchError("invalid-domain-input")
+
+        with self.assertRaises(RoleLaunchError) as captured:
+            bind_role_launch(
+                self.definition(adapter, input_validator=validate_inputs),
+                invocation=validate_invocation(self.envelope()),
+                task=validate_role_task(self.task()),
+                selections=self.selections(),
+            )
+
+        self.assertEqual(captured.exception.code, "invalid-domain-input")
+        self.assertEqual(len(validated), 1)
+        self.assertEqual(adapter.calls, [])
 
     @staticmethod
     def task(**overrides):

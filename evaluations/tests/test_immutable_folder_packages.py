@@ -5,6 +5,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from scripts.immutable_folder_package import (
     PackageError,
@@ -204,6 +205,37 @@ class ImmutableFolderPackageLoaderTest(unittest.TestCase):
                         max_bytes=4096,
                     )
                 self.assertEqual(captured.exception.code, expected)
+
+    def test_byte_limit_is_enforced_before_oversized_bytes_are_read(self):
+        root = FIXTURES / "judicial-profile"
+        manifest_path = root / "package-manifest.json"
+        original_read_bytes = Path.read_bytes
+
+        def reject_manifest_read(path):
+            raise AssertionError(f"read oversized manifest: {path}")
+
+        with mock.patch.object(Path, "read_bytes", reject_manifest_read):
+            with self.assertRaises(PackageError) as captured:
+                load_folder_package(
+                    root,
+                    accepted_kinds={"judicial-profile"},
+                    max_bytes=manifest_path.stat().st_size - 1,
+                )
+        self.assertEqual(captured.exception.code, "package-byte-limit")
+
+        def reject_oversized_member(path):
+            if path.name == "profile.json":
+                raise AssertionError(f"read oversized member: {path}")
+            return original_read_bytes(path)
+
+        with mock.patch.object(Path, "read_bytes", reject_oversized_member):
+            with self.assertRaises(PackageError) as captured:
+                load_folder_package(
+                    root,
+                    accepted_kinds={"judicial-profile"},
+                    max_bytes=manifest_path.stat().st_size + 1,
+                )
+        self.assertEqual(captured.exception.code, "package-byte-limit")
 
 
 class ImmutableFolderPackagePublisherTest(unittest.TestCase):

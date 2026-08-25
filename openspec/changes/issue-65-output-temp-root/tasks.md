@@ -14,9 +14,9 @@
 
 ## 3. GREEN
 
-- [ ] 3.1 Move staging to the reserved temporary namespace without weakening
+- [x] 3.1 Move staging to the reserved temporary namespace without weakening
       stable-directory, atomicity, cleanup, or failure semantics.
-- [ ] 3.2 Expose bounded process configuration and update current guidance.
+- [x] 3.2 Expose bounded process configuration and update current guidance.
 
 ## 4. Verification
 

@@ -191,7 +191,7 @@ class SkillOutputWriterTest(unittest.TestCase):
     def assert_failed_write_is_confined(self, relative_path, run_id, before):
         self.assertFalse(os.path.lexists(self.output_root / relative_path))
         after = self.snapshot_tree()
-        staging = Path(".skill-runs") / run_id / "staging"
+        staging = Path("temp") / run_id
         final_path = Path(relative_path)
         allowed_parent_directories = {
             Path(*final_path.parts[:index])
@@ -246,7 +246,7 @@ class SkillOutputWriterTest(unittest.TestCase):
     def test_run_uses_only_reserved_output_temp_for_staging_and_process_work(self):
         run = self.start_run("temp-root-run")
 
-        expected_temp_root = self.output_root / "temp"
+        expected_temp_root = self.invocation.output_root / "temp"
         expected_run_temp = expected_temp_root / "temp-root-run"
         self.assertTrue(expected_run_temp.is_dir())
         self.assertFalse((self.run_directory("temp-root-run") / "staging").exists())
@@ -401,6 +401,34 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertEqual(self.snapshot_tree(), before)
         self.assertEqual(list(outside.iterdir()), [])
 
+    def test_rejects_aliased_temp_namespace_and_temp_run_id(self):
+        outside_namespace = self.root / "outside-temp-namespace"
+        outside_namespace.mkdir()
+        (self.output_root / "temp").symlink_to(
+            outside_namespace, target_is_directory=True
+        )
+
+        self.assert_error(
+            lambda: self.start_run("aliased-temp-root-run"),
+            "run-collision",
+        )
+        self.assertEqual(list(outside_namespace.iterdir()), [])
+
+        (self.output_root / "temp").unlink()
+        temp_root = self.output_root / "temp"
+        temp_root.mkdir()
+        outside_run = self.root / "outside-temp-run"
+        outside_run.mkdir()
+        (temp_root / "aliased-temp-run").symlink_to(
+            outside_run, target_is_directory=True
+        )
+
+        self.assert_error(
+            lambda: self.start_run("aliased-temp-run"),
+            "run-collision",
+        )
+        self.assertEqual(list(outside_run.iterdir()), [])
+
     def test_rejects_noncanonical_raw_and_reserved_output_paths(self):
         cases = (
             ("empty", ""),
@@ -418,6 +446,9 @@ class SkillOutputWriterTest(unittest.TestCase):
             ("reserved-root", ".skill-runs"),
             ("reserved-child", ".skill-runs/foreign/manifest.json"),
             ("reserved-uppercase", ".SKILL-RUNS"),
+            ("reserved-temp-root", "temp"),
+            ("reserved-temp-child", "temp/work.txt"),
+            ("reserved-temp-uppercase", "TEMP/work.txt"),
             ("reserved-mixed-case", ".Skill-Runs/foreign/manifest.json"),
         )
 
@@ -682,7 +713,7 @@ class SkillOutputWriterTest(unittest.TestCase):
             )
 
         final = self.output_root / expected["path"]
-        staging = self.output_root / ".skill-runs" / run_id / "staging"
+        staging = self.temp_directory(run_id)
         staged_files = list(staging.iterdir())
         self.assertEqual(final.read_bytes(), contents)
         self.assertEqual(len(staged_files), 1)
@@ -716,7 +747,7 @@ class SkillOutputWriterTest(unittest.TestCase):
             )
 
         final = self.output_root / expected["path"]
-        staging = self.output_root / ".skill-runs" / run_id / "staging"
+        staging = self.temp_directory(run_id)
         staged_files = list(staging.iterdir())
         self.assertEqual(final.read_bytes(), contents)
         self.assertEqual(len(staged_files), 1)
@@ -1601,7 +1632,7 @@ class SkillOutputWriterTest(unittest.TestCase):
 
     def test_prepublication_staging_cleanup_unlinks_are_directory_synced(self):
         stream_run = self.start_run("stream-cleanup-sync-run")
-        stream_staging = self.run_directory("stream-cleanup-sync-run") / "staging"
+        stream_staging = self.temp_directory("stream-cleanup-sync-run")
         stream_staging_identity = (stream_staging.stat().st_dev, stream_staging.stat().st_ino)
         original_fsync = os.fsync
         stream_cleanup_syncs = 0
@@ -1626,7 +1657,7 @@ class SkillOutputWriterTest(unittest.TestCase):
 
     def test_receipt_prelink_cleanup_unlink_is_directory_synced(self):
         receipt_run = self.start_run("receipt-prelink-cleanup-sync-run")
-        receipt_staging = self.run_directory("receipt-prelink-cleanup-sync-run") / "staging"
+        receipt_staging = self.temp_directory("receipt-prelink-cleanup-sync-run")
         receipt_staging_identity = (
             receipt_staging.stat().st_dev,
             receipt_staging.stat().st_ino,
@@ -1658,7 +1689,7 @@ class SkillOutputWriterTest(unittest.TestCase):
 
     def test_cleanup_sync_failure_preserves_the_primary_bounded_failure(self):
         run = self.start_run("primary-failure-cleanup-sync-run")
-        staging_path = self.run_directory("primary-failure-cleanup-sync-run") / "staging"
+        staging_path = self.temp_directory("primary-failure-cleanup-sync-run")
         staging_identity = (staging_path.stat().st_dev, staging_path.stat().st_ino)
         original_fsync = os.fsync
         cleanup_sync_attempted = False
@@ -1697,7 +1728,7 @@ class SkillOutputWriterTest(unittest.TestCase):
 
     def test_artifact_staging_unlink_is_synced_and_sync_failure_is_incomplete(self):
         successful_run = self.start_run("artifact-staging-sync-run")
-        staging_path = self.run_directory("artifact-staging-sync-run") / "staging"
+        staging_path = self.temp_directory("artifact-staging-sync-run")
         staging_identity = (staging_path.stat().st_dev, staging_path.stat().st_ino)
         original_fsync = os.fsync
         staging_syncs = 0
@@ -1714,7 +1745,7 @@ class SkillOutputWriterTest(unittest.TestCase):
         self.assertEqual(staging_syncs, 1)
 
         failed_run = self.start_run("artifact-staging-sync-failure-run")
-        failed_staging_path = self.run_directory("artifact-staging-sync-failure-run") / "staging"
+        failed_staging_path = self.temp_directory("artifact-staging-sync-failure-run")
         failed_staging_identity = (
             failed_staging_path.stat().st_dev,
             failed_staging_path.stat().st_ino,
@@ -1750,7 +1781,7 @@ class SkillOutputWriterTest(unittest.TestCase):
                 run_id = f"{status}-receipt-staging-sync-run"
                 run = self.start_run(run_id)
                 run_directory = self.run_directory(run_id)
-                staging_path = run_directory / "staging"
+                staging_path = self.temp_directory(run_id)
                 staging_identity = (staging_path.stat().st_dev, staging_path.stat().st_ino)
                 receipt_name = "manifest.json" if status == "success" else "failure.json"
                 original_fsync = os.fsync

@@ -268,7 +268,7 @@ def _relative_parts(value: Any) -> tuple[str, ...]:
         or "\x00" in value
         or re.match(r"^[A-Za-z]:/", value) is not None
         or any(part in {"", ".", ".."} for part in parts)
-        or parts[0].casefold() == ".skill-runs"
+        or parts[0].casefold() in {".skill-runs", "temp"}
     ):
         _fail("invalid-output-path")
     return tuple(parts)
@@ -461,8 +461,10 @@ class OutputRun:
             _fail("output-unavailable")
 
         runs_fd = None
+        temp_fd = None
         run_fd = None
         staging_fd = None
+        temp_run_created = False
         try:
             if mode == "fresh-regenerable":
                 try:
@@ -475,15 +477,32 @@ class OutputRun:
 
             input_identities = _input_file_identities(invocation)
             runs_fd = _open_directory(root_fd, ".skill-runs", create=True, error_code="run-collision")
+            if _entry_exists(runs_fd, run_id):
+                _fail("run-collision")
+            temp_fd = _open_directory(root_fd, "temp", create=True, error_code="run-collision")
             try:
-                os.mkdir(run_id, mode=0o700, dir_fd=runs_fd)
-                os.fsync(runs_fd)
+                os.mkdir(run_id, mode=0o700, dir_fd=temp_fd)
+                os.fsync(temp_fd)
+                temp_run_created = True
             except OSError as error:
                 if error.errno in {errno.EEXIST, errno.ELOOP, errno.ENOTDIR}:
                     _fail("run-collision")
                 _fail("run-unavailable")
+            staging_fd = _open_directory(temp_fd, run_id, create=False, error_code="run-unavailable")
+            try:
+                os.mkdir(run_id, mode=0o700, dir_fd=runs_fd)
+                os.fsync(runs_fd)
+            except OSError as error:
+                try:
+                    os.rmdir(run_id, dir_fd=temp_fd)
+                    os.fsync(temp_fd)
+                    temp_run_created = False
+                except OSError:
+                    pass
+                if error.errno in {errno.EEXIST, errno.ELOOP, errno.ENOTDIR}:
+                    _fail("run-collision")
+                _fail("run-unavailable")
             run_fd = _open_directory(runs_fd, run_id, create=False, error_code="run-unavailable")
-            staging_fd = _open_directory(run_fd, "staging", create=True, error_code="run-unavailable")
             _publish_record(staging_fd, run_fd, _INCOMPLETE_NAME, incomplete_bytes)
             result = cls(
                 invocation,
@@ -501,14 +520,33 @@ class OutputRun:
             root_fd = -1
             run_fd = -1
             staging_fd = -1
+            temp_run_created = False
             return result
         finally:
-            for descriptor in (staging_fd, run_fd, runs_fd, root_fd):
+            if temp_run_created and temp_fd is not None and temp_fd >= 0:
+                try:
+                    os.rmdir(run_id, dir_fd=temp_fd)
+                    os.fsync(temp_fd)
+                except OSError:
+                    pass
+            for descriptor in (staging_fd, run_fd, temp_fd, runs_fd, root_fd):
                 if descriptor is not None and descriptor >= 0:
                     try:
                         os.close(descriptor)
                     except OSError:
                         pass
+
+    def process_configuration(self) -> dict[str, Any]:
+        """Return the invocation's exclusive trusted-host temp configuration."""
+        temp_root = str(self.invocation.output_root / "temp")
+        return {
+            "cwd": temp_root,
+            "environment": {
+                "TEMP": temp_root,
+                "TMP": temp_root,
+                "TMPDIR": temp_root,
+            },
+        }
 
     def _destination_parent(self, parts: tuple[str, ...]) -> int:
         descriptor = os.dup(self._root_fd)

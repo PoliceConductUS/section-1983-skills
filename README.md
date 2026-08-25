@@ -29,6 +29,20 @@ To upgrade deliberately, choose a newer published tag from
 replace `v0.1.0` in the install command, and run it again. Do not substitute a
 branch name: tags are the immutable release identity.
 
+## Folder-scoped invocation
+
+Every invocation receives fixed recursive read-only input folders and one
+caller-selected absolute output folder. If the output path is missing, ask the
+caller for it before beginning work. Durable artifacts and run receipts are
+written only beneath that output folder.
+
+The trusted host reserves `<output-folder>/temp/` as the invocation's only
+temporary workspace. It uses that folder for staging, intermediate files,
+scratch files, the semantic-work current directory, and `TMPDIR`, `TMP`, and
+`TEMP`. It does not use a system temporary directory, repository worktree, input
+folder, ambient current directory, or undeclared path for invocation temporary
+work. `temp/` is not a durable artifact destination.
+
 ## Skills
 
 | Skill                                             | Role                                                                                                                                                                       |

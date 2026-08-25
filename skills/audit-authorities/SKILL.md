@@ -55,6 +55,36 @@ Verify that every cited authority, factual assertion, and "differentiator"
 This skill applies to complaints, amendment proffers, RRDs, motions, responses,
 replies, briefs, declarations, and appendices.
 
+## Proposition-level approval gate
+
+Before authority approval, split every material generated or filing-near
+statement into atomic propositions. Give each atomic proposition a stable ID,
+exact filing location, exact text, and type. A citation attached to two or more
+propositions passes only if the exact source supports every proposition in the
+context asserted. No aggregate pass may conceal an incorrect, unresolved,
+misgrounded, or ungrounded proposition.
+
+Record correctness separately as `verified`, `incorrect`, or `unresolved`. When
+correctness is `verified`, record groundedness separately as `grounded`,
+`misgrounded`, or `ungrounded`; otherwise groundedness is `not-applicable`.
+Correctness asks whether the proposition is right. Groundedness asks whether the
+cited material supports it. A correct proposition with an irrelevant citation
+remains misgrounded or ungrounded.
+
+For every relied-on citation, record the exact authority artifact, SHA-256,
+authority and source YAML paths, pinpoint, source text, scope and qualifiers,
+jurisdiction, decision date, posture, precedential force, support status, and
+source voice. Source voice is exactly one of: majority holding, court dicta,
+party argument, lower-court ruling under review, factual or procedural
+background, concurrence, dissent, or quoted secondary authority. Ambiguous or
+incorrect voice attribution fails closed.
+
+A real citation, working link, source list, snippet, or positive treatment
+symbol is only a retrieval lead. None proves that the exact source supports the
+proposition or applies in the asserted context. Keep the audit limited to
+propositions necessary to answer the question or support the filing. Any added
+material proposition incurs the same complete audit.
+
 ## Declared authority sources
 
 Use the required target in `filing-source` and only the ordinary authority files
@@ -185,13 +215,22 @@ the sentence they're attached to.
 
 ## Output contract (what you produce)
 
-For each citation (and each differentiator that matters), produce one structured
-audit record with:
+For each atomic proposition, produce one structured audit record with:
 
-- what the brief claims,
-- what the authority actually says,
-- whether it supports the claim,
-- and what to fix.
+- what the filing claims and where;
+- correctness and groundedness as separate results;
+- what each exact source says, in whose voice, and with which qualifiers;
+- jurisdiction, date, posture, precedential force, and support status;
+- exact input and verification provenance; and
+- the finding and advisory remediation, if any.
+
+Return both a machine-readable record conforming to
+[proposition-audit.schema.json](references/proposition-audit.schema.json) and a
+human-readable report with one section per proposition ID. The report must show
+the proposition text, correctness, groundedness, every source-support mapping,
+source voice, provenance, and any failure. Schema conformance validates shape
+only. It never decides legal correctness, groundedness, source voice,
+applicability, or filing readiness.
 
 ### Severity levels
 
@@ -225,6 +264,11 @@ Before finalizing:
   cited pinpoint.
 - Every paragraph with a legal conclusion has at least one authority that
   **directly supports** it.
+- Every material statement is decomposed into atomic propositions, and no
+  proposition-level failure is hidden by a citation-level or document-level
+  pass.
+- Every proposition records correctness, groundedness, exact source support,
+  source voice, and verification provenance.
 - Every key authority is not only correct, but **not misleading** in posture and
   scope.
 - Every adverse case is either:

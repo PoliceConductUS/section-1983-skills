@@ -1,0 +1,33 @@
+{
+  "id": "authority-grounding-irrelevant-citation",
+  "synthetic": true,
+  "target_skill": "audit-authorities",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "treats-real-citation-as-support",
+      "candidate": "regression.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Proposition Audit"],
+    "banned_terms": [
+      {
+        "id": "real-citation-equals-grounding",
+        "term": "grounded because the citation is real"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["REAL-IRRELEVANT"]
+  },
+  "rubric": [
+    {
+      "id": "rejects-irrelevant-source",
+      "description": "Preserves the authentic source identity while classifying it irrelevant to the qualified-immunity proposition."
+    }
+  ]
+}

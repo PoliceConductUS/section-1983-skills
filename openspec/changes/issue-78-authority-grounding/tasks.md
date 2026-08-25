@@ -8,16 +8,16 @@
 
 ## 2. TDD contract
 
-- [ ] 2.1 RED-test the proposition-level schema and status relationship.
-- [ ] 2.2 RED-test the audit and shared drafting instructions.
-- [ ] 2.3 RED-test all six required synthetic fixture classes.
+- [x] 2.1 RED-test the proposition-level schema and status relationship.
+- [x] 2.2 RED-test the audit and shared drafting instructions.
+- [x] 2.3 RED-test all six required synthetic fixture classes.
 
 ## 3. Implementation
 
-- [ ] 3.1 Define the machine-readable and human-readable audit contract.
-- [ ] 3.2 Require atomic propositions, exact source mapping, source voice, and
+- [x] 3.1 Define the machine-readable and human-readable audit contract.
+- [x] 3.2 Require atomic propositions, exact source mapping, source voice, and
       verification provenance.
-- [ ] 3.3 Add six passing/regression fixtures without network dependence.
+- [x] 3.3 Add six passing/regression fixtures without network dependence.
 
 ## 4. Completion
 

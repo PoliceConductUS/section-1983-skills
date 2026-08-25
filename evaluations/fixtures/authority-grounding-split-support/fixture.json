@@ -1,0 +1,33 @@
+{
+  "id": "authority-grounding-split-support",
+  "synthetic": true,
+  "target_skill": "audit-authorities",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "passes-two-propositions-on-one-source",
+      "candidate": "regression.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Proposition Audit"],
+    "banned_terms": [
+      {
+        "id": "compound-aggregate-pass",
+        "term": "both propositions are grounded by the same source"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["SPLIT-OPINION"]
+  },
+  "rubric": [
+    {
+      "id": "splits-compound-statement",
+      "description": "Creates separate proposition records and refuses to let support for the Rule 12 proposition pass the distinct qualified-immunity proposition."
+    }
+  ]
+}

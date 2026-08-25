@@ -15,22 +15,31 @@ Deliverable: an ordered list of audit items in the same order as the brief.
 
 ### Stage 1 - Extract the _actual proposition_ being asserted (not the label)
 
-For each sentence/paragraph with citations:
+For each material generated or filing-near statement:
 
-1. Write the proposition in plain English, scoped narrowly:
+1. Split it into atomic propositions. A conjunction, embedded condition,
+   exception, or second legal consequence ordinarily creates another audit unit.
+   Preserve the exact filing location and exact text for each unit.
+2. Write each proposition in plain English, scoped narrowly:
    - Bad: "Qualified immunity doesn't apply."
    - Good: "At the 12(b)(6) stage, the court must accept pleaded facts as true
      and may deny qualified immunity when the complaint plausibly alleges
      violation of clearly established law."
 
-2. Identify whether the proposition is:
+3. Give each proposition a stable ID and identify whether it is:
    - legal rule/standard,
    - application of rule to facts,
    - factual claim,
    - inference,
    - or procedural claim.
 
-Deliverable: proposition statement + type.
+4. Mark whether each proposition is material to the answer or filing. Audit
+   every material proposition under every remaining stage. New material
+   propositions introduced by the audit receive the same treatment.
+
+Deliverable: stable ID + filing location + exact atomic proposition + type +
+materiality. No aggregate pass may hide a proposition that fails or remains
+unresolved.
 
 ### Stage 2 - Validate authority identity (existence + metadata)
 
@@ -81,10 +90,12 @@ document path where it was checked.
 
 ### Stage 4 - Context verification (the "are you laundering dicta?" test)
 
-Even if the text exists, read enough context to classify it:
+Even if the text exists, read enough context to classify its source voice:
 
-1. Is it **holding** or **dicta**?
-2. Is it **majority**, **concurrence**, or **dissent**?
+1. Is it a majority holding, court dicta, party argument, lower-court ruling
+   under review, factual or procedural background, concurrence, dissent, or
+   quoted secondary authority?
+2. If it is court language, is it necessary to the judgment or dicta?
 3. Is the statement conditional or fact-bound?
 4. Is the authority addressing the same legal question or a different one?
 
@@ -94,7 +105,9 @@ Fail conditions:
 - citing a dissent like it's law,
 - quoting a standard that was later rejected in the same opinion.
 
-Deliverable: holding/dicta classification + notes.
+Deliverable: exact source voice + holding/dicta classification when applicable
+
+- notes. Ambiguous or incorrect attribution fails closed.
 
 ### Stage 5 - On-point analysis (posture/standard/facts match)
 
@@ -230,3 +243,22 @@ For every issue found, supply a fix that fits one of these patterns:
 - **Move statement** to background / persuasive section if not binding.
 
 Deliverable: one-line edit + replacement citation recommendation.
+
+### Stage 11 - Record correctness, groundedness, and provenance
+
+For every atomic proposition:
+
+1. Record correctness as `verified`, `incorrect`, or `unresolved`.
+2. If correctness is `verified`, separately record groundedness as `grounded`,
+   `misgrounded`, or `ungrounded`; otherwise use `not-applicable`.
+3. Map every relied-on citation to the exact authority artifact, hash, domain
+   YAML paths, pinpoint, source text, scope and qualifiers, jurisdiction,
+   decision date, posture, precedential force, source voice, and support status.
+4. Record the independent audit stage, exact input fingerprints, selected source
+   IDs, execution time, and model or provider identity when available.
+5. Render the machine-readable record under `proposition-audit.schema.json` and
+   a human report with one section per proposition ID.
+
+A real citation, working link, source list, snippet, or positive treatment
+symbol does not establish proposition support. No aggregate pass may conceal an
+incorrect, unresolved, misgrounded, or ungrounded proposition.

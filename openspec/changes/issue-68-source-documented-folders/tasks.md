@@ -17,6 +17,6 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run focused tests and full validation.
+- [x] 4.1 Run focused tests and full validation.
 - [ ] 4.2 Archive the OpenSpec change, review the complete diff, push, and
       verify the exact remote head before marking PR #81 ready.

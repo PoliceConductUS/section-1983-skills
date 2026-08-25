@@ -7,7 +7,7 @@
 
 ## 2. RED
 
-- [ ] 2.1 Add documentation tests for explicit output-path prompting, exclusive
+- [x] 2.1 Add documentation tests for explicit output-path prompting, exclusive
       `temp/` use, and process configuration.
 
 ## 3. GREEN

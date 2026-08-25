@@ -285,6 +285,44 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 with self.subTest(heading=heading, pattern=pattern):
                     self.assertRegex(section, pattern.lower())
 
+    def test_guide_requires_one_absolute_output_path_and_exclusive_output_temp(self):
+        select_section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[0]).split()
+        ).lower()
+        run_section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[3]).split()
+        ).lower()
+        verify_section = " ".join(
+            markdown_section(self.prose, FIRST_HOUR_HEADINGS[5]).split()
+        ).lower()
+
+        self.assertRegex(select_section, r"exactly one.{0,80}absolute output folder")
+        self.assertRegex(
+            select_section,
+            r"output (?:folder )?path.{0,100}(?:missing|not supplied).{0,100}ask.{0,100}(?:caller|user)",
+        )
+        self.assertIn("<output-folder>/temp/", run_section)
+        for value in ("cwd", "tmpdir", "tmp", "temp"):
+            with self.subTest(process_value=value):
+                self.assertRegex(run_section, rf"`?{value}`?.{{0,120}}<output-folder>/temp/")
+        self.assertRegex(
+            run_section,
+            r"only temporary workspace|only transient workspace",
+        )
+        for forbidden in (
+            "system temporary directory",
+            "repository worktree",
+            "input folder",
+            "ambient current directory",
+            "undeclared path",
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertIn(forbidden, run_section)
+        self.assertRegex(
+            verify_section,
+            r"durable artifacts?.{0,120}(?:must not|cannot|do not).{0,80}`?temp/`?",
+        )
+
     def test_terminal_verification_uses_affirmative_success_semantics(self):
         section = " ".join(
             markdown_section(self.prose, FIRST_HOUR_HEADINGS[5]).split()
@@ -469,11 +507,28 @@ class FolderOperationsGuideTest(unittest.TestCase):
                 mode="fresh-regenerable",
                 input_manifest=input_manifest,
             )
+            expected_temp_root = output_root.resolve() / "temp"
+            self.assertEqual(
+                run.process_configuration(),
+                {
+                    "cwd": str(expected_temp_root),
+                    "environment": {
+                        "TEMP": str(expected_temp_root),
+                        "TMP": str(expected_temp_root),
+                        "TMPDIR": str(expected_temp_root),
+                    },
+                },
+            )
             manifest_artifact = run.write(
                 "metadata/logical-input-manifest.json", canonical_manifest_bytes
             )
             run.write("reports/example-inventory.json", inventory_bytes)
             receipt = run.complete()
+
+            self.assertTrue((expected_temp_root / "guide-manifest-run").is_dir())
+            self.assertTrue(
+                all(not artifact["path"].startswith("temp/") for artifact in receipt["artifacts"])
+            )
 
             persisted_manifest = (
                 output_root / "metadata" / "logical-input-manifest.json"

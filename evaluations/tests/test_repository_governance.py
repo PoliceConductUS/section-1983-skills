@@ -6,7 +6,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_governance import APPROVED_FOLDER_CONTRACTS
+from scripts.validate_governance import (
+    APPROVED_FOLDER_CONTRACTS,
+    IMMUTABLE_PACKAGE_SKILLS,
+    validate_immutable_package_contracts,
+)
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -1340,6 +1344,30 @@ description: Use when independently auditing a synthetic artifact.
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("protected-review-language-missing", result.stdout + result.stderr)
+
+    def test_immutable_package_contract_is_public_and_install_local(self):
+        self.assertEqual(
+            IMMUTABLE_PACKAGE_SKILLS,
+            (
+                "building-defense-counsel-overlays",
+                "building-litigation-alignment-overlays",
+            ),
+        )
+        self.assertEqual(validate_immutable_package_contracts(REPOSITORY), [])
+        for path in (REPOSITORY / "README.md", REPOSITORY / "GOVERNANCE.md"):
+            self.assertIn("FOLDER_PACKAGES.md", path.read_text())
+        for skill in IMMUTABLE_PACKAGE_SKILLS:
+            root = REPOSITORY / "skills" / skill
+            entrypoint = (root / "SKILL.md").read_text()
+            reference = root / "references" / "immutable-folder-package.md"
+            self.assertIn(
+                "[immutable folder package](references/immutable-folder-package.md)",
+                entrypoint.lower(),
+            )
+            text = reference.read_text()
+            self.assertIn("package-manifest.json", text)
+            self.assertIn("Every non-manifest regular file", text)
+            self.assertIn("trusted host", text.lower())
 
 
 if __name__ == "__main__":

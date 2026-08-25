@@ -37,9 +37,9 @@
 
 ## 6. Verification and archive
 
-- [ ] 6.1 Run focused behavioral/package tests, skill validation, full
+- [x] 6.1 Run focused behavioral/package tests, skill validation, full
       repository validation, and fresh whole-story review.
-- [ ] 6.2 Record verification and retrospective evidence and archive the owning
+- [x] 6.2 Record verification and retrospective evidence and archive the owning
       OpenSpec change.
-- [ ] 6.3 Push the verified archive and mark the PR ready without closing the
+- [x] 6.3 Push the verified archive and mark the PR ready without closing the
       issue or PR.

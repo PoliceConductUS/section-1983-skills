@@ -592,3 +592,18 @@ generic root envelope.
   repository around it
 - **THEN** its installed skill retains the source-documented-folder boundary and
   its domain-specific validator
+
+### Requirement: Participant profiles remain data rather than skills
+
+The repository MUST keep judge-, attorney-, team-, court-, source-class-, and
+assumption-specific information in ordinary files within declared read-only
+input folders. It MUST NOT publish real-participant skills, generate
+person-specific skills, or permit profile data to alter protected installed
+behavior.
+
+#### Scenario: Maintainer adds a new participant profile
+
+- **WHEN** the profile is intended for an agent simulating that participant's
+  litigation role
+- **THEN** the maintainer adds or regenerates validated profile files and
+  domain-owned YAML source records while reusable behavior remains unchanged

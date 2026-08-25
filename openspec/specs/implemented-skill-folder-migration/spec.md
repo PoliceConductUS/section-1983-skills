@@ -11,36 +11,32 @@ after archive.
 
 Every public skill MUST link to a schema-valid install-local folder contract
 with exactly its approved ordered role set, target policy and target roles,
-allowed internet policy or policies, and `append-immutable` output mode. A
-single-operation skill declares one internet-policy string. A multi-operation
-skill may declare a nonempty object mapping every operation name to its exact
-invocation policy; each invocation selects one known operation and its matching
-policy:
+internet policy, and `append-immutable` output mode:
 
-| Skill                                             | Ordered input roles                                                         | Target policy and roles                       | Internet               |
-| ------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------- | ---------------------- |
-| `adversarial-filing-review`                       | `filing`, `approved-sources`                                                | required in `filing`                          | authorized             |
-| `audit-authorities`                               | `filing`, `authorities`                                                     | required in `filing`                          | authorized             |
-| `auditing-section-1983-discovery-responses`       | `served-discovery`, `responses`, `production`, `authorities`                | required in `served-discovery` or `responses` | disabled               |
-| `auditing-section-1983-privilege-logs`            | `privilege-log`, `served-discovery`, `authorities`                          | required in `privilege-log`                   | disabled               |
-| `building-defense-counsel-overlays`               | `research-snapshot`, `case-record`                                          | required in `research-snapshot`               | disabled               |
-| `building-litigation-alignment-overlays`          | `docket-snapshot`, `filing`                                                 | required in `docket-snapshot`                 | disabled               |
-| `drafting-false-arrest-complaints`                | `record`, `authorities`, `filing`                                           | optional in `filing`                          | disabled               |
-| `building-judicial-reasoning-profiles`            | `judge-identity`, `court-scope`, `approved-sources`, `verified-authorities` | none                                          | authorized or disabled |
-| `drafting-section-1983-complaints`                | `record`, `authorities`, `filing`                                           | optional in `filing`                          | disabled               |
-| `drafting-section-1983-declarations-and-evidence` | `record`, `authorities`                                                     | optional in `record`                          | disabled               |
-| `drafting-section-1983-deposition-outlines`       | `record`, `authorities`, `discovery`                                        | optional in `record`                          | disabled               |
-| `drafting-section-1983-meet-and-confer`           | `discovery-audit`, `served-discovery`, `authorities`, `conference-record`   | required in `discovery-audit`                 | disabled               |
-| `drafting-section-1983-rule-59e`                  | `record`, `authorities`, `filing`                                           | optional in `filing`                          | disabled               |
-| `drafting-section-1983-written-discovery`         | `record`, `authorities`, `claim-map`                                        | optional in `claim-map`                       | disabled               |
-| `filing-ci`                                       | `filing`, `authorities`                                                     | required in `filing`                          | disabled               |
-| `horan-bad-words`                                 | `filing`                                                                    | required in `filing`                          | disabled               |
-| `rrd`                                             | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled               |
-| `rrd-rule12`                                      | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled               |
-| `rrd-rule12-city`                                 | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled               |
-| `rrd-rule12-officers`                             | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled               |
-| `section-1983-drafting`                           | `record`, `authorities`, `strategy`, `filing`                               | optional in `filing`                          | authorized             |
-| `studying-rule-59e-decisions`                     | `decisions`, `authorities`                                                  | optional in `decisions`                       | authorized             |
+| Skill                                             | Ordered input roles                                                         | Target policy and roles                       | Internet   |
+| ------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------- | ---------- |
+| `adversarial-filing-review`                       | `filing`, `approved-sources`                                                | required in `filing`                          | authorized |
+| `audit-authorities`                               | `filing`, `authorities`                                                     | required in `filing`                          | authorized |
+| `auditing-section-1983-discovery-responses`       | `served-discovery`, `responses`, `production`, `authorities`                | required in `served-discovery` or `responses` | disabled   |
+| `auditing-section-1983-privilege-logs`            | `privilege-log`, `served-discovery`, `authorities`                          | required in `privilege-log`                   | disabled   |
+| `building-defense-counsel-overlays`               | `research-snapshot`, `case-record`                                          | required in `research-snapshot`               | disabled   |
+| `building-judicial-reasoning-profiles`            | `judge-identity`, `court-scope`, `approved-sources`, `verified-authorities` | none                                          | authorized |
+| `building-litigation-alignment-overlays`          | `docket-snapshot`, `filing`                                                 | required in `docket-snapshot`                 | disabled   |
+| `drafting-false-arrest-complaints`                | `record`, `authorities`, `filing`                                           | optional in `filing`                          | disabled   |
+| `drafting-section-1983-complaints`                | `record`, `authorities`, `filing`                                           | optional in `filing`                          | disabled   |
+| `drafting-section-1983-declarations-and-evidence` | `record`, `authorities`                                                     | optional in `record`                          | disabled   |
+| `drafting-section-1983-deposition-outlines`       | `record`, `authorities`, `discovery`                                        | optional in `record`                          | disabled   |
+| `drafting-section-1983-meet-and-confer`           | `discovery-audit`, `served-discovery`, `authorities`, `conference-record`   | required in `discovery-audit`                 | disabled   |
+| `drafting-section-1983-rule-59e`                  | `record`, `authorities`, `filing`                                           | optional in `filing`                          | disabled   |
+| `drafting-section-1983-written-discovery`         | `record`, `authorities`, `claim-map`                                        | optional in `claim-map`                       | disabled   |
+| `filing-ci`                                       | `filing`, `authorities`                                                     | required in `filing`                          | disabled   |
+| `horan-bad-words`                                 | `filing`                                                                    | required in `filing`                          | disabled   |
+| `rrd`                                             | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled   |
+| `rrd-rule12`                                      | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled   |
+| `rrd-rule12-city`                                 | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled   |
+| `rrd-rule12-officers`                             | `motion`, `record`, `authorities`                                           | required in `motion`                          | disabled   |
+| `section-1983-drafting`                           | `record`, `authorities`, `strategy`, `filing`                               | optional in `filing`                          | authorized |
+| `studying-rule-59e-decisions`                     | `decisions`, `authorities`                                                  | optional in `decisions`                       | authorized |
 
 The contract object MUST contain no additional fields. Every role listed by the
 contract MUST appear exactly once and in order in the invocation. A required

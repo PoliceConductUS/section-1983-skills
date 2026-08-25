@@ -1,13 +1,15 @@
-import hashlib
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from scripts.role_profile_sweeps import (
+    SequenceHop,
     RoleSweepError,
     SweepVariant,
     compare_role_runs,
+    run_role_sequence,
     run_role_sweep,
 )
 from scripts.static_role_launcher import (
@@ -110,7 +112,13 @@ class RoleProfileSweepTest(unittest.TestCase):
         )
 
     @staticmethod
-    def definition(adapter, profile_id):
+    def definition(
+        adapter,
+        profile_id,
+        *,
+        role_id="opposing-counsel",
+        operation="opposing-counsel-simulation",
+    ):
         def validate_output(value):
             if (
                 type(value) is not dict
@@ -121,7 +129,7 @@ class RoleProfileSweepTest(unittest.TestCase):
                 raise ValueError("invalid")
             artifact = {
                 "schema_version": 1,
-                "role": "opposing-counsel",
+                "role": role_id,
                 "profile_id": profile_id,
                 "result": "findings-only",
                 "findings": value["findings"],
@@ -137,8 +145,8 @@ class RoleProfileSweepTest(unittest.TestCase):
             )
 
         return RoleLaunchDefinition(
-            role_id="opposing-counsel",
-            operations=("opposing-counsel-simulation",),
+            role_id=role_id,
+            operations=(operation,),
             input_requirements=(
                 InputRequirement("profile", ("profile",), 1, 1),
                 InputRequirement("filing-target", ("filing",), 1, 1),
@@ -316,6 +324,180 @@ class RoleProfileSweepTest(unittest.TestCase):
             )
         self.assertEqual(captured.exception.code, "invalid-sweep-output")
         self.assertEqual(wrong_adapter.calls, [])
+
+    def test_sequence_rebinds_persisted_file_into_a_fresh_role_invocation(self):
+        sequence_root = self.root / "sequence-output"
+        first_output = sequence_root / "attack"
+        second_output = sequence_root / "judicial-review"
+        first_output.mkdir(parents=True)
+        second_output.mkdir()
+        first, first_adapter = self.variant(
+            "variant-a",
+            [finding("attack", "authority-attack", "First-hop analysis.")],
+            output_root=first_output,
+        )
+        judicial_adapter = FakeAdapter(
+            {
+                "output_kind": "synthetic-findings",
+                "findings": [
+                    finding("review", "record-attack", "Second-hop analysis.")
+                ],
+            }
+        )
+        binder_calls = []
+
+        def bind_judicial_review(prior):
+            binder_calls.append(prior)
+            self.assertTrue((prior.output_root / prior.path).is_file())
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "synthetic-role-sequence",
+                    "inputs": [
+                        {"role": "profile", "root": str(self.profiles)},
+                        {"role": "filing", "root": str(prior.output_root)},
+                        {"role": "approved-sources", "root": str(self.sources)},
+                    ],
+                    "output": {"root": str(second_output)},
+                    "runtime": {
+                        "max_seconds": 60,
+                        "max_input_bytes": 1_000_000,
+                    },
+                    "internet": "disabled",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            return bind_role_launch(
+                self.definition(
+                    judicial_adapter,
+                    "variant-b",
+                    role_id="judicial-reviewer",
+                    operation="judicial-review",
+                ),
+                invocation=invocation,
+                task=validate_role_task(
+                    {
+                        "operation": "judicial-review",
+                        "instructions": "Review the selected persisted findings.",
+                    }
+                ),
+                selections=(
+                    InputSelection("profile", "profile", "variant-b.json"),
+                    InputSelection("filing-target", "filing", prior.path),
+                ),
+            )
+
+        result = run_role_sequence(
+            first=SweepVariant("attack", first.binding),
+            hops=(
+                SequenceHop(
+                    hop_id="judicial-review",
+                    prior_artifact_path="reports/findings.json",
+                    binder=bind_judicial_review,
+                ),
+            ),
+            launcher_version="1.0.0",
+            producer_version="1.0.0",
+        )
+
+        self.assertEqual(result.status, "complete")
+        self.assertEqual(
+            [(run.variant_id, run.role_id, run.status) for run in result.runs],
+            [
+                ("attack", "opposing-counsel", "success"),
+                ("judicial-review", "judicial-reviewer", "success"),
+            ],
+        )
+        self.assertEqual(len(first_adapter.calls), 1)
+        self.assertEqual(len(judicial_adapter.calls), 1)
+        self.assertEqual(len(binder_calls), 1)
+        prior = binder_calls[0]
+        self.assertEqual(prior.path, "reports/findings.json")
+        self.assertEqual(
+            prior.sha256,
+            json.loads(
+                (first_output / ".skill-runs/attack/manifest.json").read_text()
+            )["artifacts"][0]["sha256"],
+        )
+        self.assertTrue((second_output / "reports/findings.json").is_file())
+
+    def test_sequence_rejects_a_same_byte_copy_outside_the_prior_output(self):
+        sequence_root = self.root / "invalid-sequence"
+        first_output = sequence_root / "attack"
+        second_output = sequence_root / "review"
+        unrelated = self.root / "unrelated-copy"
+        first_output.mkdir(parents=True)
+        second_output.mkdir()
+        unrelated.mkdir()
+        first, first_adapter = self.variant(
+            "variant-a",
+            [finding("attack", "authority-attack", "First-hop analysis.")],
+            output_root=first_output,
+        )
+        later_adapter = FakeAdapter(
+            {"output_kind": "synthetic-findings", "findings": []}
+        )
+
+        def bind_wrong_folder(prior):
+            shutil.copyfile(prior.output_root / prior.path, unrelated / "findings.json")
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "synthetic-role-sequence",
+                    "inputs": [
+                        {"role": "profile", "root": str(self.profiles)},
+                        {"role": "filing", "root": str(unrelated)},
+                        {"role": "approved-sources", "root": str(self.sources)},
+                    ],
+                    "output": {"root": str(second_output)},
+                    "runtime": {
+                        "max_seconds": 60,
+                        "max_input_bytes": 1_000_000,
+                    },
+                    "internet": "disabled",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            return bind_role_launch(
+                self.definition(later_adapter, "variant-b"),
+                invocation=invocation,
+                task=validate_role_task(
+                    {
+                        "operation": "opposing-counsel-simulation",
+                        "instructions": "Review findings.",
+                    }
+                ),
+                selections=(
+                    InputSelection("profile", "profile", "variant-b.json"),
+                    InputSelection("filing-target", "filing", "findings.json"),
+                ),
+            )
+
+        with self.assertRaises(RoleSweepError) as captured:
+            run_role_sequence(
+                first=SweepVariant("attack", first.binding),
+                hops=(
+                    SequenceHop(
+                        hop_id="review",
+                        prior_artifact_path="reports/findings.json",
+                        binder=bind_wrong_folder,
+                    ),
+                ),
+                launcher_version="1.0.0",
+                producer_version="1.0.0",
+            )
+
+        self.assertEqual(captured.exception.code, "invalid-sequence-link")
+        self.assertEqual(len(first_adapter.calls), 1)
+        self.assertEqual(later_adapter.calls, [])
 
 
 if __name__ == "__main__":

@@ -42,9 +42,9 @@
 
 ## 7. Verification and archive
 
-- [ ] 7.1 Run focused and repository-wide verification and fresh whole-story
+- [x] 7.1 Run focused and repository-wide verification and fresh whole-story
       review.
-- [ ] 7.2 Record verification and retrospective evidence and archive the owning
+- [x] 7.2 Record verification and retrospective evidence and archive the owning
       OpenSpec change.
 - [ ] 7.3 Push the verified archive and mark the PR ready without closing the
       issue or PR.

@@ -17,10 +17,10 @@
 
 ## 3. Minimal complaint guidance
 
-- [ ] 3.1 Add the trigger and ten-part defendant-specific record to the
+- [x] 3.1 Add the trigger and ten-part defendant-specific record to the
       canonical complaint contract.
-- [ ] 3.2 Add the filing-critical completion rule to the complaint audit.
-- [ ] 3.3 Run the focused evaluation and confirm GREEN without changing the
+- [x] 3.2 Add the filing-critical completion rule to the complaint audit.
+- [x] 3.3 Run the focused evaluation and confirm GREEN without changing the
       false-arrest or actor-causation contracts.
 
 ## 4. Completion

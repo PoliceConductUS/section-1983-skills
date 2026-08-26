@@ -1,0 +1,265 @@
+schema_version: 1
+scenarios:
+  - id: one-arresting-officer
+    arrest_involved: true
+    arresting_officers:
+      - Officer Rivera
+    designated_primary: null
+    caller_defendant_order:
+      - City of Example
+      - Officer Rivera
+      - Officer Jones
+    required_presentations:
+      - caption
+      - parties
+      - defendant_list
+      - defendant_grouped_claims
+    expected_chronology:
+      - Officer Jones arrived.
+      - Officer Rivera made the arrest decision.
+    passing_candidate:
+      outcome: filing
+      defendant_presentations:
+        caption:
+          - Officer Rivera
+          - City of Example
+          - Officer Jones
+        parties:
+          - Officer Rivera
+          - City of Example
+          - Officer Jones
+        defendant_list:
+          - Officer Rivera
+          - City of Example
+          - Officer Jones
+        defendant_grouped_claims:
+          - Officer Rivera
+          - City of Example
+          - Officer Jones
+      factual_chronology:
+        - Officer Jones arrived.
+        - Officer Rivera made the arrest decision.
+    regressions:
+      - id: city-remains-first
+        candidate:
+          outcome: filing
+          defendant_presentations:
+            caption:
+              - City of Example
+              - Officer Rivera
+            parties:
+              - City of Example
+              - Officer Rivera
+            defendant_list:
+              - City of Example
+              - Officer Rivera
+            defendant_grouped_claims:
+              - City of Example
+              - Officer Rivera
+          factual_chronology:
+            - Officer Jones arrived.
+            - Officer Rivera made the arrest decision.
+        expected_findings:
+          - primary-not-first:caption
+          - primary-not-first:defendant_grouped_claims
+          - primary-not-first:defendant_list
+          - primary-not-first:parties
+      - id: chronology-reordered-to-match-defendants
+        candidate:
+          outcome: filing
+          defendant_presentations:
+            caption:
+              - Officer Rivera
+            parties:
+              - Officer Rivera
+            defendant_list:
+              - Officer Rivera
+            defendant_grouped_claims:
+              - Officer Rivera
+          factual_chronology:
+            - Officer Rivera made the arrest decision.
+            - Officer Jones arrived.
+        expected_findings:
+          - chronology-reordered
+
+  - id: legacy-order-corrected
+    arrest_involved: true
+    arresting_officers:
+      - Officer Markham
+    designated_primary: Officer Markham
+    caller_defendant_order:
+      - City of Irving
+      - Officer Markham
+      - Officer Roe
+    existing_defendant_order:
+      - City of Irving
+      - Officer Roe
+      - Officer Markham
+    required_presentations:
+      - caption
+      - parties
+    expected_chronology:
+      - Officer Roe initiated the encounter.
+      - Officer Markham made the arrest decision.
+    passing_candidate:
+      outcome: filing
+      defendant_presentations:
+        caption:
+          - Officer Markham
+          - City of Irving
+          - Officer Roe
+        parties:
+          - Officer Markham
+          - City of Irving
+          - Officer Roe
+      factual_chronology:
+        - Officer Roe initiated the encounter.
+        - Officer Markham made the arrest decision.
+    regressions:
+      - id: prior-filing-order-controls
+        candidate:
+          outcome: filing
+          defendant_presentations:
+            caption:
+              - City of Irving
+              - Officer Roe
+              - Officer Markham
+            parties:
+              - City of Irving
+              - Officer Roe
+              - Officer Markham
+          factual_chronology:
+            - Officer Roe initiated the encounter.
+            - Officer Markham made the arrest decision.
+        expected_findings:
+          - primary-not-first:caption
+          - primary-not-first:parties
+
+  - id: several-officers-with-designated-primary
+    arrest_involved: true
+    arresting_officers:
+      - Officer Adams
+      - Officer Baker
+    designated_primary: Officer Baker
+    caller_defendant_order:
+      - Officer Adams
+      - Officer Baker
+      - City of Example
+    required_presentations:
+      - caption
+      - parties
+    expected_chronology:
+      - Officer Adams gave a command.
+      - Officer Baker made the arrest decision.
+    passing_candidate:
+      outcome: filing
+      defendant_presentations:
+        caption:
+          - Officer Baker
+          - Officer Adams
+          - City of Example
+        parties:
+          - Officer Baker
+          - Officer Adams
+          - City of Example
+      factual_chronology:
+        - Officer Adams gave a command.
+        - Officer Baker made the arrest decision.
+    regressions:
+      - id: skill-selects-another-officer
+        candidate:
+          outcome: filing
+          defendant_presentations:
+            caption:
+              - Officer Adams
+              - Officer Baker
+            parties:
+              - Officer Adams
+              - Officer Baker
+          factual_chronology:
+            - Officer Adams gave a command.
+            - Officer Baker made the arrest decision.
+        expected_findings:
+          - primary-not-first:caption
+          - primary-not-first:parties
+
+  - id: several-officers-without-designated-primary
+    arrest_involved: true
+    arresting_officers:
+      - Officer Adams
+      - Officer Baker
+    designated_primary: null
+    caller_defendant_order:
+      - Officer Adams
+      - Officer Baker
+    required_presentations:
+      - caption
+      - parties
+    expected_chronology:
+      - Officer Adams gave a command.
+      - Officer Baker applied handcuffs.
+    passing_candidate:
+      outcome: clarification-required
+      question: Which arresting officer should be treated as primary?
+      defendant_presentations: {}
+      factual_chronology: []
+    regressions:
+      - id: filing-produced-without-primary
+        candidate:
+          outcome: filing
+          defendant_presentations:
+            caption:
+              - Officer Adams
+              - Officer Baker
+            parties:
+              - Officer Adams
+              - Officer Baker
+          factual_chronology:
+            - Officer Adams gave a command.
+            - Officer Baker applied handcuffs.
+        expected_findings:
+          - clarification-required
+          - draft-before-primary-designation
+
+  - id: no-arrest
+    arrest_involved: false
+    arresting_officers: []
+    designated_primary: null
+    caller_defendant_order:
+      - City of Example
+      - Officer Clark
+    required_presentations:
+      - caption
+      - parties
+    expected_chronology:
+      - Officer Clark spoke first.
+      - The City later received the complaint.
+    passing_candidate:
+      outcome: filing
+      defendant_presentations:
+        caption:
+          - City of Example
+          - Officer Clark
+        parties:
+          - City of Example
+          - Officer Clark
+      factual_chronology:
+        - Officer Clark spoke first.
+        - The City later received the complaint.
+    regressions:
+      - id: no-arrest-order-changed
+        candidate:
+          outcome: filing
+          defendant_presentations:
+            caption:
+              - Officer Clark
+              - City of Example
+            parties:
+              - Officer Clark
+              - City of Example
+          factual_chronology:
+            - Officer Clark spoke first.
+            - The City later received the complaint.
+        expected_findings:
+          - no-arrest-order-changed:caption
+          - no-arrest-order-changed:parties

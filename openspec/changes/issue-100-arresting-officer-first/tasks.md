@@ -6,12 +6,12 @@
       context.
 - [x] 1.2 Create the ignored worktree and OpenSpec change from PR #99's exact
       head.
-- [ ] 1.3 Validate, commit, push, and open the stacked draft PR.
+- [x] 1.3 Validate, commit, push, and open the stacked draft PR.
 
 ## 2. TDD evaluation
 
-- [ ] 2.1 Add deterministic scenarios for the five approved decision branches.
-- [ ] 2.2 Run the focused evaluation against existing guidance and retain the
+- [x] 2.1 Add deterministic scenarios for the five approved decision branches.
+- [x] 2.2 Run the focused evaluation against existing guidance and retain the
       RED result.
 
 ## 3. Skill implementation

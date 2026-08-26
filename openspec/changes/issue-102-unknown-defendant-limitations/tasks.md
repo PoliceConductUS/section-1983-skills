@@ -10,9 +10,9 @@
 
 ## 2. TDD evaluation
 
-- [ ] 2.1 Add deterministic scenarios for both triggers, per-defendant
+- [x] 2.1 Add deterministic scenarios for both triggers, per-defendant
       cardinality, every required entry, and unresolved fail-closed behavior.
-- [ ] 2.2 Run the focused evaluation against existing guidance and retain the
+- [x] 2.2 Run the focused evaluation against existing guidance and retain the
       RED result.
 
 ## 3. Minimal complaint guidance

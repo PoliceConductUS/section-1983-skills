@@ -6,7 +6,7 @@
       baseline.
 - [x] 1.2 Create Issue #102, its ignored worktree, and this OpenSpec change from
       PR #101's exact head.
-- [ ] 1.3 Strictly validate, commit, push, and open the stacked draft PR.
+- [x] 1.3 Strictly validate, commit, push, and open the stacked draft PR.
 
 ## 2. TDD evaluation
 

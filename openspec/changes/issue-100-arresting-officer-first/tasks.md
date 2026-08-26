@@ -16,13 +16,13 @@
 
 ## 3. Skill implementation
 
-- [ ] 3.1 Add the cross-document arrest audit and ordering rule to the umbrella
+- [x] 3.1 Add the cross-document arrest audit and ordering rule to the umbrella
       workflow.
-- [ ] 3.2 Add complaint presentation and completion requirements to the
+- [x] 3.2 Add complaint presentation and completion requirements to the
       canonical contract.
-- [ ] 3.3 Make the false-arrest actor audit identify primary-officer designation
+- [x] 3.3 Make the false-arrest actor audit identify primary-officer designation
       state.
-- [ ] 3.4 Run focused evaluation and confirm GREEN.
+- [x] 3.4 Run focused evaluation and confirm GREEN.
 
 ## 4. Completion
 

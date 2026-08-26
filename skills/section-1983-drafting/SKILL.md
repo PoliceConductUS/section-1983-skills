@@ -145,6 +145,30 @@ rhetorical argument is a small part of any document, if present at all.
 - Rhetoric, when used at all, is confined to at most a sentence or two of
   framing and is never load-bearing.
 
+## Arrest-driven defendant order
+
+Before drafting or materially revising any filing that names defendants, audit
+the declared `record` and `filing` inputs to determine whether an arrest
+occurred and identify every source-documented arresting officer. Report a gap
+instead of inventing an arrest or officer identity.
+
+When the inputs identify one arresting officer, treat that officer as primary.
+When they identify multiple arresting officers, use the primary arresting
+officer declared by the caller. If the caller has not declared one, stop and ask
+which officer is primary; never infer the designation from rank, chronology,
+report authorship, physical contact, or a prior filing's order.
+
+When an arrest occurred and a primary arresting officer is identified, put that
+officer first in every ordered defendant presentation the new or materially
+revised filing contains: the caption, Parties section, defendant list or table,
+and defendant-grouped claim presentation. A prior or existing filing's different
+order does not control the new or revised output.
+
+This presentation rule does not reorder factual chronology, claim-specific
+allegations, event stages, or merits analysis. When the audit establishes no
+arrest, preserve the caller's defendant order unless another approved contract
+expressly controls it.
+
 ## Workflow
 
 1. Strategy. Read the strategy supplied in the declared `strategy` role. If no

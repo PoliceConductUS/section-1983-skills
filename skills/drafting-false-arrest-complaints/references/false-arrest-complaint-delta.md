@@ -93,8 +93,16 @@ Route the false-arrest theory before drafting:
 
 ## Actor matrix
 
-| Defendant | Knowledge at relevant time | Personal act | Event stage | Causal role | Particular injury | GAP |
-| --------- | -------------------------- | ------------ | ----------- | ----------- | ----------------- | --- |
+| Defendant | Arresting-officer status | Caller-declared primary? | Knowledge at relevant time | Personal act | Event stage | Causal role | Particular injury | GAP |
+| --------- | ------------------------ | ------------------------ | -------------------------- | ------------ | ----------- | ----------- | ----------------- | --- |
+
+Before completing the actor matrix, audit the declared inputs to determine
+whether an arrest occurred. For each source-documented arresting officer, record
+the arresting-officer status and whether the caller declared that officer
+primary. One identified arresting officer is primary. If more than one arresting
+officer is identified without a caller-declared primary, stop and ask for the
+designation; never infer it from rank, chronology, report authorship, physical
+contact, or a prior filing's order.
 
 Do not assign every arrest theory to every officer. Use "Defendants" as a
 collective subject only when every named defendant performed the same alleged

@@ -33,6 +33,16 @@ function must be removed from filed text or moved to internal chronology.
 
 A count is complete only if:
 
+- [ ] the arrest audit is complete and, when an arrest occurred, the primary
+      arresting officer appears first in the caption, Parties section, defendant
+      lists or tables, and defendant-grouped claim presentation;
+- [ ] when multiple arresting officers are source-documented, the caller has
+      declared the primary officer or drafting has stopped for that designation
+      without inference;
+- [ ] when no arrest occurred, every ordered defendant presentation preserves
+      the caller's order unless another approved contract controls it;
+- [ ] defendant presentation has not reordered factual chronology, event stages,
+      claim-specific allegations, or merits analysis;
 - [ ] every claim–defendant–challenged-act mapping satisfies all applicable
       fields and the fail-closed disposition in the canonical checklist in the
       complaint contract;

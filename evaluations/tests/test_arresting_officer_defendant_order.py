@@ -9,8 +9,8 @@ REPOSITORY = Path(__file__).resolve().parents[2]
 SCENARIOS = (
     REPOSITORY
     / "evaluations"
-    / "fixtures"
     / "arresting-officer-defendant-order"
+    / "v1"
     / "scenarios.yaml"
 )
 UMBRELLA = REPOSITORY / "skills" / "section-1983-drafting" / "SKILL.md"

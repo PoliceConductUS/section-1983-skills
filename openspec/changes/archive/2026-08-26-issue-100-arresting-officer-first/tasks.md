@@ -26,8 +26,8 @@
 
 ## 4. Completion
 
-- [ ] 4.1 Run mutation checks, focused tests, strict OpenSpec validation, and
+- [x] 4.1 Run mutation checks, focused tests, strict OpenSpec validation, and
       `npm run validate`.
-- [ ] 4.2 Review the whole story, archive OpenSpec, and push every commit.
-- [ ] 4.3 Freshly verify the exact remote head, checks, files, and issue
+- [x] 4.2 Review the whole story, archive OpenSpec, and push every commit.
+- [x] 4.3 Freshly verify the exact remote head, checks, files, and issue
       relationship; mark the PR ready while leaving PR #101 and Issue #100 open.

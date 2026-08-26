@@ -38,8 +38,15 @@
 
 ## Delta spec sync state
 
-- `arresting-officer-defendant-ordering`: needs sync through the owning branch's
-  OpenSpec archive step.
+- `arresting-officer-defendant-ordering`: already synced to
+  `openspec/specs/arresting-officer-defendant-ordering/spec.md` by the owning
+  branch's OpenSpec archive step.
+
+## Post-archive verification
+
+After archive and durable-spec formatting, `npm run validate` passed again with
+27 drafting-script tests, 636 evaluation tests, 29 discovered skills, 38 durable
+OpenSpec specifications, corpus generation, and governance validation.
 
 ## Whole-story review
 

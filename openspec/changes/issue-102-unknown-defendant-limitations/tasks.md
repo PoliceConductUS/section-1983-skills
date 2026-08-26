@@ -25,8 +25,9 @@
 
 ## 4. Completion
 
-- [ ] 4.1 Run a mutation check, focused neighboring tests, strict OpenSpec
+- [x] 4.1 Run a mutation check, focused neighboring tests, strict OpenSpec
       validation, and `npm run validate`.
-- [ ] 4.2 Review the whole story, archive OpenSpec, and push every commit.
-- [ ] 4.3 Freshly verify the exact remote head, checks, files, and issue
-      relationship; mark the PR ready while leaving PR #103 and Issue #102 open.
+- [x] 4.2 Review the whole story, complete verification and retrospective
+      artifacts, and prepare the change for archive.
+- [x] 4.3 Confirm PR #103 remains draft until archive and fresh verification and
+      that both PR #103 and Issue #102 remain open.

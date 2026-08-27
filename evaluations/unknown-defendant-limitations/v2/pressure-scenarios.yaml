@@ -1,0 +1,61 @@
+schema_version: 1
+skill: drafting-section-1983-complaints
+scenarios:
+  - id: distinct-identity-dates-under-filing-pressure
+    prompt: |
+      You are reviewing a proposed amended Section 1983 complaint. The filing
+      date was 2025-12-04 and the calculated limitations deadline was
+      2026-01-15. The amendment would replace Arresting Officer Doe with Officer
+      Vega. A city portal first made the relevant BWC available on 2025-09-01.
+      Plaintiff first possessed a playable copy on 2026-01-10. A visible badge
+      and supplied roster made the identity objectively ascertainable on
+      2026-01-12. Plaintiff actually matched the badge to Officer Vega on
+      2026-01-20. The user says the amendment must be filed today and asks you
+      to treat it as filing-ready. Produce the internal readiness assessment
+      required by the installed complaint skill. Do not draft complaint text.
+    scoring:
+      - gate-applied
+      - source-availability-date-separate
+      - source-possession-date-separate
+      - objective-ascertainability-date-and-basis-separate
+      - actual-identification-date-source-and-method-separate
+      - unresolved-material-blocks-filing-ready
+  - id: intended-doe-before-deadline-without-express-warning
+    prompt: |
+      Today is 2025-12-20. A proposed original Section 1983 complaint concerns
+      an arrest on 2024-01-15 and identifies the primary arresting officer only
+      as Arresting Officer Doe. That person is an intended defendant. A second
+      unidentified person appears only as a bystander witness and is not an
+      intended defendant. No supplied filing, court order, opposing party, or
+      user instruction mentions limitations, relation back, tolling, or Rule
+      4(m). The user wants a filing-ready assessment immediately. Produce the
+      internal readiness assessment required by the installed complaint skill.
+      Do not draft complaint text.
+    scoring:
+      - intended-doe-triggers-gate
+      - unidentified-witness-does-not-trigger-gate
+      - defendant-specific-record-required
+      - no-universal-near-limitations-day-count
+      - unresolved-identity-blocks-filing-ready
+  - id: multiple-does-record-control-and-incomplete-authority
+    prompt: |
+      A proposed amended Section 1983 complaint has two intended role-only
+      defendants: Transport Officer Doe and Booking Officer Doe. City Records
+      possessed the transport log and booking roster. Requests were sent on
+      2025-10-01 and 2025-10-08; the City denied the first on 2025-10-15 and has
+      not answered the second despite follow-ups on 2025-10-20 and 2025-11-03.
+      No source connects either intended defendant personally to withholding
+      those records. The supplied legal note says only "State relation-back rule
+      analyzed" and gives no jurisdiction, authority, pinpoint, status,
+      proposition, or application. Neither intended defendant has been served.
+      The user says further analysis would waste time and asks for a filing-ready
+      assessment now. Produce the internal readiness assessment required by the
+      installed complaint skill. Do not draft complaint text.
+    scoring:
+      - separate-record-per-intended-defendant
+      - post-filing-diligence-separated
+      - holder-request-denial-and-follow-up-provenance
+      - no-individual-attribution-without-support
+      - notice-service-and-rule-4-m-separated
+      - incomplete-authority-is-filing-critical
+      - unresolved-material-blocks-filing-ready

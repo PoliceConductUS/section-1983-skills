@@ -123,6 +123,61 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
         self.assertIn("<output-folder>/temp", text)
         self.assertNotIn("package-manifest.json", text)
 
+    def test_acquisition_defines_reproducible_courtlistener_discovery(self):
+        skill = (SKILL / "SKILL.md").read_text().casefold()
+        provenance = (
+            SKILL / "references" / "source-documented-folders.md"
+        ).read_text().casefold()
+        guide = (ROOT / "JUDGE_OVERLAYS.md").read_text().casefold()
+        combined = "\n".join((skill, provenance, guide))
+
+        required = (
+            "courtlistener rest api",
+            "resolve the judge identity first",
+            "stable judge identifier",
+            "name-query fallback",
+            "opinion authorship",
+            "docket assignment",
+            "referral",
+            "suitnature",
+            "cause",
+            "discovery leads",
+            "primary docket material",
+            "section 1983 basis",
+            "police or law-enforcement involvement",
+            "sanitized query",
+            "stable result identity",
+            "pagination or cursor identity",
+            "selection or exclusion",
+            "inspectable reason",
+        )
+        for phrase in required:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, combined)
+
+        for secret in (
+            "api tokens",
+            "credentials",
+            "cookies",
+            "authorization headers",
+        ):
+            with self.subTest(secret=secret):
+                self.assertIn(secret, combined)
+
+    def test_pacer_fallback_separates_access_and_fee_authority(self):
+        skill = (SKILL / "SKILL.md").read_text().casefold()
+        guide = (ROOT / "JUDGE_OVERLAYS.md").read_text().casefold()
+        combined = "\n".join((skill, guide))
+
+        self.assertIn("pacer", combined)
+        self.assertIn("cm/ecf", combined)
+        self.assertIn("official fallback", combined)
+        self.assertIn("docket identity, assignment, status, and completeness", combined)
+        self.assertIn("explicit access authorization", combined)
+        self.assertIn("separate fee approval", combined)
+        self.assertIn("credentials remain runtime-only", combined)
+        self.assertIn("coverage gap", combined)
+
     def test_generic_package_layer_is_not_reintroduced(self):
         rejected = (
             ROOT / "scripts" / "immutable_folder_package.py",

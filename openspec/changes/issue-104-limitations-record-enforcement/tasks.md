@@ -15,7 +15,7 @@
       fail-closed behavior, and legal-judgment exclusions.
 - [x] 2.2 Run those tests against the Issue #102 implementation and retain the
       expected RED result.
-- [ ] 2.3 Run and preserve fresh-context baseline pressure scenarios against the
+- [x] 2.3 Run and preserve fresh-context baseline pressure scenarios against the
       Issue #102 installed skill.
 
 ## 3. Schema and installed complaint checker
@@ -34,9 +34,9 @@
 
 ## 5. Canonical guidance and pressure rerun
 
-- [ ] 5.1 Update the complaint contract, completion audit, skill routing, and
+- [x] 5.1 Update the complaint contract, completion audit, skill routing, and
       durable specification with the approved trigger and record distinctions.
-- [ ] 5.2 Run the same fresh-context pressure scenarios against the corrected
+- [x] 5.2 Run the same fresh-context pressure scenarios against the corrected
       installed skill and score the observable behavior.
 - [ ] 5.3 Preserve exact pressure inputs and scored baseline/corrected outputs
       in the verification artifact.

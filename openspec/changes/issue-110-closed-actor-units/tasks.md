@@ -5,15 +5,15 @@
 - [x] 1.1 Verify Issue #108, PR #109, its exact branch SHA, checks, and the
       local baseline.
 - [x] 1.2 Create Issue #110 and its ignored worktree from PR #109's exact head.
-- [ ] 1.3 Strictly validate, commit, push, and open the stacked draft PR.
+- [x] 1.3 Strictly validate, commit, push, and open the stacked draft PR.
 
 ## 2. RED evidence
 
-- [ ] 2.1 Add focused tests for closed general actor units, completion-audit
+- [x] 2.1 Add focused tests for closed general actor units, completion-audit
       failures, false-arrest closure, and the paired fixture.
-- [ ] 2.2 Run the focused tests against the current installed references and
+- [x] 2.2 Run the focused tests against the current installed references and
       preserve the expected RED result.
-- [ ] 2.3 Preserve fresh-context baseline behavior showing the known shortcut.
+- [x] 2.3 Preserve fresh-context baseline behavior showing the known shortcut.
 
 ## 3. Installed contracts and fixture
 

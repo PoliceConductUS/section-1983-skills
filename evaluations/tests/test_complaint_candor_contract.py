@@ -70,6 +70,19 @@ EXPECTED_FIXTURES = {
             "sources.json",
         },
     },
+    "complaint-open-actor-unit": {
+        "target_skill": FALSE_ARREST_PACKAGE,
+        "location": "paragraph-range-without-application",
+        "assets": {
+            "approved-authority.md",
+            "approved-facts.md",
+            "fixture.json",
+            "passing.md",
+            "prompt.md",
+            "regression-open-actor-unit.md",
+            "sources.json",
+        },
+    },
 }
 
 CONFORMING_ADVERSE_MERITS = """
@@ -620,6 +633,114 @@ def assert_ambiguous_actual_offense_analysis(test, text):
     )
 
 
+def assert_closed_actor_unit_contract(test, text):
+    assert_clause_contains(
+        test,
+        text,
+        r"(?:each|every) claim.{0,30}defendant.{0,30}challenged[- ]act",
+        r"(?:own|actor[- ]specific) incorporated (?:factual )?paragraphs",
+    )
+    assert_clause_contains(
+        test,
+        text,
+        r"omnibus incorporation",
+        r"to the extent applicable",
+        r"(?:insufficient|does not satisfy)",
+        r"(?:different|differ)",
+        r"(?:acts|stages|knowledge)",
+    )
+    assert_clause_contains(
+        test,
+        text,
+        r"paragraph range",
+        r"(?:does not|cannot)",
+        r"(?:perform|supply)",
+        r"application",
+    )
+    required_fields = (
+        r"challenged act",
+        r"event time",
+        r"decisive facts",
+        r"known to (?:that|the) defendant",
+        r"disputed (?:claim or offense )?element",
+        r"(?:establish|fail to establish).{0,40}element",
+        r"later.{0,30}(?:cannot|must not).{0,40}(?:knowledge set|relevant[- ]time knowledge)",
+        r"personal causal role",
+        r"resulting injury",
+        r"qualified[- ]immunity prongs? one and two|both qualified[- ]immunity prongs",
+    )
+    for field in required_fields:
+        with test.subTest(closed_actor_field=field):
+            test.assertRegex(text, field)
+    assert_clause_contains(
+        test,
+        text,
+        r"functional closure",
+        r"(?:does not|must not)",
+        r"fixed paragraph count",
+        r"needless repetition",
+    )
+    assert_clause_contains(
+        test,
+        text,
+        r"supporting brief",
+        r"may expand",
+        r"(?:cannot|must not|may not) supply",
+        r"missing complaint[- ]level",
+        r"application|factual bridge",
+    )
+
+
+def assert_completion_audit_rejects_open_actor_units(test, text):
+    required_failures = (
+        r"court must (?:search|gather).{0,80}(?:construct|supply).{0,80}(?:fact[- ]to[- ]element|element analysis|application)",
+        r"(?:officers|actors|defendants).{0,60}(?:different acts|different stages|different knowledge|acts, stages, or knowledge).{0,80}(?:broad|omnibus) incorporation",
+        r"qualified[- ]immunity.{0,60}paragraph range.{0,60}conclusion",
+        r"later[- ]only facts.{0,80}(?:knowledge set|relevant[- ]time knowledge).{0,80}(?:express|limited[- ]use)",
+        r"brief.{0,80}(?:cure|supply).{0,80}missing complaint[- ]level",
+    )
+    for failure in required_failures:
+        with test.subTest(open_actor_failure=failure):
+            test.assertRegex(text, failure)
+    assert_clause_contains(
+        test,
+        text,
+        r"unresolved",
+        r"required (?:component|part|field)",
+        r"filing[- ]critical",
+    )
+
+
+def assert_false_arrest_closed_actor_unit(test, text):
+    required_fields = (
+        r"(?:each|every) (?:challenged )?officer",
+        r"seizure or continued[- ]seizure point|seizure point",
+        r"suspected offense",
+        r"alternative offense.{0,80}actually raised",
+        r"facts known to that officer",
+        r"missing or disputed element",
+        r"post[- ]seizure identification",
+        r"resistance",
+        r"reports?",
+        r"probable[- ]cause and arguable[- ]probable[- ]cause application",
+        r"personal participation",
+        r"causal stage",
+        r"resulting injury",
+        r"conduct[- ]specific fair[- ]warning",
+        r"qualified[- ]immunity prongs? one and two|both qualified[- ]immunity prongs",
+    )
+    for field in required_fields:
+        with test.subTest(false_arrest_actor_field=field):
+            test.assertRegex(text, field)
+    assert_clause_contains(
+        test,
+        text,
+        r"post[- ]seizure|later",
+        r"(?:limited later function|exclude|not part)",
+        r"(?:contemporaneous|relevant[- ]time|earlier) knowledge",
+    )
+
+
 class ComplaintCandorContractTest(unittest.TestCase):
     def test_conforming_canonical_checklist_satisfies_the_contract(self):
         assert_canonical_claim_checklist(self, CONFORMING_CANONICAL_CHECKLIST)
@@ -734,6 +855,30 @@ fair warning, and separate prong results.
         with tempfile.TemporaryDirectory() as directory:
             package = copied_package(directory, FALSE_ARREST_PACKAGE)
             assert_ambiguous_actual_offense_analysis(
+                self,
+                normalized_prose(package / FALSE_ARREST_DELTA),
+            )
+
+    def test_independent_general_package_requires_closed_actor_units(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = copied_package(directory, GENERAL_PACKAGE)
+            assert_closed_actor_unit_contract(
+                self,
+                normalized_prose(package / COMPLAINT_CONTRACT),
+            )
+
+    def test_independent_general_completion_audit_rejects_open_actor_units(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = copied_package(directory, GENERAL_PACKAGE)
+            assert_completion_audit_rejects_open_actor_units(
+                self,
+                normalized_prose(package / COMPLETION_AUDIT),
+            )
+
+    def test_independent_false_arrest_package_requires_closed_actor_units(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package = copied_package(directory, FALSE_ARREST_PACKAGE)
+            assert_false_arrest_closed_actor_unit(
                 self,
                 normalized_prose(package / FALSE_ARREST_DELTA),
             )

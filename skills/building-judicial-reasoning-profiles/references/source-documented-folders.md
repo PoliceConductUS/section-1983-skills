@@ -19,8 +19,8 @@ date, pagination or cursor identity, judge relationship searched, source-
 coverage limitation, selection or exclusion status, inspectable disposition
 reason, and the primary material used to verify the judge relationship, Section
 1983 basis, police or law-enforcement involvement, and posture. Preserve the
-ordinary acquired bytes and their SHA-256. Do not store API tokens,
-credentials, cookies, authorization headers, or unsanitized request data.
+ordinary acquired bytes and their SHA-256. Do not store API tokens, credentials,
+cookies, authorization headers, or unsanitized request data.
 
 For an authorized PACER or CM/ECF source, record the stable docket and document
 identity, court, checked date, acquisition method, and coverage limitation,

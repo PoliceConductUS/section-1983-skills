@@ -14,8 +14,8 @@ but introduces credential and fee authority that the skill cannot infer.
 
 - Define CourtListener judge identity and case-discovery steps.
 - Keep opinion authorship, docket assignment, and referral distinct.
-- Require primary-source verification of Section 1983, police involvement,
-  judge relationship, and posture.
+- Require primary-source verification of Section 1983, police involvement, judge
+  relationship, and posture.
 - Preserve query provenance, candidate dispositions, exclusions, coverage, and
   gaps without secrets.
 - Permit PACER/CM-ECF only through explicit access and fee gates.
@@ -78,8 +78,8 @@ compilation. No test calls an external service.
 ## Migration Plan
 
 Publish the additive skill and guide changes in the existing stacked PR. No
-stored profile or source folder requires migration. Reverting the commit restores
-the prior generic acquisition guidance.
+stored profile or source folder requires migration. Reverting the commit
+restores the prior generic acquisition guidance.
 
 ## Open Questions
 

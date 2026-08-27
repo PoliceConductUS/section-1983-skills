@@ -40,12 +40,13 @@ the explicit output folder.
 - **Approach:** Update the existing skill, public guide, and OpenSpec contract
   with CourtListener query roles, candidate verification, provenance, exclusion,
   and PACER authorization rules. Add no client or credential storage.
-- **Advantages:** Makes the supported path explicit, auditable, and install-local
-  while preserving existing folder and network boundaries.
+- **Advantages:** Makes the supported path explicit, auditable, and
+  install-local while preserving existing folder and network boundaries.
 - **Disadvantages:** The trusted runtime or user must perform the actual API and
   PACER operations.
-- **Why selected:** This is the narrowest design that supports the requested path
-  without moving executable network functionality into the skills repository.
+- **Why selected:** This is the narrowest design that supports the requested
+  path without moving executable network functionality into the skills
+  repository.
 
 ## Agreed Approach
 
@@ -57,11 +58,11 @@ narrowing, with PACER supported only as an authorized fallback.
 
 - Stable CourtListener judge IDs are preferred when supported; documented name
   queries remain available when an ID is unavailable.
-- `author_id` or `judge`, `assigned_to_id` or `assignedTo`, and
-  `referred_to_id` or `referredTo` represent different relationships and cannot
-  substitute for one another.
-- `suitNature`, `cause`, Section 1983 terms, and police terms retrieve candidates
-  but do not establish corpus eligibility.
+- `author_id` or `judge`, `assigned_to_id` or `assignedTo`, and `referred_to_id`
+  or `referredTo` represent different relationships and cannot substitute for
+  one another.
+- `suitNature`, `cause`, Section 1983 terms, and police terms retrieve
+  candidates but do not establish corpus eligibility.
 - Primary docket material must verify Section 1983, police involvement, judge
   relationship, and posture.
 - Rejected and unresolved candidates retain inspectable reasons and source

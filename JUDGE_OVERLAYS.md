@@ -79,8 +79,8 @@ and adverse and disconfirming evidence under the same declared method.
 
 ### CourtListener discovery recipe
 
-Use the [CourtListener REST API](https://www.courtlistener.com/help/api/rest/)
-to discover candidates while preserving the source hierarchy above:
+Use the CourtListener REST API to discover candidates while preserving the
+source hierarchy above:
 
 1. Resolve the judge identity first with a `type=p` search and prefer the
    returned stable judge identifier. If only a name-query fallback is possible,
@@ -91,9 +91,9 @@ to discover candidates while preserving the source hierarchy above:
    `assignedTo`, and referral through `referred_to_id` or `referredTo`. Do not
    treat authorship, assignment, and referral as interchangeable.
 3. Narrow by `court_id`, the judge's tenure or other date range, case category,
-   procedural posture, and the research question. `suitNature`, `cause`,
-   Section 1983 terms, and police or law-enforcement terms are discovery leads,
-   not inclusion findings.
+   procedural posture, and the research question. `suitNature`, `cause`, Section
+   1983 terms, and police or law-enforcement terms are discovery leads, not
+   inclusion findings.
 4. Verify from primary docket material the judge relationship, Section 1983
    basis, police or law-enforcement involvement, and relevant posture before
    inclusion. Give every reviewed candidate a selection or exclusion status and
@@ -112,8 +112,8 @@ unsanitized request data.
 Use PACER or court-specific CM/ECF only as the optional official fallback for
 docket identity, assignment, status, and completeness. Require explicit access
 authorization separately from separate fee approval. Credentials remain
-runtime-only. Without the required authorization, record the coverage gap and
-do not imply that the official docket was checked.
+runtime-only. Without the required authorization, record the coverage gap and do
+not imply that the official docket was checked.
 
 ## 2. Build and validate the corpus
 

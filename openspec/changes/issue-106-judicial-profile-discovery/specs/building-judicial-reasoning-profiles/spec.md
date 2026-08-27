@@ -2,23 +2,23 @@
 
 ### Requirement: CourtListener discovery preserves judge identity and candidate disposition
 
-The acquisition operation MUST document a CourtListener REST API discovery
-path that resolves the judge before searching cases, prefers a stable judge
+The acquisition operation MUST document a CourtListener REST API discovery path
+that resolves the judge before searching cases, prefers a stable judge
 identifier, and permits a documented name-query fallback. It MUST distinguish
 opinion authorship from docket assignment and referral, and MUST narrow
 candidates by applicable court, judicial tenure or date range, case category,
 procedural posture, and the profile's research question. Nature-of-suit,
 cause-of-action, Section 1983, and police or law-enforcement search terms MUST
-remain discovery leads rather than proof that a candidate belongs in the
-profile corpus.
+remain discovery leads rather than proof that a candidate belongs in the profile
+corpus.
 
-Before inclusion, the acquisition operation MUST require primary docket
-material to verify the judge relationship, Section 1983 basis, police or law-
-enforcement involvement, and relevant posture. It MUST preserve sanitized
-query provenance, stable result identity, pagination or cursor identity,
-selection or exclusion status, and an inspectable reason for every reviewed
-candidate. It MUST NOT persist API tokens, credentials, cookies, authorization
-headers, or other secrets.
+Before inclusion, the acquisition operation MUST require primary docket material
+to verify the judge relationship, Section 1983 basis, police or law- enforcement
+involvement, and relevant posture. It MUST preserve sanitized query provenance,
+stable result identity, pagination or cursor identity, selection or exclusion
+status, and an inspectable reason for every reviewed candidate. It MUST NOT
+persist API tokens, credentials, cookies, authorization headers, or other
+secrets.
 
 #### Scenario: Judge-name search returns mixed civil-rights cases
 

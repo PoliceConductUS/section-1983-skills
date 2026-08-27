@@ -2,23 +2,23 @@
 
 ## 1. Contract and stack
 
-- [ ] 1.1 Create the stacked worktree and OpenSpec design for Issue #106.
-- [ ] 1.2 Strictly validate the proposed contract, push the design commit, and
+- [x] 1.1 Create the stacked worktree and OpenSpec design for Issue #106.
+- [x] 1.2 Strictly validate the proposed contract, push the design commit, and
       open a stacked draft PR.
 
 ## 2. Test-first acquisition contract
 
-- [ ] 2.1 Add an install-local failing contract test for judge-first
+- [x] 2.1 Add an install-local failing contract test for judge-first
       CourtListener discovery, candidate verification and disposition, and
       secret exclusion.
-- [ ] 2.2 Add the optional PACER/CM-ECF fallback contract with separate access
+- [x] 2.2 Add the optional PACER/CM-ECF fallback contract with separate access
       and fee authorization.
 
 ## 3. Profile guidance
 
-- [ ] 3.1 Update the generic judicial-profile acquisition skill with the
+- [x] 3.1 Update the generic judicial-profile acquisition skill with the
       approved discovery and provenance recipe.
-- [ ] 3.2 Update the public judge-overlay guide with the same bounded method.
+- [x] 3.2 Update the public judge-overlay guide with the same bounded method.
 
 ## 4. Verification
 

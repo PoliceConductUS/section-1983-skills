@@ -8,9 +8,9 @@
 
 ## 2. RED prerequisite planning
 
-- [ ] 2.1 Add failing public-seam tests for collection, review, analysis,
+- [x] 2.1 Add failing public-seam tests for collection, review, analysis,
       assessment, profile readiness, invalid outputs, and missing conditions.
-- [ ] 2.2 Preserve the expected RED results before changing the installed skill
+- [x] 2.2 Preserve the expected RED results before changing the installed skill
       or helper.
 
 ## 3. Deterministic resolver

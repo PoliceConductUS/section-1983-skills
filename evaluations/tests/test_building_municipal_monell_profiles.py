@@ -46,6 +46,29 @@ CATEGORIES = [
     "institutional_learning",
 ]
 DIRECTIONS = ["favorable", "unfavorable", "disconfirming", "neutral"]
+STAGE_ROLES = {
+    "collection": [
+        "department-identity",
+        "jurisdiction",
+        "approved-source-system",
+        "research-scope",
+    ],
+    "analysis": [
+        "department-identity",
+        "jurisdiction",
+        "policy-source",
+        "analysis-scope",
+    ],
+    "assessment": [
+        "policy-catalog",
+        "actor",
+        "event",
+        "phase",
+        "case-record",
+        "assessment-scope",
+    ],
+    "profile": ROLES,
+}
 
 
 def load_module():
@@ -96,6 +119,43 @@ def upstream_validations():
         role: {"valid": True, "sha256": hashlib.sha256(role.encode()).hexdigest()}
         for role in ("policy-catalog", "policy-assessment", "verified-authority")
     }
+
+
+def prerequisite_state(state, *, complete=None, substantive_gaps=False):
+    if complete is None:
+        complete = state not in {"absent", "invalid"}
+    record = {
+        "state": state,
+        "terminal_receipt": complete,
+        "expected_artifacts": complete,
+        "validation_passed": complete,
+        "fingerprints_match": complete,
+    }
+    if substantive_gaps:
+        record["substantive_gaps"] = True
+    return record
+
+
+def prerequisite_arguments(**overrides):
+    arguments = {
+        "policy_source_state": prerequisite_state("absent"),
+        "policy_catalog": prerequisite_state("absent"),
+        "policy_assessment": prerequisite_state("absent"),
+        "available_roles": copy.deepcopy(STAGE_ROLES),
+        "output_folders": {
+            "collection": True,
+            "analysis": True,
+            "assessment": True,
+            "profile": True,
+        },
+        "collection_authorization": {
+            "internet": True,
+            "fees_required": False,
+            "fees_approved": False,
+        },
+    }
+    arguments.update(overrides)
+    return arguments
 
 
 def evidence_records():
@@ -350,6 +410,205 @@ class BuildingMunicipalMonellProfilesTest(unittest.TestCase):
                 },
                 before,
             )
+
+    def test_prerequisite_plan_routes_absent_sources_to_collection(self):
+        records = load_module()
+        plan = records.build_prerequisite_plan(**prerequisite_arguments())
+        repeated = records.build_prerequisite_plan(**prerequisite_arguments())
+        self.assertEqual(plan, repeated)
+        self.assertEqual(plan["status"], "ready-for-collection")
+        self.assertEqual(plan["next_skill"], "collecting-police-policy-sources")
+        self.assertEqual(plan["required_roles"], STAGE_ROLES["collection"])
+        self.assertEqual(plan["missing_roles"], [])
+        self.assertEqual(plan["internet"], "authorized")
+        self.assertEqual(
+            [item["path"] for item in plan["artifacts"]],
+            [
+                "municipal-profile-prerequisites.yaml",
+                "municipal-profile-prerequisites.md",
+            ],
+        )
+        document = yaml.safe_load(plan["artifacts"][0]["bytes"])
+        self.assertEqual(document["status"], "ready-for-collection")
+        self.assertNotIn("artifacts", document)
+
+    def test_prerequisite_plan_requires_collection_authority(self):
+        records = load_module()
+        cases = [
+            (
+                {"internet": False, "fees_required": False, "fees_approved": False},
+                ["bounded-internet-authorization-required"],
+            ),
+            (
+                {"internet": True, "fees_required": True, "fees_approved": False},
+                ["fee-authorization-required"],
+            ),
+        ]
+        for authorization, reasons in cases:
+            with self.subTest(authorization=authorization):
+                plan = records.build_prerequisite_plan(
+                    **prerequisite_arguments(
+                        collection_authorization=authorization
+                    )
+                )
+                self.assertEqual(plan["status"], "authorization-required")
+                self.assertEqual(plan["blocking_reasons"], reasons)
+                self.assertEqual(
+                    plan["next_skill"], "collecting-police-policy-sources"
+                )
+
+    def test_prerequisite_plan_stops_candidate_sources_for_review(self):
+        records = load_module()
+        plan = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_source_state=prerequisite_state("candidate")
+            )
+        )
+        self.assertEqual(plan["status"], "review-required")
+        self.assertIsNone(plan["next_skill"])
+        self.assertEqual(plan["required_roles"], [])
+        self.assertEqual(
+            plan["blocking_reasons"],
+            ["independent-policy-source-review-required"],
+        )
+
+    def test_prerequisite_plan_routes_approved_sources_to_analysis(self):
+        records = load_module()
+        plan = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_source_state=prerequisite_state("approved")
+            )
+        )
+        self.assertEqual(plan["status"], "ready-for-analysis")
+        self.assertEqual(plan["next_skill"], "analyzing-police-policy-sources")
+        self.assertEqual(plan["required_roles"], STAGE_ROLES["analysis"])
+        self.assertEqual(plan["internet"], "disabled")
+        self.assertEqual(
+            plan["postconditions"],
+            [
+                "terminal-run-receipt-success",
+                "policy-requirements.yaml-present",
+                "policy-gaps.yaml-present",
+                "policy-analysis.md-present",
+                "policy-analysis-validation.json-present",
+                "domain-validation-passed",
+                "input-fingerprints-match",
+            ],
+        )
+
+    def test_prerequisite_plan_routes_valid_catalog_to_assessment(self):
+        records = load_module()
+        plan = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_catalog=prerequisite_state("valid")
+            )
+        )
+        self.assertEqual(plan["status"], "ready-for-assessment")
+        self.assertEqual(
+            plan["next_skill"], "assessing-police-policy-compliance"
+        )
+        self.assertEqual(plan["required_roles"], STAGE_ROLES["assessment"])
+        self.assertEqual(plan["internet"], "disabled")
+
+    def test_prerequisite_plan_resumes_profile_only_when_all_roles_are_ready(self):
+        records = load_module()
+        ready = prerequisite_arguments(
+            policy_catalog=prerequisite_state("valid"),
+            policy_assessment=prerequisite_state("valid"),
+        )
+        plan = records.build_prerequisite_plan(**ready)
+        self.assertEqual(plan["status"], "ready-for-profile")
+        self.assertEqual(
+            plan["next_skill"], "building-municipal-monell-profiles"
+        )
+        self.assertEqual(plan["required_roles"], ROLES)
+
+        roles = copy.deepcopy(STAGE_ROLES)
+        roles["profile"].remove("verified-authority")
+        missing = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_catalog=prerequisite_state("valid"),
+                policy_assessment=prerequisite_state("valid"),
+                available_roles=roles,
+            )
+        )
+        self.assertEqual(missing["status"], "input-required")
+        self.assertEqual(missing["missing_roles"], ["verified-authority"])
+
+    def test_prerequisite_plan_requires_fresh_output_folder_for_next_stage(self):
+        records = load_module()
+        outputs = {
+            "collection": True,
+            "analysis": False,
+            "assessment": True,
+            "profile": True,
+        }
+        plan = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_source_state=prerequisite_state("approved"),
+                output_folders=outputs,
+            )
+        )
+        self.assertEqual(plan["status"], "input-required")
+        self.assertEqual(plan["missing_roles"], [])
+        self.assertEqual(
+            plan["output_folder"], {"required": True, "supplied": False}
+        )
+        self.assertEqual(
+            plan["blocking_reasons"], ["fresh-output-folder-required"]
+        )
+
+    def test_prerequisite_plan_blocks_invalid_mechanical_state_but_not_gaps(self):
+        records = load_module()
+        invalid_catalog = prerequisite_state("valid")
+        invalid_catalog["fingerprints_match"] = False
+        blocked = records.build_prerequisite_plan(
+            **prerequisite_arguments(policy_catalog=invalid_catalog)
+        )
+        self.assertEqual(blocked["status"], "blocked-invalid")
+        self.assertEqual(
+            blocked["blocking_reasons"],
+            ["policy-catalog-fingerprints-mismatch"],
+        )
+
+        eligible = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_catalog=prerequisite_state(
+                    "valid", substantive_gaps=True
+                )
+            )
+        )
+        self.assertEqual(eligible["status"], "ready-for-assessment")
+
+    def test_prerequisite_plan_rejects_unknown_or_inexact_state(self):
+        records = load_module()
+        cases = []
+        unknown_state = prerequisite_state("unknown")
+        cases.append(
+            prerequisite_arguments(policy_source_state=unknown_state)
+        )
+        extra_field = prerequisite_state("approved")
+        extra_field["unexpected"] = True
+        cases.append(
+            prerequisite_arguments(policy_source_state=extra_field)
+        )
+        duplicate_roles = copy.deepcopy(STAGE_ROLES)
+        duplicate_roles["analysis"].append("policy-source")
+        cases.append(prerequisite_arguments(available_roles=duplicate_roles))
+        invalid_outputs = {
+            "collection": True,
+            "analysis": True,
+            "assessment": True,
+            "profile": "yes",
+        }
+        cases.append(prerequisite_arguments(output_folders=invalid_outputs))
+        for arguments in cases:
+            with self.subTest(arguments=arguments):
+                with self.assertRaises(records.MunicipalProfileError) as captured:
+                    records.build_prerequisite_plan(**arguments)
+                self.assertTrue(
+                    captured.exception.code.startswith("invalid-prerequisite-")
+                )
 
 
 if __name__ == "__main__":

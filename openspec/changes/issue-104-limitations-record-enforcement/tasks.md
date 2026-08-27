@@ -38,14 +38,14 @@
       durable specification with the approved trigger and record distinctions.
 - [x] 5.2 Run the same fresh-context pressure scenarios against the corrected
       installed skill and score the observable behavior.
-- [ ] 5.3 Preserve exact pressure inputs and scored baseline/corrected outputs
+- [x] 5.3 Preserve exact pressure inputs and scored baseline/corrected outputs
       in the verification artifact.
 
 ## 6. Completion
 
-- [ ] 6.1 Run mutation checks, focused neighboring tests, strict OpenSpec
+- [x] 6.1 Run mutation checks, focused neighboring tests, strict OpenSpec
       validation, and `npm run validate`.
-- [ ] 6.2 Review the complete diff against Issue #104 and complete verification
+- [x] 6.2 Review the complete diff against Issue #104 and complete verification
       and retrospective artifacts.
 - [ ] 6.3 Archive the OpenSpec change, push every commit, verify the exact
       remote head and checks, then mark the PR ready while leaving PR and issue

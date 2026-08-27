@@ -689,6 +689,15 @@ def assert_closed_actor_unit_contract(test, text):
         r"missing complaint[- ]level",
         r"application|factual bridge",
     )
+    assert_clause_contains(
+        test,
+        text,
+        r"arrest[- ]time actor unit",
+        r"(?:report|prosecution|suppression|dismissal)",
+        r"limited later function",
+        r"not part",
+        r"contemporaneous knowledge",
+    )
 
 
 def assert_completion_audit_rejects_open_actor_units(test, text):

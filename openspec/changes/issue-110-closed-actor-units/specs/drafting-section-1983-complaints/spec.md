@@ -38,14 +38,14 @@ complaint-level factual bridge.
   brief adds fuller authority comparisons
 - **THEN** the unit may be complete without duplicating the entire brief
 
-### Requirement: Later facts have an express limited function
+### Requirement: Later facts in an arrest-time unit have an express limited function
 
 The canonical complaint contract MUST require an express limited-use statement
-when an actor unit incorporates a report, prosecution, suppression, dismissal,
-identification, resistance, or other fact occurring after the challenged act.
-The unit MUST state that fact's limited later function and that the fact is not
-part of the Defendant's earlier relevant-time knowledge. A later-only fact MUST
-NOT enter the earlier knowledge set by incorporation.
+when an arrest-time actor unit incorporates a report, prosecution, suppression,
+dismissal, identification, resistance, or other fact occurring after the
+challenged act. The unit MUST state that fact's limited later function and that
+the fact is not part of the Defendant's earlier relevant-time knowledge. A
+later-only fact MUST NOT enter the earlier knowledge set by incorporation.
 
 #### Scenario: Arrest unit incorporates a later report
 

@@ -116,9 +116,9 @@ seizure, force, intervention, report conduct, or later custody.
 Within each applicable mapping required by the canonical general contract,
 identify the suspected offense, disputed offense element, seizure point,
 arrest-time knowledge, personal participation, and probable-cause application
-for that defendant. Address an alternative offense or arguable probable cause
-only when the defense, a controlling ruling, or governing law makes it material.
-Do not rely only on a general right to be free from arrest.
+for that defendant. Address an alternative offense only when the defense, a
+controlling ruling, or governing law makes it material. Do not rely only on a
+general right to be free from arrest.
 
 Each challenged officer requires one closed application that identifies the
 seizure or continued-seizure point; the suspected offense and every alternative

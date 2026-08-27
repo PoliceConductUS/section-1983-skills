@@ -45,10 +45,11 @@ synthetic evaluation fixture.
 
 Use Alternative C. Functional closure, not a fixed paragraph count, controls.
 The complaint must state its own decisive bridge; a supporting brief may expand
-but cannot cure it. Later facts may serve later functions only when the actor
-unit expressly excludes them from the earlier knowledge set. The fixture will
-use deterministic grading only for a narrow explicit shortcut and will reserve
-substantive discrimination to independent rubric judgment.
+but cannot cure it. In an arrest-time actor unit, later facts may serve later
+functions only when the unit expressly excludes them from the earlier knowledge
+set. The fixture will use deterministic grading only for a narrow explicit
+shortcut and will reserve substantive discrimination to independent rubric
+judgment.
 
 ## Open Questions
 

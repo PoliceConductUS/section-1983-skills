@@ -14,8 +14,8 @@ placing the decisive factual bridge inside the actor unit.
 - Make each claim–Defendant–challenged-act unit functionally complete in filed
   complaint prose.
 - Require actor-specific incorporation when acts, stages, or knowledge differ.
-- Keep later facts out of an earlier knowledge set while permitting an expressly
-  stated later function.
+- In arrest-time units, keep later facts out of the earlier knowledge set while
+  permitting an expressly stated later function.
 - State the false-arrest actor recipe in one place without duplicating the
   general complaint skeleton.
 - Preserve a paired synthetic behavior fixture and independent rubric.
@@ -68,8 +68,9 @@ described as proof of legal sufficiency or actor-unit closure.
 
 - **Guidance causes needless repetition** → Define functional closure and allow
   compact prose rather than fixed paragraph cardinality.
-- **Later facts disappear entirely** → Permit them when their later function is
-  stated and they are excluded from the earlier knowledge set.
+- **Later facts disappear entirely from arrest-time units** → Permit them when
+  their later function is stated and they are excluded from the earlier
+  knowledge set.
 - **Fixture appears to prove semantics mechanically** → Limit the deterministic
   rule to the explicit shortcut and state rubric ownership in the fixture and
   durable specification.

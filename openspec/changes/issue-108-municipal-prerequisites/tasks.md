@@ -24,9 +24,9 @@
 
 ## 4. Installed public workflow
 
-- [ ] 4.1 Update the municipal-profile skill and source-folder reference with
+- [x] 4.1 Update the municipal-profile skill and source-folder reference with
       separate resolution and compilation operations.
-- [ ] 4.2 Update README routing without changing any upstream skill's folder or
+- [x] 4.2 Update README routing without changing any upstream skill's folder or
       semantic contract.
 
 ## 5. Verification

@@ -167,14 +167,27 @@ OpenSpec.
   workflow: municipal-profile-prerequisites
   status: ready-for-assessment
   next_skill: assessing-police-policy-compliance
-  required_roles: []
+  required_roles:
+    - policy-catalog
+    - actor
+    - event
+    - phase
+    - case-record
+    - assessment-scope
   missing_roles: []
   internet: disabled
   output_folder:
     required: true
     supplied: true
   blocking_reasons: []
-  postconditions: []
+  postconditions:
+    - terminal-run-receipt-success
+    - policy-assessments.yaml-present
+    - policy-assessment-gaps.yaml-present
+    - policy-assessment.md-present
+    - policy-assessment-validation.json-present
+    - domain-validation-passed
+    - input-fingerprints-match
   ```
 
 - [ ] **Step 5: Verify GREEN**

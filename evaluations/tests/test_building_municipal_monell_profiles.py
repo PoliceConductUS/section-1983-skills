@@ -488,7 +488,7 @@ class BuildingMunicipalMonellProfilesTest(unittest.TestCase):
             [
                 "terminal-run-receipt-success",
                 "policy-requirements.yaml-present",
-                "policy-gaps.yaml-present",
+                "policy-analysis-gaps.yaml-present",
                 "policy-analysis.md-present",
                 "policy-analysis-validation.json-present",
                 "domain-validation-passed",
@@ -509,6 +509,18 @@ class BuildingMunicipalMonellProfilesTest(unittest.TestCase):
         )
         self.assertEqual(plan["required_roles"], STAGE_ROLES["assessment"])
         self.assertEqual(plan["internet"], "disabled")
+
+        roles = copy.deepcopy(STAGE_ROLES)
+        roles["assessment"].remove("actor")
+        missing = records.build_prerequisite_plan(
+            **prerequisite_arguments(
+                policy_catalog=prerequisite_state("valid"),
+                available_roles=roles,
+            )
+        )
+        self.assertEqual(missing["status"], "input-required")
+        self.assertEqual(missing["missing_roles"], ["actor"])
+        self.assertEqual(missing["blocking_reasons"], ["missing-role:actor"])
 
     def test_prerequisite_plan_resumes_profile_only_when_all_roles_are_ready(self):
         records = load_module()

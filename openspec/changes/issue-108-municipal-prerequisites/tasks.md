@@ -15,11 +15,11 @@
 
 ## 3. Deterministic resolver
 
-- [ ] 3.1 Implement exact input-state validation and fixed next-stage precedence
+- [x] 3.1 Implement exact input-state validation and fixed next-stage precedence
       in the municipal-profile helper.
-- [ ] 3.2 Return deterministic YAML and Markdown prerequisite plans with exact
+- [x] 3.2 Return deterministic YAML and Markdown prerequisite plans with exact
       roles, network mode, blockers, output readiness, and postconditions.
-- [ ] 3.3 Confirm valid substantive gaps continue while mechanical failures
+- [x] 3.3 Confirm valid substantive gaps continue while mechanical failures
       remain blocked-invalid.
 
 ## 4. Installed public workflow

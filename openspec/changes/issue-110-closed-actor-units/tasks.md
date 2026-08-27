@@ -27,9 +27,9 @@
 
 ## 4. Completion
 
-- [ ] 4.1 Run mutation checks, neighboring tests, strict OpenSpec validation,
+- [x] 4.1 Run mutation checks, neighboring tests, strict OpenSpec validation,
       and `npm run validate`.
-- [ ] 4.2 Review the complete diff against Issue #110 and complete verification
+- [x] 4.2 Review the complete diff against Issue #110 and complete verification
       and retrospective artifacts.
 - [ ] 4.3 Archive the OpenSpec change, run post-archive validation, and push the
       archive commit before externally verifying the exact remote head and

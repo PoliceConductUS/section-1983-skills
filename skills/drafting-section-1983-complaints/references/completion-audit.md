@@ -36,9 +36,9 @@ the fact-to-element application; when actors with different acts, stages, or
 knowledge share broad incorporation without closed individual applications; when
 a qualified-immunity paragraph gives only a paragraph range and conclusion; when
 later-only facts enter an earlier relevant-time knowledge set without an express
-limited-use statement; or when a supporting brief must cure a missing
-complaint-level application. Every unresolved required component is
-filing-critical.
+statement excluding them from that earlier knowledge set; or when a supporting
+brief must cure a missing complaint-level application. Every unresolved required
+component is filing-critical.
 
 A count is complete only if:
 

@@ -163,3 +163,40 @@ incorporating them without a limited function. Exact outputs are preserved in
 
 Corrected result: 5/5 closed actor units, compared with 2/5 closed baseline
 outputs under the same scored contract.
+
+## Mutation checks
+
+Two targeted mutations proved that the regression suite detects loss of the new
+behavior:
+
+1. Removing the paragraph-range-without-application prohibition caused the
+   focused contract test to fail on that missing clause.
+2. Replacing the fixture's named paragraph-range shortcut rule with an unrelated
+   rule caused the fixture test to fail because the expected
+   `paragraph-range-without-application` finding disappeared.
+
+The original text was restored after each mutation, and the focused suite
+returned to 31 passing tests.
+
+## Independent review corrections
+
+An independent review of the complete branch identified two contract-alignment
+problems. First, the false-arrest delta could be read to make arguable probable
+cause conditional whenever an alternative offense was immaterial. A new RED
+assertion reproduced the problem; the installed text now conditions only the
+alternative-offense discussion and always requires probable-cause and
+arguable-probable-cause application. Second, the completion audit conflated the
+general temporal-exclusion rule with the stronger arrest-time limited-function
+rule. A new RED assertion reproduced that problem; the general audit now
+requires an express statement excluding later-only facts from the earlier
+knowledge set, while the arrest-time contract separately requires any
+incorporated later facts' limited later function.
+
+## Full validation before archive
+
+`npm run validate` passed before independent review and again after the first
+review correction. Each run included 27 drafting-script tests, 664 evaluation
+tests, 29 installed skills, 39 OpenSpec items, the evaluation corpus, and
+governance validation. The final pre-archive run after the second review
+correction passed with the same counts. Post-archive validation will be recorded
+with the archived change.

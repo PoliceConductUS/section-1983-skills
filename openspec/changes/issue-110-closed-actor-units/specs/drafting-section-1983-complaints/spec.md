@@ -85,9 +85,10 @@ The completion audit MUST fail when the court must search several factual
 sections and construct the fact-to-element analysis; actors with different acts,
 stages, or knowledge share broad incorporation without closed individual
 applications; a QI paragraph gives only a paragraph range and conclusion;
-later-only facts enter an earlier knowledge set without an express limited-use
-statement; or a supporting brief is needed to cure a missing complaint-level
-application. Every unresolved required component MUST be filing-critical.
+later-only facts enter an earlier knowledge set without an express statement
+excluding them from that earlier knowledge set; or a supporting brief is needed
+to cure a missing complaint-level application. Every unresolved required
+component MUST be filing-critical.
 
 #### Scenario: Brief is the only source of application
 

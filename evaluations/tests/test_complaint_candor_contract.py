@@ -705,7 +705,7 @@ def assert_completion_audit_rejects_open_actor_units(test, text):
         r"court must (?:search|gather).{0,80}(?:construct|supply).{0,80}(?:fact[- ]to[- ]element|element analysis|application)",
         r"(?:officers|actors|defendants).{0,60}(?:different acts|different stages|different knowledge|acts, stages, or knowledge).{0,80}(?:broad|omnibus) incorporation",
         r"qualified[- ]immunity.{0,60}paragraph range.{0,60}conclusion",
-        r"later[- ]only facts.{0,80}(?:knowledge set|relevant[- ]time knowledge).{0,80}(?:express|limited[- ]use)",
+        r"later[- ]only facts.{0,80}(?:knowledge set|relevant[- ]time knowledge).{0,80}express.{0,40}exclud",
         r"brief.{0,80}(?:cure|supply).{0,80}missing complaint[- ]level",
     )
     for failure in required_failures:

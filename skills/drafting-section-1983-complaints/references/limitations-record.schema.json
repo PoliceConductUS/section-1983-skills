@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/section-1983-limitations-record-v1.json",
+  "title": "Section 1983 defendant-specific limitations gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "intended_individuals",
+    "records",
+    "filing_critical_gaps"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "status": { "enum": ["clear", "blocked"] },
+    "intended_individuals": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/intendedIndividual" }
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/limitationsRecord" }
+    },
+    "filing_critical_gaps": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "sourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/identifier" }
+    },
+    "nullableDate": {
+      "oneOf": [{ "type": "string", "format": "date" }, { "type": "null" }]
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "analysis", "source_refs"],
+      "properties": {
+        "status": { "enum": ["complete", "unresolved"] },
+        "analysis": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "datedFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "date", "basis", "source_refs"],
+      "properties": {
+        "status": { "enum": ["complete", "unresolved"] },
+        "date": { "$ref": "#/$defs/nullableDate" },
+        "basis": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" },
+        "identification_source": { "type": "string", "minLength": 1 },
+        "identification_method": { "type": "string", "minLength": 1 }
+      }
+    },
+    "intendedIndividual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defendant_id",
+        "name_or_role",
+        "identity_status",
+        "amendment_action",
+        "deadline_status",
+        "risk_raised"
+      ],
+      "properties": {
+        "defendant_id": { "$ref": "#/$defs/identifier" },
+        "name_or_role": { "type": "string", "minLength": 1 },
+        "identity_status": {
+          "enum": [
+            "named-serviceable",
+            "unnamed",
+            "role-only",
+            "misnamed",
+            "named-not-serviceable"
+          ]
+        },
+        "amendment_action": {
+          "enum": ["unchanged", "added", "identified", "substituted"]
+        },
+        "deadline_status": {
+          "enum": ["not-passed", "passed", "unresolved"]
+        },
+        "risk_raised": { "type": "boolean" }
+      }
+    },
+    "diligenceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "action", "result", "source_refs"],
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "action": { "type": "string", "minLength": 1 },
+        "result": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["municipality", "custodian", "individual_defendant"],
+      "properties": {
+        "municipality": { "$ref": "#/$defs/analysis" },
+        "custodian": { "$ref": "#/$defs/analysis" },
+        "individual_defendant": { "$ref": "#/$defs/analysis" }
+      }
+    },
+    "provenanceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record",
+        "holder_or_controller",
+        "request_recipient",
+        "request_date",
+        "response_date",
+        "denial_date",
+        "follow_up_dates",
+        "stated_basis",
+        "source_refs",
+        "attribution"
+      ],
+      "properties": {
+        "record": { "type": "string", "minLength": 1 },
+        "holder_or_controller": { "type": "string", "minLength": 1 },
+        "request_recipient": { "type": "string", "minLength": 1 },
+        "request_date": { "$ref": "#/$defs/nullableDate" },
+        "response_date": { "$ref": "#/$defs/nullableDate" },
+        "denial_date": { "$ref": "#/$defs/nullableDate" },
+        "follow_up_dates": {
+          "type": "array",
+          "items": { "type": "string", "format": "date" },
+          "uniqueItems": true
+        },
+        "stated_basis": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" },
+        "attribution": { "$ref": "#/$defs/attribution" }
+      }
+    },
+    "notice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "recipient",
+        "date",
+        "factual_basis",
+        "prejudice_analysis",
+        "knew_or_should_have_known_but_for_mistake_analysis",
+        "source_refs"
+      ],
+      "properties": {
+        "status": { "enum": ["complete", "unresolved"] },
+        "recipient": { "type": "string", "minLength": 1 },
+        "date": { "$ref": "#/$defs/nullableDate" },
+        "factual_basis": { "type": "string", "minLength": 1 },
+        "prejudice_analysis": { "type": "string", "minLength": 1 },
+        "knew_or_should_have_known_but_for_mistake_analysis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "service_status",
+        "date",
+        "method",
+        "attempts",
+        "proof",
+        "source_refs"
+      ],
+      "properties": {
+        "status": { "enum": ["complete", "unresolved"] },
+        "service_status": {
+          "enum": ["not-attempted", "attempted", "served", "unresolved"]
+        },
+        "date": { "$ref": "#/$defs/nullableDate" },
+        "method": { "type": "string", "minLength": 1 },
+        "attempts": { "type": "string", "minLength": 1 },
+        "proof": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "rule4m": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "deadline",
+        "extension_request_status",
+        "good_cause_facts",
+        "discretionary_extension_facts",
+        "requested_relief",
+        "source_refs"
+      ],
+      "properties": {
+        "status": { "enum": ["complete", "unresolved"] },
+        "deadline": { "$ref": "#/$defs/nullableDate" },
+        "extension_request_status": {
+          "enum": [
+            "not-requested",
+            "pending",
+            "granted",
+            "denied",
+            "unresolved"
+          ]
+        },
+        "good_cause_facts": { "type": "string", "minLength": 1 },
+        "discretionary_extension_facts": { "type": "string", "minLength": 1 },
+        "requested_relief": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "authorityRoute": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "reason", "source_refs"],
+          "properties": {
+            "status": { "enum": ["not-relied-on", "unresolved"] },
+            "reason": { "type": "string", "minLength": 1 },
+            "source_refs": { "$ref": "#/$defs/sourceRefs" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "controlling_jurisdiction",
+            "governing_authority",
+            "pinpoint",
+            "authority_status",
+            "supported_proposition",
+            "defendant_specific_application",
+            "source_refs"
+          ],
+          "properties": {
+            "status": { "const": "relied-on" },
+            "controlling_jurisdiction": { "type": "string", "minLength": 1 },
+            "governing_authority": { "type": "string", "minLength": 1 },
+            "pinpoint": { "type": "string", "minLength": 1 },
+            "authority_status": {
+              "enum": [
+                "binding-current",
+                "binding-status-unresolved",
+                "persuasive-current",
+                "superseded",
+                "unresolved"
+              ]
+            },
+            "supported_proposition": { "type": "string", "minLength": 1 },
+            "defendant_specific_application": {
+              "type": "string",
+              "minLength": 1
+            },
+            "source_refs": { "$ref": "#/$defs/sourceRefs" }
+          }
+        }
+      ]
+    },
+    "limitationsRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "defendant_id",
+        "accrual",
+        "limitations_deadline",
+        "original_doe_or_role_description",
+        "same_transaction_analysis",
+        "mistake_versus_lack_of_knowledge",
+        "identity_timeline",
+        "diligence",
+        "record_control_provenance",
+        "rule_15_c_1_c_notice",
+        "service",
+        "rule_4_m",
+        "authority_routes",
+        "defendant_specific_concealment_or_tolling",
+        "fallback_claims_and_severable_relief",
+        "filing_critical_gaps",
+        "status"
+      ],
+      "properties": {
+        "record_id": { "$ref": "#/$defs/identifier" },
+        "defendant_id": { "$ref": "#/$defs/identifier" },
+        "accrual": { "$ref": "#/$defs/datedFact" },
+        "limitations_deadline": { "$ref": "#/$defs/datedFact" },
+        "original_doe_or_role_description": { "$ref": "#/$defs/analysis" },
+        "same_transaction_analysis": { "$ref": "#/$defs/analysis" },
+        "mistake_versus_lack_of_knowledge": { "$ref": "#/$defs/analysis" },
+        "identity_timeline": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_first_available",
+            "source_first_possessed",
+            "objectively_ascertainable",
+            "actual_identification"
+          ],
+          "properties": {
+            "source_first_available": { "$ref": "#/$defs/datedFact" },
+            "source_first_possessed": { "$ref": "#/$defs/datedFact" },
+            "objectively_ascertainable": { "$ref": "#/$defs/datedFact" },
+            "actual_identification": { "$ref": "#/$defs/datedFact" }
+          }
+        },
+        "diligence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pre_limitations",
+            "post_filing_pre_identification",
+            "post_identification_pre_service"
+          ],
+          "properties": {
+            "pre_limitations": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/diligenceEntry" }
+            },
+            "post_filing_pre_identification": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/diligenceEntry" }
+            },
+            "post_identification_pre_service": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/diligenceEntry" }
+            }
+          }
+        },
+        "record_control_provenance": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/provenanceEntry" }
+        },
+        "rule_15_c_1_c_notice": { "$ref": "#/$defs/notice" },
+        "service": { "$ref": "#/$defs/service" },
+        "rule_4_m": { "$ref": "#/$defs/rule4m" },
+        "authority_routes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "limitations",
+            "rule_15_c_1_a",
+            "rule_15_c_1_c",
+            "rule_4_m",
+            "tolling",
+            "concealment"
+          ],
+          "properties": {
+            "limitations": { "$ref": "#/$defs/authorityRoute" },
+            "rule_15_c_1_a": { "$ref": "#/$defs/authorityRoute" },
+            "rule_15_c_1_c": { "$ref": "#/$defs/authorityRoute" },
+            "rule_4_m": { "$ref": "#/$defs/authorityRoute" },
+            "tolling": { "$ref": "#/$defs/authorityRoute" },
+            "concealment": { "$ref": "#/$defs/authorityRoute" }
+          }
+        },
+        "defendant_specific_concealment_or_tolling": {
+          "$ref": "#/$defs/analysis"
+        },
+        "fallback_claims_and_severable_relief": { "$ref": "#/$defs/analysis" },
+        "filing_critical_gaps": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "status": { "enum": ["clear", "blocked"] }
+      }
+    }
+  }
+}

@@ -20,9 +20,9 @@
 
 ## 3. Schema and installed complaint checker
 
-- [ ] 3.1 Add the limitations-gate JSON Schema and a valid complete fixture.
-- [ ] 3.2 Add minimal native validation to the installed complaint checker.
-- [ ] 3.3 Confirm the complaint-checker focused tests pass without deciding
+- [x] 3.1 Add the limitations-gate JSON Schema and a valid complete fixture.
+- [x] 3.2 Add minimal native validation to the installed complaint checker.
+- [x] 3.3 Confirm the complaint-checker focused tests pass without deciding
       legal sufficiency.
 
 ## 4. Filing CI alignment

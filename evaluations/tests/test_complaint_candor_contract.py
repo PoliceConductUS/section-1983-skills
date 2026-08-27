@@ -739,6 +739,14 @@ def assert_false_arrest_closed_actor_unit(test, text):
         r"(?:limited later function|exclude|not part)",
         r"(?:contemporaneous|relevant[- ]time|earlier) knowledge",
     )
+    assert_no_clause_contains(
+        test,
+        text,
+        r"alternative offense",
+        r"arguable probable cause",
+        r"only when",
+        r"(?:defense|controlling ruling|governing law)",
+    )
 
 
 class ComplaintCandorContractTest(unittest.TestCase):

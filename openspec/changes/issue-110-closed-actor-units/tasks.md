@@ -17,13 +17,13 @@
 
 ## 3. Installed contracts and fixture
 
-- [ ] 3.1 Add the minimal closed-unit recipe to the canonical complaint contract
+- [x] 3.1 Add the minimal closed-unit recipe to the canonical complaint contract
       and completion audit.
-- [ ] 3.2 Add the officer-, seizure-, and offense-specific closed-unit recipe to
+- [x] 3.2 Add the officer-, seizure-, and offense-specific closed-unit recipe to
       the false-arrest delta.
-- [ ] 3.3 Add the paired synthetic fixture, narrow deterministic shortcut
+- [x] 3.3 Add the paired synthetic fixture, narrow deterministic shortcut
       finding, and independent semantic rubric.
-- [ ] 3.4 Run focused tests and corrected fresh-context behavior verification.
+- [x] 3.4 Run focused tests and corrected fresh-context behavior verification.
 
 ## 4. Completion
 

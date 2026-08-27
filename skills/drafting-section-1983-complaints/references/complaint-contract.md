@@ -198,6 +198,37 @@ the same claim require separately complete mappings. The mapping is the
 count-level drafting and audit record; the filed count may express its functions
 in concise paragraphs rather than labels or a table.
 
+### Closed actor application unit
+
+Each claim–Defendant–challenged-act unit must identify its own incorporated
+factual paragraphs and directly state, in compact form:
+
+- the Defendant's challenged act and event time;
+- the decisive facts known to that Defendant then;
+- the disputed claim or offense element;
+- why the then-known facts establish or fail to establish that element;
+- which asserted facts occurred only later and cannot enter the earlier
+  relevant-time knowledge set;
+- the Defendant's personal causal role and resulting injury; and
+- the Defendant-specific application of qualified-immunity prongs one and two
+  when qualified immunity applies.
+
+Omnibus incorporation, including incorporation qualified by “to the extent
+applicable,” is insufficient when Defendants' acts, stages, or knowledge differ.
+A paragraph range plus a conclusion does not perform the required application.
+Functional closure does not impose a fixed paragraph count or require needless
+repetition.
+
+The complaint must contain the decisive factual bridge. A supporting brief may
+expand authority comparisons and competing record interpretations but must not
+supply a missing complaint-level application or factual bridge.
+
+When an arrest-time actor unit incorporates later report, prosecution,
+suppression, dismissal, identification, resistance, or other post-act
+paragraphs, state their limited later function and state that they are not part
+of the Defendant's contemporaneous knowledge. Later-only facts must not enter
+the earlier knowledge set by incorporation.
+
 ### Canonical claim–defendant–challenged-act checklist
 
 Record the following fields in this order:

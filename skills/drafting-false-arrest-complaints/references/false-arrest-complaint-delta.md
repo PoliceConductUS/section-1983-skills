@@ -120,6 +120,20 @@ for that defendant. Address an alternative offense or arguable probable cause
 only when the defense, a controlling ruling, or governing law makes it material.
 Do not rely only on a general right to be free from arrest.
 
+Each challenged officer requires one closed application that identifies the
+seizure or continued-seizure point; the suspected offense and every alternative
+offense actually raised by the defense, a controlling ruling, or governing law;
+the facts known to that officer at that point; the missing or disputed element
+of each material offense; the exclusion or limited later function of
+post-seizure identification, resistance, reports, prosecution, and other later
+facts; probable-cause and arguable-probable-cause application; personal
+participation and causal stage; resulting injury; conduct-specific fair-warning
+analysis; and Defendant-specific qualified-immunity prongs one and two.
+
+Post-seizure or other later facts may perform a limited later function, but they
+must be excluded from the officer's contemporaneous knowledge unless supported
+facts show the officer knew them at the challenged seizure point.
+
 Keep initial arrest, later force, continued detention, report conduct, and
 prosecution separate when their actors, decisions, knowledge sets, causal paths,
 or injuries differ. Incorporate only the factual paragraphs that perform work

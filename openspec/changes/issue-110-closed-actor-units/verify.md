@@ -151,4 +151,15 @@ that current standards do not reliably enforce the intended shape.
 
 ## GREEN evidence
 
-Pending implementation.
+The same combined-pressure task ran in five new independent contexts after each
+agent read the complete corrected canonical and false-arrest skills and
+references. All five rejected the requested open-unit shortcut and supplied
+compact actor-specific closure. Every run identified actor-specific paragraphs,
+relevant-time offense application, personal causation and injury, and both QI
+prongs. Runs that referenced paragraphs 31–34 expressly excluded them from the
+earlier knowledge set; runs 2–3 omitted those later paragraphs rather than
+incorporating them without a limited function. Exact outputs are preserved in
+`green-pressure.md`.
+
+Corrected result: 5/5 closed actor units, compared with 2/5 closed baseline
+outputs under the same scored contract.

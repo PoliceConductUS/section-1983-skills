@@ -22,8 +22,8 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run focused tests, strict OpenSpec validation, and full repository
+- [x] 4.1 Run focused tests, strict OpenSpec validation, and full repository
       validation.
-- [ ] 4.2 Record verification and retrospective evidence and archive OpenSpec.
-- [ ] 4.3 Verify exact remote head and checks, mark the PR ready, and leave the
+- [x] 4.2 Record verification and retrospective evidence and archive OpenSpec.
+- [x] 4.3 Verify exact remote head and checks, mark the PR ready, and leave the
       PR and Issue #106 open.

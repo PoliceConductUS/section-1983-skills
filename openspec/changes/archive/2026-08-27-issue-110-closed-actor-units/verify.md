@@ -200,3 +200,22 @@ tests, 29 installed skills, 39 OpenSpec items, the evaluation corpus, and
 governance validation. The final pre-archive run after the second review
 correction passed with the same counts. Post-archive validation will be recorded
 with the archived change.
+
+The final independent follow-up review at `55b2b91` reported no Critical or
+Important findings and confirmed that the general temporal-exclusion rule and
+the arrest-time limited-function rule are correctly separated.
+
+## Post-archive validation
+
+The archive applied four complaint requirements and one evaluation requirement
+to the canonical specifications. After formatting the generated spec changes,
+`npm run validate` passed: 27 drafting-script tests, 664 evaluation tests, 29
+installed skills, 38 archived OpenSpec items, the evaluation corpus, and
+governance validation all passed.
+
+An earlier post-archive run encountered an unrelated load-sensitive timeout
+classification in
+`test_agent_failures_produce_bounded_stable_json_and_markdown_reports` while the
+host load average exceeded 150. The exact test passed unchanged once scheduling
+recovered, and the complete validation then passed. No timeout or reporting code
+was changed.

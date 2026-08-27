@@ -31,6 +31,6 @@
       and `npm run validate`.
 - [x] 4.2 Review the complete diff against Issue #110 and complete verification
       and retrospective artifacts.
-- [ ] 4.3 Archive the OpenSpec change, run post-archive validation, and push the
+- [x] 4.3 Archive the OpenSpec change, run post-archive validation, and push the
       archive commit before externally verifying the exact remote head and
       checks and marking the PR ready while leaving PR and issue open.

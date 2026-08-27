@@ -58,6 +58,49 @@ If internet is disabled, do not acquire or silently refresh material. A paid,
 unavailable, ambiguous, or out-of-scope source remains a gap. Never incur a fee
 without separate user authorization.
 
+#### CourtListener candidate discovery
+
+Use the [CourtListener REST API](https://www.courtlistener.com/help/api/rest/)
+as a public discovery source, not as proof that a case belongs in the profile
+corpus:
+
+1. Resolve the judge identity first with a `type=p` search. Prefer the returned
+   stable judge identifier. Use a documented name-query fallback only when a
+   stable identifier cannot be resolved, and preserve the ambiguity as a gap.
+2. Search opinions with `type=o` and distinguish `author_id` or `judge`
+   opinion authorship from docket searches. Search dockets or RECAP results with
+   `type=d` or `type=r` and distinguish `assigned_to_id` or `assignedTo` docket
+   assignment from `referred_to_id` or `referredTo` referral. These
+   relationships are not interchangeable.
+3. Narrow the declared candidate universe by `court_id`, the judge's tenure or
+   other date range, case category, procedural posture, and the profile's
+   research question. `suitNature`, `cause`, Section 1983 terms, and police or
+   law-enforcement terms are discovery leads only.
+4. Before inclusion, use primary docket material to verify the judge
+   relationship, Section 1983 basis, police or law-enforcement involvement, and
+   relevant procedural posture. Reject agency-only matters, unidentified-actor
+   matches, non-police matters, non-Section 1983 matters, and unresolved
+   candidates unless later primary material cures the stated defect.
+5. For every reviewed candidate, record the stable result identity, result
+   rank, checked date, sanitized query type and parameters, pagination or cursor
+   identity, source-coverage limitation, selection or exclusion status, and an
+   inspectable reason. Search visibility and approximate result counts do not
+   establish a complete denominator.
+
+Never write API tokens, credentials, cookies, authorization headers, or
+unsanitized request data to the output folder, `SOURCE.yaml`, receipts, or
+`<output-folder>/temp`.
+
+#### Optional PACER or CM/ECF verification
+
+Treat PACER or court-specific CM/ECF as the optional official fallback for
+docket identity, assignment, status, and completeness when public sources are
+insufficient. Require explicit access authorization before using either system
+and separate fee approval before incurring a charge. Credentials remain
+runtime-only and never enter an output, provenance record, receipt, or temporary
+file. If access or fee approval is absent, retain the exact coverage gap and do
+not represent the official docket as checked.
+
 ### Compilation operation
 
 Internet is `disabled`. Compile only the validated read-only inputs supplied at

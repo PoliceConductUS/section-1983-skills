@@ -129,7 +129,7 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
             SKILL / "references" / "source-documented-folders.md"
         ).read_text().casefold()
         guide = (ROOT / "JUDGE_OVERLAYS.md").read_text().casefold()
-        combined = "\n".join((skill, provenance, guide))
+        combined = " ".join("\n".join((skill, provenance, guide)).split())
 
         required = (
             "courtlistener rest api",
@@ -167,7 +167,7 @@ class JudicialReasoningProfileStructureTest(unittest.TestCase):
     def test_pacer_fallback_separates_access_and_fee_authority(self):
         skill = (SKILL / "SKILL.md").read_text().casefold()
         guide = (ROOT / "JUDGE_OVERLAYS.md").read_text().casefold()
-        combined = "\n".join((skill, guide))
+        combined = " ".join("\n".join((skill, guide)).split())
 
         self.assertIn("pacer", combined)
         self.assertIn("cm/ecf", combined)

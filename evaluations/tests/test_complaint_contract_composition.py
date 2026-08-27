@@ -73,6 +73,11 @@ MECHANICAL_CHECKS = (
     "cross-reference-target",
     "incorporation-target",
     "required-count-field-location",
+    "limitations-gate-presence",
+    "limitations-trigger-structure",
+    "limitations-record-cardinality",
+    "limitations-record-structure",
+    "limitations-filing-critical-status",
 )
 EXCLUDED_JUDGMENTS = (
     "fact-truth",
@@ -81,6 +86,11 @@ EXCLUDED_JUDGMENTS = (
     "material-analogy",
     "strategy",
     "filing-readiness",
+    "relation-back",
+    "tolling",
+    "mistake",
+    "notice-sufficiency",
+    "service-sufficiency",
 )
 FINDING_FIELDS = (
     "finding_id",

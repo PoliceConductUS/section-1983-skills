@@ -389,6 +389,32 @@ class InstalledFilingChecksTest(unittest.TestCase):
                     {finding["check_id"] for finding in result["findings"]},
                 )
 
+    def test_structurally_valid_unresolved_identity_event_is_filing_critical(self):
+        checker = load_module(
+            "installed_complaint_checker_unresolved_identity", COMPLAINT_SCRIPT
+        )
+        document = complaint_document()
+        record = complete_limitations_record()
+        record["identity_timeline"]["objectively_ascertainable"]["status"] = (
+            "unresolved"
+        )
+        document["limitations_gate"] = {
+            "schema_version": 1,
+            "status": "clear",
+            "intended_individuals": [intended_individual()],
+            "records": [record],
+            "filing_critical_gaps": [],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "complaint.json").write_text(json.dumps(document))
+            result = checker.check_complaint(root, "complaint.json")
+
+        checks = {finding["check_id"] for finding in result["findings"]}
+        self.assertEqual(result["status"], "failed")
+        self.assertNotIn("limitations-record-structure", checks)
+        self.assertIn("limitations-filing-critical-status", checks)
+
     def test_complete_supported_adverse_record_does_not_create_legal_judgment(self):
         checker = load_module("installed_complaint_checker_complete_limitations", COMPLAINT_SCRIPT)
         document = complaint_document()

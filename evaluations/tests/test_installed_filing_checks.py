@@ -415,6 +415,76 @@ class InstalledFilingChecksTest(unittest.TestCase):
         self.assertNotIn("limitations-record-structure", checks)
         self.assertIn("limitations-filing-critical-status", checks)
 
+    def test_both_installed_checkers_reject_duplicate_intended_defendant_ids(self):
+        document = complaint_document()
+        document["limitations_gate"] = {
+            "schema_version": 1,
+            "status": "clear",
+            "intended_individuals": [
+                intended_individual(),
+                intended_individual(name_or_role="Booking Officer Doe"),
+            ],
+            "records": [complete_limitations_record()],
+            "filing_critical_gaps": [],
+        }
+        results = self._run_both_limitations_checkers(document, "duplicate_defendant")
+
+        for checker_name, result in results.items():
+            with self.subTest(checker=checker_name):
+                self.assertEqual(result["status"], "failed")
+                self.assertIn(
+                    "limitations-trigger-structure",
+                    {finding["check_id"] for finding in result["findings"]},
+                )
+
+    def test_both_installed_checkers_reject_duplicate_limitations_record_ids(self):
+        second_record = complete_limitations_record("booking-doe")
+        second_record["record_id"] = "limitations-officer-doe"
+        document = complaint_document()
+        document["limitations_gate"] = {
+            "schema_version": 1,
+            "status": "clear",
+            "intended_individuals": [
+                intended_individual(),
+                intended_individual("booking-doe", name_or_role="Booking Officer Doe"),
+            ],
+            "records": [complete_limitations_record(), second_record],
+            "filing_critical_gaps": [],
+        }
+        results = self._run_both_limitations_checkers(document, "duplicate_record")
+
+        for checker_name, result in results.items():
+            with self.subTest(checker=checker_name):
+                self.assertEqual(result["status"], "failed")
+                self.assertIn(
+                    "limitations-record-cardinality",
+                    {finding["check_id"] for finding in result["findings"]},
+                )
+
+    def _run_both_limitations_checkers(self, document, module_suffix):
+        complaint_checker = load_module(
+            f"installed_complaint_checker_{module_suffix}", COMPLAINT_SCRIPT
+        )
+        filing_ci = load_module(f"installed_filing_ci_{module_suffix}", FILING_CI_SCRIPT)
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            filing_root = base / "filing"
+            authorities_root = base / "authorities"
+            filing_root.mkdir()
+            authorities_root.mkdir()
+            (filing_root / "complaint.json").write_text(json.dumps(document))
+            return {
+                "complaint": complaint_checker.check_complaint(
+                    filing_root, "complaint.json"
+                ),
+                "filing-ci": filing_ci.run_filing_ci(
+                    filing_root,
+                    "complaint.json",
+                    authorities_root,
+                    CHECKER_ID,
+                ),
+            }
+
     def test_complete_supported_adverse_record_does_not_create_legal_judgment(self):
         checker = load_module("installed_complaint_checker_complete_limitations", COMPLAINT_SCRIPT)
         document = complaint_document()

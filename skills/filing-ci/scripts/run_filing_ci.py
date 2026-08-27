@@ -252,12 +252,46 @@ def _limitations_findings(document, target):
     if not isinstance(gate, dict):
         return findings
 
+    seen_defendant_ids = set()
+    intended = gate.get("intended_individuals")
+    for index, entry in enumerate(intended if isinstance(intended, list) else []):
+        defendant_id = entry.get("defendant_id") if isinstance(entry, dict) else None
+        if isinstance(defendant_id, str) and defendant_id in seen_defendant_ids:
+            findings.append(
+                _finding(
+                    "limitations-trigger-structure",
+                    target,
+                    f"limitations_gate.intended_individuals[{index}]",
+                    "intended-defendant IDs must be unique",
+                )
+            )
+            critical = True
+        elif isinstance(defendant_id, str):
+            seen_defendant_ids.add(defendant_id)
+
     affected = _affected_defendants(gate)
     records = gate.get("records") if isinstance(gate.get("records"), list) else []
     records_by_defendant = {}
-    for record in records:
-        if isinstance(record, dict) and isinstance(record.get("defendant_id"), str):
-            records_by_defendant.setdefault(record["defendant_id"], []).append(record)
+    seen_record_ids = set()
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            continue
+        defendant_id = record.get("defendant_id")
+        record_id = record.get("record_id")
+        if isinstance(record_id, str) and record_id in seen_record_ids:
+            findings.append(
+                _finding(
+                    "limitations-record-cardinality",
+                    target,
+                    f"limitations_gate.records[{index}]",
+                    "record IDs must be unique",
+                )
+            )
+            critical = True
+        elif isinstance(record_id, str):
+            seen_record_ids.add(record_id)
+        if isinstance(defendant_id, str):
+            records_by_defendant.setdefault(defendant_id, []).append(record)
     for defendant_id in sorted(affected):
         matches = records_by_defendant.get(defendant_id, [])
         if len(matches) != 1:

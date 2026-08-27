@@ -47,6 +47,6 @@
       validation, and `npm run validate`.
 - [x] 6.2 Review the complete diff against Issue #104 and complete verification
       and retrospective artifacts.
-- [ ] 6.3 Archive the OpenSpec change, push every commit, verify the exact
-      remote head and checks, then mark the PR ready while leaving PR and issue
-      open.
+- [x] 6.3 Archive the OpenSpec change, run post-archive validation, and push the
+      archive commit before externally verifying the exact remote head and
+      checks and marking the PR ready while leaving PR and issue open.

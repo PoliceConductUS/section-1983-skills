@@ -31,6 +31,9 @@
 - Pre-archive `npm run validate`: formatting passed; 27 unit tests and 648
   evaluation tests passed; 29 skills were discoverable; all 39 OpenSpec items
   passed; corpus generation and governance validation passed.
+- Post-archive `npm run validate`: formatting passed; 27 unit tests and 650
+  evaluation tests passed; 29 skills were discoverable; all 38 durable OpenSpec
+  items passed; corpus generation and governance validation passed.
 
 The deterministic checkers validate structure, types, stable identifiers,
 cardinality, dates, sources, and unresolved status. They expressly exclude fact

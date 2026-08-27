@@ -31,7 +31,7 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Run focused tests, strict OpenSpec validation, and `npm run validate`.
+- [x] 5.1 Run focused tests, strict OpenSpec validation, and `npm run validate`.
 - [ ] 5.2 Complete verification and retrospective artifacts, archive OpenSpec,
       and rerun full validation.
 - [ ] 5.3 Push the archive, verify exact-head GitHub checks, mark PR #109 ready,

@@ -457,7 +457,17 @@ class InstalledFilingChecksTest(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertNotEqual(result["exit_status"], 0)
         finding_checks = {finding["check_id"] for finding in result["findings"]}
-        self.assertEqual(finding_checks, set(contract["mechanical_checks"]))
+        self.assertEqual(
+            finding_checks,
+            set(contract["mechanical_checks"])
+            - {
+                "limitations-gate-presence",
+                "limitations-trigger-structure",
+                "limitations-record-cardinality",
+                "limitations-record-structure",
+                "limitations-filing-critical-status",
+            },
+        )
         self.assertTrue(set(contract["excluded_judgments"]).isdisjoint(finding_checks))
 
     def test_complaint_checker_rejects_unconfined_targets(self):

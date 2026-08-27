@@ -27,9 +27,9 @@
 
 ## 4. Filing CI alignment
 
-- [ ] 4.1 Add the exact aligned schema to Filing CI and minimal native
+- [x] 4.1 Add the exact aligned schema to Filing CI and minimal native
       validation at its installed seam.
-- [ ] 4.2 Confirm identical fixtures produce aligned hard findings in both
+- [x] 4.2 Confirm identical fixtures produce aligned hard findings in both
       independently installed checkers.
 
 ## 5. Canonical guidance and pressure rerun

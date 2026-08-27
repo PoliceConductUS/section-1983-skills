@@ -6,14 +6,14 @@
       local baseline.
 - [x] 1.2 Create Issue #104, its ignored worktree, and this OpenSpec change from
       PR #103's exact head.
-- [ ] 1.3 Strictly validate, commit, push, and open the stacked draft PR.
+- [x] 1.3 Strictly validate, commit, push, and open the stacked draft PR.
 
 ## 2. RED public-seam and behavior evidence
 
-- [ ] 2.1 Add public-seam tests for trigger derivation, schema alignment,
+- [x] 2.1 Add public-seam tests for trigger derivation, schema alignment,
       separate identity events, per-defendant cardinality, unresolved
       fail-closed behavior, and legal-judgment exclusions.
-- [ ] 2.2 Run those tests against the Issue #102 implementation and retain the
+- [x] 2.2 Run those tests against the Issue #102 implementation and retain the
       expected RED result.
 - [ ] 2.3 Run and preserve fresh-context baseline pressure scenarios against the
       Issue #102 installed skill.

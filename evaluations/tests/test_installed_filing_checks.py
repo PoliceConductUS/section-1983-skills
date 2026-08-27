@@ -344,6 +344,51 @@ class InstalledFilingChecksTest(unittest.TestCase):
         self.assertIn("limitations-record-structure", checks)
         self.assertIn("limitations-filing-critical-status", checks)
 
+    def test_both_installed_checkers_require_actual_identification_source_and_method(self):
+        document = complaint_document()
+        record = complete_limitations_record()
+        record["identity_timeline"]["actual_identification"].pop(
+            "identification_method"
+        )
+        document["limitations_gate"] = {
+            "schema_version": 1,
+            "status": "clear",
+            "intended_individuals": [intended_individual()],
+            "records": [record],
+            "filing_critical_gaps": [],
+        }
+
+        complaint_checker = load_module(
+            "installed_complaint_checker_identification_method", COMPLAINT_SCRIPT
+        )
+        filing_ci = load_module(
+            "installed_filing_ci_identification_method", FILING_CI_SCRIPT
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            filing_root = base / "filing"
+            authorities_root = base / "authorities"
+            filing_root.mkdir()
+            authorities_root.mkdir()
+            (filing_root / "complaint.json").write_text(json.dumps(document))
+            complaint_result = complaint_checker.check_complaint(
+                filing_root, "complaint.json"
+            )
+            filing_ci_result = filing_ci.run_filing_ci(
+                filing_root,
+                "complaint.json",
+                authorities_root,
+                CHECKER_ID,
+            )
+
+        for result in (complaint_result, filing_ci_result):
+            with self.subTest(checker=result.get("checker_id", "complaint")):
+                self.assertEqual(result["status"], "failed")
+                self.assertIn(
+                    "limitations-record-structure",
+                    {finding["check_id"] for finding in result["findings"]},
+                )
+
     def test_complete_supported_adverse_record_does_not_create_legal_judgment(self):
         checker = load_module("installed_complaint_checker_complete_limitations", COMPLAINT_SCRIPT)
         document = complaint_document()

@@ -60,6 +60,24 @@
         "status": { "enum": ["complete", "unresolved"] },
         "date": { "$ref": "#/$defs/nullableDate" },
         "basis": { "type": "string", "minLength": 1 },
+        "source_refs": { "$ref": "#/$defs/sourceRefs" }
+      }
+    },
+    "identificationFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "date",
+        "basis",
+        "source_refs",
+        "identification_source",
+        "identification_method"
+      ],
+      "properties": {
+        "status": { "enum": ["complete", "unresolved"] },
+        "date": { "$ref": "#/$defs/nullableDate" },
+        "basis": { "type": "string", "minLength": 1 },
         "source_refs": { "$ref": "#/$defs/sourceRefs" },
         "identification_source": { "type": "string", "minLength": 1 },
         "identification_method": { "type": "string", "minLength": 1 }
@@ -322,7 +340,7 @@
             "source_first_available": { "$ref": "#/$defs/datedFact" },
             "source_first_possessed": { "$ref": "#/$defs/datedFact" },
             "objectively_ascertainable": { "$ref": "#/$defs/datedFact" },
-            "actual_identification": { "$ref": "#/$defs/datedFact" }
+            "actual_identification": { "$ref": "#/$defs/identificationFact" }
           }
         },
         "diligence": {

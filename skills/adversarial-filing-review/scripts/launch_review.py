@@ -993,8 +993,16 @@ def _error_result(error):
 
 
 def _json_result(result):
-    value = dict(result)
-    value["report"] = value.pop("report_bytes").decode("utf-8")
+    value = {
+        "outcome": result["outcome"],
+        "artifact_path": result["artifact_path"],
+        "report": result["report_bytes"].decode("utf-8"),
+        "internet_sources": result["internet_sources"],
+    }
+    if "dispatch" in result:
+        value["dispatch"] = result["dispatch"]
+    if "error" in result:
+        value["error"] = result["error"]
     return value
 
 

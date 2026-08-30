@@ -460,6 +460,30 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         multibyte["report_bytes"].decode("utf-8")
         self.launcher._json_result(multibyte)
 
+    def test_json_result_excludes_undeclared_sensitive_fields(self):
+        public_result = self.launcher._json_result(
+            {
+                "outcome": "completed",
+                "artifact_path": "reports/review.md",
+                "report_bytes": b"# Review\n",
+                "internet_sources": [],
+                "dispatch": {"runtime": "synthetic", "capabilities": []},
+                "api_key": "secret-test-key",
+            }
+        )
+
+        self.assertEqual(
+            public_result,
+            {
+                "outcome": "completed",
+                "artifact_path": "reports/review.md",
+                "report": "# Review\n",
+                "internet_sources": [],
+                "dispatch": {"runtime": "synthetic", "capabilities": []},
+            },
+        )
+        self.assertNotIn("secret-test-key", json.dumps(public_result))
+
     def test_required_filing_target_is_canonical_and_confined(self):
         execute = self.trusted_api("execute_trusted_review")
         with tempfile.TemporaryDirectory() as directory:

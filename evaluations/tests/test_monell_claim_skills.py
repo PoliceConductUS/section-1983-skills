@@ -6,6 +6,7 @@ from pathlib import Path
 REPOSITORY = Path(__file__).resolve().parents[2]
 SKILLS = REPOSITORY / "skills"
 PLANNER = SKILLS / "planning-section-1983-monell-claims"
+DRAFTER = SKILLS / "drafting-section-1983-monell-claims"
 
 
 class MonellPlanningSkillTests(unittest.TestCase):
@@ -67,6 +68,43 @@ class MonellPlanningSkillTests(unittest.TestCase):
             "completed",
         ):
             self.assertIn(status, text)
+
+
+class MonellDraftingSkillTests(unittest.TestCase):
+    def test_drafter_has_approved_plan_and_delta_contracts(self):
+        required = {
+            "SKILL.md",
+            "agents/openai.yaml",
+            "references/approved-planning-handoff.md",
+            "references/monell-complaint-delta.md",
+        }
+        actual = {
+            str(path.relative_to(DRAFTER))
+            for path in DRAFTER.rglob("*")
+            if path.is_file()
+        }
+        self.assertTrue(required.issubset(actual), required - actual)
+
+    def test_drafter_uses_only_approved_paths_and_returns_to_canonical_owner(self):
+        text = (DRAFTER / "SKILL.md").read_text(encoding="utf-8")
+        self.assertRegex(text, r"(?is)draft only.*approved path")
+        self.assertRegex(text, r"(?is)(?:do not|never).*select.*claim")
+        self.assertIn("drafting-section-1983-complaints", text)
+        self.assertIn("validate_complaint_handoff.py", text)
+        self.assertRegex(text, r"(?is)one.*path_id.*one.*path_type")
+
+    def test_delta_preserves_mechanism_information_belief_and_temporal_bounds(self):
+        text = (DRAFTER / "references/monell-complaint-delta.md").read_text(encoding="utf-8")
+        self.assertRegex(text, r"(?is)implementation or transmission mechanism")
+        self.assertRegex(text, r"(?is)information and belief.*known facts.*controlled")
+        self.assertRegex(text, r"(?is)post-event.*(?:cannot|must not).*pre-event causation")
+        self.assertRegex(text, r"(?is)moving.force.*particular injury")
+
+    def test_drafter_cannot_convert_recommendation_into_approval(self):
+        text = (DRAFTER / "references/approved-planning-handoff.md").read_text(encoding="utf-8")
+        self.assertRegex(text, r"(?is)recommendation.*(?:is not|does not).*approval")
+        self.assertRegex(text, r"(?is)litigation principal.*(?:approved|approval)")
+        self.assertRegex(text, r"(?is)(?:missing|ambiguous).*approval.*stop")
 
 
 if __name__ == "__main__":

@@ -81,6 +81,12 @@ roles across the stack or enlarges one skill's filesystem or internet authority.
 Output from one skill is available to another only through a new invocation that
 expressly supplies it in the receiving skill's declared input role.
 
+Multi-document filing workflows use
+[folder-backed FilingPackets](FILING_PACKETS.md): ordinary files plus one strict
+manifest that fixes member identity, order, kind, packet role, path, hash, and
+revision provenance. Source packets remain read-only; the trusted host publishes
+a complete new packet beneath the explicit output folder.
+
 1. Start with `section-1983-drafting` for routing, localization, and writing
    rules.
 2. For factual declarations and exhibit-foundation preparation supporting

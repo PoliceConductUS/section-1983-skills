@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/filing-packet.schema.json",
+  "title": "Folder-backed FilingPacket manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "packet_id", "documents", "provenance"],
+  "properties": {
+    "schema_version": { "const": 1, "type": "integer" },
+    "packet_id": { "$ref": "#/$defs/identifier" },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/document" }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_manifest_sha256", "source_packet_sha256"],
+      "properties": {
+        "input_manifest_sha256": { "$ref": "#/$defs/sha256" },
+        "source_packet_sha256": {
+          "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "role", "path", "sha256", "size"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "kind": { "$ref": "#/$defs/identifier" },
+        "role": {
+          "enum": ["main", "appendix", "exhibit", "proposed-order", "other"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!filing-packet\\.json$)(?!(?:\\.[Ss][Kk][Ii][Ll][Ll]-[Rr][Uu][Nn][Ss]|[Tt][Ee][Mm][Pp]|filing-packets)(?:/|$))(?!/)(?![\\s\\S]*\\\\)(?![\\s\\S]*\\u0000)(?!\\.{1,2}(?:/|$))(?![\\s\\S]*\\/\\.{1,2}(?:/|$))(?![\\s\\S]*//)(?![\\s\\S]*\\/$)[\\s\\S]+$"
+        },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "size": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

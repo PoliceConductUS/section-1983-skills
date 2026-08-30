@@ -30,6 +30,16 @@ path and publishes the report append-immutable. Report missing authority,
 pinpoint, metadata, or source material as a filing-critical gap rather than
 substituting another folder.
 
+## FilingPacket boundary
+
+When a declared filing folder is a FilingPacket, follow
+[the folder-backed FilingPacket contract](references/filing-packet-contract.md).
+Validate \`filing-packet.json\` and every hashed member before work. The
+manifest targets the whole packet; any document target must be one exact
+manifest-listed member. Member review does not count as whole-packet coverage.
+Drafting or revision returns proposed members for trusted-host publication as a
+complete new packet and never mutates the source packet.
+
 ## Goal
 
 Verify that every cited authority, factual assertion, and "differentiator"

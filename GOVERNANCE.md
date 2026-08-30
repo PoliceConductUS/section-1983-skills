@@ -93,6 +93,17 @@ mode. Repository validation compares each contract with the approved skill
 matrix. Composing skills does not combine their contracts or enlarge either
 skill's filesystem or network authority.
 
+Folder-backed FilingPacket generation and review follow
+[FILING_PACKETS.md](FILING_PACKETS.md). The manifest is the packet membership,
+order, identity, kind, role, path, and hash authority. Exactly one member is
+`main`; every other role requires express operation authorization. A source
+packet is recursively read-only, and revision publishes a complete new packet
+with source and logical-input fingerprints. Whole-packet review targets the
+manifest; a member review targets one exact listed file and never silently
+counts as whole-packet coverage. Filing readiness requires every member and
+every configured packet-level gate to validate, but remains a mechanical result
+that does not decide filing or legal judgment.
+
 This repository retains public skill instructions and repository-specific
 validation or evaluation support. General-purpose executable tooling for rule
 retrieval, citation verification, evidence processing, filing inspection, or

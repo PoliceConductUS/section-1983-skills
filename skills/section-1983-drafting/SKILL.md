@@ -54,6 +54,16 @@ The skill is layered the way the law varies: an invariant writing system, a
 uniform federal baseline per document type, and a protocol for the
 district-by-district layer that cannot be authored in advance.
 
+## FilingPacket boundary
+
+When a declared filing folder is a FilingPacket, follow
+[the folder-backed FilingPacket contract](references/filing-packet-contract.md).
+Validate \`filing-packet.json\` and every hashed member before work. The
+manifest targets the whole packet; any document target must be one exact
+manifest-listed member. Member review does not count as whole-packet coverage.
+Drafting or revision returns proposed members for trusted-host publication as a
+complete new packet and never mutates the source packet.
+
 ## Skill routing and precedence
 
 Load each applicable skill once, in this order:

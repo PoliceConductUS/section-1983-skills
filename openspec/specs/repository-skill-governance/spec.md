@@ -548,3 +548,25 @@ contract is missing or inverted.
 - **WHEN** an independently installed QC skill no longer requires its report to
   identify the terminal run manifest
 - **THEN** repository validation exits nonzero and identifies that skill
+
+### Requirement: Public filing workflows preserve packet boundaries
+
+Public filing-generation and quality-control skills MUST describe a FilingPacket
+as a manifest-listed set of ordinary files under declared folder authority. They
+MUST preserve kind/role separation, source packet immutability, trusted-host
+publication, packet/member target semantics, and complete packet-level gate
+coverage without adding CaseGraph or ambient filesystem authority.
+
+#### Scenario: A public skill reviews one packet member
+
+- **WHEN** the caller selects a manifest-listed member rather than the whole
+  packet
+- **THEN** the skill identifies the member by stable document ID and does not
+  silently treat the result as whole-packet coverage
+
+#### Scenario: A current public filing skill is installed independently
+
+- **WHEN** any currently published skill that drafts or reviews a filing is
+  copied without the repository around it
+- **THEN** its package retains the install-local FilingPacket contract and its
+  entrypoint links to that contract

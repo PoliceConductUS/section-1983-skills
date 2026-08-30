@@ -1,0 +1,17 @@
+version: 1
+fixtures:
+  - inverted-holding
+  - party-argument-as-holding
+  - lower-court-as-appellate-voice
+  - superseded-panel
+  - overruled-authority
+  - wrong-jurisdiction
+  - wrong-statute
+  - wrong-date
+  - wrong-posture
+  - irrelevant-citation
+  - split-support
+  - uncited-material-proposition
+  - fictional-judge
+  - nonexistent-rule-provision
+  - false-premise

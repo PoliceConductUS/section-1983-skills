@@ -1,0 +1,15 @@
+version: 1
+id: overruled-authority
+source:
+  source_id: synthetic-overruled-authority
+  text: |
+    The court held that the rule applied. A later controlling decision expressly overruled this holding.
+  sha256: ef9fdb4aa3192f9ff0f3b1e1b26eef3167d0457fa2c3c25cdffbee075ee7fd05
+challenged_text: The earlier holding remains controlling authority.
+expected_propositions:
+  - proposition_id: overruled-authority-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: majority-holding
+pass_allowed: false
+reason: Later controlling authority expressly overruled the relied-on holding.

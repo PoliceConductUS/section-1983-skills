@@ -1,0 +1,15 @@
+version: 1
+id: fictional-judge
+source:
+  source_id: synthetic-fictional-judge
+  text: |
+    No judge named Jordan Example participated in this synthetic opinion.
+  sha256: c7b8700865e822b9d7a919a557436fc1044a4f1b0cfa51c724775fea775b5dba
+challenged_text: Judge Jordan Example authored the opinion.
+expected_propositions:
+  - proposition_id: fictional-judge-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: none
+pass_allowed: false
+reason: The challenged judge identity does not exist in the source.

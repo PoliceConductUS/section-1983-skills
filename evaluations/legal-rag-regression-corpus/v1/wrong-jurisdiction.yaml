@@ -1,0 +1,19 @@
+version: 1
+id: wrong-jurisdiction
+source:
+  source_id: synthetic-wrong-jurisdiction
+  text: |
+    A court in State Alpha interprets Alpha law.
+  sha256: 9a937d9345431354ab1e80c42a0cf0d090e39e68e17df22eaf4f1eaacce7e7b9
+challenged_text:
+  State Beta law requires justification for this search, citing only the Alpha
+  decision.
+expected_propositions:
+  - proposition_id: wrong-jurisdiction-1
+    correctness: verified
+    groundedness: misgrounded
+    source_voice: majority-holding
+pass_allowed: false
+reason:
+  A source interpreting Alpha law does not ground the proposition about Beta
+  law.

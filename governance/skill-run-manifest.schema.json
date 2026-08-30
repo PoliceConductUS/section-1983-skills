@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/skill-run-manifest.schema.json",
+  "title": "Skill Output Run Receipt",
+  "description": "Version 1 terminal receipt for one folder-scoped skill output run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifacts",
+    "input_manifest_sha256",
+    "internet",
+    "mode",
+    "run_id",
+    "schema_version",
+    "skill",
+    "skill_version",
+    "status"
+  ],
+  "properties": {
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "failure": {
+      "$ref": "#/$defs/failure"
+    },
+    "incomplete_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/incompleteArtifact"
+      }
+    },
+    "input_manifest_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "internet": {
+      "$ref": "#/$defs/internet"
+    },
+    "mode": {
+      "enum": ["append-immutable", "fresh-regenerable"]
+    },
+    "run_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "skill": {
+      "$ref": "#/$defs/identifier"
+    },
+    "skill_version": {
+      "$ref": "#/$defs/skillVersion"
+    },
+    "status": {
+      "enum": ["success", "failure"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "failure"
+          }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["failure", "incomplete_artifacts"]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {
+              "required": ["failure"]
+            },
+            {
+              "required": ["incomplete_artifacts"]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:/)(?!\\.[sS][kK][iI][lL][lL]-[rR][uU][nN][sS](?:/|$))(?!.*(?:^|/)\\.\\.?$)(?!.*(?:^|/)\\.\\.?/)[^\\u0000\\\\/]+(?:/[^\\u0000\\\\/]+)*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "skillVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$"
+    },
+    "internetSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retrieved_at", "sha256"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1,
+          "maxLength": 2048,
+          "pattern": "^(?=[\\x21-\\x7E]{1,2048}$)(?!.*\\\\)https?://(?![^/?#]*@)[^/?#]+(?:[/?#].*)?$"
+        },
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retrieved_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "request_context": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "oneOf": [
+        {
+          "required": ["url"],
+          "not": {
+            "required": ["identity"]
+          }
+        },
+        {
+          "required": ["identity"],
+          "not": {
+            "required": ["url"]
+          }
+        }
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "size"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "internet_sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/internetSource"
+          }
+        }
+      }
+    },
+    "incompleteArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "phase", "sha256", "size"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "phase": {
+          "enum": ["destination-sync", "staging-cleanup"]
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "internet_sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/internetSource"
+          }
+        }
+      }
+    },
+    "failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "phase"],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/failureValue"
+        },
+        "phase": {
+          "$ref": "#/$defs/failureValue"
+        }
+      }
+    },
+    "failureValue": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "internet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "used"],
+      "properties": {
+        "policy": {
+          "enum": ["disabled", "authorized"]
+        },
+        "used": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -22,6 +22,7 @@ SOURCE_DOCUMENTED_SKILLS = (
     "building-defense-counsel-overlays",
     "building-judicial-reasoning-profiles",
     "building-litigation-alignment-overlays",
+    "building-municipal-monell-profiles",
     "collecting-legal-authority-sources",
     "collecting-police-policy-sources",
 )
@@ -105,6 +106,21 @@ APPROVED_FOLDER_CONTRACTS = {
         ["docket-snapshot", "filing"],
         "required",
         ["docket-snapshot"],
+        "disabled",
+    ),
+    "building-municipal-monell-profiles": folder_contract(
+        "building-municipal-monell-profiles",
+        [
+            "municipality",
+            "department",
+            "source",
+            "policy-catalog",
+            "policy-assessment",
+            "case-record",
+            "verified-authority",
+        ],
+        "none",
+        [],
         "disabled",
     ),
     "building-judicial-reasoning-profiles": folder_contract(

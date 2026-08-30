@@ -97,6 +97,12 @@
       "rationale": "Classifies and compiles caller-approved public source material without supplying current procedural rule content."
     },
     {
+      "name": "building-municipal-monell-profiles",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Organizes caller-approved municipal evidence and verified authority without supplying procedural rules or deciding Monell liability."
+    },
+    {
       "name": "collecting-legal-authority-sources",
       "rules_mode": "rules-independent",
       "reviewed_on": "2026-08-25",

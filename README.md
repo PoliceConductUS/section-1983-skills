@@ -87,6 +87,12 @@ manifest that fixes member identity, order, kind, packet role, path, hash, and
 revision provenance. Source packets remain read-only; the trusted host publishes
 a complete new packet beneath the explicit output folder.
 
+Profile, overlay, and research-corpus workflows use
+[source-documented folders](SOURCE_DOCUMENTED_FOLDERS.md): ordinary files from
+declared read-only input folders, domain-owned YAML provenance, one explicit
+output folder, and protected installed behavior. No generic folder wrapper,
+registry, graph, or case-management runtime is required.
+
 1. Start with `section-1983-drafting` for routing, localization, and writing
    rules.
 2. For factual declarations and exhibit-foundation preparation supporting

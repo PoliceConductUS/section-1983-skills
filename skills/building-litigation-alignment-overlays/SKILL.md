@@ -28,6 +28,13 @@ deterministic bytes; only the trusted host may publish it append-immutable.
 Report missing actors, sources, filing pins, or docket coverage as a gap rather
 than refreshing or enlarging the snapshot.
 
+## Source-documented folder boundary
+
+Contract: [source-documented folders](references/source-documented-folders.md).
+The trusted host exposes only selected immutable bytes from the declared input
+folders. The domain schemas below remain authoritative for substantive overlay
+content and source documentation.
+
 ## Purpose
 
 Transform one approved immutable docket snapshot into a source-backed, versioned
@@ -46,7 +53,7 @@ Read these install-local contracts completely:
 - [references/litigation-alignment-overlay.schema.json](references/litigation-alignment-overlay.schema.json)
 - [references/filing-overlay-manifest.schema.json](references/filing-overlay-manifest.schema.json)
 
-Use only the selected `docket-snapshot` target after the packaged validator
+Use only the selected `docket-snapshot` target after the domain validator
 passes. Do not browse, open an unlisted path or URL, silently refresh the
 docket, or add a source from conversation history. If the snapshot is missing,
 stale, ambiguous, or invalid, report the scoped gap and stop overlay generation.

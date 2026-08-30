@@ -570,3 +570,22 @@ coverage without adding CaseGraph or ambient filesystem authority.
   copied without the repository around it
 - **THEN** its package retains the install-local FilingPacket contract and its
   entrypoint links to that contract
+
+### Requirement: Public data workflows use source-documented folders
+
+The repository MUST document that profile, overlay, and research data consists
+of ordinary files selected from declared recursive read-only input folders.
+Public skills that produce or consume that data MUST link to install-local
+source-documented-folder guidance, retain their domain-specific validation, and
+MUST NOT convert participant data into generated skills, static-role changes,
+ambient filesystem authority, or mutable input access. Domain-owned YAML source
+records MUST preserve applicable folder-relative paths, hashes, provenance,
+dates, classifications, validation state, assumptions, and gaps without a
+generic root envelope.
+
+#### Scenario: An overlay skill is installed independently
+
+- **WHEN** a current counsel or litigation-alignment skill is copied without the
+  repository around it
+- **THEN** its installed skill retains the source-documented-folder boundary and
+  its domain-specific validator

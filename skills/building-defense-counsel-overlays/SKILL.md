@@ -28,6 +28,13 @@ bytes; only the trusted host may publish it append-immutable. Report incomplete
 identity, source, checked-date, or comparable-matter material as a gap and keep
 the resulting profile bounded.
 
+## Source-documented folder boundary
+
+Contract: [source-documented folders](references/source-documented-folders.md).
+The trusted host exposes only selected immutable bytes from the declared input
+folders. The counsel schemas below remain authoritative for substantive profile
+content and source documentation.
+
 ## Purpose
 
 Build an immutable professional litigation profile from one approved public-
@@ -45,7 +52,7 @@ Read these install-local contracts completely:
 - [references/counsel-research-snapshot.schema.json](references/counsel-research-snapshot.schema.json)
 - [references/defense-counsel-overlay.schema.json](references/defense-counsel-overlay.schema.json)
 
-Use only the selected `research-snapshot` target after the packaged validator
+Use only the selected `research-snapshot` target after the domain validator
 passes. Do not browse, open an unlisted path or URL, silently refresh a source,
 or incur a PACER or other fee. Missing public content and unavailable paid
 content are scoped gaps unless the user separately authorizes retrieval.

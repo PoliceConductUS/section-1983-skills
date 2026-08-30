@@ -16,6 +16,10 @@ FOLDER_CONTRACT_FIELDS = {
     "output",
 }
 SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SOURCE_DOCUMENTED_SKILLS = (
+    "building-defense-counsel-overlays",
+    "building-litigation-alignment-overlays",
+)
 
 
 def folder_contract(skill, input_roles, target_policy, target_roles, internet):
@@ -786,6 +790,59 @@ def validate_skill_folder_contracts(repository_root):
     return errors
 
 
+def validate_source_documented_folder_guidance(repository_root):
+    errors = []
+    guide = repository_root / "SOURCE_DOCUMENTED_FOLDERS.md"
+    try:
+        guide_text = normalized(guide.read_text())
+    except OSError:
+        return ["source-documented-folder-guide-missing"]
+    required = (
+        "declared input folders",
+        "recursive read-only",
+        "explicit output folder",
+        "domain-owned yaml",
+        "source.yaml",
+        "folder-relative path",
+        "sha-256",
+        "protected behavior",
+    )
+    if any(item not in guide_text for item in required):
+        errors.append("source-documented-folder-guide-incomplete")
+    for skill in SOURCE_DOCUMENTED_SKILLS:
+        skill_root = repository_root / "skills" / skill
+        reference = skill_root / "references" / "source-documented-folders.md"
+        try:
+            entrypoint = (skill_root / "SKILL.md").read_text().lower()
+            reference_text = normalized(reference.read_text())
+            if (
+                reference.is_symlink()
+                or reference.resolve().parent != reference.parent.resolve()
+            ):
+                errors.append(f"source-documented-folder-reference-invalid: {skill}")
+                continue
+        except (OSError, RuntimeError):
+            errors.append(f"source-documented-folder-reference-missing: {skill}")
+            continue
+        if (
+            "[source-documented folders](references/source-documented-folders.md)"
+            not in entrypoint
+        ):
+            errors.append(f"source-documented-folder-link-missing: {skill}")
+        if any(
+            item not in reference_text
+            for item in (
+                "recursive read-only input folders",
+                "folder-relative path",
+                "sha-256",
+                "domain-owned yaml",
+                "<output-folder>/temp/",
+            )
+        ):
+            errors.append(f"source-documented-folder-reference-incomplete: {skill}")
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
@@ -795,6 +852,7 @@ def validate_repository(repository_root):
     errors.extend(validate_quality_control_contracts(repository_root))
     errors.extend(validate_folder_scope_contracts(repository_root))
     errors.extend(validate_skill_folder_contracts(repository_root))
+    errors.extend(validate_source_documented_folder_guidance(repository_root))
     return errors
 
 

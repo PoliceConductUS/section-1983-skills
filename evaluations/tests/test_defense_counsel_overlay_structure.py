@@ -42,6 +42,7 @@ class DefenseCounselOverlayStructureTest(unittest.TestCase):
             "SKILL.md",
             "agents/openai.yaml",
             "references/folder-contract.json",
+            "references/source-documented-folders.md",
             "scripts/validate_counsel_overlays.py",
             *(f"references/{name}" for name in SCHEMAS),
             *(f"references/fixtures/{name}" for name in FIXTURES),

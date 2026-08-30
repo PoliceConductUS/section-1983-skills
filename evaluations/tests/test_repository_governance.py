@@ -6,7 +6,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_governance import APPROVED_FOLDER_CONTRACTS
+from scripts.validate_governance import (
+    APPROVED_FOLDER_CONTRACTS,
+    SOURCE_DOCUMENTED_SKILLS,
+    validate_source_documented_folder_guidance,
+)
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -616,6 +620,11 @@ implementation.
 
 
 def valid_folder_scope_skill(name="filing-ci"):
+    source_guidance = (
+        "\n[Source-documented folders](references/source-documented-folders.md)\n"
+        if name in SOURCE_DOCUMENTED_SKILLS
+        else ""
+    )
     return f"""---
 name: {name}
 description: Use when preparing a synthetic artifact.
@@ -629,6 +638,7 @@ Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+{source_guidance}
 """
 
 
@@ -701,6 +711,19 @@ def write_temporary_repository(
         (package / "references" / "folder-contract.json").write_text(
             json.dumps(contract)
         )
+        if name in SOURCE_DOCUMENTED_SKILLS:
+            (package / "references" / "source-documented-folders.md").write_text(
+                "Declared recursive read-only input folders.\n"
+                "Each source uses a folder-relative path and SHA-256.\n"
+                "Write domain-owned YAML under the explicit output.\n"
+                "Use <output-folder>/temp/ for temporary work.\n"
+            )
+    (root / "SOURCE_DOCUMENTED_FOLDERS.md").write_text(
+        "Declared input folders are recursive read-only.\n"
+        "Use one explicit output folder.\n"
+        "Domain-owned YAML includes SOURCE.yaml and a folder-relative path.\n"
+        "Record SHA-256 and keep protected behavior installed.\n"
+    )
     fixture_package = root / "skills" / "filing-ci"
     (fixture_package / "SKILL.md").write_text(
         skill_text or valid_folder_scope_skill("filing-ci")
@@ -1340,6 +1363,30 @@ description: Use when independently auditing a synthetic artifact.
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("protected-review-language-missing", result.stdout + result.stderr)
+
+    def test_source_documented_folder_guidance_is_public_and_install_local(self):
+        self.assertEqual(
+            SOURCE_DOCUMENTED_SKILLS,
+            (
+                "building-defense-counsel-overlays",
+                "building-litigation-alignment-overlays",
+            ),
+        )
+        self.assertEqual(validate_source_documented_folder_guidance(REPOSITORY), [])
+        for path in (REPOSITORY / "README.md", REPOSITORY / "GOVERNANCE.md"):
+            self.assertIn("SOURCE_DOCUMENTED_FOLDERS.md", path.read_text())
+        for skill in SOURCE_DOCUMENTED_SKILLS:
+            root = REPOSITORY / "skills" / skill
+            entrypoint = (root / "SKILL.md").read_text()
+            reference = root / "references" / "source-documented-folders.md"
+            self.assertIn(
+                "[source-documented folders](references/source-documented-folders.md)",
+                entrypoint.lower(),
+            )
+            text = reference.read_text()
+            self.assertIn("domain-owned YAML", text)
+            self.assertIn("folder-relative path", text)
+            self.assertIn("SHA-256", text)
 
 
 if __name__ == "__main__":

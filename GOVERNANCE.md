@@ -104,6 +104,14 @@ counts as whole-packet coverage. Filing readiness requires every member and
 every configured packet-level gate to validate, but remains a mechanical result
 that does not decide filing or legal judgment.
 
+Profile, overlay, and research-corpus data follow
+[SOURCE_DOCUMENTED_FOLDERS.md](SOURCE_DOCUMENTED_FOLDERS.md). The invocation's
+declared recursive read-only input folders are the complete access boundary.
+Domain-owned YAML records preserve applicable paths, hashes, provenance, dates,
+classifications, validation state, assumptions, and gaps. Domain schemas remain
+authoritative. Data cannot alter protected capabilities, prohibitions, internet
+policy, target-mutation boundary, output authority, or folder access.
+
 This repository retains public skill instructions and repository-specific
 validation or evaluation support. General-purpose executable tooling for rule
 retrieval, citation verification, evidence processing, filing inspection, or

@@ -1,0 +1,90 @@
+{
+  "scope": {
+    "start_date": "2024-01-01",
+    "end_date": "2025-12-31",
+    "selected_requirement_ids": ["req-report-force"],
+    "selected_actor_ids": ["actor-alpha", "actor-bravo"],
+    "selected_event_ids": ["event-one", "event-two"],
+    "selected_phase_ids": [
+      "phase-one",
+      "phase-two",
+      "phase-three",
+      "phase-four",
+      "phase-five",
+      "phase-six",
+      "phase-seven"
+    ],
+    "selected_source_paths": [
+      "evidence/src-support.SOURCE.yaml",
+      "evidence/src-contrary.SOURCE.yaml"
+    ]
+  },
+  "actors": [
+    {
+      "actor_id": "actor-alpha",
+      "display_name": "Officer Alpha",
+      "roles": ["officer"]
+    },
+    {
+      "actor_id": "actor-bravo",
+      "display_name": "Supervisor Bravo",
+      "roles": ["supervisor"]
+    }
+  ],
+  "events": [
+    {
+      "event_id": "event-one",
+      "event_date": "2025-06-15",
+      "description": "Fictional in-period event."
+    },
+    {
+      "event_id": "event-two",
+      "event_date": "2024-12-15",
+      "description": "Fictional pre-policy event."
+    }
+  ],
+  "phases": [
+    {
+      "phase_id": "phase-one",
+      "event_id": "event-one",
+      "label": "Initial report",
+      "sequence": 1
+    },
+    {
+      "phase_id": "phase-two",
+      "event_id": "event-one",
+      "label": "Supervisor review",
+      "sequence": 2
+    },
+    {
+      "phase_id": "phase-three",
+      "event_id": "event-one",
+      "label": "Record dispute",
+      "sequence": 3
+    },
+    {
+      "phase_id": "phase-four",
+      "event_id": "event-one",
+      "label": "Completed review",
+      "sequence": 4
+    },
+    {
+      "phase_id": "phase-five",
+      "event_id": "event-one",
+      "label": "Unavailable dispatch record",
+      "sequence": 5
+    },
+    {
+      "phase_id": "phase-six",
+      "event_id": "event-one",
+      "label": "Outside actor scope",
+      "sequence": 6
+    },
+    {
+      "phase_id": "phase-seven",
+      "event_id": "event-two",
+      "label": "Before effective date",
+      "sequence": 1
+    }
+  ]
+}

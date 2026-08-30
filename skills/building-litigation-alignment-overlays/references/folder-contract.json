@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "building-litigation-alignment-overlays",
+  "input_roles": ["docket-snapshot", "filing"],
+  "target": { "policy": "required", "roles": ["docket-snapshot"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

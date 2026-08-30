@@ -77,6 +77,44 @@ Use this source hierarchy:
 Never treat search visibility as the denominator. Seek favorable, unfavorable,
 and adverse and disconfirming evidence under the same declared method.
 
+### CourtListener discovery recipe
+
+Use the CourtListener REST API to discover candidates while preserving the
+source hierarchy above:
+
+1. Resolve the judge identity first with a `type=p` search and prefer the
+   returned stable judge identifier. If only a name-query fallback is possible,
+   document the query and unresolved identity ambiguity.
+2. For opinions, use `type=o` and record opinion authorship through `author_id`
+   or a documented `judge` name search. For dockets or RECAP results, use
+   `type=d` or `type=r` and record docket assignment through `assigned_to_id` or
+   `assignedTo`, and referral through `referred_to_id` or `referredTo`. Do not
+   treat authorship, assignment, and referral as interchangeable.
+3. Narrow by `court_id`, the judge's tenure or other date range, case category,
+   procedural posture, and the research question. `suitNature`, `cause`, Section
+   1983 terms, and police or law-enforcement terms are discovery leads, not
+   inclusion findings.
+4. Verify from primary docket material the judge relationship, Section 1983
+   basis, police or law-enforcement involvement, and relevant posture before
+   inclusion. Give every reviewed candidate a selection or exclusion status and
+   an inspectable reason, including agency-only, unidentified-actor, non-police,
+   non-Section 1983, and unresolved candidates.
+5. Preserve the sanitized query type and parameters, stable result identity and
+   rank, checked date, pagination or cursor identity, and coverage gap. Search
+   visibility and approximate result counts do not establish a complete corpus
+   or denominator.
+
+Never persist API tokens, credentials, cookies, authorization headers, or
+unsanitized request data.
+
+### Optional official fallback
+
+Use PACER or court-specific CM/ECF only as the optional official fallback for
+docket identity, assignment, status, and completeness. Require explicit access
+authorization separately from separate fee approval. Credentials remain
+runtime-only. Without the required authorization, record the coverage gap and do
+not imply that the official docket was checked.
+
 ## 2. Build and validate the corpus
 
 Code one motion-disposition pair as the unit of analysis and link each related
@@ -93,7 +131,7 @@ The canonical corpus must pass
 before publication or transfer:
 
 ```bash
-python3 skills/studying-rule-59e-decisions/scripts/validate_corpus.py skills/studying-rule-59e-decisions/references/fixtures/valid-complete.json
+python3 skills/studying-rule-59e-decisions/scripts/validate_corpus.py --decisions-root "$PWD/skills/studying-rule-59e-decisions/references/fixtures" --corpus-target valid-complete.json
 ```
 
 Validation proves the declared structural and semantic contract. It does not
@@ -149,16 +187,19 @@ not select a litigation path.
 After the applicable document and claim skills compose the filing, validate one
 execution packet against
 `skills/section-1983-drafting/references/judge-overlay-execution.schema.json`
-and write its receipt with
+and produce its receipt with
 `skills/section-1983-drafting/scripts/judge_overlay_receipt.py`.
 
-The writer verifies the frozen artifact fingerprints and creates one exclusive,
-immutable Markdown receipt under the audited version's canonical `audits/`
-directory. It must not edit or modify the filing or any artifact under review.
-Missing, stale, invalid or failed, and unavailable required inputs fail closed
-with no drafting change. A completed degradation records
-`no judge-specific drafting change` and its bounded reason. The absence of
-judge-specific prose or an execution receipt does not prove the overlay ran.
+The processor receives the declared `filing`, `judge-corpus`, and
+`court-conduct` role roots. A required filing target selects one canonical
+relative file inside `filing`. The processor verifies the frozen filing artifact
+fingerprints and returns deterministic receipt bytes plus one output-relative
+path. It must not edit or modify the filing or any artifact under review. Only
+the trusted host may publish the receipt through `OutputRun`. Missing, stale,
+invalid or failed, and unavailable required inputs fail closed with no drafting
+change. A completed degradation records `no judge-specific drafting change` and
+its bounded reason. The absence of judge-specific prose or an execution receipt
+does not prove the overlay ran.
 
 ## 8. Apply the degradation clause
 
@@ -250,7 +291,9 @@ gap: One fictional candidate lacks a complete motion-disposition pair.
 
 ## Structural example only
 
-The existing [Scholer overlay](skills/drafting-for-judge-scholer/SKILL.md) is a
-structural example only. It separates judicial authorship stages, preserves
+The generic
+[Judicial Reasoning Profile builder](skills/building-judicial-reasoning-profiles/SKILL.md)
+is the structural contract. It separates judicial authorship stages, preserves
 evidence strength, and adds no judge-specific proposition when qualifying
-support is absent. Do not copy its substantive conclusions.
+support is absent. Profiles remain data; do not create a judge-named skill or
+copy a profile's substantive conclusions into role behavior.

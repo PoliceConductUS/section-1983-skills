@@ -8,6 +8,38 @@ description:
 
 # Drafting Section 1983 Rule 59(e) Filings
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the operative judgment record, chronology, and claim facts.
+- `authorities` contains approved Rule 59(e), amendment, and merits authorities.
+- `filing` contains any motion, brief, proposed pleading, or related artifact.
+
+Target is optional in `filing`; without one, draft the user-requested filing
+from the supplied roles. Internet is `disabled`. Return each requested filing
+artifact with a canonical output-relative path and deterministic bytes; only the
+trusted host may publish it append-immutable. Report missing record, authority,
+requested relief, or filing material as a gap without inventing a versioning
+scheme.
+
+## Filing folder boundary
+
+Filing inputs are ordinary files in declared recursive read-only folders. When
+the task targets one file, identify its declared input role and folder-relative
+path. A whole-folder task must expressly identify the ordinary files in scope;
+there is no folder-wide manifest. Never mutate an input. Return proposed files
+for trusted-host publication directly beneath the exact output folder, and keep
+all cache, extraction, staging, working-directory, and temporary bytes beneath
+`<output-folder>/temp/`.
+
 ## Purpose
 
 Build one genuine request for district-court relief. When the case strategy
@@ -75,15 +107,15 @@ Before drafting, identify and read:
 9. canonical verified sources for every load-bearing authority and record
    quotation.
 
-Treat the artifact names in item 7 as roles, not mandatory filenames. If a
-public user's project has no formal fact lock, claim ledger, gap register, or
-authority audit, use the available equivalents and create a minimal internal
+Treat the artifact names in item 7 as roles, not mandatory filenames. If the
+declared inputs contain no formal fact lock, claim ledger, gap register, or
+authority audit, use the available equivalents and create a minimal in-memory
 working table for the missing role. Do not invent a path or imply that an
 artifact was reviewed. The minimum substitutes are: a dated chronology and
 source list; a claim-by-defendant disposition table; an unresolved-fact and
 source list; and an authority-status ledger. Follow `section-1983-drafting` for
-a missing strategy: ask the user for one or for permission to proceed without
-one.
+a missing strategy: report the gap and ask the user for one or for permission to
+proceed without one.
 
 Before using material developed or located near the filing deadline, apply the
 evidence-maturity and source-use gate in the postjudgment-amendment contract. Do
@@ -218,16 +250,11 @@ Generate the documents required by the court and strategy, commonly the motion,
 brief, complete proposed complaint, proposed order, appendix, exhibit
 instructions, accurate conference certificate, and internal audits.
 
-Follow the project's existing version and audit system. When it uses numbered
-packet folders, manifests, hashes, or source records, create the next version,
-carry forward only still-used artifacts, identify unchanged files, and update
-those records. Never overwrite a prior packet.
-
-When no project versioning system exists, do not invent numbered folders,
-manifests, or source schemas as filing requirements. Preserve the prior draft,
-create a clearly identified new working version in the user's chosen location,
-and report which documents changed. Ask before creating a new directory or
-repository structure.
+Return each changed document as a new canonical output-relative artifact and
+identify which supplied filing artifacts remain unchanged. The trusted host
+records hashes and publishes every returned artifact append-immutable. Never
+overwrite a prior filing or invent numbered folders, manifests, or source
+schemas as legal requirements.
 
 ## Appendix and final-render traceability
 
@@ -312,8 +339,7 @@ Reject the packet unless:
     disclosure, appears in the required place and form;
 17. the writing-system lint and `horan-bad-words` review pass; and
 18. page limit, conference statement, and appendix pagination are verified; and
-19. hashes, manifests, and source records are verified when the project requires
-    them.
+19. required input hashes, run manifests, and source records are verified.
 
 Do not call the packet filing-ready while a load-bearing source, authority,
 deadline, conference statement, proposed-complaint cross-reference, requested
@@ -322,33 +348,60 @@ ruling, or supersession effect remains unresolved.
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
-Before review, resolve exactly one existing version-specific folder inside the
-designated project boundary. Write exactly one new report under the canonical
-`<version-folder>/audits/` directory. Name it
-`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
-the path exists, fail closed and preserve its bytes. Existing reports are
-immutable and must not be edited, overwritten, replaced, renamed, or deleted.
-Exclude `audits/` from review input unless one exact report is expressly
-designated; write any review of that report to a different new report. If the
-version folder is missing, ambiguous, nonexistent, or outside the designated
-boundary, report output is unavailable and write nowhere else. Reject traversal
-and any `audits/` symlink that resolves outside the canonical audits directory.
+Before review, an independent quality-control stage must select exactly one
+artifact through its declared input roles and target policy. It must propose
+exactly one unique append-immutable output-relative report beneath the
+caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
+target must fail closed without a fallback write. The report path must reject
+absolute paths, traversal, symlink escapes, and existing destinations. Only the
+trusted host may publish the report through the shared output boundary. The
+trusted host accepts quality-control publication only from an invocation bound
+to the installed skill's target policy and approved target roles; it rejects an
+unbound invocation or a target outside those approved roles.
 
-The report identifies the audited version, artifact paths and SHA-256
-fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
-identities, and result. Separate failed findings from passing-but-suboptimal
-observations. Recommendations, proposed language, and copy-ready replacements
-for failures or passing-but-suboptimal observations are advisory and do not
-authorize implementation.
+Prior quality-control reports must not become implicit input. A report may be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage must propose a different new append-immutable report for
+trusted-host publication. Existing reports are immutable and must not be edited,
+overwritten, replaced, renamed, or deleted.
+
+The trusted host derives the report path as
+`quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and publishes
+exactly one report through the shared output writer. Generated reports beneath
+`quality-control-reports/` are excluded from the reviewed-input manifest and
+fingerprint unless one exact report is the explicit target; selecting one report
+does not include sibling or older reports. The canonical quality-control
+metadata envelope identifies a generated report even when the report directory
+itself is a declared input root. A quality-control run ID must be a canonical
+lowercase UUIDv4; weak, malformed, or reused identities fail closed before
+publication.
+
+The trusted host prefixes the report with the canonical quality-control metadata
+envelope containing the skill and version, filtered logical input roles and
+reviewed artifact hashes, selected target role, relative path, SHA-256
+fingerprint, and byte size, quality-control kind, UTC run time, run ID, scope,
+approved source identities, result, failed findings, passing-but-suboptimal
+recommendations, and terminal run-manifest identity. The skill returns report
+content and structured findings; it does not build the canonical metadata
+envelope or publish output.
+
+The quality-control run is complete only after both report bytes and the
+terminal success manifest are durable and incomplete state is absent. Separate
+failed findings from passing-but-suboptimal observations. Recommendations,
+proposed language, and copy-ready replacements for failures or
+passing-but-suboptimal observations are advisory and do not authorize
+implementation.

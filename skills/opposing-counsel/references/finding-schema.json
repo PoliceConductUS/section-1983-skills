@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Opposing-counsel findings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["output_kind", "findings"],
+  "properties": {
+    "output_kind": { "const": "opposing-counsel-findings" },
+    "findings": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "category",
+          "attacked_quote",
+          "location",
+          "source_ids",
+          "analysis",
+          "limitation"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+          },
+          "category": {
+            "enum": [
+              "source-backed-attack",
+              "procedural-attack",
+              "authority-attack",
+              "record-attack",
+              "element-attack",
+              "remedy-attack",
+              "presentation-attack",
+              "gap"
+            ]
+          },
+          "attacked_quote": { "type": "string", "minLength": 1 },
+          "location": { "type": "string", "minLength": 1 },
+          "source_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "analysis": { "type": "string", "minLength": 1 },
+          "limitation": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

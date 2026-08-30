@@ -8,6 +8,33 @@ description: >-
 
 # Building Litigation-Alignment Overlays
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `docket-snapshot` contains the approved immutable docket snapshot.
+- `filing` contains any filing manifest or target filing used for pinning.
+
+Target is required in `docket-snapshot`. Internet is `disabled`. Return the
+validated litigation overlay as a canonical output-relative path and
+deterministic bytes; only the trusted host may publish it append-immutable.
+Report missing actors, sources, filing pins, or docket coverage as a gap rather
+than refreshing or enlarging the snapshot.
+
+## Source-documented folder boundary
+
+Contract: [source-documented folders](references/source-documented-folders.md).
+The trusted host exposes only selected immutable bytes from the declared input
+folders. The domain schemas below remain authoritative for substantive overlay
+content and source documentation.
+
 ## Purpose
 
 Transform one approved immutable docket snapshot into a source-backed, versioned
@@ -26,10 +53,10 @@ Read these install-local contracts completely:
 - [references/litigation-alignment-overlay.schema.json](references/litigation-alignment-overlay.schema.json)
 - [references/filing-overlay-manifest.schema.json](references/filing-overlay-manifest.schema.json)
 
-Use only one existing snapshot that passed its approved project preflight. Do
-not browse, open an unlisted path or URL, silently refresh the docket, or add a
-source from conversation history. If the snapshot is missing, stale, ambiguous,
-or invalid, report the scoped gap and stop overlay generation.
+Use only the selected `docket-snapshot` target after the domain validator
+passes. Do not browse, open an unlisted path or URL, silently refresh the
+docket, or add a source from conversation history. If the snapshot is missing,
+stale, ambiguous, or invalid, report the scoped gap and stop overlay generation.
 
 ## Derive litigation-alignment groups
 
@@ -101,9 +128,18 @@ actual reviewer receives only its validated slice.
 Run:
 
 ```bash
-python3 scripts/validate_overlays.py SNAPSHOT_JSON OVERLAY_JSON \
-  --filing-manifest FILING_MANIFEST_JSON
+python3 scripts/validate_overlays.py \
+  --docket-snapshot-root "$DOCKET_SNAPSHOT_ROOT" \
+  --docket-snapshot-target "$DOCKET_SNAPSHOT_TARGET" \
+  --filing-root "$FILING_ROOT" \
+  --filing-manifest-target "$FILING_MANIFEST_TARGET" \
+  < candidate-overlay.json
 ```
+
+The roots are caller-declared role folders and each target is a canonical
+relative path inside its named root. The generated overlay arrives as bounded
+standard-input JSON. The helper returns deterministic JSON and never writes or
+publishes the overlay.
 
 The filing-version manifest pins every consumed overlay by kind, ID, version,
 SHA-256, checked-through date, validator result, and source snapshot. A stale,

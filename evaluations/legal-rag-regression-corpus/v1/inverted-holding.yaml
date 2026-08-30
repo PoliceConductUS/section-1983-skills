@@ -1,0 +1,15 @@
+version: 1
+id: inverted-holding
+source:
+  source_id: synthetic-inverted-holding
+  text: |
+    The court holds that the search was unreasonable.
+  sha256: 797e0eab37977d6759f76fd168c68d01f10b00777dd1fa3f274ef6397efddd68
+challenged_text: The court held that the search was reasonable.
+expected_propositions:
+  - proposition_id: inverted-holding-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: majority-holding
+pass_allowed: false
+reason: The challenged proposition reverses the exact holding.

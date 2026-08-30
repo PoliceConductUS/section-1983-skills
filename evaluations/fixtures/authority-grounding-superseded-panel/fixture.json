@@ -1,0 +1,33 @@
+{
+  "id": "authority-grounding-superseded-panel",
+  "synthetic": true,
+  "target_skill": "audit-authorities",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "treats-vacated-panel-as-binding",
+      "candidate": "regression.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Proposition Audit"],
+    "banned_terms": [
+      {
+        "id": "superseded-panel-binding",
+        "term": "binding panel authority establishes the broad rule"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["PANEL", "EN-BANC"]
+  },
+  "rubric": [
+    {
+      "id": "applies-en-banc-history",
+      "description": "Records that the en banc court vacated the panel opinion and refuses to rely on the panel rule as precedential."
+    }
+  ]
+}

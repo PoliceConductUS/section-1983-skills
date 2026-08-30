@@ -7,6 +7,28 @@ description: >-
 
 # Drafting Section 1983 Declarations and Evidence
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the declarant's supplied facts, source records, and
+  exhibits.
+- `authorities` contains approved declaration and evidence requirements.
+
+Target is optional in `record`; without one, use the supplied proposition set.
+Internet is `disabled`. Return the unsigned declaration or foundation artifact
+as a canonical output-relative path and deterministic bytes; only the trusted
+host may publish it append-immutable. Report missing personal-knowledge,
+competency, exhibit, execution, or authority material as a gap without filling
+it by inference.
+
 Prepare an unsigned factual declaration from the human declarant's supplied
 personal knowledge and approved sources. Keep record attribution, analysis,
 inference, legal conclusions, and expected discovery visible instead of turning

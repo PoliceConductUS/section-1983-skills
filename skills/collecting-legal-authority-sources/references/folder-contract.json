@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skill": "collecting-legal-authority-sources",
+  "input_roles": [
+    "legal-question",
+    "jurisdiction",
+    "court-hierarchy",
+    "relevant-date",
+    "seed-authority",
+    "approved-source-system"
+  ],
+  "target": { "policy": "none", "roles": [] },
+  "internet": "authorized",
+  "output": { "mode": "append-immutable" }
+}

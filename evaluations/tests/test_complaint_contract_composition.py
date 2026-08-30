@@ -82,6 +82,15 @@ MECHANICAL_CHECKS = (
     "assessment-claim-coverage",
     "authority-artifact-hash",
     "authority-exact-passage",
+    "claim-defendant-challenged-act-cardinality",
+    "cross-reference-target",
+    "incorporation-target",
+    "required-count-field-location",
+    "limitations-gate-presence",
+    "limitations-trigger-structure",
+    "limitations-record-cardinality",
+    "limitations-record-structure",
+    "limitations-filing-critical-status",
 )
 EXCLUDED_JUDGMENTS = (
     "fact-truth",
@@ -90,6 +99,11 @@ EXCLUDED_JUDGMENTS = (
     "material-analogy",
     "strategy",
     "filing-readiness",
+    "relation-back",
+    "tolling",
+    "mistake",
+    "notice-sufficiency",
+    "service-sufficiency",
 )
 FINDING_FIELDS = ("code", "location", "message")
 SECTION_HEADINGS = (
@@ -545,8 +559,8 @@ class ComplaintContractCompositionTest(unittest.TestCase):
                 / "complaint.md"
             )
             mutated, replacements = re.subn(
-                r"do not draft, revise, or\s+audit the complaint\. Do not\s+"
-                r"invent or reconstruct the missing requirements\.",
+                r"do not\s+draft,\s+revise,\s+or\s+audit\s+the\s+complaint\.\s+"
+                r"Do not\s+invent\s+or\s+reconstruct\s+the\s+missing\s+requirements\.",
                 "may draft, revise, or audit the complaint. Do not invent or "
                 "reconstruct the missing requirements.",
                 complaint.read_text(encoding="utf-8"),

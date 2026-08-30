@@ -1,11 +1,5 @@
 import hashlib
 import importlib.util
-import json
-import os
-import subprocess
-import sys
-import tempfile
-import textwrap
 import unittest
 from pathlib import Path
 
@@ -83,13 +77,6 @@ def launcher_module():
     specification.loader.exec_module(module)
     return module
 
-
-def write_script(directory, name, body):
-    path = Path(directory) / name
-    path.write_text(textwrap.dedent(body))
-    return path
-
-
 class AdversarialReviewLauncherTest(unittest.TestCase):
 
     def test_validate_packet_accepts_only_exact_fingerprinted_payload(self):
@@ -120,228 +107,118 @@ class AdversarialReviewLauncherTest(unittest.TestCase):
             launcher.validate_packet(valid_packet("nearest-looking-family"))
         self.assertEqual(captured.exception.finding_id, "unsupported-document-family")
 
-    def test_invalid_packets_are_rejected_before_reviewer_execution(self):
+    def test_invalid_packets_are_rejected_before_provider_execution(self):
         launcher = launcher_module()
-        with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "executed"
-            command_script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
+        invalid_packets = []
 
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-            command = [sys.executable, str(command_script), str(marker)]
-            invalid_packets = []
+        extra_top_level = valid_packet()
+        extra_top_level["drafting_history"] = "excluded"
+        invalid_packets.append(("extra-top-level", extra_top_level))
 
-            extra_top_level = valid_packet()
-            extra_top_level["drafting_history"] = "excluded"
-            invalid_packets.append(("extra-top-level", extra_top_level))
+        top_level_path = valid_packet()
+        top_level_path["path"] = "packet.json"
+        invalid_packets.append(("top-level-path", top_level_path))
 
-            top_level_path = valid_packet()
-            top_level_path["path"] = "packet.json"
-            invalid_packets.append(("top-level-path", top_level_path))
+        top_level_url = valid_packet()
+        top_level_url["url"] = "https://example.invalid/packet"
+        invalid_packets.append(("top-level-url", top_level_url))
 
-            top_level_url = valid_packet()
-            top_level_url["url"] = "https://example.invalid/packet"
-            invalid_packets.append(("top-level-url", top_level_url))
+        extra_draft_field = valid_packet()
+        extra_draft_field["draft"]["path"] = "draft.md"
+        invalid_packets.append(("extra-draft-field", extra_draft_field))
 
-            extra_draft_field = valid_packet()
-            extra_draft_field["draft"]["path"] = "draft.md"
-            invalid_packets.append(("extra-draft-field", extra_draft_field))
+        extra_source_field = valid_packet()
+        extra_source_field["sources"][0]["path"] = "source.md"
+        invalid_packets.append(("extra-source-field", extra_source_field))
 
-            extra_source_field = valid_packet()
-            extra_source_field["sources"][0]["path"] = "source.md"
-            invalid_packets.append(("extra-source-field", extra_source_field))
+        source_url = valid_packet()
+        source_url["sources"][0]["url"] = "https://example.invalid/source"
+        invalid_packets.append(("source-url", source_url))
 
-            source_url = valid_packet()
-            source_url["sources"][0]["url"] = "https://example.invalid/source"
-            invalid_packets.append(("source-url", source_url))
+        extra_skill_field = valid_packet()
+        extra_skill_field["skill"]["path"] = "SKILL.md"
+        invalid_packets.append(("extra-skill-field", extra_skill_field))
 
-            extra_skill_field = valid_packet()
-            extra_skill_field["skill"]["path"] = "SKILL.md"
-            invalid_packets.append(("extra-skill-field", extra_skill_field))
+        extra_checklist_field = valid_packet()
+        extra_checklist_field["checklist"]["path"] = "checklist.md"
+        invalid_packets.append(("extra-checklist-field", extra_checklist_field))
 
-            extra_checklist_field = valid_packet()
-            extra_checklist_field["checklist"]["path"] = "checklist.md"
-            invalid_packets.append(("extra-checklist-field", extra_checklist_field))
+        missing_top_level = valid_packet()
+        missing_top_level.pop("checklist")
+        invalid_packets.append(("missing-top-level", missing_top_level))
 
-            missing_top_level = valid_packet()
-            missing_top_level.pop("checklist")
-            invalid_packets.append(("missing-top-level", missing_top_level))
+        path_only_source = valid_packet()
+        path_only_source["sources"][0].pop("content")
+        path_only_source["sources"][0]["path"] = "source.md"
+        invalid_packets.append(("path-only-source", path_only_source))
 
-            path_only_source = valid_packet()
-            path_only_source["sources"][0].pop("content")
-            path_only_source["sources"][0]["path"] = "source.md"
-            invalid_packets.append(("path-only-source", path_only_source))
+        path_only_draft = valid_packet()
+        path_only_draft["draft"].pop("content")
+        path_only_draft["draft"]["path"] = "draft.md"
+        invalid_packets.append(("path-only-draft", path_only_draft))
 
-            path_only_draft = valid_packet()
-            path_only_draft["draft"].pop("content")
-            path_only_draft["draft"]["path"] = "draft.md"
-            invalid_packets.append(("path-only-draft", path_only_draft))
+        path_only_skill = valid_packet()
+        path_only_skill["skill"] = {"path": "SKILL.md"}
+        invalid_packets.append(("path-only-skill", path_only_skill))
 
-            path_only_skill = valid_packet()
-            path_only_skill["skill"] = {"path": "SKILL.md"}
-            invalid_packets.append(("path-only-skill", path_only_skill))
+        path_only_checklist = valid_packet()
+        path_only_checklist["checklist"] = {"path": "checklist.md"}
+        invalid_packets.append(("path-only-checklist", path_only_checklist))
 
-            path_only_checklist = valid_packet()
-            path_only_checklist["checklist"] = {"path": "checklist.md"}
-            invalid_packets.append(("path-only-checklist", path_only_checklist))
+        draft_mismatch = valid_packet()
+        draft_mismatch["draft"]["sha256"] = "0" * 64
+        invalid_packets.append(("draft-fingerprint", draft_mismatch))
 
-            draft_mismatch = valid_packet()
-            draft_mismatch["draft"]["sha256"] = "0" * 64
-            invalid_packets.append(("draft-fingerprint", draft_mismatch))
+        source_mismatch = valid_packet()
+        source_mismatch["sources"][0]["sha256"] = "0" * 64
+        invalid_packets.append(("source-fingerprint", source_mismatch))
 
-            source_mismatch = valid_packet()
-            source_mismatch["sources"][0]["sha256"] = "0" * 64
-            invalid_packets.append(("source-fingerprint", source_mismatch))
+        forbidden_capability = valid_packet()
+        forbidden_capability["capabilities"] = ["filesystem"]
+        invalid_packets.append(("capability", forbidden_capability))
 
-            forbidden_capability = valid_packet()
-            forbidden_capability["capabilities"] = ["filesystem"]
-            invalid_packets.append(("capability", forbidden_capability))
+        for label, packet_value in invalid_packets:
+            with self.subTest(case=label):
+                with self.assertRaises(launcher.PacketValidationError):
+                    launcher.validate_packet(packet_value)
 
-            for label, packet in invalid_packets:
-                with self.subTest(case=label):
-                    with self.assertRaises(launcher.PacketValidationError):
-                        launcher.launch_review(
-                            packet,
-                            command,
-                            runtime_enforces_empty_capabilities=True,
-                        )
-                    self.assertFalse(marker.exists())
 
-    def test_runtime_enforcement_is_required_before_execution(self):
-        launcher = launcher_module()
-        with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "executed"
-            command_script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
-
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-
-            with self.assertRaises(launcher.ReviewLaunchError) as captured:
-                launcher.launch_review(
-                    valid_packet(),
-                    [sys.executable, str(command_script), str(marker)],
-                    runtime_enforces_empty_capabilities=False,
-                )
-
-            self.assertEqual(
-                captured.exception.finding_id,
-                "independent-review-unavailable",
-            )
-            self.assertIn("independent review unavailable", str(captured.exception))
-            self.assertFalse(marker.exists())
-
-    def test_whitespace_only_metadata_is_rejected_before_execution(self):
+    def test_whitespace_only_metadata_is_rejected_before_dispatch(self):
         launcher = launcher_module()
         mutations = {
-            "draft-version": lambda packet: packet["draft"].update(
-                {"version": " \t\n"}
-            ),
-            "source-id": lambda packet: packet["sources"][0].update(
-                {"id": " \t\n"}
-            ),
-            "source-role": lambda packet: packet["sources"][0].update(
-                {"role": " \t\n"}
-            ),
-            "skill-content": lambda packet: packet["skill"].update(
-                {"content": " \t\n"}
-            ),
-            "checklist-content": lambda packet: packet["checklist"].update(
-                {"content": " \t\n"}
-            ),
+            "draft-version": lambda packet: packet["draft"].update({"version": " \t\n"}),
+            "source-id": lambda packet: packet["sources"][0].update({"id": " \t\n"}),
+            "source-role": lambda packet: packet["sources"][0].update({"role": " \t\n"}),
+            "skill-content": lambda packet: packet["skill"].update({"content": " \t\n"}),
+            "checklist-content": lambda packet: packet["checklist"].update({"content": " \t\n"}),
         }
-        with tempfile.TemporaryDirectory() as directory:
-            script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
+        for label, mutate in mutations.items():
+            with self.subTest(field=label):
+                packet_value = valid_packet()
+                mutate(packet_value)
+                with self.assertRaises(launcher.PacketValidationError):
+                    launcher.validate_packet(packet_value)
 
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-            for label, mutate in mutations.items():
-                with self.subTest(field=label):
-                    marker = Path(directory) / label
-                    packet = valid_packet()
-                    mutate(packet)
-                    with self.assertRaises(launcher.PacketValidationError):
-                        launcher.launch_review(
-                            packet,
-                            [sys.executable, str(script), str(marker)],
-                            runtime_enforces_empty_capabilities=True,
-                        )
-                    self.assertFalse(marker.exists())
-
-    def test_unpaired_surrogate_in_every_string_field_is_rejected_before_execution(self):
+    def test_unpaired_surrogate_in_every_string_field_is_rejected_before_dispatch(self):
         launcher = launcher_module()
         mutations = {
-            "draft-content": lambda packet: packet["draft"].update(
-                {"content": "\ud800"}
-            ),
-            "draft-version": lambda packet: packet["draft"].update(
-                {"version": "\ud800"}
-            ),
-            "draft-sha256": lambda packet: packet["draft"].update(
-                {"sha256": "\ud800"}
-            ),
-            "document-family": lambda packet: packet.update(
-                {"document_family": "\ud800"}
-            ),
-            "source-id": lambda packet: packet["sources"][0].update(
-                {"id": "\ud800"}
-            ),
-            "source-role": lambda packet: packet["sources"][0].update(
-                {"role": "\ud800"}
-            ),
-            "source-content": lambda packet: packet["sources"][0].update(
-                {"content": "\ud800"}
-            ),
-            "source-sha256": lambda packet: packet["sources"][0].update(
-                {"sha256": "\ud800"}
-            ),
-            "skill-content": lambda packet: packet["skill"].update(
-                {"content": "\ud800"}
-            ),
-            "checklist-content": lambda packet: packet["checklist"].update(
-                {"content": "\ud800"}
-            ),
+            "draft-content": lambda packet: packet["draft"].update({"content": "\ud800"}),
+            "draft-version": lambda packet: packet["draft"].update({"version": "\ud800"}),
+            "draft-sha256": lambda packet: packet["draft"].update({"sha256": "\ud800"}),
+            "document-family": lambda packet: packet.update({"document_family": "\ud800"}),
+            "source-id": lambda packet: packet["sources"][0].update({"id": "\ud800"}),
+            "source-role": lambda packet: packet["sources"][0].update({"role": "\ud800"}),
+            "source-content": lambda packet: packet["sources"][0].update({"content": "\ud800"}),
+            "source-sha256": lambda packet: packet["sources"][0].update({"sha256": "\ud800"}),
+            "skill-content": lambda packet: packet["skill"].update({"content": "\ud800"}),
+            "checklist-content": lambda packet: packet["checklist"].update({"content": "\ud800"}),
         }
-        with tempfile.TemporaryDirectory() as directory:
-            script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
-
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-            for label, mutate in mutations.items():
-                with self.subTest(field=label):
-                    marker = Path(directory) / label
-                    packet = valid_packet()
-                    mutate(packet)
-                    with self.assertRaises(launcher.PacketValidationError):
-                        launcher.launch_review(
-                            packet,
-                            [sys.executable, str(script), str(marker)],
-                            runtime_enforces_empty_capabilities=True,
-                        )
-                    self.assertFalse(marker.exists())
+        for label, mutate in mutations.items():
+            with self.subTest(field=label):
+                packet_value = valid_packet()
+                mutate(packet_value)
+                with self.assertRaises(launcher.PacketValidationError):
+                    launcher.validate_packet(packet_value)
 
     def test_content_hashes_use_exact_untrimmed_text(self):
         launcher = launcher_module()
@@ -365,109 +242,19 @@ class AdversarialReviewLauncherTest(unittest.TestCase):
 
     def test_timeout_must_be_finite_positive_and_not_boolean(self):
         launcher = launcher_module()
-        with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "executed"
-            command_script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
+        for timeout_seconds in (
+            True,
+            False,
+            0,
+            -1,
+            float("inf"),
+            float("nan"),
+            "1",
+        ):
+            with self.subTest(timeout=timeout_seconds):
+                with self.assertRaises(ValueError):
+                    launcher._positive_timeout(timeout_seconds)
 
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-            command = [sys.executable, str(command_script), str(marker)]
-            for timeout_seconds in (
-                True,
-                False,
-                0,
-                -1,
-                float("inf"),
-                float("nan"),
-                "1",
-            ):
-                with self.subTest(timeout=timeout_seconds):
-                    with self.assertRaises(ValueError):
-                        launcher.launch_review(
-                            valid_packet(),
-                            command,
-                            runtime_enforces_empty_capabilities=True,
-                            timeout_seconds=timeout_seconds,
-                        )
-                    self.assertFalse(marker.exists())
-
-    def test_caller_assertion_cannot_execute_custom_command(self):
-        launcher = launcher_module()
-        with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "executed"
-            script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
-
-                sys.stdin.buffer.read()
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-            for claimed_boundary in (False, True):
-                with self.subTest(claimed_boundary=claimed_boundary):
-                    with self.assertRaises(launcher.ReviewLaunchError) as captured:
-                        launcher.launch_review(
-                            valid_packet(),
-                            [sys.executable, str(script), str(marker)],
-                            runtime_enforces_empty_capabilities=claimed_boundary,
-                        )
-                    self.assertEqual(
-                        captured.exception.finding_id,
-                        "independent-review-unavailable",
-                    )
-                    self.assertFalse(marker.exists())
-
-    def test_cli_rejects_caller_asserted_command_before_execution(self):
-        launcher_module()
-        packet = valid_packet()
-        with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "executed"
-            script = write_script(
-                directory,
-                "marker.py",
-                """
-                import pathlib
-                import sys
-
-                sys.stdin.buffer.read()
-                pathlib.Path(sys.argv[1]).write_text("executed")
-                """,
-            )
-            command = [sys.executable, str(script), str(marker)]
-            for claimed_flag in ([], ["--runtime-enforces-empty-capabilities"]):
-                with self.subTest(claimed=bool(claimed_flag)):
-                    completed = subprocess.run(
-                        [
-                            sys.executable,
-                            str(LAUNCHER),
-                            "--reviewer-command-json",
-                            json.dumps(command),
-                            "--timeout-seconds",
-                            "1",
-                            *claimed_flag,
-                        ],
-                        input=json.dumps(packet),
-                        cwd=REPOSITORY,
-                        text=True,
-                        capture_output=True,
-                        check=False,
-                    )
-
-                    self.assertNotEqual(completed.returncode, 0)
-                    self.assertFalse(marker.exists())
-                    self.assertIn(
-                        "independent review unavailable",
-                        (completed.stdout + completed.stderr).casefold(),
-                    )
 
 
 if __name__ == "__main__":

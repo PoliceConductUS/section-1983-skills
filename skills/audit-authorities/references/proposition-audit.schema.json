@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://policeconduct.us/schemas/proposition-authority-audit-v1.json",
+  "title": "Proposition authority audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "audit_id",
+    "target",
+    "target_sha256",
+    "checked_through",
+    "overall_result",
+    "human_approval",
+    "generation_stage",
+    "audit_stage",
+    "propositions"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "audit_id": { "$ref": "#/$defs/identifier" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path"],
+      "properties": {
+        "role": { "const": "filing-source" },
+        "path": { "$ref": "#/$defs/relative_path" }
+      }
+    },
+    "target_sha256": { "$ref": "#/$defs/sha256" },
+    "checked_through": { "$ref": "#/$defs/date_time" },
+    "overall_result": {
+      "enum": ["passed", "findings", "unavailable", "invalid"]
+    },
+    "human_approval": { "const": "not-provided" },
+    "generation_stage": { "$ref": "#/$defs/generation_stage" },
+    "audit_stage": { "$ref": "#/$defs/audit_stage" },
+    "propositions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/proposition" }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "overall_result": { "const": "passed" } },
+        "required": ["overall_result"]
+      },
+      "then": {
+        "properties": {
+          "audit_stage": {
+            "allOf": [
+              {
+                "properties": {
+                  "review_relationship": { "const": "independent-stage" }
+                }
+              },
+              {
+                "properties": {
+                  "execution_outcome": {
+                    "const": "successful-independent-execution"
+                  }
+                }
+              }
+            ]
+          },
+          "propositions": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                { "properties": { "correctness": { "const": "verified" } } },
+                { "properties": { "groundedness": { "const": "grounded" } } }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "relative_path": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "date_time": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "model_or_provider": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "input_fingerprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "sha256"],
+      "properties": {
+        "role": { "$ref": "#/$defs/identifier" },
+        "path": { "$ref": "#/$defs/relative_path" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "source_id": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "generation_stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage_id",
+        "invocation_id",
+        "stage_kind",
+        "model_or_provider",
+        "input_fingerprints",
+        "output",
+        "output_folder_fingerprint",
+        "executed_at"
+      ],
+      "properties": {
+        "stage_id": { "$ref": "#/$defs/identifier" },
+        "invocation_id": { "$ref": "#/$defs/identifier" },
+        "stage_kind": { "enum": ["generation", "material-revision"] },
+        "model_or_provider": { "$ref": "#/$defs/model_or_provider" },
+        "input_fingerprints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/input_fingerprint" }
+        },
+        "output": { "$ref": "#/$defs/input_fingerprint" },
+        "output_folder_fingerprint": { "$ref": "#/$defs/sha256" },
+        "executed_at": { "$ref": "#/$defs/date_time" }
+      }
+    },
+    "audit_stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage_id",
+        "invocation_id",
+        "stage_kind",
+        "review_relationship",
+        "model_or_provider",
+        "input_fingerprints",
+        "selected_source_ids",
+        "output_folder_fingerprint",
+        "executed_at",
+        "execution_outcome"
+      ],
+      "properties": {
+        "stage_id": { "$ref": "#/$defs/identifier" },
+        "invocation_id": { "$ref": "#/$defs/identifier" },
+        "stage_kind": { "const": "independent-authority-audit" },
+        "review_relationship": {
+          "enum": ["independent-stage", "generator-self-review", "missing"]
+        },
+        "model_or_provider": { "$ref": "#/$defs/model_or_provider" },
+        "input_fingerprints": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/input_fingerprint" }
+        },
+        "selected_source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "output_folder_fingerprint": { "$ref": "#/$defs/sha256" },
+        "executed_at": { "$ref": "#/$defs/date_time" },
+        "execution_outcome": {
+          "enum": [
+            "successful-independent-execution",
+            "independent-execution-unavailable",
+            "malformed-audit-output"
+          ]
+        }
+      }
+    },
+    "filing_location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document_path", "section", "paragraph", "sentence"],
+      "properties": {
+        "document_path": { "$ref": "#/$defs/relative_path" },
+        "section": { "type": "string", "minLength": 1 },
+        "paragraph": { "type": "integer", "minimum": 1 },
+        "sentence": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "verification_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audit_stage",
+        "input_fingerprints",
+        "selected_source_ids",
+        "executed_at"
+      ],
+      "properties": {
+        "audit_stage": { "const": "independent-authority-audit" },
+        "auditor_model_or_provider": { "type": "string", "minLength": 1 },
+        "input_fingerprints": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sha256" }
+        },
+        "selected_source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identifier" }
+        },
+        "executed_at": { "$ref": "#/$defs/date_time" }
+      }
+    },
+    "source_support": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_id",
+        "authority_yaml_path",
+        "source_yaml_path",
+        "artifact_path",
+        "artifact_sha256",
+        "pinpoint",
+        "source_text",
+        "scope_and_qualifiers",
+        "jurisdiction",
+        "decision_date",
+        "procedural_posture",
+        "precedential_force",
+        "source_voice",
+        "support_status"
+      ],
+      "properties": {
+        "authority_id": { "$ref": "#/$defs/identifier" },
+        "authority_yaml_path": { "$ref": "#/$defs/relative_path" },
+        "source_yaml_path": { "$ref": "#/$defs/relative_path" },
+        "artifact_path": { "$ref": "#/$defs/relative_path" },
+        "artifact_sha256": { "$ref": "#/$defs/sha256" },
+        "pinpoint": { "type": "string", "minLength": 1 },
+        "source_text": { "type": "string", "minLength": 1 },
+        "scope_and_qualifiers": { "type": "string", "minLength": 1 },
+        "jurisdiction": { "type": "string", "minLength": 1 },
+        "decision_date": { "$ref": "#/$defs/date" },
+        "procedural_posture": { "type": "string", "minLength": 1 },
+        "precedential_force": { "type": "string", "minLength": 1 },
+        "source_voice": {
+          "enum": [
+            "majority-holding",
+            "court-dicta",
+            "party-argument",
+            "lower-court-ruling-under-review",
+            "factual-or-procedural-background",
+            "concurrence",
+            "dissent",
+            "quoted-secondary-authority"
+          ]
+        },
+        "support_status": {
+          "enum": [
+            "supports",
+            "contradicts",
+            "partial",
+            "irrelevant",
+            "not-found"
+          ]
+        }
+      }
+    },
+    "proposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposition_id",
+        "filing_location",
+        "text",
+        "type",
+        "materiality",
+        "correctness",
+        "groundedness",
+        "source_support",
+        "verification_provenance"
+      ],
+      "properties": {
+        "proposition_id": { "$ref": "#/$defs/identifier" },
+        "filing_location": { "$ref": "#/$defs/filing_location" },
+        "text": { "type": "string", "minLength": 1 },
+        "type": {
+          "enum": [
+            "legal-standard",
+            "legal-application",
+            "factual-claim",
+            "inference",
+            "procedural-claim"
+          ]
+        },
+        "materiality": { "enum": ["material", "non-material"] },
+        "correctness": { "enum": ["verified", "incorrect", "unresolved"] },
+        "groundedness": {
+          "enum": ["grounded", "misgrounded", "ungrounded", "not-applicable"]
+        },
+        "source_support": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source_support" }
+        },
+        "verification_provenance": {
+          "$ref": "#/$defs/verification_provenance"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "correctness": { "const": "verified" } },
+            "required": ["correctness"]
+          },
+          "then": {
+            "properties": {
+              "groundedness": {
+                "enum": ["grounded", "misgrounded", "ungrounded"]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "groundedness": { "const": "not-applicable" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

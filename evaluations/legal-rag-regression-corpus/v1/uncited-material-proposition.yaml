@@ -1,0 +1,15 @@
+version: 1
+id: uncited-material-proposition
+source:
+  source_id: synthetic-uncited-proposition
+  text: |
+    The selected source states only the procedural history.
+  sha256: ec522cd2d391acc875abc0c5b9d223c47e10c14654290996728e8b6bb6770b24
+challenged_text: The filing asserts a material legal rule without a citation.
+expected_propositions:
+  - proposition_id: uncited-material-1
+    correctness: verified
+    groundedness: ungrounded
+    source_voice: none
+pass_allowed: false
+reason: A material legal proposition has no cited or selected source support.

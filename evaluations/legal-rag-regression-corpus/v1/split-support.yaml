@@ -1,0 +1,21 @@
+version: 1
+id: split-support
+source:
+  source_id: synthetic-split-support
+  text: |
+    The court holds that notice was required. The opinion does not address an opportunity to respond.
+  sha256: 559a680f5ae777663b06ddca5dd8842ca8c1ba8eb7f6ccfc27c1886b190f9e2b
+challenged_text: The court required notice and an opportunity to respond.
+expected_propositions:
+  - proposition_id: split-support-notice
+    correctness: verified
+    groundedness: grounded
+    source_voice: majority-holding
+  - proposition_id: split-support-response
+    correctness: verified
+    groundedness: ungrounded
+    source_voice: none
+pass_allowed: false
+reason:
+  The source grounds notice but supplies no support for an opportunity to
+  respond.

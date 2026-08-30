@@ -1,0 +1,198 @@
+schema_version: 1
+required_record_fields:
+  - accrual_date
+  - limitations_deadline
+  - original_doe_or_role_description
+  - same_transaction_analysis
+  - rule_15_c_1_a_analysis
+  - rule_15_c_1_c_analysis
+  - mistake_or_lack_of_knowledge
+  - rule_4_m_notice_and_service
+  - identity_first_knowable_date
+  - pre_limitations_diligence
+  - defendant_specific_concealment_or_tolling
+  - fallback_claims_and_severable_relief
+scenarios:
+  - id: passed-deadline-complete-record
+    calculated_deadline_passed: true
+    raised_risks: []
+    affected_defendants:
+      - Officer Alpha
+    passing_candidate:
+      gate_applied: true
+      records:
+        Officer Alpha:
+          accrual_date: 2024-01-15
+          limitations_deadline: 2026-01-15
+          original_doe_or_role_description: Arresting Officer Doe
+          same_transaction_analysis: Same arrest and challenged seizure.
+          rule_15_c_1_a_analysis: State relation-back rule analyzed separately.
+          rule_15_c_1_c_analysis:
+            Federal notice and mistake route analyzed separately.
+          mistake_or_lack_of_knowledge:
+            Lack of knowledge; not classified as mistake.
+          rule_4_m_notice_and_service: Notice and service dates evaluated.
+          identity_first_knowable_date: 2025-11-03
+          pre_limitations_diligence: Records requests dated and sourced.
+          defendant_specific_concealment_or_tolling:
+            No supported concealment; tolling authority status recorded.
+          fallback_claims_and_severable_relief:
+            Timely claims and severable prospective relief identified.
+      filing_critical_gaps: []
+      filing_ready: true
+    regressions:
+      - id: deadline-trigger-ignored
+        candidate:
+          gate_applied: false
+          records: {}
+          filing_critical_gaps: []
+          filing_ready: true
+        expected_findings:
+          - gate-required
+          - missing-record:Officer Alpha
+          - filing-ready-with-unresolved-limitations
+      - id: rule-15-c-paths-collapsed
+        candidate:
+          gate_applied: true
+          records:
+            Officer Alpha:
+              accrual_date: 2024-01-15
+              limitations_deadline: 2026-01-15
+              original_doe_or_role_description: Arresting Officer Doe
+              same_transaction_analysis: Same arrest and challenged seizure.
+              rule_15_c_1_a_analysis: unresolved
+              rule_15_c_1_c_analysis: unresolved
+              mistake_or_lack_of_knowledge: Lack of knowledge.
+              rule_4_m_notice_and_service: Notice and service dates evaluated.
+              identity_first_knowable_date: 2025-11-03
+              pre_limitations_diligence: Records requests dated and sourced.
+              defendant_specific_concealment_or_tolling:
+                No supported concealment.
+              fallback_claims_and_severable_relief: Timely claims identified.
+          filing_critical_gaps: []
+          filing_ready: true
+        expected_findings:
+          - filing-ready-with-unresolved-limitations
+          - missing-entry:Officer Alpha:rule_15_c_1_a_analysis
+          - missing-entry:Officer Alpha:rule_15_c_1_c_analysis
+  - id: identified-pre-deadline-risk
+    calculated_deadline_passed: false
+    raised_risks:
+      - source: court
+        issue: relation-back
+    affected_defendants:
+      - Officer Bravo
+    passing_candidate:
+      gate_applied: true
+      records:
+        Officer Bravo:
+          accrual_date: 2025-09-01
+          limitations_deadline: 2027-09-01
+          original_doe_or_role_description: Transport Officer Doe
+          same_transaction_analysis: Same custody episode.
+          rule_15_c_1_a_analysis: State route analyzed.
+          rule_15_c_1_c_analysis: Federal route analyzed.
+          mistake_or_lack_of_knowledge:
+            Mistake and lack of knowledge classified separately.
+          rule_4_m_notice_and_service: Notice facts and dates evaluated.
+          identity_first_knowable_date: 2026-06-10
+          pre_limitations_diligence: Discovery and requests dated and sourced.
+          defendant_specific_concealment_or_tolling:
+            Defendant-specific facts and authority status recorded.
+          fallback_claims_and_severable_relief:
+            Severable alternatives identified.
+      filing_critical_gaps: []
+      filing_ready: true
+    regressions:
+      - id: risk-trigger-ignored-because-deadline-not-passed
+        candidate:
+          gate_applied: false
+          records: {}
+          filing_critical_gaps: []
+          filing_ready: true
+        expected_findings:
+          - filing-ready-with-unresolved-limitations
+          - gate-required
+          - missing-record:Officer Bravo
+  - id: separate-record-per-affected-defendant
+    calculated_deadline_passed: true
+    raised_risks:
+      - source: opposing-party
+        issue: notice
+    affected_defendants:
+      - Officer Charlie
+      - Officer Delta
+    passing_candidate:
+      gate_applied: true
+      records:
+        Officer Charlie: &complete_record
+          accrual_date: 2024-02-02
+          limitations_deadline: 2026-02-02
+          original_doe_or_role_description: Booking Officer Doe
+          same_transaction_analysis: Same booking episode.
+          rule_15_c_1_a_analysis: State route analyzed.
+          rule_15_c_1_c_analysis: Federal route analyzed.
+          mistake_or_lack_of_knowledge: Classification supported.
+          rule_4_m_notice_and_service: Notice and service evaluated.
+          identity_first_knowable_date: 2025-12-01
+          pre_limitations_diligence: Dated and sourced diligence recorded.
+          defendant_specific_concealment_or_tolling:
+            Defendant-specific analysis recorded.
+          fallback_claims_and_severable_relief: Fallbacks identified.
+        Officer Delta:
+          <<: *complete_record
+          original_doe_or_role_description: Supervising Officer Doe
+          rule_4_m_notice_and_service:
+            Different notice and service facts evaluated.
+      filing_critical_gaps: []
+      filing_ready: true
+    regressions:
+      - id: collective-record-omits-second-defendant
+        candidate:
+          gate_applied: true
+          records:
+            Officer Charlie: *complete_record
+          filing_critical_gaps: []
+          filing_ready: true
+        expected_findings:
+          - filing-ready-with-unresolved-limitations
+          - missing-record:Officer Delta
+  - id: unresolved-entry-fails-closed
+    calculated_deadline_passed: false
+    raised_risks:
+      - source: caller
+        issue: diligence
+    affected_defendants:
+      - Officer Echo
+    passing_candidate:
+      gate_applied: true
+      records:
+        Officer Echo:
+          <<: *complete_record
+          identity_first_knowable_date: unresolved
+      filing_critical_gaps:
+        - Officer Echo:identity_first_knowable_date
+      filing_ready: false
+    regressions:
+      - id: unresolved-entry-treated-as-ready
+        candidate:
+          gate_applied: true
+          records:
+            Officer Echo:
+              <<: *complete_record
+              identity_first_knowable_date: unresolved
+          filing_critical_gaps: []
+          filing_ready: true
+        expected_findings:
+          - filing-ready-with-unresolved-limitations
+          - missing-entry:Officer Echo:identity_first_knowable_date
+  - id: no-identified-limitations-risk
+    calculated_deadline_passed: false
+    raised_risks: []
+    affected_defendants: []
+    passing_candidate:
+      gate_applied: false
+      records: {}
+      filing_critical_gaps: []
+      filing_ready: true
+    regressions: []

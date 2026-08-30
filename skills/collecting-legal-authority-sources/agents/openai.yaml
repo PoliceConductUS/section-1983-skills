@@ -1,0 +1,6 @@
+interface:
+  display_name: "Collect Legal-Authority Sources"
+  short_description: "Collect ordinary authority files and source YAML"
+  default_prompt:
+    "Use $collecting-legal-authority-sources to perform bounded authorized
+    collection for a later independent authority audit."

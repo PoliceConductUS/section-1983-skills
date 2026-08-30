@@ -1,0 +1,6 @@
+interface:
+  display_name: "Build Municipal Monell Profile"
+  short_description: "Organize evidence-coded municipal institutional records"
+  default_prompt:
+    "Use $building-municipal-monell-profiles to build a source-documented
+    municipal profile without deciding Monell liability."

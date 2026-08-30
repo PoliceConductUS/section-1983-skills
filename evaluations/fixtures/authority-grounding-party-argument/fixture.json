@@ -1,0 +1,33 @@
+{
+  "id": "authority-grounding-party-argument",
+  "synthetic": true,
+  "target_skill": "audit-authorities",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "attributes-party-argument-to-court",
+      "candidate": "regression.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Proposition Audit"],
+    "banned_terms": [
+      {
+        "id": "party-as-holding",
+        "term": "majority holding: notice is unnecessary"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["ARG-OPINION"]
+  },
+  "rubric": [
+    {
+      "id": "classifies-party-voice",
+      "description": "Classifies the no-notice sentence as party argument and the contrary disposition as the majority holding."
+    }
+  ]
+}

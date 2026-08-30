@@ -15,16 +15,6 @@
       "id": "28-usc-1746",
       "url": "https://uscode.house.gov/view.xhtml?req=%28title%3A28+section%3A1746+edition%3Aprelim%29",
       "checked_on": "2026-08-20"
-    },
-    {
-      "id": "northern-district-texas-local-rules",
-      "url": "https://www.txnd.uscourts.gov/local-civil-rules",
-      "checked_on": "2026-08-20"
-    },
-    {
-      "id": "judge-scholer-requirements",
-      "url": "https://www.txnd.uscourts.gov/judge/district-judge-karen-gren-scholer",
-      "checked_on": "2026-08-20"
     }
   ],
   "skills": [
@@ -79,10 +69,66 @@
       }
     },
     {
+      "name": "analyzing-police-policy-sources",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Decomposes caller-approved policy sources without supplying procedural rules or deciding compliance."
+    },
+    {
+      "name": "assessing-police-policy-compliance",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Assesses caller-approved policy requirements against source-documented case records without supplying procedural rules or deciding legal liability."
+    },
+    {
       "name": "building-defense-counsel-overlays",
       "rules_mode": "runtime-sourced",
       "reviewed_on": "2026-08-22",
       "rationale": "Builds professional counsel profiles from an approved immutable public-source snapshot supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "building-judicial-reasoning-profiles",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Classifies and compiles caller-approved public source material without supplying current procedural rule content."
+    },
+    {
+      "name": "building-municipal-monell-profiles",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Organizes caller-approved municipal evidence and verified authority without supplying procedural rules or deciding Monell liability."
+    },
+    {
+      "name": "collecting-legal-authority-sources",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Collects source-documented legal-authority files without supplying procedural rules or verifying authority use."
+    },
+    {
+      "name": "collecting-police-policy-sources",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Collects source-documented police-policy files without supplying procedural rules or interpreting policy meaning."
+    },
+    {
+      "name": "judicial-reviewer",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Returns bounded findings from caller-approved profile, filing, and source files supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual approved source identity used",
+        "checked_date": "actual checked date used"
+      }
+    },
+    {
+      "name": "opposing-counsel",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Returns bounded simulated attacks from caller-approved counsel profile, filing, and source files supplied at runtime.",
       "output_provenance": {
         "source_identity": "actual approved source identity used",
         "checked_date": "actual checked date used"
@@ -95,18 +141,6 @@
       "rationale": "Supplies federal civil-procedure drafting guidance.",
       "source_ids": ["federal-civil-rules"],
       "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
-    },
-    {
-      "name": "drafting-for-judge-scholer",
-      "rules_mode": "bundled-rules-dependent",
-      "reviewed_on": "2026-08-20",
-      "rationale": "Supplies a sourced Judge Scholer procedural overlay.",
-      "source_ids": [
-        "federal-civil-rules",
-        "northern-district-texas-local-rules",
-        "judge-scholer-requirements"
-      ],
-      "jurisdiction_reference": "skills/drafting-for-judge-scholer/REFERENCE.md"
     },
     {
       "name": "drafting-section-1983-complaints",

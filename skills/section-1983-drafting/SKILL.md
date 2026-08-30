@@ -19,6 +19,29 @@ description:
 
 # section-1983-drafting
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the approved docket, facts, evidence, and procedural record.
+- `authorities` contains approved governing law, rules, and local requirements.
+- `strategy` contains user-approved positions, concessions, and objectives.
+- `filing` contains any existing filing selected for drafting or revision.
+
+Target is optional in `filing`; without one, draft the document selected by the
+user request and supplied record. Internet is `authorized` for bounded
+localization and authority research. Return each requested artifact with a
+canonical output-relative path and deterministic bytes; only the trusted host
+may publish it append-immutable. Report missing facts, authority, strategy, or
+filing material as a gap without searching undeclared folders.
+
 Draft litigation documents in Section 1983 cases that read like a dispassionate
 factual record, not like advocacy theater and not like AI slop. The theory of
 this skill: adjectives and adverbs tell; facts show. A judge reading "Officer
@@ -30,6 +53,16 @@ conclusions and credits facts.
 The skill is layered the way the law varies: an invariant writing system, a
 uniform federal baseline per document type, and a protocol for the
 district-by-district layer that cannot be authored in advance.
+
+## Filing folder boundary
+
+Filing inputs are ordinary files in declared recursive read-only folders. When
+the task targets one file, identify its declared input role and folder-relative
+path. A whole-folder task must expressly identify the ordinary files in scope;
+there is no folder-wide manifest. Never mutate an input. Return proposed files
+for trusted-host publication directly beneath the exact output folder, and keep
+all cache, extraction, staging, working-directory, and temporary bytes beneath
+`<output-folder>/temp/`.
 
 ## Skill routing and precedence
 
@@ -44,12 +77,14 @@ Load each applicable skill once, in this order:
 4. Add `drafting-false-arrest-complaints` when false arrest, probable cause,
    arguable probable cause, alternative offenses, seizure timing, or
    incorporated arrest video is material.
-5. Add an assigned-judge overlay, such as `drafting-for-judge-scholer`, after
-   the applicable document and claim skills.
+5. Build an assigned-judge profile with `building-judicial-reasoning-profiles`
+   when approved public sources support one. Profile-backed review remains a
+   separate downstream invocation.
 6. Add `building-litigation-alignment-overlays` before drafting an amended
-   complaint, leave-to-amend package, or other filing that should consume actual
-   adversary attacks or judicial treatment from the current approved docket
-   snapshot. A stale or failing overlay produces no specialized drafting change.
+   complaint, motion for leave to amend, or other filing that should consume
+   actual adversary attacks or judicial treatment from the current approved
+   docket snapshot. A stale or failing overlay produces no specialized drafting
+   change.
 7. Add `building-defense-counsel-overlays` when an actual-adversary review
    should consume validated professional litigation history for the effective
    counsel team. Keep every counsel overlay out of the blind common-attack
@@ -70,7 +105,7 @@ Load each applicable skill once, in this order:
     any material authority-driven revision.
 
 The more specific skill adds requirements. It does not relax this skill,
-governing court rules, repository instructions, source gates, or authority
+governing court rules, declared-input instructions, source gates, or authority
 gates.
 
 **REQUIRED FINAL EDITING SUB-SKILL:** Every drafting task must use
@@ -110,25 +145,47 @@ rhetorical argument is a small part of any document, if present at all.
 - Rhetoric, when used at all, is confined to at most a sentence or two of
   framing and is never load-bearing.
 
+## Arrest-driven defendant order
+
+Before drafting or materially revising any filing that names defendants, audit
+the declared `record` and `filing` inputs to determine whether an arrest
+occurred and identify every source-documented arresting officer. Report a gap
+instead of inventing an arrest or officer identity.
+
+When the inputs identify one arresting officer, treat that officer as primary.
+When they identify multiple arresting officers, use the primary arresting
+officer declared by the caller. If the caller has not declared one, stop and ask
+which officer is primary; never infer the designation from rank, chronology,
+report authorship, physical contact, or a prior filing's order.
+
+When an arrest occurred and a primary arresting officer is identified, put that
+officer first in every ordered defendant presentation the new or materially
+revised filing contains: the caption, Parties section, defendant list or table,
+and defendant-grouped claim presentation. A prior or existing filing's different
+order does not control the new or revised output.
+
+This presentation rule does not reorder factual chronology, claim-specific
+allegations, event stages, or merits analysis. When the audit establishes no
+arrest, preserve the caller's defendant order unless another approved contract
+expressly controls it.
+
 ## Workflow
 
-1. Strategy. Locate the case strategy file: `strategy.md`, or the
-   highest-numbered `strategy-v*.md` if versions exist, in the case or
-   workstream folder. If none is found, ask the user for it (or for permission
-   to proceed without one) before drafting. Follow its objective and relief
-   hierarchy, argument-structure directives (which theory leads, which
-   corroborates, claim-lane rules), filing-packet requirements, and prescribed
-   audits. If the work surfaces a reason to depart — a new fact, a better
-   authority, a structural problem — do not deviate silently: propose the change
-   as the next strategy version and proceed only per the user's decision. Never
-   edit a strategy version in place.
+1. Strategy. Read the strategy supplied in the declared `strategy` role. If no
+   strategy is supplied, report the gap and ask the user whether to proceed
+   without one before drafting. Follow its objective and relief hierarchy,
+   argument-structure directives (which theory leads, which corroborates,
+   claim-lane rules), filing-folder requirements, and prescribed audits. If the
+   work surfaces a reason to depart — a new fact, a better authority, a
+   structural problem — do not deviate silently: propose the change and proceed
+   only per the user's decision.
 2. Route. For a complaint, amended complaint, or amendment proffer, before any
    drafting use the [complaint route](references/documents/complaint.md), load
    drafting-section-1983-complaints, and require that skill to read both of its
-   canonical references. If the canonical package or either reference cannot be
-   read, report **complaint contract unavailable** and do not draft, revise, or
-   audit the complaint. Do not invent or reconstruct the missing requirements.
-   For discovery, select the applicable peer skill above and apply
+   canonical references. If the canonical complaint skill or either reference
+   cannot be read, report **complaint contract unavailable** and do not draft,
+   revise, or audit the complaint. Do not invent or reconstruct the missing
+   requirements. For discovery, select the applicable peer skill above and apply
    `references/discovery-coordination-contract.md`. For another filing, identify
    the document from the user's request or docket event using
    `references/case-map.md`, which maps events to responsive documents and
@@ -136,15 +193,15 @@ rhetorical argument is a small part of any document, if present at all.
    is the answer.
 3. Calendar. Establish the deadline before drafting. A perfect late filing
    loses. Local rules control most response deadlines.
-4. Localize. Run `references/localization.md`: use the cached project
-   localization record if one exists. Otherwise fetch the district's local rules
-   and the assigned judges' standing orders and answer the checklist. Preserve
-   it where the project requires; never write into an installed skill package or
-   invent a repository path.
-5. Source authorities. Follow `references/authorities.md` for every citation: a
-   verified-authorities tool or repository when available, binding before
-   persuasive, and a `[VERIFY]` marker on anything cited without a verified
-   source. Never invent a citation.
+4. Localize. Run `references/localization.md`: use approved localization
+   material in `authorities` when supplied. Otherwise use the authorized
+   internet connection to fetch the district's local rules and the assigned
+   judges' standing orders and answer the checklist. Return the result for
+   publication by the trusted host; never write into an installed skill package.
+5. Source authorities. Follow `references/authorities.md` for every citation:
+   use approved material in `authorities`, then bounded primary-source internet
+   research, binding before persuasive, and a `[VERIFY]` marker on anything not
+   verified from those sources. Never invent a citation.
 6. Gather the facts: who did what to whom, when, where, under what authority.
    Ask for what is missing before drafting.
 7. Draft from the selected document skeleton. For a complaint, draft from the
@@ -157,17 +214,27 @@ rhetorical argument is a small part of any document, if present at all.
    repeat it in the drafter's own voice. Audit grounding: confirm every point
    rests on cited facts, permitted inferences, or authority, and run any audits
    the strategy file prescribes.
-9. If an assigned-judge overlay was used, after composition write one immutable
-   judge-overlay execution receipt under the version's canonical `audits/`
-   directory. Use `references/judge-overlay-execution.schema.json` and
-   `scripts/judge_overlay_receipt.py`. A completed degradation records exactly
+9. If an assigned-judge overlay was used, after composition select the required
+   filing target inside the declared `filing` role root and use the declared
+   `judge-corpus` and `court-conduct` role roots. Validate
+   `references/judge-overlay-execution.schema.json` with
+   `scripts/judge_overlay_receipt.py`. The processor returns receipt bytes and
+   one output-relative path; only the trusted host may publish them through
+   `OutputRun`. A completed degradation records exactly
    `no judge-specific drafting change` and a bounded reason. The absence of
    judge-specific prose or a receipt does not prove the overlay ran.
 10. Self-edit against `references/banned-words.md`, then run the linter:
 
 ```bash
-python3 scripts/draft_lint.py draft.md
+python3 scripts/draft_lint.py \
+  --filing-root "$FILING_ROOT" \
+  --filing-target "$FILING_TARGET"
 ```
+
+The root is the caller-declared `filing` role and the target is one canonical
+relative path inside it. With neither flag, the linter accepts bounded draft
+text on standard input. It returns deterministic JSON and does not write or
+publish a report.
 
 Score is violations per 100 words. Lint, revise, and lint again. A score delta
 is editing feedback only, never a merits verdict, legal-sufficiency decision, or
@@ -204,10 +271,10 @@ and keep their required wording.
 - `references/case-map.md` — docket event to responsive document, with federal
   deadline baselines.
 - `references/localization.md` — the protocol for district and judge variation,
-  using a project-defined cache when one exists and a returned internal audit
-  otherwise.
+  using approved material in `authorities` when supplied and returning a
+  completed audit otherwise.
 - `references/authorities.md` — citation sourcing rules and the interface this
-  skill expects from a verified-authorities tool or repository.
+  skill expects from the declared `authorities` role and authorized internet.
 - `references/discovery-coordination-contract.md` — shared discovery target,
   proportionality, source, existence, and plaintiff-decision boundaries. Each
   public discovery peer repeats its operative minimum for standalone use.
@@ -219,9 +286,9 @@ and keep their required wording.
 - `scripts/draft_lint.py` — deterministic linter for the mechanical subset of
   the writing rules. It cannot judge whether a fact is well pleaded; it can only
   catch the form of slop.
-- `scripts/judge_overlay_receipt.py` — validates one judge-overlay execution
-  packet and writes one exclusive immutable receipt under the audited version's
-  `audits/` directory.
+- `scripts/judge_overlay_receipt.py` — validates one folder-scoped judge-overlay
+  execution packet and returns deterministic receipt bytes for trusted-host
+  publication.
 
 ## What this skill is not for
 

@@ -1,0 +1,31 @@
+{
+  "premises": [
+    {
+      "premise_id": "premise-case-identity",
+      "premise_type": "case-identity",
+      "statement": "The seed citation identifies Fictional Plaintiff v. Fictional City.",
+      "status": "verified",
+      "evidence": "The supplied docket copy uses that caption.",
+      "correction": null,
+      "gap": null
+    },
+    {
+      "premise_id": "premise-asserted-holding",
+      "premise_type": "asserted-holding",
+      "statement": "The seed opinion held that notice was unnecessary.",
+      "status": "false",
+      "evidence": "The source states the opposite rule.",
+      "correction": "Search for authority applying a notice requirement.",
+      "gap": null
+    },
+    {
+      "premise_id": "premise-current-validity",
+      "premise_type": "current-validity",
+      "statement": "The seed opinion remains precedential.",
+      "status": "unresolved",
+      "evidence": null,
+      "correction": null,
+      "gap": "Later-history material has not yet been acquired."
+    }
+  ]
+}

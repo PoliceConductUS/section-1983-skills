@@ -12,6 +12,25 @@ allowed-tools:
 
 # Bad Words: A Legal Writer's Guide to What Not to Say
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `filing` contains the draft selected for plain-language and rhetoric review.
+
+Target is required in `filing`. Internet is `disabled`. Return the edited text
+or review record as a canonical output-relative path and deterministic bytes;
+only the trusted host may publish it append-immutable. Report an unavailable or
+ambiguous filing, quotation, source-dependent exception, or unresolved term as a
+gap rather than opening another folder or treating the edit as legal review.
+
 **Author**: David L. Horan | **Pages**: ~153 | **Chapters**: 5 | **Generated**:
 2026-05-28
 

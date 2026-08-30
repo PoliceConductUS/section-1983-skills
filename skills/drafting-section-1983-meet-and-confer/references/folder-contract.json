@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skill": "drafting-section-1983-meet-and-confer",
+  "input_roles": [
+    "discovery-audit",
+    "served-discovery",
+    "authorities",
+    "conference-record"
+  ],
+  "target": { "policy": "required", "roles": ["discovery-audit"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

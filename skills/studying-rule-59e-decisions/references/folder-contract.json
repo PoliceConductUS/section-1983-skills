@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "studying-rule-59e-decisions",
+  "input_roles": ["decisions", "authorities"],
+  "target": { "policy": "optional", "roles": ["decisions"] },
+  "internet": "authorized",
+  "output": { "mode": "append-immutable" }
+}

@@ -7,6 +7,310 @@ from urllib.parse import urlparse
 
 
 MODES = {"rules-independent", "runtime-sourced", "bundled-rules-dependent"}
+FOLDER_CONTRACT_FIELDS = {
+    "version",
+    "skill",
+    "input_roles",
+    "target",
+    "internet",
+    "output",
+}
+OPTIONAL_FOLDER_CONTRACT_FIELDS = {"optional_input_roles"}
+SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SOURCE_DOCUMENTED_SKILLS = (
+    "analyzing-police-policy-sources",
+    "assessing-police-policy-compliance",
+    "building-defense-counsel-overlays",
+    "building-judicial-reasoning-profiles",
+    "building-litigation-alignment-overlays",
+    "building-municipal-monell-profiles",
+    "collecting-legal-authority-sources",
+    "collecting-police-policy-sources",
+)
+
+
+def folder_contract(
+    skill,
+    input_roles,
+    target_policy,
+    target_roles,
+    internet,
+    optional_input_roles=None,
+):
+    contract = {
+        "version": 1,
+        "skill": skill,
+        "input_roles": input_roles,
+        "target": {"policy": target_policy, "roles": target_roles},
+        "internet": internet,
+        "output": {"mode": "append-immutable"},
+    }
+    if optional_input_roles:
+        contract["optional_input_roles"] = optional_input_roles
+    return contract
+
+
+APPROVED_FOLDER_CONTRACTS = {
+    "adversarial-filing-review": folder_contract(
+        "adversarial-filing-review",
+        ["filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "authorized",
+        ["municipal-profile"],
+    ),
+    "audit-authorities": folder_contract(
+        "audit-authorities",
+        ["filing-source", "verified-authority"],
+        "required",
+        ["filing-source"],
+        {"audit": "disabled", "freshness-research": "authorized"},
+    ),
+    "auditing-section-1983-discovery-responses": folder_contract(
+        "auditing-section-1983-discovery-responses",
+        ["served-discovery", "responses", "production", "authorities"],
+        "required",
+        ["served-discovery", "responses"],
+        "disabled",
+    ),
+    "auditing-section-1983-privilege-logs": folder_contract(
+        "auditing-section-1983-privilege-logs",
+        ["privilege-log", "served-discovery", "authorities"],
+        "required",
+        ["privilege-log"],
+        "disabled",
+    ),
+    "analyzing-police-policy-sources": folder_contract(
+        "analyzing-police-policy-sources",
+        [
+            "department-identity",
+            "jurisdiction",
+            "policy-source",
+            "analysis-scope",
+        ],
+        "none",
+        [],
+        "disabled",
+    ),
+    "assessing-police-policy-compliance": folder_contract(
+        "assessing-police-policy-compliance",
+        [
+            "policy-catalog",
+            "actor",
+            "event",
+            "phase",
+            "case-record",
+            "assessment-scope",
+        ],
+        "none",
+        [],
+        "disabled",
+    ),
+    "building-defense-counsel-overlays": folder_contract(
+        "building-defense-counsel-overlays",
+        ["research-snapshot", "case-record"],
+        "required",
+        ["research-snapshot"],
+        "disabled",
+    ),
+    "building-litigation-alignment-overlays": folder_contract(
+        "building-litigation-alignment-overlays",
+        ["docket-snapshot", "filing"],
+        "required",
+        ["docket-snapshot"],
+        "disabled",
+    ),
+    "building-municipal-monell-profiles": folder_contract(
+        "building-municipal-monell-profiles",
+        [
+            "municipality",
+            "department",
+            "source",
+            "policy-catalog",
+            "policy-assessment",
+            "case-record",
+            "verified-authority",
+        ],
+        "none",
+        [],
+        "disabled",
+    ),
+    "building-judicial-reasoning-profiles": folder_contract(
+        "building-judicial-reasoning-profiles",
+        [
+            "judge-identity",
+            "court-scope",
+            "approved-sources",
+            "verified-authorities",
+        ],
+        "none",
+        [],
+        {"acquisition": "authorized", "compilation": "disabled"},
+    ),
+    "collecting-police-policy-sources": folder_contract(
+        "collecting-police-policy-sources",
+        [
+            "department-identity",
+            "jurisdiction",
+            "approved-source-system",
+            "research-scope",
+        ],
+        "none",
+        [],
+        "authorized",
+    ),
+    "collecting-legal-authority-sources": folder_contract(
+        "collecting-legal-authority-sources",
+        [
+            "legal-question",
+            "jurisdiction",
+            "court-hierarchy",
+            "relevant-date",
+            "seed-authority",
+            "approved-source-system",
+        ],
+        "none",
+        [],
+        "authorized",
+    ),
+    "judicial-reviewer": folder_contract(
+        "judicial-reviewer",
+        ["profile", "filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
+    "opposing-counsel": folder_contract(
+        "opposing-counsel",
+        ["profile", "filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-false-arrest-complaints": folder_contract(
+        "drafting-false-arrest-complaints",
+        ["record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-section-1983-complaints": folder_contract(
+        "drafting-section-1983-complaints",
+        ["record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+        ["municipal-profile"],
+    ),
+    "drafting-section-1983-monell-claims": folder_contract(
+        "drafting-section-1983-monell-claims",
+        ["planning-handoff", "record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-section-1983-declarations-and-evidence": folder_contract(
+        "drafting-section-1983-declarations-and-evidence",
+        ["record", "authorities"],
+        "optional",
+        ["record"],
+        "disabled",
+    ),
+    "drafting-section-1983-deposition-outlines": folder_contract(
+        "drafting-section-1983-deposition-outlines",
+        ["record", "authorities", "discovery"],
+        "optional",
+        ["record"],
+        "disabled",
+        ["municipal-profile"],
+    ),
+    "drafting-section-1983-meet-and-confer": folder_contract(
+        "drafting-section-1983-meet-and-confer",
+        ["discovery-audit", "served-discovery", "authorities", "conference-record"],
+        "required",
+        ["discovery-audit"],
+        "disabled",
+    ),
+    "drafting-section-1983-rule-59e": folder_contract(
+        "drafting-section-1983-rule-59e",
+        ["record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
+    "drafting-section-1983-written-discovery": folder_contract(
+        "drafting-section-1983-written-discovery",
+        ["record", "authorities", "claim-map"],
+        "optional",
+        ["claim-map"],
+        "disabled",
+        ["municipal-profile"],
+    ),
+    "filing-ci": folder_contract(
+        "filing-ci",
+        [
+            "filing-source",
+            "filing-index",
+            "record-reference",
+            "exhibit",
+            "docket-to-appendix",
+            "verified-authority",
+        ],
+        "required",
+        ["filing-source"],
+        "disabled",
+    ),
+    "planning-section-1983-monell-claims": folder_contract(
+        "planning-section-1983-monell-claims",
+        ["record", "authorities", "municipal-source", "strategy"],
+        "none",
+        [],
+        "disabled",
+        ["municipal-profile", "casegraph"],
+    ),
+    "horan-bad-words": folder_contract(
+        "horan-bad-words", ["filing"], "required", ["filing"], "disabled"
+    ),
+    "rrd": folder_contract(
+        "rrd", ["motion", "record", "authorities"], "required", ["motion"], "disabled"
+    ),
+    "rrd-rule12": folder_contract(
+        "rrd-rule12",
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
+    "rrd-rule12-city": folder_contract(
+        "rrd-rule12-city",
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+        ["municipal-profile"],
+    ),
+    "rrd-rule12-officers": folder_contract(
+        "rrd-rule12-officers",
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
+    "section-1983-drafting": folder_contract(
+        "section-1983-drafting",
+        ["record", "authorities", "strategy", "filing"],
+        "optional",
+        ["filing"],
+        "authorized",
+    ),
+    "studying-rule-59e-decisions": folder_contract(
+        "studying-rule-59e-decisions",
+        ["decisions", "authorities"],
+        "optional",
+        ["decisions"],
+        "authorized",
+    ),
+}
 CONTRIBUTION_RULES = (
     (
         "Use one story per stacked branch.",
@@ -72,7 +376,7 @@ QUALITY_CONTROL_RULES = (
         "An independent quality-control stage may mutate an artifact under review.",
     ),
     (
-        "It may read designated artifacts and write only its designated report or result.",
+        "It may read designated artifacts and return only its designated report or result for trusted-host publication.",
         "It may write changes to an artifact under review.",
     ),
     (
@@ -110,40 +414,72 @@ QUALITY_CONTROL_RULES = (
 )
 QUALITY_CONTROL_REPORT_RULES = (
     (
-        "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
-        "A quality-control stage may choose any convenient output folder.",
+        "Before review, an independent quality-control stage must select exactly one artifact through its declared input roles and target policy.",
+        "An independent quality-control stage may select an artifact outside its declared input roles or target policy.",
     ),
     (
-        "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
-        "A report may be written outside the audited version's `audits/` directory.",
+        "It must propose exactly one unique append-immutable output-relative report beneath the caller-declared output folder.",
+        "It may propose a mutable or non-unique report outside the caller-declared output folder.",
     ),
     (
-        "Name it `<check-kind>-<UTC timestamp>-<run-id>.md`.",
-        "Use a stable shared filename for the latest report.",
+        "A missing, ambiguous, nonexistent, or out-of-role target must fail closed without a fallback write.",
+        "A missing, ambiguous, nonexistent, or out-of-role target may use a fallback write.",
     ),
     (
-        "Create the report exclusively; if the path exists, fail closed and preserve its bytes.",
-        "If the path exists, overwrite the prior report.",
+        "The report path must reject absolute paths, traversal, symlink escapes, and existing destinations.",
+        "The report path may be absolute, traverse, follow symlink escapes, or replace an existing destination.",
+    ),
+    (
+        "Only the trusted host may publish the report through the shared output boundary.",
+        "The skill or helper may publish the report directly.",
+    ),
+    (
+        "The trusted host accepts quality-control publication only from an invocation bound to the installed skill's target policy and approved target roles; it rejects an unbound invocation or a target outside those approved roles.",
+        "The trusted host may publish from an unbound invocation or a target outside the installed skill's approved roles.",
+    ),
+    (
+        "Prior quality-control reports must not become implicit input.",
+        "Prior quality-control reports may become implicit input.",
+    ),
+    (
+        "A report may be reviewed only when that exact report is expressly present in a declared input role and selected consistently with the reviewing skill's target policy.",
+        "A report may be reviewed from ambient output without a declared input role or target.",
+    ),
+    (
+        "The reviewing stage must propose a different new append-immutable report for trusted-host publication.",
+        "The reviewing stage may update or replace the report under review.",
     ),
     (
         "Existing reports are immutable and must not be edited, overwritten, replaced, renamed, or deleted.",
         "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
     ),
     (
-        "Exclude `audits/` from review input unless one exact report is expressly designated; write any review of that report to a different new report.",
-        "Include `audits/` in every review and update the report being reviewed.",
+        "The trusted host prefixes the report with the canonical quality-control metadata envelope containing the skill and version, filtered logical input roles and reviewed artifact hashes, selected target role, relative path, SHA-256 fingerprint, and byte size, quality-control kind, UTC run time, run ID, scope, approved source identities, result, failed findings, passing-but-suboptimal recommendations, and terminal run-manifest identity.",
+        "The report may omit its skill version, reviewed artifact hashes, target fingerprint, findings, recommendations, or run-manifest identity.",
     ),
     (
-        "If the version folder is missing, ambiguous, nonexistent, or outside the designated boundary, report output is unavailable and write nowhere else.",
-        "If the version folder cannot be resolved, write the report to a fallback location.",
+        "The trusted host derives the report path as `quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and publishes exactly one report through the shared output writer.",
+        "The skill may choose any report path or publish more than one report.",
     ),
     (
-        "Reject traversal and any `audits/` symlink that resolves outside the canonical audits directory.",
-        "Follow traversal or an `audits/` symlink outside the canonical audits directory.",
+        "Generated reports beneath `quality-control-reports/` are excluded from the reviewed-input manifest and fingerprint unless one exact report is the explicit target; selecting one report does not include sibling or older reports.",
+        "Generated reports beneath `quality-control-reports/` are always included in the reviewed-input manifest and fingerprint.",
     ),
     (
-        "The report identifies the audited version, artifact paths and SHA-256 fingerprints, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
-        "The report may omit its audited version, artifact fingerprints, scope, sources, or result.",
+        "The canonical quality-control metadata envelope identifies a generated report even when the report directory itself is a declared input root.",
+        "A report is not generated when its declared input root omits the `quality-control-reports/` path segment.",
+    ),
+    (
+        "A quality-control run ID must be a canonical lowercase UUIDv4; weak, malformed, or reused identities fail closed before publication.",
+        "A quality-control run may use a weak, malformed, or reused identity.",
+    ),
+    (
+        "The quality-control run is complete only after both report bytes and the terminal success manifest are durable and incomplete state is absent.",
+        "The quality-control run may report completion before its report or terminal success manifest is durable.",
+    ),
+    (
+        "The skill returns report content and structured findings; it does not build the canonical metadata envelope or publish output.",
+        "The skill builds the canonical metadata envelope and publishes output directly.",
     ),
     (
         "Separate failed findings from passing-but-suboptimal observations.",
@@ -152,6 +488,24 @@ QUALITY_CONTROL_REPORT_RULES = (
     (
         "Recommendations, proposed language, and copy-ready replacements for failures or passing-but-suboptimal observations are advisory and do not authorize implementation.",
         "Report recommendations and copy-ready replacements authorize implementation.",
+    ),
+)
+FOLDER_SCOPE_RULES = (
+    (
+        "Only caller-declared input folders are available and recursively read-only.",
+        "Any input folder is available and writable.",
+    ),
+    (
+        "Writes occur only beneath the caller-declared output folder.",
+        "Writes may occur outside the caller-declared output folder.",
+    ),
+    (
+        "Internet is used only when that skill expressly authorizes it.",
+        "Internet may be used without that skill expressly authorizing it.",
+    ),
+    (
+        "Execution stops before reading case material if the host cannot enforce the filesystem and network boundary.",
+        "Execution may read case material when the host cannot enforce the filesystem and network boundary.",
     ),
 )
 QUALITY_CONTROL_TRIGGER = re.compile(
@@ -186,6 +540,20 @@ PROHIBITED_QUALITY_CONTROL_REPORT_PERMISSIONS = (
     ),
     re.compile(
         r"\bprior audit reports\b.{0,80}\bincluded\b.{0,80}\bevery re-audit\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bresolve exactly one existing version-specific folder\b.{0,80}"
+        r"\bdesignated project boundary\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bwrite exactly one new report\b.{0,100}"
+        r"`?<version-folder>/audits/`?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bexclude `?audits/`? from review input\b",
         re.IGNORECASE,
     ),
 )
@@ -346,6 +714,10 @@ def validate_policy(repository_root):
         "judgment-routing",
         "rules-provenance",
         "tool-ownership",
+        "folder scope",
+        "recursive input non-mutation",
+        "output confinement",
+        "declared internet policy",
         "explicit human review",
         "thin skill wrapper",
         "owning repository",
@@ -440,6 +812,205 @@ def validate_quality_control_contracts(repository_root):
     return errors
 
 
+def folder_scope_contract_missing(text):
+    contract = normalized(text)
+    return any(
+        normalized(affirmative) not in contract or normalized(inversion) in contract
+        for affirmative, inversion in FOLDER_SCOPE_RULES
+    )
+
+
+def validate_folder_scope_contracts(repository_root):
+    errors = []
+    for path in sorted((repository_root / "skills").glob("*/SKILL.md")):
+        try:
+            text = path.read_text()
+        except OSError:
+            errors.append(
+                f"folder-scope-contract-language-missing: {path.parent.name}"
+            )
+            continue
+        if folder_scope_contract_missing(text):
+            errors.append(
+                f"folder-scope-contract-language-missing: {path.parent.name}"
+            )
+    return errors
+
+
+def validate_folder_contract_document(document, expected_skill):
+    if (
+        not isinstance(document, dict)
+        or not FOLDER_CONTRACT_FIELDS.issubset(document)
+        or not set(document).issubset(
+            FOLDER_CONTRACT_FIELDS | OPTIONAL_FOLDER_CONTRACT_FIELDS
+        )
+    ):
+        return ["invalid-folder-contract-shape"]
+
+    errors = []
+    if type(document.get("version")) is not int or document.get("version") != 1:
+        errors.append("invalid-folder-contract-version")
+    if document.get("skill") != expected_skill:
+        errors.append("skill-folder-contract-mismatch")
+
+    roles = document.get("input_roles")
+    if (
+        not isinstance(roles, list)
+        or not roles
+        or any(not isinstance(role, str) or not SAFE_ROLE.fullmatch(role) for role in roles)
+        or len(roles) != len(set(roles))
+    ):
+        errors.append("invalid-folder-contract-input-roles")
+    optional_roles = document.get("optional_input_roles", [])
+    if (
+        not isinstance(optional_roles, list)
+        or ("optional_input_roles" in document and not optional_roles)
+        or any(
+            not isinstance(role, str) or not SAFE_ROLE.fullmatch(role)
+            for role in optional_roles
+        )
+        or len(optional_roles) != len(set(optional_roles))
+        or (isinstance(roles, list) and set(optional_roles) & set(roles))
+    ):
+        errors.append("invalid-folder-contract-optional-input-roles")
+
+    target = document.get("target")
+    target_valid = isinstance(target, dict) and set(target) == {"policy", "roles"}
+    if target_valid:
+        policy = target["policy"]
+        target_roles = target["roles"]
+        target_valid = (
+            policy in {"required", "optional", "none"}
+            and isinstance(target_roles, list)
+            and all(
+                isinstance(role, str) and SAFE_ROLE.fullmatch(role)
+                for role in target_roles
+            )
+            and len(target_roles) == len(set(target_roles))
+            and isinstance(roles, list)
+            and all(role in roles for role in target_roles)
+            and ((policy == "none" and not target_roles) or (policy != "none" and target_roles))
+        )
+    if not target_valid:
+        errors.append("invalid-folder-contract-target")
+
+    internet = document.get("internet")
+    if isinstance(internet, str):
+        internet_valid = internet in {"disabled", "authorized"}
+    else:
+        internet_valid = (
+            isinstance(internet, dict)
+            and bool(internet)
+            and all(
+                isinstance(operation, str) and SAFE_ROLE.fullmatch(operation)
+                for operation in internet
+            )
+            and all(
+                policy in {"disabled", "authorized"}
+                for policy in internet.values()
+            )
+        )
+    if not internet_valid:
+        errors.append("invalid-folder-contract-internet")
+    if document.get("output") != {"mode": "append-immutable"}:
+        errors.append("invalid-folder-contract-output")
+
+    expected = APPROVED_FOLDER_CONTRACTS.get(expected_skill)
+    if expected is not None and document != expected:
+        errors.append("skill-folder-contract-mismatch")
+    return list(dict.fromkeys(errors))
+
+
+def validate_skill_folder_contracts(repository_root):
+    errors = []
+    entrypoints = sorted((repository_root / "skills").glob("*/SKILL.md"))
+    discovered = {entrypoint.parent.name for entrypoint in entrypoints}
+    approved = set(APPROVED_FOLDER_CONTRACTS)
+    errors.extend(
+        f"approved-skill-folder-contract-missing: {skill}"
+        for skill in sorted(approved - discovered)
+    )
+    errors.extend(
+        f"unapproved-skill-folder-contract: {skill}"
+        for skill in sorted(discovered - approved)
+    )
+    for entrypoint in entrypoints:
+        skill = entrypoint.parent.name
+        contract_path = entrypoint.parent / "references" / "folder-contract.json"
+        if not contract_path.is_file():
+            errors.append(f"skill-folder-contract-missing: {skill}")
+            continue
+        try:
+            document = json.loads(contract_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            errors.append(f"skill-folder-contract-unreadable: {skill}")
+            continue
+        errors.extend(
+            f"{finding}: {skill}"
+            for finding in validate_folder_contract_document(document, skill)
+        )
+        try:
+            entrypoint_text = entrypoint.read_text().lower()
+        except OSError:
+            entrypoint_text = ""
+        if "[folder contract](references/folder-contract.json)" not in entrypoint_text:
+            errors.append(f"skill-folder-contract-link-missing: {skill}")
+    return errors
+
+
+def validate_source_documented_folder_guidance(repository_root):
+    errors = []
+    guide = repository_root / "SOURCE_DOCUMENTED_FOLDERS.md"
+    try:
+        guide_text = normalized(guide.read_text())
+    except OSError:
+        return ["source-documented-folder-guide-missing"]
+    required = (
+        "declared input folders",
+        "recursive read-only",
+        "explicit output folder",
+        "domain-owned yaml",
+        "source.yaml",
+        "folder-relative path",
+        "sha-256",
+        "protected behavior",
+    )
+    if any(item not in guide_text for item in required):
+        errors.append("source-documented-folder-guide-incomplete")
+    for skill in SOURCE_DOCUMENTED_SKILLS:
+        skill_root = repository_root / "skills" / skill
+        reference = skill_root / "references" / "source-documented-folders.md"
+        try:
+            entrypoint = (skill_root / "SKILL.md").read_text().lower()
+            reference_text = normalized(reference.read_text())
+            if (
+                reference.is_symlink()
+                or reference.resolve().parent != reference.parent.resolve()
+            ):
+                errors.append(f"source-documented-folder-reference-invalid: {skill}")
+                continue
+        except (OSError, RuntimeError):
+            errors.append(f"source-documented-folder-reference-missing: {skill}")
+            continue
+        if (
+            "[source-documented folders](references/source-documented-folders.md)"
+            not in entrypoint
+        ):
+            errors.append(f"source-documented-folder-link-missing: {skill}")
+        if any(
+            item not in reference_text
+            for item in (
+                "recursive read-only input folders",
+                "folder-relative path",
+                "sha-256",
+                "domain-owned yaml",
+                "<output-folder>/temp/",
+            )
+        ):
+            errors.append(f"source-documented-folder-reference-incomplete: {skill}")
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
@@ -447,6 +1018,9 @@ def validate_repository(repository_root):
     errors.extend(validate_pull_request_template(repository_root))
     errors.extend(validate_contribution_contract(repository_root))
     errors.extend(validate_quality_control_contracts(repository_root))
+    errors.extend(validate_folder_scope_contracts(repository_root))
+    errors.extend(validate_skill_folder_contracts(repository_root))
+    errors.extend(validate_source_documented_folder_guidance(repository_root))
     return errors
 
 

@@ -29,39 +29,79 @@ To upgrade deliberately, choose a newer published tag from
 replace `v0.1.0` in the install command, and run it again. Do not substitute a
 branch name: tags are the immutable release identity.
 
+## Folder-scoped invocation
+
+Every invocation receives fixed recursive read-only input folders and one
+caller-selected absolute output folder. If the output path is missing, ask the
+caller for it before beginning work. Durable artifacts and run receipts are
+written only beneath that output folder.
+
+The trusted host reserves `<output-folder>/temp/` as the invocation's only
+temporary workspace. It uses that folder for staging, intermediate files,
+scratch files, the semantic-work current directory, and `TMPDIR`, `TMP`, and
+`TEMP`. It does not use a system temporary directory, repository worktree, input
+folder, ambient current directory, or undeclared path for invocation temporary
+work. `temp/` is not a durable artifact destination.
+
 ## Skills
 
-| Skill                                             | Role                                                                                                                                                                       |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adversarial-filing-review`                       | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.               |
-| `building-litigation-alignment-overlays`          | Immutable docket-derived defendant alignment, adversary attack, plaintiff-response, judicial-treatment, review-plan, and filing-manifest overlays.                         |
-| `building-defense-counsel-overlays`               | Immutable professional defense-attorney identity, counsel-team behavior, court-treatment, and calibrated next-move overlays from approved public sources.                  |
-| `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
-| `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
-| `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
-| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and external-checker handoff.                                                         |
-| `planning-section-1983-monell-claims`             | Path-separated municipal-liability planning, candid recommendations, and optional read-only on-disk CaseGraph assessment.                                                  |
-| `drafting-section-1983-monell-claims`             | Approved-path-only Monell complaint deltas returned to the canonical complaint owner.                                                                                      |
-| `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
-| `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                             |
-| `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                   |
-| `drafting-section-1983-meet-and-confer`           | Neutral meet-and-confer correspondence from a completed discovery-response audit, with a separate factual conference record.                                               |
-| `auditing-section-1983-privilege-logs`            | Source-bounded privilege-log requirements and entry audit without invented metadata, privilege adjudication, or automatic waiver.                                          |
-| `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                            |
-| `drafting-for-judge-scholer`                      | Judge-specific overlay for matters assigned to Judge Karen Gren Scholer.                                                                                                   |
-| `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
-| `rrd`                                             | Generic Response Requirements Document planner; routes Section 1983 Rule 12 matters to the specialized RRD skills.                                                         |
-| `rrd-rule12`                                      | Base Rule 12 response-planning contract.                                                                                                                                   |
-| `rrd-rule12-officers`                             | Officer-motion specialization with claim-by-claim and officer-by-officer qualified-immunity analysis.                                                                      |
-| `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
-| `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
-| `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
-| `filing-ci`                                       | Orchestrates a project-configured deterministic filing-integrity checker and its fail-closed filing gate.                                                                  |
+| Skill                                             | Role                                                                                                                                                                        |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adversarial-filing-review`                       | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.                |
+| `building-litigation-alignment-overlays`          | Immutable docket-derived defendant alignment, adversary attack, plaintiff-response, judicial-treatment, review-plan, and filing-manifest overlays.                          |
+| `building-defense-counsel-overlays`               | Immutable professional defense-attorney identity, counsel-team behavior, court-treatment, and calibrated next-move overlays from approved public sources.                   |
+| `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                               |
+| `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                  |
+| `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                              |
+| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, strict version-2 handoff, limitations gate, and fixed install-local mechanical checks. |
+| `planning-section-1983-monell-claims`             | Path-separated municipal-liability planning, candid recommendations, and optional read-only on-disk graph assessment.                                                       |
+| `drafting-section-1983-monell-claims`             | Approved-path-only Monell complaint deltas returned to the canonical complaint owner.                                                                                       |
+| `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression.  |
+| `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                              |
+| `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                    |
+| `drafting-section-1983-meet-and-confer`           | Neutral meet-and-confer correspondence from a completed discovery-response audit, with a separate factual conference record.                                                |
+| `auditing-section-1983-privilege-logs`            | Source-bounded privilege-log requirements and entry audit without invented metadata, privilege adjudication, or automatic waiver.                                           |
+| `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                             |
+| `building-judicial-reasoning-profiles`            | Generic builder for evidence-bounded Judicial Reasoning Profile files with domain YAML provenance from approved public sources.                                             |
+| `collecting-police-policy-sources`                | Bounded authorized collection of ordinary police-policy source files with adjacent YAML provenance and explicit coverage gaps.                                              |
+| `analyzing-police-policy-sources`                 | Offline decomposition of reviewed adopted-policy files into source-bounded atomic requirement and gap YAML.                                                                 |
+| `assessing-police-policy-compliance`              | Offline actor-, event-, and phase-specific assessment of validated policy requirements against source-documented case records.                                              |
+| `collecting-legal-authority-sources`              | Bounded authorized collection of ordinary legal-authority source files, adjacent YAML provenance, candidate identities, and search gaps.                                    |
+| `building-municipal-monell-profiles`              | Staged prerequisite resolution followed by separate offline evidence-coded municipal-profile compilation preserving five domains, counterevidence, questions, and gaps.     |
+| `judicial-reviewer`                               | Findings-only review of comprehension, procedure, authority presentation, record traceability, and gaps under a validated judicial profile.                                 |
+| `opposing-counsel`                                | Findings-only source-backed opposing-counsel simulation under a validated defense-counsel profile without impersonation or disposition.                                     |
+| `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                        |
+| `rrd`                                             | Generic Response Requirements Document planner; routes Section 1983 Rule 12 matters to the specialized RRD skills.                                                          |
+| `rrd-rule12`                                      | Base Rule 12 response-planning contract.                                                                                                                                    |
+| `rrd-rule12-officers`                             | Officer-motion specialization with claim-by-claim and officer-by-officer qualified-immunity analysis.                                                                       |
+| `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                       |
+| `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                       |
+| `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                      |
+| `filing-ci`                                       | Runs fixed installed deterministic filing checks over declared folders and preserves a fail-closed filing gate.                                                             |
 
 ## How the skills compose
 
 Load each applicable skill once. The more specific skill adds requirements; it
 does not replace source, authority, or court rules.
+
+Composition is sequential: the trusted host validates and invokes each skill
+separately against that installed skill's exact folder contract. It never unions
+roles across the stack or enlarges one skill's filesystem or internet authority.
+Output from one skill is available to another only through a new invocation that
+expressly supplies it in the receiving skill's declared input role.
+
+Filing workflows use ordinary filing folders. Inputs are recursively read-only,
+and one file is selected by its declared input role and folder-relative path
+when the task targets a single file. There is no folder-wide manifest, loader,
+registry, or inferred membership. Generated files are published directly beneath
+the exact caller-selected output folder, and every temporary byte stays beneath
+`<output-folder>/temp/`.
+
+Profile, overlay, and research-corpus workflows use
+[source-documented folders](SOURCE_DOCUMENTED_FOLDERS.md): ordinary files from
+declared read-only input folders, domain-owned YAML provenance, one explicit
+output folder, and protected installed behavior. No generic folder wrapper,
+registry, graph, or case-management runtime is required.
 
 1. Start with `section-1983-drafting` for routing, localization, and writing
    rules.
@@ -75,31 +115,57 @@ does not replace source, authority, or court rules.
    complaint owner.
 6. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
    incorporated-video issues, add `drafting-false-arrest-complaints`.
-7. Add `drafting-for-judge-scholer` when Judge Scholer is assigned.
-8. Add `building-litigation-alignment-overlays` before an amended complaint,
-   leave package, or other filing that should consume the current docket's
-   actual adversary positions and judicial treatment.
-9. Add `building-defense-counsel-overlays` when an actual-adversary review
-   should consume validated professional history for the effective defense team.
-   Keep that material out of the blind common-attack review.
-10. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
+7. Use `building-judicial-reasoning-profiles` to acquire approved public sources
+   with `SOURCE.yaml` provenance or compile validated profile files for the
+   assigned judge. A later shared launcher owns profile-backed judicial review.
+8. Use `collecting-police-policy-sources` for bounded authorized acquisition of
+   ordinary policy files and adjacent source YAML. Policy analysis remains a
+   separate later invocation over a reviewed read-only folder.
+9. Use `analyzing-police-policy-sources` to decompose reviewed adopted-policy
+   files into source-bounded requirement and gap YAML without assessing conduct.
+10. Use `assessing-police-policy-compliance` to assess validated requirements
+    against separately declared actor, event, phase, and case-record folders
+    without deciding legal liability.
+11. Use `collecting-legal-authority-sources` for bounded authorized acquisition
+    of ordinary authority files and adjacent source YAML. A separate
+    `audit-authorities` invocation must verify every proposed authority use.
+12. Use `building-municipal-monell-profiles` prerequisite resolution when the
+    validated policy catalog or assessment is missing or invalid. Follow its
+    one-state plan through separate collection, independent review, offline
+    analysis, and offline assessment invocations, each with the owning skill's
+    exact roles and a fresh explicit output folder. Only after it returns
+    `ready-for-profile`, start the separate seven-role offline compilation to
+    organize validated policy, assessment, case-record, and authority input
+    folders into a five-domain evidence profile without deciding Monell
+    liability or selecting a theory. In a later invocation, supply that ordinary
+    output folder as the `municipal-profile` role to complaint drafting, city
+    Rule 12 planning, written discovery, deposition outlines, or adversarial
+    review. Each consumer must validate the profile files and preserve its own
+    record, authority, target, and strategy boundaries.
+13. Add `building-litigation-alignment-overlays` before an amended complaint,
+    motion for leave, or other filing that should consume the current docket's
+    actual adversary positions and judicial treatment.
+14. Add `building-defense-counsel-overlays` when an actual-adversary review
+    should consume validated professional history for the effective defense
+    team. Keep that material out of the blind common-attack review.
+15. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
     specialization. Those planners hand amendment work back to the applicable
     complaint skills.
-11. For discovery, use `drafting-section-1983-written-discovery`,
+16. For discovery, use `drafting-section-1983-written-discovery`,
     `auditing-section-1983-discovery-responses`,
     `drafting-section-1983-meet-and-confer`,
     `auditing-section-1983-privilege-logs`, or
     `drafting-section-1983-deposition-outlines` for its named task. The existing
     drafting entrypoint supplies routing and the shared coordination contract;
     each peer remains independently usable.
-12. Before treating legal work as filing-ready, run `audit-authorities`,
+17. Before treating legal work as filing-ready, run `audit-authorities`,
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-13. Run `adversarial-filing-review` in a fresh clean-room context after
+18. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-14. Run `filing-ci` after the applicable prose and authority audits, after each
+19. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.
@@ -107,7 +173,7 @@ does not replace source, authority, or court rules.
 For every complaint, `drafting-section-1983-complaints` must read its
 install-local `references/complaint-contract.md` and
 `references/complaint-structure-contract.json` before drafting, revision, or
-audit. If the package or either reference is unavailable, the result is
+audit. If the installed skill or either reference is unavailable, the result is
 **complaint contract unavailable** and complaint work stops; no routing or
 specialization skill supplies a fallback.
 
@@ -119,66 +185,77 @@ The ownership boundaries are deliberate: the umbrella routes; complaint skills
 establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; discovery peers draft or
 audit only their named artifacts; the authority and writing skills are final
-gates, and Filing CI adds a separate configured integrity gate.
+gates, and Filing CI adds a separate folder-scoped integrity gate.
 
 ### Trusted adversarial-review runtime
 
-Independent adversarial review uses the built-in stateless OpenAI runtime. An
-arbitrary reviewer command or a caller assertion cannot establish independent
-isolation. Set `OPENAI_API_KEY` and an explicit model, build the bounded packet
-required by the skill, and run from the repository root:
+Independent adversarial review uses the built-in stateless OpenAI runtime. The
+declared `filing` role root supplies the filing bytes, and the declared
+`approved-sources` role root supplies every approved packet source. A required
+filing target selects one canonical relative file inside `filing`. Internet is
+authorized for this provider dispatch. Set `OPENAI_API_KEY`, choose an explicit
+model, build the bounded packet required by the skill, and run the install-local
+processor:
 
 ```bash
 python3 skills/adversarial-filing-review/scripts/launch_review.py \
   --trusted-openai \
   --model "$OPENAI_REVIEW_MODEL" \
-  --project-boundary "$CASE_ROOT" \
-  --version-folder "$VERSION_FOLDER" \
-  --artifact "$CANONICAL_DRAFT" \
+  --filing-root "$FILING_ROOT" \
+  --approved-sources-root "$APPROVED_SOURCES_ROOT" \
+  --filing-target "$FILING_TARGET" \
+  --internet-policy authorized \
   < "$REVIEW_PACKET"
 ```
 
-The host verifies the canonical draft and writes a new immutable report under
-`<version-folder>/audits/`. A missing credential, unavailable provider, or
-invalid response produces an unavailable report and a nonzero exit; it is not a
-completed independent review.
+The processor returns report bytes, a canonical output-relative artifact path,
+and validated internet-source records. It accepts no arbitrary command or output
+folder and writes nothing directly. Only the trusted host publishes the bytes
+with `OutputRun` and records the append-immutable terminal receipt. A missing
+credential, unavailable provider, or invalid response returns a bounded
+unavailable report and a nonzero exit; it is not a completed independent review.
 
 ## Complaint contract and assessment boundary
 
 The canonical JSON complaint contract and install-local validator enforce strict
 contract version 2. The validator checks typed individual-capacity, QI, and
-Monell records plus CaseGraph assessment receipts. It does not decide fact
+Monell records plus on-disk graph assessment receipts. It does not decide fact
 truth, legal sufficiency, authority fit, material analogy, strategy, or filing
 readiness.
 
-An optional reasoned assessment reads an explicitly supplied CaseGraph directly
-from disk and read-only; it does not require or invoke a CaseGraph CLI. Every
-used authority proposition must resolve to verified opinion bytes and hash,
-pinpoint, and an exact matching passage. Filing CI preserves structural and
-assessment results separately and fails closed in filing mode when the current
-assessment is missing, incomplete, stale, or unresolved.
+An optional reasoned assessment reads an explicitly supplied graph directly from
+disk and read-only; it does not require or invoke a graph CLI. Every used
+authority proposition must resolve to verified opinion bytes and hash, pinpoint,
+and an exact matching passage. Filing CI preserves structural and assessment
+results separately and fails closed in filing mode when the current assessment
+is missing, incomplete, stale, or unresolved.
 
-## Project inputs and portability
+The canonical JSON complaint contract drives the install-local
+`scripts/check_complaint.py` mechanical checker. It does not decide fact truth,
+legal sufficiency, authority fit, material analogy, strategy, or filing
+readiness. Filing CI dispatches only checker IDs registered inside its installed
+skill directory; an absent, unknown, unavailable, or incompatible checker
+returns an honest unavailable result. Neither helper accepts a command,
+executable, or output folder, and only the trusted host publishes returned
+report bytes.
 
-The skills describe artifact roles, not a required case-management product.
-Projects may use different filenames or keep the same information in one
-document. When a skill calls for a strategy, chronology or fact lock, claim
-ledger, gap register, authority library, or coded corpus:
+## Invocation inputs and portability
 
-New users can follow [Start a case workspace](CASE_WORKSPACE.md) to establish
-those roles with generic source-bounded examples before using the drafting
-skills.
+The skills consume named artifact roles, not a case-management product or
+repository layout. Callers may use different filenames or keep related
+information in one document, but each invocation exposes only the exact
+recursive read-only folders declared for that skill. Missing strategy,
+chronology, fact-lock, claim-ledger, gap-register, authority, or corpus material
+is reported as a gap; the skill does not search another folder or imply that an
+absent artifact was reviewed.
 
-- use the project's existing equivalent;
-- do not invent a file or imply that a missing artifact was reviewed;
-- ask before drafting without a strategy; and
-- create a minimal internal working table for other missing roles when the
-  document can still be prepared from verified sources.
-
-Localization results belong in a project-defined cache or returned internal
-audit, not inside an installed skill package. Numbered packet folders,
-manifests, hashes, and source records apply only when the user's project already
-uses them.
+New users can follow [Run folder-scoped skill operations](FOLDER_OPERATIONS.md)
+to map roles to input folders, select one output folder, and verify a synthetic
+operation before using the drafting skills. Only the trusted host publishes
+returned artifacts. Logical input hashes and run manifests are required for
+every folder-scoped operation and bind the declared inputs to the terminal
+output run. Caller-specific additional packet controls remain optional and
+separate from the shared folder contract.
 
 Judge-specific observations are optional. If the reviewed corpus does not
 support an issue-specific conclusion, the judge overlay contributes no

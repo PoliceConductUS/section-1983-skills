@@ -1,0 +1,17 @@
+version: 1
+id: irrelevant-citation
+source:
+  source_id: synthetic-irrelevant-citation
+  text: |
+    The opinion decides a licensing-fee dispute and does not address warrantless searches.
+  sha256: cd0bc8846434d484b7ab2358893a19fbed4c2a0f5c63d4ff50860e194f1f375a
+challenged_text:
+  Warrantless searches require justification, citing only the licensing-fee
+  opinion.
+expected_propositions:
+  - proposition_id: irrelevant-citation-1
+    correctness: verified
+    groundedness: misgrounded
+    source_voice: majority-holding
+pass_allowed: false
+reason: The authentic citation addresses an unrelated legal issue.

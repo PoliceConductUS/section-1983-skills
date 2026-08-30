@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "section-1983-drafting",
+  "input_roles": ["record", "authorities", "strategy", "filing"],
+  "target": { "policy": "optional", "roles": ["filing"] },
+  "internet": "authorized",
+  "output": { "mode": "append-immutable" }
+}

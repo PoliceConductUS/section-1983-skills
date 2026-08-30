@@ -10,12 +10,13 @@ a checklist. Run it once per district, cache the answers, and reuse them.
 The district, the division, the assigned district judge, and the assigned
 magistrate judge. All four can carry their own rules.
 
-## Step 2: Check available caches
+## Step 2: Check supplied material
 
-First use a project-defined localization or local-rules cache. A bundled
-`jurisdictions/<district-slug>.md` file may be used as a retrieval lead if it is
-current, but an installed skill directory is not the user's case workspace. Do
-not write to or commit changes inside an installed skill package.
+First use approved localization or local-rules material in the declared
+`authorities` input role. A bundled `jurisdictions/<district-slug>.md` file may
+be used as a retrieval lead if it is current, but an installed skill directory
+is not an invocation input or output. Do not write inside an installed skill
+package.
 
 ## Step 3: Fetch the sources
 
@@ -45,17 +46,16 @@ For the district and, where they speak, the assigned judges:
    plaintiff runs (mail or ECF notice).
 7. Anything the assigned judge's standing orders add or change.
 
-## Step 5: Preserve the localization result
+## Step 5: Return the localization result
 
-If the project defines a localization-cache path, write the answers there, one
-section per checklist item, each with a citation to the local rule or standing
-order and the date checked. Otherwise return the completed checklist as an
-internal audit and ask before creating a durable project file. Do not invent a
-repository path, edit the installed skill tree, commit, or push unless the user
-separately authorizes that repository action.
+Return the answers as deterministic bytes at the canonical output-relative path
+`localization/local-rules.md`, one section per checklist item, each with a
+citation to the local rule or standing order and the date checked. Only the
+trusted host may publish the artifact append-immutable. Do not edit the
+installed skill tree.
 
 ## Step 6: Apply it
 
-Every document drafted for that forum gets a final pass against the cache file.
-Deadlines and length limits from the cache override the federal baseline in the
-skeletons whenever they are stricter.
+Every document drafted for that forum gets a final pass against the approved or
+newly returned localization result. Deadlines and length limits from that result
+override the federal baseline in the skeletons whenever they are stricter.

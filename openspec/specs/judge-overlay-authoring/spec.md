@@ -14,9 +14,9 @@ fails closed when support is insufficient.
 
 The repository SHALL publish a concise judge-overlay authoring guide, route to
 it from README with confined relative links, and link it to the general case-
-overlay lifecycle. The guide MUST use the existing Scholer overlay only as a
-structural example and MUST NOT generalize or copy its judge-specific
-conclusions.
+overlay lifecycle. The guide MUST route every profile through the generic
+`building-judicial-reasoning-profiles` skill and MUST NOT depend on a real-judge
+or judge-named skill, example, conclusion, or runtime package.
 
 The judge guide MUST define when to create, reuse, refresh, rebuild, and
 supersede a judge overlay. Assignment or reassignment, a changed official rule,
@@ -28,8 +28,8 @@ version and its source identities.
 #### Scenario: Maintainer starts a new overlay
 
 - **WHEN** a maintainer follows the README route
-- **THEN** the maintainer reaches the repository guide, general lifecycle, and
-  existing local corpus, validator, transfer-card, and worked-example sources
+- **THEN** the maintainer reaches the generic builder, repository guide, general
+  lifecycle, canonical schemas, validator, and fictional paired examples
 
 #### Scenario: Assigned judge or official procedure changes
 
@@ -105,30 +105,31 @@ be stated as a court requirement.
 
 ### Requirement: Neutral downstream consumption
 
-A drafting skill SHALL load an applicable assigned-judge overlay after the
-governing document and claim skills. It SHALL consume only validated neutral
-transfer cards, preserve their source identity, evidence strength, permitted
-use, prohibited inference, denominator, and missingness, and keep governing law
-separate. The transfer MUST NOT expose private strategy or select a litigation
-path.
+A drafting skill SHALL invoke the assigned-judge overlay separately after the
+governing document and claim skills, using only that overlay's declared input
+roles and target. It SHALL consume only validated neutral transfer cards,
+preserve their source identity, evidence strength, permitted use, prohibited
+inference, denominator, and missingness, and keep governing law separate. The
+transfer MUST NOT expose private strategy or select a litigation path.
 
-Every composition run SHALL write an immutable version-local execution receipt.
-A prohibited inference or no qualifying support produces no judge-specific
-drafting change and records the bounded reason. Missing, stale, invalid, or
-unavailable required inputs fail closed and are not represented as passing. The
-absence of judge-specific prose does not establish that the overlay ran.
+Every composition run SHALL return one canonical output-relative receipt plan
+for publication by the trusted host. A prohibited inference or no qualifying
+support produces no judge-specific drafting change and records the bounded
+reason. Missing, stale, invalid, or unavailable required inputs fail closed and
+are not represented as passing. The absence of judge-specific prose does not
+establish that the overlay ran.
 
 #### Scenario: Transfer card supports no drafting change
 
 - **WHEN** the card prohibits the proposed inference or reports no qualifying
   support
 - **THEN** the drafting skill makes no judge-specific change, preserves the
-  card's limitation, and writes a receipt stating
+  card's limitation, and returns a receipt stating
   `no judge-specific drafting change`
 
 #### Scenario: Applicable overlay never runs
 
-- **WHEN** composition produces no execution receipt
+- **WHEN** composition produces no host-published execution receipt
 - **THEN** review treats overlay execution as unproven rather than inferring a
   successful no-change result from the filing text
 
@@ -143,3 +144,28 @@ private path, private case fact, or real judge-specific conduct conclusion.
 - **WHEN** the reader reviews the paired examples
 - **THEN** one demonstrates a bounded validated transfer and the other
   demonstrates no unsupported judge-specific proposition
+
+### Requirement: Guide defines reproducible public case discovery
+
+The judge-overlay authoring guide MUST define the CourtListener judge-first
+case-discovery method, the distinction among opinion authorship, docket
+assignment, and referral, the required court, tenure or date, case category,
+posture, and research-question narrowing, and the primary-document verification
+needed to establish Section 1983 and police or law-enforcement involvement. The
+guide MUST require sanitized query provenance and an inspectable disposition for
+each reviewed candidate, MUST explain that search metadata and search-result
+counts do not establish a complete corpus, and MUST prohibit persisting access
+secrets.
+
+The guide MUST identify PACER or court-specific CM/ECF as the optional official
+fallback for docket identity, assignment, status, or completeness. It MUST keep
+access authorization separate from fee approval and MUST require an explicit gap
+instead of implying that unavailable or unapproved official material was
+checked.
+
+#### Scenario: Maintainer builds a police Section 1983 judge corpus
+
+- **WHEN** a maintainer follows the guide to find candidate cases by judge
+- **THEN** the resulting acquisition record distinguishes discovery leads from
+  primary-document verification, identifies included and excluded candidates,
+  and preserves unresolved coverage gaps without exposing credentials

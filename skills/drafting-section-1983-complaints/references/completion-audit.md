@@ -31,11 +31,63 @@ one function: an element, an actual defense premise, a material chronology
 function, or a candor/preservation function. A paragraph without a permitted
 function must be removed from filed text or moved to internal chronology.
 
+Fail the audit when the court must search several factual sections and construct
+the fact-to-element application; when actors with different acts, stages, or
+knowledge share broad incorporation without closed individual applications; when
+a qualified-immunity paragraph gives only a paragraph range and conclusion; when
+later-only facts enter an earlier relevant-time knowledge set without an express
+statement excluding them from that earlier knowledge set; or when a supporting
+brief must cure a missing complaint-level application. Every unresolved required
+component is filing-critical.
+
 A count is complete only if:
 
+- [ ] when the unknown and new-defendant limitations gate applies, every
+      affected individual has a limitations record that is complete under the
+      canonical complaint contract;
+- [ ] every intended individual defendant who remains unnamed, role-only,
+      misnamed, or not serviceable activates the limitations gate even when no
+      deadline has passed and no supplied source, opponent, court, or caller has
+      raised limitations, while an unidentified non-defendant does not;
+- [ ] every affected limitations record preserves source availability, source
+      possession, objective ascertainability with its basis, and actual
+      identification with its source and method as four separate events, without
+      treating one event as proof of another;
+- [ ] pre-limitations, post-filing/pre-identification, and
+      post-identification/pre-service diligence remain separate dated and
+      sourced histories;
+- [ ] record control, requests, responses, denials, and follow-ups identify the
+      actual holder, controller, or recipient and separately state supported
+      municipal, custodian, and individual attribution without imputation;
+- [ ] Rule 15(c)(1)(C) notice, service, and Rule 4(m) extension facts remain
+      separate, and every relied-on authority route states jurisdiction,
+      authority, pinpoint, status, proposition, defendant-specific application,
+      sources, and unresolved status;
+- [ ] the complaint mechanical handoff includes one schema-conforming
+      `limitations_gate` record per affected intended individual and the current
+      installed checker reports no limitations hard finding;
+- [ ] every missing, unsupported, or unresolved required limitations-record
+      entry creates an internal filing-critical GAP, and that filing-critical
+      GAP blocks filing-ready status without adding an adverse merits
+      characterization to filed text;
+- [ ] the arrest audit is complete and, when an arrest occurred, the primary
+      arresting officer appears first in the caption, Parties section, defendant
+      lists or tables, and defendant-grouped claim presentation;
+- [ ] when multiple arresting officers are source-documented, the caller has
+      declared the primary officer or drafting has stopped for that designation
+      without inference;
+- [ ] when no arrest occurred, every ordered defendant presentation preserves
+      the caller's order unless another approved contract controls it;
+- [ ] defendant presentation has not reordered factual chronology, event stages,
+      claim-specific allegations, or merits analysis;
 - [ ] every claim–defendant–challenged-act mapping satisfies all applicable
       fields and the fail-closed disposition in the canonical checklist in the
       complaint contract;
+- [ ] every claim–Defendant–challenged-act unit identifies its own incorporated
+      factual paragraphs and directly supplies the challenged act and time,
+      then-known decisive facts, disputed element, fact-to-element application,
+      later-fact boundary, personal causal role, injury, and both QI-prong
+      applications when qualified immunity applies;
 - [ ] the count's Standard states the governing test in the controlling
       authority's own formulation, faithful and not loosely paraphrased, and
       each test, element, factor, or offense element carries its own verified
@@ -118,4 +170,4 @@ A count is complete only if:
 - [ ] the prose is simple, concise, direct, and has passed the required
       `horan-bad-words` review after the last material substantive revision; and
 - [ ] paragraph numbering and cross-references are verified, and any
-      repository-required BWC timestamp convention is followed.
+      supplied-strategy BWC timestamp convention is followed.

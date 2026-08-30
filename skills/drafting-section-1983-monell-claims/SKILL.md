@@ -7,6 +7,30 @@ description: >-
 
 # Drafting Section 1983 Monell Claims
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `planning-handoff` contains the litigation principal's recorded path decisions
+  and the approved planning records.
+- `record` contains the approved facts, chronology, exhibits, and claim map.
+- `authorities` contains verified governing authority and audit material.
+- `filing` contains any complaint being revised or audited.
+
+Target is optional in `filing`; omit it only when producing deltas for a new
+complaint. Internet is `disabled`. Return the approved-path complaint deltas and
+structured findings; only the trusted host derives the canonical output-relative
+path and publishes them in append-immutable mode beneath the declared output
+folder. Report unavailable prerequisites as gaps without searching undeclared
+paths.
+
 ## Scope and prerequisites
 
 Draft only the Monell paths expressly approved by the litigation principal.

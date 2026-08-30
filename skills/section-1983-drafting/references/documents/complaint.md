@@ -11,7 +11,9 @@ both of its install-local canonical references:
 - `references/complaint-contract.md`
 - `references/complaint-structure-contract.json`
 
-If the canonical package or either reference is unavailable, report **complaint
-contract unavailable** and do not draft, revise, or audit the complaint. Do not
-invent or reconstruct the missing requirements. Apply this umbrella package's
-localization and writing system only after the canonical route succeeds.
+If the canonical complaint skill or either reference is unavailable, report
+**complaint contract unavailable**.
+
+Do not draft, revise, or audit the complaint. Do not invent or reconstruct the
+missing requirements. Apply this umbrella skill's localization and writing
+system only after the canonical route succeeds.

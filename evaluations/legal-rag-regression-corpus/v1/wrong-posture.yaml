@@ -1,0 +1,19 @@
+version: 1
+id: wrong-posture
+source:
+  source_id: synthetic-wrong-posture
+  text: |
+    On summary judgment, the court weighed admissible evidence after discovery.
+  sha256: 246e9e9592d1ba1e58869e9c36c3ced873cc6a577f9a597905fc3df6a7132327
+challenged_text:
+  A complaint must plausibly state a claim, citing only this post-discovery
+  decision.
+expected_propositions:
+  - proposition_id: wrong-posture-1
+    correctness: verified
+    groundedness: misgrounded
+    source_voice: majority-holding
+pass_allowed: false
+reason:
+  The post-discovery ruling does not state or ground the asserted Rule 12
+  pleading standard.

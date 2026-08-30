@@ -306,26 +306,6 @@ quality.
 - **THEN** repository governance validation exits nonzero and identifies the
   affected skill through the stable quality-control contract finding
 
-### Requirement: Quality-control reports are version-local
-
-An independent quality-control stage MUST resolve exactly one existing audited
-version directory before review and MUST write exactly one new report under that
-directory's canonical `audits/` subdirectory. A missing, ambiguous, nonexistent,
-or out-of-bound version directory MUST fail closed without a fallback write. The
-report path MUST reject traversal and an `audits/` symlink that resolves outside
-the canonical audits directory.
-
-#### Scenario: Version directory is unresolved
-
-- **WHEN** a quality-control run has no single existing in-bound version folder
-- **THEN** it reports output unavailability and writes no report elsewhere
-
-#### Scenario: Audits directory escapes the version
-
-- **WHEN** traversal or a symlink would resolve the report outside the canonical
-  version-local audits directory
-- **THEN** report creation fails closed and no fallback report is written
-
 ### Requirement: Quality-control reports are immutable
 
 Each report MUST use a unique filename containing the stable check kind, UTC
@@ -339,14 +319,17 @@ MUST NOT edit, overwrite, replace, rename, or delete an existing report.
 
 ### Requirement: Generated reports are excluded by default
 
-The version-local `audits/` directory MUST NOT become an implicit artifact under
-review. A report MAY be reviewed only when that exact report is expressly
-designated, and the reviewing stage MUST write a different new report.
+Prior quality-control reports MUST NOT become implicit input. A report MAY be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage MUST propose a different new append-immutable report for trusted
+host publication.
 
-#### Scenario: A version is re-audited
+#### Scenario: An output folder contains earlier reports
 
-- **WHEN** a later quality-control run reviews the version artifacts
-- **THEN** it excludes prior audit reports and creates a new immutable report
+- **WHEN** a later quality-control run begins
+- **THEN** those outputs remain unavailable as input unless the caller declares
+  them under an authorized input role in a separate invocation
 
 ### Requirement: Reports identify their evidence and result
 
@@ -378,23 +361,251 @@ read-only stage verifies the new version.
 ### Requirement: Install-local report contract
 
 Every public skill whose trigger permits independent quality control MUST carry
-the compact location, immutability, exclusion, content, and advisory report
-contract in its independently installable package.
+the compact non-mutation, target, append-immutable report, input exclusion,
+content, receipt, and advisory-remediation contract in its independently
+installable package. It MUST identify its exact
+`references/folder-contract.json` without copying the full shared persistence
+protocol.
 
 #### Scenario: Quality-control skill is installed alone
 
 - **WHEN** an agent loads one affected skill without root governance files
-- **THEN** it still writes only a new immutable report inside the audited
-  version's `audits/` directory and preserves earlier reports
+- **THEN** the package still selects only a declared target, returns one new
+  output-relative report, preserves every input and prior output, and leaves
+  publication to the trusted host
 
 ### Requirement: Deterministic report-contract validation
 
-Repository governance validation MUST apply the existing behavioral
-quality-control classifier and MUST fail with a stable root- or skill-specific
-finding when the version-local immutable report contract is missing or inverted.
+Repository governance validation MUST apply the behavioral quality-control
+classifier and MUST fail with a stable root- or skill-specific finding when the
+explicit-output immutable report contract is missing or inverted. It MUST reject
+project-boundary, version-folder, implicit `audits/`, fallback output, direct
+helper write, and overwrite permissions in current public contracts.
 
-#### Scenario: Skill permits shared or overwrite output
+#### Scenario: Skill permits project-shaped or direct output
 
-- **WHEN** an affected public skill permits output outside the version-local
-  `audits/` directory or permits replacement of an existing report
+- **WHEN** an affected skill permits a report outside the trusted host's
+  caller-declared output boundary or permits replacement of an existing report
 - **THEN** governance validation exits nonzero and identifies the affected skill
+
+### Requirement: Independently installable folder boundary
+
+Every public `SKILL.md` MUST link to a schema-valid install-local
+`references/folder-contract.json` that states the exact ordered input roles,
+target policy and roles, allowed internet policy or policies, and declared
+output mode. A multi-operation skill MAY map each operation name to its exact
+internet policy, while each invocation MUST choose one known operation and its
+matching policy. The skill MUST also carry the compact recursive
+input-read-only, output-only, internet, and host-enforcement boundary. The full
+protocol SHALL remain in the repository's canonical execution owner and MUST NOT
+be copied into every skill.
+
+#### Scenario: Skill is installed alone
+
+- **WHEN** an agent loads one public skill without repository-root governance
+  files
+- **THEN** the package still exposes its complete exact invocation authority and
+  preserves the compact enforcement boundary
+
+### Requirement: Deterministic folder-contract validation
+
+Repository governance validation MUST inspect every public skill package and
+fail with a stable skill-specific finding when its folder contract is missing,
+unreadable, malformed, noncanonical, mismatched to the public skill name, or
+different from the approved role/target/internet/output matrix. Deterministic
+validation MUST NOT claim to prove host isolation or subjective agent behavior.
+
+#### Scenario: Public skill changes one role or policy
+
+- **WHEN** a public contract adds, removes, duplicates, reorders, or renames a
+  role or changes its target, internet, or output policy
+- **THEN** repository validation exits nonzero and identifies that skill before
+  any invocation uses the broadened authority
+
+### Requirement: Protected folder-execution gate
+
+The repository MUST protect folder scope, recursive input non-mutation, output
+confinement, and declared internet policy as contribution gates. A contribution
+that weakens or bypasses one of those gates SHALL identify the affected gate and
+rationale and request explicit human review.
+
+#### Scenario: Contribution changes filesystem authority
+
+- **WHEN** a contribution broadens input mutation, output placement, undeclared
+  path access, or internet authority
+- **THEN** the pull request identifies the protected change for explicit human
+  review before acceptance
+
+### Requirement: Quality-control reports use explicit output
+
+An independent quality-control stage MUST select exactly one artifact through
+its declared input roles and target policy and MUST propose exactly one unique
+append-immutable output-relative report beneath the caller-declared output
+folder. A missing, ambiguous, nonexistent, or out-of-role target MUST fail
+closed without a fallback write. The report path MUST reject absolute paths,
+traversal, symlink escapes, and existing destinations. Only the trusted host MAY
+publish the report through the shared output boundary.
+
+#### Scenario: Quality-control target is unresolved
+
+- **WHEN** a quality-control run has no single valid target required by its
+  install-local folder contract
+- **THEN** it reports output unavailability and the trusted host publishes no
+  completed report
+
+#### Scenario: Proposed report escapes output
+
+- **WHEN** a helper returns an absolute, traversing, escaping, or colliding
+  output-relative report path
+- **THEN** publication fails closed and every existing input and output byte is
+  preserved
+
+### Requirement: Standalone helper ownership is deterministic
+
+Repository governance validation MUST identify every helper named by a public
+folder contract and verify that the file exists inside that skill package. A
+helper MUST NOT import repository-root validator/writer modules, accept an
+output-root argument, perform arbitrary command dispatch, or directly create an
+output artifact or receipt.
+
+#### Scenario: Installed helper depends on repository root
+
+- **WHEN** a helper imports or references a required executable outside its
+  isolated skill package
+- **THEN** governance validation fails with a stable skill-specific helper
+  ownership finding
+
+### Requirement: Every quality-control invocation has one primary target
+
+Every public quality-control skill MUST require exactly one primary target
+within its approved declared input roles. This applies when its trigger permits
+an independent audit, validation, verification, review, evaluation, Filing CI
+run, or behaviorally equivalent quality-control stage. Missing, ambiguous,
+directory, or out-of-role targets MUST fail closed.
+
+#### Scenario: A QC-capable drafting skill is invoked without a filing target
+
+- **WHEN** an invocation selects the independent quality-control behavior but
+  supplies no primary target
+- **THEN** the quality-control stage publishes no report and does not choose a
+  target from the input tree
+
+#### Scenario: The host receives only a generic validated invocation
+
+- **WHEN** a quality-control publisher receives an invocation that was not bound
+  to the installed skill's target policy and approved target roles
+- **THEN** it publishes no report and fails closed
+
+### Requirement: Quality-control report metadata is complete and receipt-bound
+
+Every independent quality-control report MUST record the skill and version,
+quality-control kind, UTC run time, run ID, filtered logical input roles and
+reviewed artifact hashes, primary target role/path/hash/size, scope, result,
+failed findings, passing-but-suboptimal recommendations, and the terminal
+run-manifest identity. Findings and recommendations remain advisory and MUST NOT
+authorize same-stage remediation.
+
+#### Scenario: A passing run has a supported improvement
+
+- **WHEN** a quality-control run passes but identifies a suboptimal choice
+- **THEN** its report preserves the passing result, records the recommendation
+  separately, and leaves the target bytes unchanged
+
+### Requirement: Generated QC reports are excluded from reviewed fingerprints
+
+The trusted host MUST exclude files beneath the reserved
+`quality-control-reports/` output prefix and files identified by the canonical
+quality-control metadata envelope from a quality-control run's reviewed-input
+manifest unless one exact report is itself the explicit primary target.
+Selecting one report MUST NOT implicitly include sibling or older reports.
+
+#### Scenario: A prior report folder is declared as an input role
+
+- **WHEN** a later quality-control invocation targets an ordinary artifact
+- **THEN** prior generated reports do not contribute to the reviewed-input
+  manifest or its fingerprint
+
+#### Scenario: The declared input role is the report directory itself
+
+- **WHEN** generated report relative paths omit the reserved prefix because the
+  declared role is rooted directly at `quality-control-reports/`
+- **THEN** the canonical metadata envelope still identifies and excludes every
+  non-target generated report
+
+#### Scenario: One prior report is the primary target
+
+- **WHEN** the caller expressly selects one report beneath the reserved prefix
+- **THEN** that report alone remains in the reviewed-input manifest and other
+  generated reports remain excluded
+
+### Requirement: Installed QC packages carry the shared report contract
+
+Every behaviorally detected QC skill MUST carry the compact target, metadata,
+report-exclusion, immutable publication, receipt-success, and advisory-only
+remediation contract in its independently installable package. Deterministic
+governance validation MUST fail with a stable skill-specific finding when that
+contract is missing or inverted.
+
+#### Scenario: A QC skill omits run-manifest identity
+
+- **WHEN** an independently installed QC skill no longer requires its report to
+  identify the terminal run manifest
+- **THEN** repository validation exits nonzero and identifies that skill
+
+### Requirement: Public filing workflows use ordinary folders
+
+Public filing-generation and quality-control skills MUST describe ordinary files
+under declared recursive read-only folder authority. A one-file task MUST
+identify the declared input role and folder-relative path. A whole-folder task
+MUST expressly identify the ordinary files in scope and MUST NOT infer
+membership from a folder-wide manifest, loader, registry, or shared folder
+object. Skills MUST preserve input immutability, trusted-host publication,
+explicit targets, exact output-folder writes, and exclusive temporary use of
+`<output-folder>/temp/`.
+
+#### Scenario: A public skill reviews one filing
+
+- **WHEN** the caller selects one role-relative filing target
+- **THEN** the skill reviews only that ordinary file and does not silently treat
+  the result as coverage of sibling files
+
+#### Scenario: A current public filing skill is installed independently
+
+- **WHEN** any currently published skill that drafts or reviews a filing is
+  copied without the repository around it
+- **THEN** its entrypoint retains the ordinary filing-folder boundary without a
+  repository-local persistence helper
+
+### Requirement: Public data workflows use source-documented folders
+
+The repository MUST document that profile, overlay, and research data consists
+of ordinary files selected from declared recursive read-only input folders.
+Public skills that produce or consume that data MUST link to install-local
+source-documented-folder guidance, retain their domain-specific validation, and
+MUST NOT convert participant data into generated skills, static-role changes,
+ambient filesystem authority, or mutable input access. Domain-owned YAML source
+records MUST preserve applicable folder-relative paths, hashes, provenance,
+dates, classifications, validation state, assumptions, and gaps without a
+generic root envelope.
+
+#### Scenario: An overlay skill is installed independently
+
+- **WHEN** a current counsel or litigation-alignment skill is copied without the
+  repository around it
+- **THEN** its installed skill retains the source-documented-folder boundary and
+  its domain-specific validator
+
+### Requirement: Participant profiles remain data rather than skills
+
+The repository MUST keep judge-, attorney-, team-, court-, source-class-, and
+assumption-specific information in ordinary files within declared read-only
+input folders. It MUST NOT publish real-participant skills, generate
+person-specific skills, or permit profile data to alter protected installed
+behavior.
+
+#### Scenario: Maintainer adds a new participant profile
+
+- **WHEN** the profile is intended for an agent simulating that participant's
+  litigation role
+- **THEN** the maintainer adds or regenerates validated profile files and
+  domain-owned YAML source records while reusable behavior remains unchanged

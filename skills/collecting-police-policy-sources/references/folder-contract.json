@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skill": "collecting-police-policy-sources",
+  "input_roles": [
+    "department-identity",
+    "jurisdiction",
+    "approved-source-system",
+    "research-scope"
+  ],
+  "target": { "policy": "none", "roles": [] },
+  "internet": "authorized",
+  "output": { "mode": "append-immutable" }
+}

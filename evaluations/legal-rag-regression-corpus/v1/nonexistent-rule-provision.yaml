@@ -1,0 +1,15 @@
+version: 1
+id: nonexistent-rule-provision
+source:
+  source_id: synthetic-nonexistent-rule
+  text: |
+    The rule contains subsections (a) and (b); it has no subsection (z).
+  sha256: 76cc448152afdb52f27c5e475edc5714bd3147fb8087b69f1b48d13c7c71310a
+challenged_text: Rule 10(z) supplies the governing standard.
+expected_propositions:
+  - proposition_id: nonexistent-rule-1
+    correctness: incorrect
+    groundedness: not-applicable
+    source_voice: none
+pass_allowed: false
+reason: The asserted rule provision does not exist in the selected rule text.

@@ -7,6 +7,38 @@ description: >-
 
 # Drafting Section 1983 Written Discovery
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the approved facts, chronology, and open factual gaps.
+- `authorities` contains approved discovery rules, orders, and numerical limits.
+- `claim-map` contains the stable claim, defendant, element, and target mapping.
+- `municipal-profile` contains the four validated ordinary Issue #31 output
+  files when municipal discovery is within scope.
+
+`municipal-profile` is the only optional input role. Omit it for discovery
+without municipal-profile work. If the assigned task requests profile use, the
+role and a valid complete profile are required; never substitute an empty
+folder.
+
+For municipal discovery, read
+[municipal profile consumption](references/municipal-profile-consumption.md)
+before building the target map.
+
+Target is optional in `claim-map`; without one, use the supplied mapped scope.
+Internet is `disabled`. Return the discovery requests and target map as a
+canonical output-relative path and deterministic bytes; only the trusted host
+may publish them append-immutable. Report missing claim, defendant, element,
+source, scope, or authority material as a gap without assuming evidence.
+
 Draft traceable, bounded written discovery without turning an expected source or
 answer into a factual premise.
 

@@ -1,0 +1,11 @@
+{
+  "gap": {
+    "gap_id": "gap-incomplete-docket-search",
+    "gap_type": "incomplete",
+    "source_system_id": "fictional-court-search",
+    "query": "fictional qualified immunity docket opinions",
+    "filters": ["before:2025-06-15"],
+    "checked_date": "2026-08-25",
+    "coverage_limit": "The fictional index omits sealed and unindexed docket material."
+  }
+}

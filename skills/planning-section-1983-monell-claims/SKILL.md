@@ -7,6 +7,36 @@ description: >-
 
 # Planning Section 1983 Monell Claims
 
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the operative pleading, rulings, proposed facts, event date,
+  chronology, and claim and gap controls.
+- `authorities` contains verified governing authority and audit material.
+- `municipal-source` contains the approved municipal, department, policy,
+  training, review, and practice material to evaluate.
+- `strategy` contains the litigation principal's recorded decisions and reserved
+  choices.
+- `municipal-profile` optionally contains a validated municipal evidence
+  profile.
+- `casegraph` optionally contains the explicitly supplied on-disk graph and its
+  source-linked records.
+
+`municipal-profile` and `casegraph` are the only optional input roles. Target is
+none. Internet is `disabled`. Return the planning records and structured
+findings; only the trusted host derives the canonical output-relative path and
+publishes them in append-immutable mode beneath the declared output folder.
+Report unavailable inputs or unresolved connections as gaps without searching
+undeclared paths.
+
 ## Purpose and authority
 
 Create a source-bounded plan for municipal claims. Recommend paths candidly, but
@@ -30,9 +60,9 @@ municipal source material, event date, governing jurisdiction, and existing
 claim/gap controls. Keep allegations, supported facts, inferences, disputed
 interpretations, and discovery leads distinct.
 
-An on-disk CaseGraph is optional. Inspect it only when the user or project
-supplies an explicit graph-directory path. Apply the read-only and exact-source
-contract in the CaseGraph reference.
+An on-disk CaseGraph is optional. Inspect it only through the declared
+`casegraph` input role when the user or project supplies that folder. Apply the
+read-only and exact-source contract in the CaseGraph reference.
 
 ## One stable record per candidate path
 

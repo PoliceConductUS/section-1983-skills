@@ -1,0 +1,33 @@
+{
+  "id": "authority-grounding-lower-court-voice",
+  "synthetic": true,
+  "target_skill": "audit-authorities",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "attributes-lower-court-rule-to-appellate-court",
+      "candidate": "regression.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Proposition Audit"],
+    "banned_terms": [
+      {
+        "id": "lower-court-as-appellate-holding",
+        "term": "the appellate court held that review is de novo"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["LOWER-VOICE"]
+  },
+  "rubric": [
+    {
+      "id": "separates-reviewed-ruling",
+      "description": "Attributes de novo review to the lower-court ruling under review and preserves the appellate court's contrary holding."
+    }
+  ]
+}

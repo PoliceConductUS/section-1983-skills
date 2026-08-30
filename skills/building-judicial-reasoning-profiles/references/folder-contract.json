@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "skill": "building-judicial-reasoning-profiles",
+  "input_roles": [
+    "judge-identity",
+    "court-scope",
+    "approved-sources",
+    "verified-authorities"
+  ],
+  "target": { "policy": "none", "roles": [] },
+  "internet": {
+    "acquisition": "authorized",
+    "compilation": "disabled"
+  },
+  "output": { "mode": "append-immutable" }
+}

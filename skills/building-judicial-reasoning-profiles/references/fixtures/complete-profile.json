@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "profile_id": "fictional-judge-example-profile",
+  "checked_through": "2026-08-24",
+  "judge_identity": {
+    "subject_id": "judge-example",
+    "display_name": "Judge Example",
+    "fictional": true,
+    "source_id": "identity-source",
+    "checked_on": "2026-08-24"
+  },
+  "court_scope": {
+    "court_id": "example-district",
+    "jurisdiction": "Fictional Federal District",
+    "tenure_start": "2020-01-01",
+    "tenure_end": null,
+    "source_id": "court-source",
+    "checked_on": "2026-08-24"
+  },
+  "records": [
+    {
+      "id": "reasoning-record",
+      "source_class": "revealed_reasoning",
+      "proposition": "The order analyzes each asserted element before addressing remedy.",
+      "source_id": "opinion-source",
+      "source_date": "2026-06-01",
+      "issue": "pleading-elements",
+      "posture": "motion-to-dismiss",
+      "attribution": "independent_reasoning",
+      "permitted_uses": ["neutral analytical sequence"],
+      "prohibited_uses": ["outcome prediction"]
+    },
+    {
+      "id": "philosophy-record",
+      "source_class": "stated_philosophy",
+      "proposition": "A public article describes careful issue framing.",
+      "source_id": "article-source",
+      "source_date": "2025-05-01",
+      "issue": "pleading-elements",
+      "posture": "public-article",
+      "attribution": "independent_reasoning",
+      "permitted_uses": ["bounded context"],
+      "prohibited_uses": ["authority", "revealed practice"]
+    },
+    {
+      "id": "presentation-record",
+      "source_class": "self_presentation",
+      "proposition": "A public biography describes prior professional service.",
+      "source_id": "biography-source",
+      "source_date": "2026-01-15",
+      "issue": "professional-background",
+      "posture": "public-biography",
+      "attribution": "outcome_only",
+      "permitted_uses": ["identity context"],
+      "prohibited_uses": ["motive inference"]
+    },
+    {
+      "id": "compliance-record",
+      "source_class": "court_compliance",
+      "proposition": "The current official procedure requires a separate proposed order.",
+      "source_id": "procedure-source",
+      "source_date": "2026-08-01",
+      "issue": "proposed-order",
+      "posture": "filing-procedure",
+      "attribution": "independent_reasoning",
+      "permitted_uses": ["court compliance"],
+      "prohibited_uses": ["substantive reasoning"]
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "reasoning-philosophy-comparison",
+      "left_record_id": "reasoning-record",
+      "left_proposition": "The order analyzes each asserted element before addressing remedy.",
+      "left_source_id": "opinion-source",
+      "left_source_date": "2026-06-01",
+      "left_issue": "pleading-elements",
+      "left_posture": "motion-to-dismiss",
+      "right_record_id": "philosophy-record",
+      "right_proposition": "A public article describes careful issue framing.",
+      "right_source_id": "article-source",
+      "right_source_date": "2025-05-01",
+      "right_issue": "pleading-elements",
+      "right_posture": "public-article",
+      "similarities": ["Both records expressly describe issue organization."],
+      "differences": [
+        "Only the opinion records reasoning in an adjudicated matter."
+      ],
+      "state": "aligned"
+    }
+  ],
+  "neutral_transfers": [
+    {
+      "id": "element-sequence-transfer",
+      "issue": "pleading-elements",
+      "posture": "motion-to-dismiss",
+      "instruction": "Organize the neutral analysis element by element before addressing remedy.",
+      "supporting_record_ids": ["reasoning-record"]
+    }
+  ],
+  "assumptions": [],
+  "gaps": [],
+  "validation": {
+    "status": "passed",
+    "validator": "judicial-profile-validator",
+    "version": "1",
+    "validated_at": "2026-08-24T12:00:00Z"
+  }
+}

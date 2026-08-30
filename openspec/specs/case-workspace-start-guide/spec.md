@@ -2,56 +2,133 @@
 
 ## Purpose
 
-TBD - created by archiving change issue-18-case-workspace-guide. Update Purpose
-after archive.
+Define product-independent onboarding for folder-scoped skill operations,
+including portable invocation, enforced isolation, reproducible receipts, and
+folder-backed artifact patterns.
 
 ## Requirements
-
-### Requirement: Discoverable install-local workspace guide
-
-The repository SHALL provide a root-level case-workspace starting guide linked
-from README through an install-local relative path. Every documented remote
-installation SHALL use one exact immutable semantic-version tag.
-
-#### Scenario: New user follows README
-
-- **WHEN** a user reads the project-input guidance
-- **THEN** the user can open the case-workspace guide without an external or
-  machine-specific path
-- **AND** the installation example identifies one exact tagged release
-
-### Requirement: Portable first-hour artifact roles
-
-The guide SHALL cover choosing a workspace root, recording approved source IDs,
-adding a source-bounded chronology entry, recording a protected decision,
-separating immutable inputs from generated artifacts, and running only available
-validation. Each example path SHALL identify its role and SHALL be renameable
-when project configuration identifies the equivalent location.
-
-#### Scenario: Project uses different filenames
-
-- **WHEN** a project already stores the required roles under different names
-- **THEN** the user keeps those paths and configures or identifies their
-  equivalent roles rather than copying the example layout
-
-### Requirement: Missing material remains explicit
-
-The guide SHALL treat missing evidence, authority, configuration, or validation
-as a gap or unavailable state and SHALL NOT instruct the user to fabricate a
-path, source, fact, decision, authority, or passing result.
-
-#### Scenario: Optional validator is absent
-
-- **WHEN** the project has no configured validation command
-- **THEN** the user records validation as unavailable
-- **AND** the guide does not present the workspace as validated or filing-ready
 
 ### Requirement: Generic documentation-only scope
 
 The guide SHALL use generic synthetic examples and SHALL NOT add a workspace
-template, companion repository, scaffolding skill, or scaffolding script.
+template, companion repository, scaffolding skill, adapter, agent runner, or
+scaffolding script.
 
 #### Scenario: Guide is installed publicly
 
 - **WHEN** a stranger reads the guide
-- **THEN** it contains no private case material or machine-specific path
+- **THEN** it contains no private case, judge, attorney, municipality, filing,
+  or machine-specific data
+
+### Requirement: Discoverable install-local folder operations guide
+
+The repository SHALL provide one root-level folder-scoped operations guide
+linked from README through an install-local relative path. The guide SHALL link
+each documented operation to its owning install-local skill contract without
+copying that contract's implementation instructions. It SHALL link exactly once
+to `FOLDER_SCOPED_EXECUTION.md` as owner of invocation and isolation and to
+`SKILL_OUTPUT_PERSISTENCE.md` as owner of output and receipt production. Every
+documented remote installation SHALL use one exact immutable semantic-version
+tag.
+
+#### Scenario: New user follows README
+
+- **WHEN** a user reads the project-input guidance
+- **THEN** the user can open the folder operations guide without an external or
+  machine-specific path
+- **AND** each described operation resolves to an owning skill contract
+
+### Requirement: Portable first-hour folder invocation
+
+The guide SHALL provide one ordered synthetic flow that selects fixed named
+recursive read-only input roles and exactly one explicit output folder, declares
+target and internet policy, validates the invocation, runs the determinate
+`synthetic-folder-audit` host-conformance operation through a trusted host, and
+verifies unchanged inputs, its exact output artifact, and the terminal run
+manifest. The target SHALL be a caller-selected safe relative path to an
+existing regular file in its named input role. The trusted host SHALL retain the
+logical input manifest in memory, pass it to the output writer, and publish it
+through the canonical output protocol beneath the explicit output folder rather
+than through an ambient filesystem write. The host SHALL parse validator stdout
+into the manifest object and SHALL persist the exact canonical compact UTF-8
+sorted-key JSON bytes used by the output writer's input-manifest fingerprint,
+not the raw validator stdout bytes. The conformance operation SHALL read only
+the declared target, publish `reports/example-inventory.json` through the
+canonical output protocol, use no network, and stop as execution unavailable
+when the host cannot provide it. The inventory SHALL identify its schema
+version, target role and path, target byte size and SHA-256, and logical input-
+manifest SHA-256. Verification SHALL compare those values to the invocation,
+unchanged target bytes, persisted logical input manifest, and terminal artifact
+record, including equality among the persisted manifest artifact SHA-256,
+inventory input-manifest SHA-256, and terminal receipt input-manifest SHA-256.
+The operation SHALL NOT be presented as an installed public skill or as evidence
+of public-skill migration. Logical role names SHALL remain stable within an
+operation while caller folder names and absolute locations remain configurable.
+
+#### Scenario: Caller folders use different names
+
+- **WHEN** the caller maps the required logical roles to authorized absolute
+  folders under different names or parents
+- **THEN** invocation validation and output verification use those selected
+  folders without requiring a prescribed case-directory layout
+- **AND** the caller selects an existing regular target file within the named
+  role rather than relying on a guide-specific hard-coded path
+
+### Requirement: The guide uses the invocation-owned temp workspace
+
+The canonical folder-operation guide MUST tell the caller to provide one
+absolute output-folder path or ask for it before execution. It MUST state that
+`<output-folder>/temp/` is the invocation's only transient workspace and that
+the trusted host configures semantic-work `cwd`, `TMPDIR`, `TMP`, and `TEMP` to
+that folder. It MUST distinguish transient `temp/` content from durable output
+artifacts and MUST NOT authorize system temporary directories, repository
+worktrees, input folders, ambient current directories, or undeclared paths.
+
+#### Scenario: The output path is not supplied
+
+- **WHEN** a folder-scoped operation has all semantic inputs but no explicit
+  absolute output-folder path
+- **THEN** the guide tells the skill to ask the caller for that path and stop
+  until it is supplied
+
+#### Scenario: The trusted host starts semantic work
+
+- **WHEN** the guide's synthetic host-conformance operation starts
+- **THEN** its working directory and process temporary variables select
+  `<output-folder>/temp/` and its durable artifacts use other output-relative
+  paths
+
+### Requirement: Missing or inaccessible material remains explicit
+
+The guide SHALL state that a skill cannot access undeclared folders, mutate
+inputs, traverse to parent or sibling paths, read ambient repository contents,
+or use the internet unless authorized. Missing evidence, authority,
+configuration, validation, target material, or output receipt SHALL remain a gap
+or unavailable state and SHALL NOT be presented as completed or filing-ready.
+
+#### Scenario: Host cannot enforce isolation
+
+- **WHEN** a trusted host cannot enforce read-only inputs, output-only writes,
+  undeclared-path denial, or the declared network policy
+- **THEN** execution stops before case material is read
+
+### Requirement: Product-independent folder-backed artifacts
+
+The guide SHALL map ordinary filing-folder inputs to a new drafting or audit
+output, filing or discovery inputs to an immutable QC report, public sources and
+approved identity records to ordinary profile files with domain YAML provenance,
+verified authorities and decisions to a research corpus, and selected files from
+declared input folders to an isolated review report. It SHALL require explicit
+role-relative filing targets and state that no folder-wide manifest supplies
+membership. It SHALL explain these patterns using hashes, domain source records,
+checked-through dates, and retrieval provenance without requiring Git or a
+case-management product. It SHALL state that a separate product may adapt its
+own data into declared folders and import outputs, but no adapter is part of or
+required by the skills contract.
+
+#### Scenario: Separate product supplies folders
+
+- **WHEN** another product exports compatible input folders and selects one
+  output folder
+- **THEN** the skill uses only the folder invocation and does not require that
+  product's repository, history, identifiers, graph, or adapter at runtime

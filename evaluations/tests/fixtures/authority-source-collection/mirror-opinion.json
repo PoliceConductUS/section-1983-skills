@@ -1,0 +1,33 @@
+{
+  "source": {
+    "source_id": "src-fictional-opinion-mirror",
+    "artifact_path": "sources/fictional-opinion-mirror.txt",
+    "source_documentation_path": "sources/fictional-opinion-mirror.SOURCE.yaml",
+    "artifact_text": "Fictional appellate opinion text for source-collection testing only.\n",
+    "source_url": "https://example.invalid/fictional-opinion",
+    "query": "fictional clearly established authority",
+    "filters": ["fictional-circuit", "before:2025-06-15"],
+    "checked_date": "2026-08-25",
+    "retrieved_at": "2026-08-25T12:00:00Z",
+    "result_identity": "example-invalid:fictional-opinion",
+    "source_type": "mirror",
+    "decision_date": {
+      "status": "documented",
+      "date": "2024-02-01",
+      "evidence": "The fictional source header states 2024-02-01.",
+      "gap": null
+    },
+    "citation_identity": {
+      "status": "proposed",
+      "case_name": "Fictional Plaintiff v. Fictional City",
+      "court": "Fictional Circuit",
+      "citation": "999 F.9th 1",
+      "docket_number": "24-00001"
+    },
+    "verification_state": "unverified",
+    "review_state": "candidate",
+    "retrieval_result": "retrieved",
+    "limitations": ["Unofficial fictional mirror"],
+    "duplicate_of": []
+  }
+}

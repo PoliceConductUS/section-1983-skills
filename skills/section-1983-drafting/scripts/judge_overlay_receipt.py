@@ -4,7 +4,6 @@ import argparse
 import copy
 import hashlib
 import json
-import os
 import re
 import sys
 import uuid
@@ -228,37 +227,51 @@ def _inside(path, parent):
     return True
 
 
-def _resolve_version(project_boundary, version_folder):
+def _input_root(value):
     try:
-        project = Path(project_boundary).resolve(strict=True)
-        version = Path(version_folder).resolve(strict=True)
-    except (OSError, RuntimeError) as error:
-        raise ReceiptError("project boundary and version folder must exist") from error
-    if not project.is_dir() or not version.is_dir() or version == project:
-        raise ReceiptError("project boundary and version folder must be directories")
-    if not _inside(version, project):
-        raise ReceiptError("version folder is outside the project boundary")
-    return project, version
+        root = Path(value).resolve(strict=True)
+    except (OSError, RuntimeError, TypeError, ValueError) as error:
+        raise ReceiptError("declared input root is unavailable", "invalid-input-root") from error
+    if not root.is_dir():
+        raise ReceiptError("declared input root is unavailable", "invalid-input-root")
+    return root
 
 
-def _artifact_records(packet, version):
+def _relative_path(value, label, *, reject_audits=False):
+    if not isinstance(value, str) or not value or "\\" in value:
+        raise ReceiptError(f"{label} must be a canonical relative path", "invalid-target")
+    relative = PurePosixPath(value)
+    if (
+        relative.is_absolute()
+        or relative.as_posix() != value
+        or not relative.parts
+        or any(part in {"", ".", ".."} for part in relative.parts)
+        or (reject_audits and relative.parts[0] == "audits")
+    ):
+        raise ReceiptError(f"{label} must be a canonical relative path", "invalid-target")
+    return relative
+
+
+def _resolved_file(root, relative, label):
+    selected = root.joinpath(*relative.parts)
+    try:
+        resolved = selected.resolve(strict=True)
+    except (OSError, RuntimeError, ValueError) as error:
+        raise ReceiptError(f"{label} must identify an existing file", "invalid-target") from error
+    if not _inside(resolved, root) or not resolved.is_file():
+        raise ReceiptError(f"{label} escapes its declared root", "invalid-target")
+    return resolved
+
+
+def _artifact_records(packet, filing_root):
     records = []
     for record in packet["artifacts"]:
-        relative = PurePosixPath(record["relative_path"])
-        if (
-            relative.is_absolute()
-            or not relative.parts
-            or any(part in {"", ".", ".."} for part in relative.parts)
-            or relative.parts[0] == "audits"
-        ):
-            raise ReceiptError("artifact path must be a confined non-audit relative path")
-        selected = version.joinpath(*relative.parts)
-        try:
-            resolved = selected.resolve(strict=True)
-        except (OSError, RuntimeError) as error:
-            raise ReceiptError("artifact path must identify an existing file") from error
-        if not _inside(resolved, version) or not resolved.is_file():
-            raise ReceiptError("artifact path escapes the version or is not a file")
+        relative = _relative_path(
+            record["relative_path"],
+            "artifact path",
+            reject_audits=True,
+        )
+        resolved = _resolved_file(filing_root, relative, "artifact path")
         actual = hashlib.sha256(resolved.read_bytes()).hexdigest()
         records.append(
             {
@@ -347,7 +360,16 @@ def _display(value):
     return re.sub(r"\s+", " ", value).strip()
 
 
-def _render(packet, artifacts, timestamp, run_id, version, outcome, failure, changes):
+def _render(
+    packet,
+    artifacts,
+    timestamp,
+    run_id,
+    filing_target,
+    outcome,
+    failure,
+    changes,
+):
     result = "failed-closed" if outcome == "failed-closed" else "completed"
     outcome_text = (
         "no judge-specific drafting change"
@@ -361,7 +383,7 @@ def _render(packet, artifacts, timestamp, run_id, version, outcome, failure, cha
         f"Result: {result}",
         f"Outcome: {outcome_text}",
         f"Audited version ID: {_display(packet['audited_version_id'])}",
-        f"Audited version path: {version}",
+        f"Audited filing target: {filing_target}",
         f"UTC run time: {timestamp.isoformat().replace('+00:00', 'Z')}",
         f"Run ID: {run_id}",
         f"Scope: {_display(packet['scope'])}",
@@ -474,67 +496,47 @@ def _run_id(value):
     return selected
 
 
-def _audits_directory(version):
-    audits = version / "audits"
-    if audits.is_symlink():
-        raise ReceiptError("audits directory must not be a symlink")
-    try:
-        audits.mkdir(mode=0o700, exist_ok=True)
-        resolved = audits.resolve(strict=True)
-    except (OSError, RuntimeError) as error:
-        raise ReceiptError("audits directory is unavailable") from error
-    if audits.is_symlink() or not resolved.is_dir() or resolved.parent != version:
-        raise ReceiptError("audits directory escapes the version folder")
-    return resolved
-
-
 def execute_receipt(
     packet,
     *,
-    project_boundary,
-    version_folder,
+    filing_root,
+    judge_corpus_root,
+    court_conduct_root,
+    filing_target,
     now=None,
     run_id=None,
 ):
     validated = validate_packet(packet)
-    _, version = _resolve_version(project_boundary, version_folder)
-    artifacts = _artifact_records(validated, version)
+    filing = _input_root(filing_root)
+    _input_root(judge_corpus_root)
+    _input_root(court_conduct_root)
+    target = _relative_path(filing_target, "filing target", reject_audits=True)
+    _resolved_file(filing, target, "filing target")
+    artifacts = _artifact_records(validated, filing)
+    if target.as_posix() not in {
+        record["relative_path"] for record in artifacts
+    }:
+        raise ReceiptError(
+            "filing target is not listed in packet artifacts",
+            "invalid-target",
+        )
     outcome, failure_class, changes = _normalize(validated, artifacts)
     timestamp = _utc_time(now)
     selected_run_id = _run_id(run_id)
-    filename = (
-        "judge-overlay-execution-"
-        f"{timestamp.strftime('%Y%m%dT%H%M%SZ')}-{selected_run_id}.md"
-    )
-    audits = _audits_directory(version)
-    report_path = audits / filename
     report = _render(
         validated,
         artifacts,
         timestamp,
         selected_run_id,
-        version,
+        target.as_posix(),
         outcome,
         failure_class,
         changes,
     )
-    try:
-        descriptor = os.open(report_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except OSError as error:
-        raise ReceiptError("receipt path already exists or is unavailable") from error
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
-            stream.write(report)
-    except BaseException:
-        try:
-            report_path.unlink()
-        except OSError:
-            pass
-        raise
     return {
         "outcome": outcome,
         "failure_class": failure_class,
-        "report_path": str(report_path),
+        "report_bytes": report.encode("utf-8"),
     }
 
 
@@ -558,16 +560,30 @@ def _read_packet():
         raise ReceiptError("packet is not valid UTF-8 JSON") from error
 
 
-def main(argv=None):
+def _parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project-boundary", required=True)
-    parser.add_argument("--version-folder", required=True)
-    args = parser.parse_args(argv)
+    parser.add_argument("--filing-root", required=True)
+    parser.add_argument("--judge-corpus-root", required=True)
+    parser.add_argument("--court-conduct-root", required=True)
+    parser.add_argument("--filing-target", required=True)
+    return parser
+
+
+def _json_response(response):
+    value = dict(response)
+    value["report"] = value.pop("report_bytes").decode("utf-8")
+    return value
+
+
+def main(argv=None):
+    args = _parser().parse_args(argv)
     try:
         response = execute_receipt(
             _read_packet(),
-            project_boundary=args.project_boundary,
-            version_folder=args.version_folder,
+            filing_root=args.filing_root,
+            judge_corpus_root=args.judge_corpus_root,
+            court_conduct_root=args.court_conduct_root,
+            filing_target=args.filing_target,
         )
     except ReceiptError as error:
         print(
@@ -577,7 +593,7 @@ def main(argv=None):
             )
         )
         return 2
-    print(json.dumps(response, sort_keys=True))
+    print(json.dumps(_json_response(response), sort_keys=True))
     return 1 if response["outcome"] == "failed-closed" else 0
 
 

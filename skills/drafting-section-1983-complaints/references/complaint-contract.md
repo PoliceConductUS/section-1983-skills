@@ -23,6 +23,116 @@ document title. Keep any introduction short, outcome-first, and factual. Use
 lettered subparagraphs in the prayer for relief. The signature block must
 satisfy Rule 11.
 
+## Arrest-driven defendant presentation order
+
+Before drafting or materially revising a complaint that names defendants, audit
+the declared inputs to determine whether an arrest occurred and identify every
+source-documented arresting officer. Report a gap rather than inventing an
+arrest or officer identity.
+
+When an arrest occurred, put the primary arresting officer first in the caption,
+Parties section, every defendant list or table, and any defendant-grouped claim
+presentation. A prior complaint's different order does not control the new or
+revised complaint.
+
+If one arresting officer is identified, that officer is primary. If multiple
+arresting officers are identified, use the primary declared by the caller. When
+the caller has not made that declaration, stop and ask which officer is primary;
+never infer the designation from rank, chronology, report authorship, physical
+contact, or prior complaint order.
+
+Defendant presentation does not reorder the Statement of Facts, event stages,
+claim-specific allegations, or merits analysis. Keep those materials in their
+supported chronological or substantive order. When no arrest occurred, preserve
+the caller's defendant order unless a verified governing-court requirement
+controls it.
+
+## Unknown and new-defendant limitations gate
+
+Apply this gate whenever a proposed complaint or amendment includes an intended
+individual defendant who remains unnamed, role-only, misnamed, or not
+serviceable. Do not wait for a deadline to pass or for the supplied record, an
+opposing party, the court, or the caller to raise limitations. An unidentified
+witness or other person who is not an intended defendant does not activate the
+gate.
+
+Also apply the gate whenever an amendment adds, identifies, or substitutes an
+individual defendant after the calculated limitations deadline has passed, the
+deadline cannot yet be resolved, or the supplied record, an opposing party, the
+court, or the caller raises a limitations, relation-back, Rule 4(m), notice,
+service, diligence, concealment, or tolling issue. The reusable contract must
+not invent a universal numeric or day-count threshold for “near limitations.”
+
+Create a separate internal limitations record for every affected individual.
+Each record must contain:
+
+1. the supported accrual date and applicable limitations deadline, each with its
+   calculation basis and sources;
+2. the original Doe designation or role description;
+3. a same transaction, conduct, or occurrence analysis;
+4. four separate identity events:
+   - the date the identifying source first became available, to whom it was
+     available, and the supporting source;
+   - the date the plaintiff first possessed the identifying source and the
+     supporting source;
+   - the date identity became objectively ascertainable, the precise basis for
+     that determination, and the supporting source; and
+   - the date of actual identification, the identification source and method,
+     and the supporting source;
+5. three separate diligence histories, each containing concrete acts, dates,
+   results, and sources:
+   - pre-limitations diligence;
+   - post-filing/pre-identification diligence; and
+   - post-identification/pre-service diligence;
+6. record-control and withholding provenance for each material identity source,
+   including the record, holder or controller, request recipient, request date,
+   response date, denial date, follow-up dates, stated basis, and sources;
+7. separate supported attribution entries for the municipality, custodian, and
+   intended individual defendant for each material control or withholding fact;
+8. a separate Rule 15(c)(1)(A) analysis;
+9. a separate Rule 15(c)(1)(C) notice and mistake analysis stating the notice
+   recipient, notice date if any, factual basis, prejudice analysis, and whether
+   the intended defendant knew or should have known that the action would have
+   been brought against that person but for a mistake;
+10. a supported mistake-versus-lack-of-knowledge classification;
+11. service status and date, method, attempts, and proof, separately from
+    notice;
+12. the Rule 4(m) deadline, extension-request status, supported good-cause
+    facts, supported discretionary-extension facts, and requested relief;
+13. for each limitations, Rule 15(c)(1)(A), Rule 15(c)(1)(C), Rule 4(m),
+    tolling, or concealment route relied on: the controlling jurisdiction,
+    governing authority, pinpoint, binding, precedential, and current status,
+    supported proposition, defendant-specific application, sources, and any
+    unresolved status;
+14. defendant-specific concealment or tolling facts and separate attribution of
+    any municipal, custodian, or individual conduct; and
+15. fallback claims and severable relief if substitution or relation back fails.
+
+Source availability, source possession, objective ascertainability, and actual
+identification do not imply one another. Preserve all four events even when
+their dates coincide. Do not convert “actually identified after filing” into
+either “identity was unavailable before filing” or “plaintiff knew the identity
+before filing” without separate source support.
+
+Analyze Rule 15(c)(1)(A) separately from Rule 15(c)(1)(C). Do not collapse a
+mistake about identity into a lack of knowledge; classify the supported record
+and identify what remains unresolved.
+
+Every missing, unsupported, or unresolved required entry creates an internal
+filing-critical GAP. That GAP blocks filing-ready status and must be routed for
+a reserved litigation decision. Do not convert the internal risk assessment into
+an adverse merits characterization in filed text.
+
+When producing the complaint mechanical handoff, include the `limitations_gate`
+object defined by `limitations-record.schema.json`. Declare every intended
+individual and the observable identity, amendment-action, deadline, and
+raised-risk trigger facts. Provide exactly one record for every affected
+intended individual. Run the installed complaint checker against that handoff. A
+missing, malformed, or unresolved limitations entry is a hard structural finding
+and keeps Filing CI open. The checker does not decide fact truth, relation back,
+tolling, mistake, notice or service sufficiency, authority fit, requested
+relief, strategy, or filing readiness.
+
 ## Jurisdiction, venue, parties, and capacities
 
 Plead federal-question and civil-rights jurisdiction under 28 U.S.C. § 1331 and
@@ -87,6 +197,37 @@ it separately for each challenged act. Two defendants or two challenged acts on
 the same claim require separately complete mappings. The mapping is the
 count-level drafting and audit record; the filed count may express its functions
 in concise paragraphs rather than labels or a table.
+
+### Closed actor application unit
+
+Each claim–Defendant–challenged-act unit must identify its own incorporated
+factual paragraphs and directly state, in compact form:
+
+- the Defendant's challenged act and event time;
+- the decisive facts known to that Defendant then;
+- the disputed claim or offense element;
+- why the then-known facts establish or fail to establish that element;
+- which asserted facts occurred only later and cannot enter the earlier
+  relevant-time knowledge set;
+- the Defendant's personal causal role and resulting injury; and
+- the Defendant-specific application of qualified-immunity prongs one and two
+  when qualified immunity applies.
+
+Omnibus incorporation, including incorporation qualified by “to the extent
+applicable,” is insufficient when Defendants' acts, stages, or knowledge differ.
+A paragraph range plus a conclusion does not perform the required application.
+Functional closure does not impose a fixed paragraph count or require needless
+repetition.
+
+The complaint must contain the decisive factual bridge. A supporting brief may
+expand authority comparisons and competing record interpretations but must not
+supply a missing complaint-level application or factual bridge.
+
+When an arrest-time actor unit incorporates later report, prosecution,
+suppression, dismissal, identification, resistance, or other post-act
+paragraphs, state their limited later function and state that they are not part
+of the Defendant's contemporaneous knowledge. Later-only facts must not enter
+the earlier knowledge set by incorporation.
 
 ### Canonical claim–defendant–challenged-act checklist
 
@@ -339,3 +480,24 @@ connections, and exact authority-resolution status. Drafting mode may continue
 with an explicit unassessed graph state. Filing mode fails closed unless every
 included claim unit has a current completed assessment and no unresolved receipt
 finding.
+
+## Packaged mechanical check
+
+The install-local
+[complaint-structure-contract.json](complaint-structure-contract.json) defines
+the mechanical interface implemented by `../scripts/check_complaint.py`. The
+helper accepts the declared `filing` input root and one canonical relative JSON
+target. That target contains `sections` as ordered identifiers, `paragraphs` as
+objects with `number` and `cross_references`, and `counts` as numbered objects
+carrying the canonical count fields. It also contains the `limitations_gate`
+defined by [limitations-record.schema.json](limitations-record.schema.json),
+including the intended-individual trigger entries, defendant-specific records,
+declared filing-critical gaps, and gate status. The helper returns deterministic
+report bytes and an output-relative report path; only the trusted host publishes
+them.
+
+Deterministic checking is limited to the listed mechanical checks. It excludes
+fact truth, legal sufficiency, authority fit, material analogy, strategy, and
+filing readiness. The packaged helper reports findings using the listed stable
+fields and returns a nonzero status for a hard failure. Its presence does not
+mean the checker ran, and its result does not make or replace a legal judgment.

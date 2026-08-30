@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "skill": "building-municipal-monell-profiles",
+  "input_roles": [
+    "municipality",
+    "department",
+    "source",
+    "policy-catalog",
+    "policy-assessment",
+    "case-record",
+    "verified-authority"
+  ],
+  "target": { "policy": "none", "roles": [] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

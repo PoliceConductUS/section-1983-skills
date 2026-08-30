@@ -1,31 +1,9 @@
-# filing-ci-orchestration Specification
+## RENAMED Requirements
 
-## Purpose
+- FROM: `Packaged checker resolution`
+- TO: `Installed checker resolution`
 
-Define thin, project-configured Filing CI orchestration that runs deterministic
-filing-integrity checks at the required workflow stages, preserves checker
-findings, and fails closed without taking ownership of checker logic or
-drafting.
-
-## Requirements
-
-### Requirement: Workflow-stage execution
-
-The skill MUST run Filing CI after every material drafting change and again
-immediately before describing the document as filing-ready. A material change
-MUST invalidate an earlier successful result.
-
-#### Scenario: Draft changes after a successful run
-
-- **WHEN** the controlling draft changes materially after Filing CI succeeds
-- **THEN** the skill treats the prior result as stale and requires a new run
-  before filing readiness
-
-#### Scenario: Filing-readiness review begins
-
-- **WHEN** the workflow reaches a filing-readiness decision
-- **THEN** the skill requires a current successful Filing CI result for the
-  controlling draft
+## MODIFIED Requirements
 
 ### Requirement: Failure classification and drafting-loop return
 
@@ -53,29 +31,6 @@ return actionable findings to the drafting loop without editing the filing.
 - **WHEN** the checker returns warnings or another documented non-hard class
 - **THEN** the skill preserves that class without silently downgrading,
   dismissing, or correcting the finding
-
-### Requirement: Read-only orchestration
-
-The skill MUST treat declared input processing and result reporting as
-non-mutating. The wrapper MUST NOT modify any input, create directories, open an
-output root, rewrite checker bytes, or represent a correction as user-approved.
-It SHALL return one canonical output-relative report path and deterministic
-bytes for trusted-host append-immutable publication. A response with findings
-MUST stop after reporting; remediation remains a separate authorized drafting
-operation followed by a fresh Filing CI invocation against the new target bytes.
-
-#### Scenario: Checker identifies a correctable defect
-
-- **WHEN** a finding could be corrected in the filing
-- **THEN** the Filing CI operation returns the attacked location and supported
-  correction information without changing any input byte
-
-#### Scenario: Drafting operation changes the filing
-
-- **WHEN** a later authorized drafting operation produces a materially changed
-  filing artifact
-- **THEN** a new Filing CI invocation with new logical input hashes is required
-  before the filing gate can pass
 
 ### Requirement: Fail-closed filing gate
 

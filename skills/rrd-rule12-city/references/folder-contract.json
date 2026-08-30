@@ -2,6 +2,7 @@
   "version": 1,
   "skill": "rrd-rule12-city",
   "input_roles": ["motion", "record", "authorities"],
+  "optional_input_roles": ["municipal-profile"],
   "target": { "policy": "required", "roles": ["motion"] },
   "internet": "disabled",
   "output": { "mode": "append-immutable" }

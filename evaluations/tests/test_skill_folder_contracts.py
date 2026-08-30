@@ -17,9 +17,21 @@ from scripts.validate_governance import (
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
+OPTIONAL_INPUT_ROLES = {
+    "adversarial-filing-review": ["municipal-profile"],
+    "drafting-section-1983-complaints": ["municipal-profile"],
+    "drafting-section-1983-deposition-outlines": ["municipal-profile"],
+    "drafting-section-1983-written-discovery": ["municipal-profile"],
+    "rrd-rule12-city": ["municipal-profile"],
+}
 
 CONTRACTS = {
-    "adversarial-filing-review": (["filing", "approved-sources"], "required", ["filing"], "authorized"),
+    "adversarial-filing-review": (
+        ["filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "authorized",
+    ),
     "analyzing-police-policy-sources": (
         [
             "department-identity",
@@ -193,7 +205,12 @@ CONTRACTS = {
     "horan-bad-words": (["filing"], "required", ["filing"], "disabled"),
     "rrd": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
     "rrd-rule12": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
-    "rrd-rule12-city": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
+    "rrd-rule12-city": (
+        ["motion", "record", "authorities"],
+        "required",
+        ["motion"],
+        "disabled",
+    ),
     "rrd-rule12-officers": (["motion", "record", "authorities"], "required", ["motion"], "disabled"),
     "section-1983-drafting": (
         ["record", "authorities", "strategy", "filing"],
@@ -212,7 +229,7 @@ CONTRACTS = {
 
 def expected_contract(skill, values):
     input_roles, target_policy, target_roles, internet = values
-    return {
+    contract = {
         "version": 1,
         "skill": skill,
         "input_roles": input_roles,
@@ -220,6 +237,9 @@ def expected_contract(skill, values):
         "internet": internet,
         "output": {"mode": "append-immutable"},
     }
+    if skill in OPTIONAL_INPUT_ROLES:
+        contract["optional_input_roles"] = OPTIONAL_INPUT_ROLES[skill]
+    return contract
 
 
 def schema_errors(instance, schema, path="$"):

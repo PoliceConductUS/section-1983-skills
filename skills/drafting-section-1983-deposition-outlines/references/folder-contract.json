@@ -2,6 +2,7 @@
   "version": 1,
   "skill": "drafting-section-1983-deposition-outlines",
   "input_roles": ["record", "authorities", "discovery"],
+  "optional_input_roles": ["municipal-profile"],
   "target": { "policy": "optional", "roles": ["record"] },
   "internet": "disabled",
   "output": { "mode": "append-immutable" }

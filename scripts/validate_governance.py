@@ -15,6 +15,7 @@ FOLDER_CONTRACT_FIELDS = {
     "internet",
     "output",
 }
+OPTIONAL_FOLDER_CONTRACT_FIELDS = {"optional_input_roles"}
 SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SOURCE_DOCUMENTED_SKILLS = (
     "analyzing-police-policy-sources",
@@ -28,8 +29,15 @@ SOURCE_DOCUMENTED_SKILLS = (
 )
 
 
-def folder_contract(skill, input_roles, target_policy, target_roles, internet):
-    return {
+def folder_contract(
+    skill,
+    input_roles,
+    target_policy,
+    target_roles,
+    internet,
+    optional_input_roles=None,
+):
+    contract = {
         "version": 1,
         "skill": skill,
         "input_roles": input_roles,
@@ -37,6 +45,9 @@ def folder_contract(skill, input_roles, target_policy, target_roles, internet):
         "internet": internet,
         "output": {"mode": "append-immutable"},
     }
+    if optional_input_roles:
+        contract["optional_input_roles"] = optional_input_roles
+    return contract
 
 
 APPROVED_FOLDER_CONTRACTS = {
@@ -46,6 +57,7 @@ APPROVED_FOLDER_CONTRACTS = {
         "required",
         ["filing"],
         "authorized",
+        ["municipal-profile"],
     ),
     "audit-authorities": folder_contract(
         "audit-authorities",
@@ -188,6 +200,7 @@ APPROVED_FOLDER_CONTRACTS = {
         "optional",
         ["filing"],
         "disabled",
+        ["municipal-profile"],
     ),
     "drafting-section-1983-declarations-and-evidence": folder_contract(
         "drafting-section-1983-declarations-and-evidence",
@@ -202,6 +215,7 @@ APPROVED_FOLDER_CONTRACTS = {
         "optional",
         ["record"],
         "disabled",
+        ["municipal-profile"],
     ),
     "drafting-section-1983-meet-and-confer": folder_contract(
         "drafting-section-1983-meet-and-confer",
@@ -223,6 +237,7 @@ APPROVED_FOLDER_CONTRACTS = {
         "optional",
         ["claim-map"],
         "disabled",
+        ["municipal-profile"],
     ),
     "filing-ci": folder_contract(
         "filing-ci",
@@ -257,6 +272,7 @@ APPROVED_FOLDER_CONTRACTS = {
         "required",
         ["motion"],
         "disabled",
+        ["municipal-profile"],
     ),
     "rrd-rule12-officers": folder_contract(
         "rrd-rule12-officers",
@@ -807,7 +823,13 @@ def validate_folder_scope_contracts(repository_root):
 
 
 def validate_folder_contract_document(document, expected_skill):
-    if not isinstance(document, dict) or set(document) != FOLDER_CONTRACT_FIELDS:
+    if (
+        not isinstance(document, dict)
+        or not FOLDER_CONTRACT_FIELDS.issubset(document)
+        or not set(document).issubset(
+            FOLDER_CONTRACT_FIELDS | OPTIONAL_FOLDER_CONTRACT_FIELDS
+        )
+    ):
         return ["invalid-folder-contract-shape"]
 
     errors = []
@@ -824,6 +846,18 @@ def validate_folder_contract_document(document, expected_skill):
         or len(roles) != len(set(roles))
     ):
         errors.append("invalid-folder-contract-input-roles")
+    optional_roles = document.get("optional_input_roles", [])
+    if (
+        not isinstance(optional_roles, list)
+        or ("optional_input_roles" in document and not optional_roles)
+        or any(
+            not isinstance(role, str) or not SAFE_ROLE.fullmatch(role)
+            for role in optional_roles
+        )
+        or len(optional_roles) != len(set(optional_roles))
+        or (isinstance(roles, list) and set(optional_roles) & set(roles))
+    ):
+        errors.append("invalid-folder-contract-optional-input-roles")
 
     target = document.get("target")
     target_valid = isinstance(target, dict) and set(target) == {"policy", "roles"}

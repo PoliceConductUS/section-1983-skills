@@ -589,10 +589,24 @@ def build_profile_plan(
     if gap_map:
         lines.extend(["", "## Gaps", ""])
         lines.extend(f"- {gap['gap_id']}: {gap['description']}" for gap in gap_map.values())
+    profile_bytes = _yaml(profile)
+    gaps_bytes = _yaml(
+        {
+            "version": 1,
+            "profile_id": identity_record["profile_id"],
+            "gaps": list(gap_map.values()),
+        }
+    )
+    markdown_bytes = ("\n".join(lines) + "\n").encode()
     validation = {
         "schema_version": 1,
         "valid": True,
         "profile_id": identity_record["profile_id"],
+        "artifact_hashes": {
+            "municipal-profile.yaml": hashlib.sha256(profile_bytes).hexdigest(),
+            "municipal-profile-gaps.yaml": hashlib.sha256(gaps_bytes).hexdigest(),
+            "municipal-profile.md": hashlib.sha256(markdown_bytes).hexdigest(),
+        },
         "source_hashes": {
             source_id: source_map[source_id]["source_sha256"] for source_id in sorted(source_map)
         },
@@ -610,21 +624,15 @@ def build_profile_plan(
         "gap_ids": list(gap_map),
     }
     artifacts = [
-        {"path": "municipal-profile.yaml", "bytes": _yaml(profile), "internet_sources": []},
+        {"path": "municipal-profile.yaml", "bytes": profile_bytes, "internet_sources": []},
         {
             "path": "municipal-profile-gaps.yaml",
-            "bytes": _yaml(
-                {
-                    "version": 1,
-                    "profile_id": identity_record["profile_id"],
-                    "gaps": list(gap_map.values()),
-                }
-            ),
+            "bytes": gaps_bytes,
             "internet_sources": [],
         },
         {
             "path": "municipal-profile.md",
-            "bytes": ("\n".join(lines) + "\n").encode(),
+            "bytes": markdown_bytes,
             "internet_sources": [],
         },
         {

@@ -21,6 +21,17 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `record` contains the approved facts, chronology, and open factual gaps.
 - `authorities` contains approved discovery rules, orders, and numerical limits.
 - `claim-map` contains the stable claim, defendant, element, and target mapping.
+- `municipal-profile` contains the four validated ordinary Issue #31 output
+  files when municipal discovery is within scope.
+
+`municipal-profile` is the only optional input role. Omit it for discovery
+without municipal-profile work. If the assigned task requests profile use, the
+role and a valid complete profile are required; never substitute an empty
+folder.
+
+For municipal discovery, read
+[municipal profile consumption](references/municipal-profile-consumption.md)
+before building the target map.
 
 Target is optional in `claim-map`; without one, use the supplied mapped scope.
 Internet is `disabled`. Return the discovery requests and target map as a

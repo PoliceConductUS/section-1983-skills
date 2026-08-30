@@ -23,9 +23,17 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `filing` contains the canonical draft selected for review.
 - `approved-sources` contains the exact source material permitted in the review
   and the applicable domain-owned source-documentation YAML.
+- `municipal-profile` contains the four validated ordinary Issue #31 output
+  files when the filing presents a municipal theory.
+
+`municipal-profile` is the only optional input role. Omit it for non-profile
+review. If the assigned review requests municipal-profile use, the role and a
+valid complete profile are required; never substitute an empty folder.
 
 Validate each selected source and YAML record under
 [the approved-source documentation contract](references/approved-source-documentation.md).
+When municipal-profile input is supplied, also read
+[municipal profile consumption](references/municipal-profile-consumption.md).
 
 Target is required in `filing`. Internet is `authorized` only for the approved
 review provider. The trusted host selects ordinary files from both input folders

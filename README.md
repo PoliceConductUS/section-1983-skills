@@ -154,11 +154,11 @@ completed independent review.
 ## Complaint checker boundary
 
 The canonical JSON complaint contract is a thin handoff for an external checker
-such as CaseGraph. It does not execute a checker and does not decide fact truth,
-legal sufficiency, authority fit, material analogy, strategy, or filing
-readiness. CaseGraph implementation remains outside this repository. Filing CI
-may orchestrate only a complete project-configured checker invocation; it does
-not invent an executable, flags, inputs, or output paths.
+configured by the project. It does not provide or execute a checker and does not
+decide fact truth, legal sufficiency, authority fit, material analogy, strategy,
+or filing readiness. Filing CI may orchestrate only a complete
+project-configured checker invocation; it does not invent an executable, flags,
+inputs, or output paths.
 
 ## Project inputs and portability
 
@@ -167,9 +167,9 @@ Projects may use different filenames or keep the same information in one
 document. When a skill calls for a strategy, chronology or fact lock, claim
 ledger, gap register, authority library, or coded corpus:
 
-New users can follow [Start a case workspace](CASE_WORKSPACE.md) to establish
-those roles with generic source-bounded examples before using the drafting
-skills.
+New users can follow [Run folder-scoped skill operations](FOLDER_OPERATIONS.md)
+to map those roles to recursive read-only input folders, select one output
+folder, and verify a synthetic operation before using the drafting skills.
 
 - use the project's existing equivalent;
 - do not invent a file or imply that a missing artifact was reviewed;
@@ -178,9 +178,11 @@ skills.
   document can still be prepared from verified sources.
 
 Localization results belong in a project-defined cache or returned internal
-audit, not inside an installed skill package. Numbered packet folders,
-manifests, hashes, and source records apply only when the user's project already
-uses them.
+audit, not inside an installed skill package. Logical input hashes and run
+manifests are required for every folder-scoped operation. These shared receipts
+bind the declared logical inputs to the terminal output run even when a caller
+maintains no packet-specific metadata. Project-specific extra packet controls
+remain optional and separate from the shared folder contract.
 
 Judge-specific observations are optional. If the reviewed corpus does not
 support an issue-specific conclusion, the judge overlay contributes no

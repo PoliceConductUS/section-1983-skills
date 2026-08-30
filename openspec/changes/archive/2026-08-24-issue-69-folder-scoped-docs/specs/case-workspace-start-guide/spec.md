@@ -1,24 +1,15 @@
-# case-workspace-start-guide Specification
+# case-workspace-start-guide Delta Specification
 
-## Purpose
+## RENAMED Requirements
 
-Define product-independent onboarding for folder-scoped skill operations,
-including portable invocation, enforced isolation, reproducible receipts, and
-folder-backed artifact patterns.
+- FROM: `### Requirement: Discoverable install-local workspace guide`
+- TO: `### Requirement: Discoverable install-local folder operations guide`
+- FROM: `### Requirement: Portable first-hour artifact roles`
+- TO: `### Requirement: Portable first-hour folder invocation`
+- FROM: `### Requirement: Missing material remains explicit`
+- TO: `### Requirement: Missing or inaccessible material remains explicit`
 
-## Requirements
-
-### Requirement: Generic documentation-only scope
-
-The guide SHALL use generic synthetic examples and SHALL NOT add a workspace
-template, companion repository, scaffolding skill, adapter, agent runner, or
-scaffolding script.
-
-#### Scenario: Guide is installed publicly
-
-- **WHEN** a stranger reads the guide
-- **THEN** it contains no private case, judge, attorney, municipality, filing,
-  or machine-specific data
+## MODIFIED Requirements
 
 ### Requirement: Discoverable install-local folder operations guide
 
@@ -74,30 +65,6 @@ operation while caller folder names and absolute locations remain configurable.
 - **AND** the caller selects an existing regular target file within the named
   role rather than relying on a guide-specific hard-coded path
 
-### Requirement: The guide uses the invocation-owned temp workspace
-
-The canonical folder-operation guide MUST tell the caller to provide one
-absolute output-folder path or ask for it before execution. It MUST state that
-`<output-folder>/temp/` is the invocation's only transient workspace and that
-the trusted host configures semantic-work `cwd`, `TMPDIR`, `TMP`, and `TEMP` to
-that folder. It MUST distinguish transient `temp/` content from durable output
-artifacts and MUST NOT authorize system temporary directories, repository
-worktrees, input folders, ambient current directories, or undeclared paths.
-
-#### Scenario: The output path is not supplied
-
-- **WHEN** a folder-scoped operation has all semantic inputs but no explicit
-  absolute output-folder path
-- **THEN** the guide tells the skill to ask the caller for that path and stop
-  until it is supplied
-
-#### Scenario: The trusted host starts semantic work
-
-- **WHEN** the guide's synthetic host-conformance operation starts
-- **THEN** its working directory and process temporary variables select
-  `<output-folder>/temp/` and its durable artifacts use other output-relative
-  paths
-
 ### Requirement: Missing or inaccessible material remains explicit
 
 The guide SHALL state that a skill cannot access undeclared folders, mutate
@@ -111,6 +78,20 @@ or unavailable state and SHALL NOT be presented as completed or filing-ready.
 - **WHEN** a trusted host cannot enforce read-only inputs, output-only writes,
   undeclared-path denial, or the declared network policy
 - **THEN** execution stops before case material is read
+
+### Requirement: Generic documentation-only scope
+
+The guide SHALL use generic synthetic examples and SHALL NOT add a workspace
+template, companion repository, scaffolding skill, adapter, agent runner, or
+scaffolding script.
+
+#### Scenario: Guide is installed publicly
+
+- **WHEN** a stranger reads the guide
+- **THEN** it contains no private case, judge, attorney, municipality, filing,
+  or machine-specific data
+
+## ADDED Requirements
 
 ### Requirement: Product-independent folder-backed artifacts
 

@@ -31,7 +31,7 @@ SECTION_IDS = (
     "jury-demand",
     "signature-block",
 )
-COUNT_CARDINALITY = ("claim", "defendant", "challenged_act")
+COUNT_CARDINALITY = ("claim", "defendant", "capacity", "challenged_act")
 REQUIRED_COUNT_FIELDS = (
     "count_id",
     "claim",
@@ -49,10 +49,15 @@ REQUIRED_COUNT_FIELDS = (
     "injury",
     "relief",
     "result",
+    "qualified_immunity",
+    "monell_paths",
 )
 QUALIFIED_IMMUNITY_FIELDS = (
     "event_date",
     "precise_right",
+    "jurisdiction",
+    "prong_one_result",
+    "prong_two_result",
     "binding_pre_event_authority",
     "authority_audit_status",
     "materially_similar_facts",
@@ -60,19 +65,23 @@ QUALIFIED_IMMUNITY_FIELDS = (
     "fair_warning",
     "rule_of_orderliness_review_status",
     "later_history_review_status",
-    "prong_one_result",
-    "prong_two_result",
+    "later_authority_treatment",
 )
 MECHANICAL_CHECKS = (
+    "strict-contract-version",
     "section-presence",
     "section-order",
-    "paragraph-numbering-continuity",
-    "count-numbering-continuity",
     "unique-count-id",
-    "claim-defendant-challenged-act-cardinality",
-    "cross-reference-target",
-    "incorporation-target",
-    "required-count-field-location",
+    "claim-defendant-capacity-challenged-act-cardinality",
+    "paragraph-reference-target",
+    "typed-individual-capacity-unit",
+    "conditional-qualified-immunity-unit",
+    "separated-monell-path",
+    "path-specific-monell-fields",
+    "assessment-document-fingerprint",
+    "assessment-claim-coverage",
+    "authority-artifact-hash",
+    "authority-exact-passage",
 )
 EXCLUDED_JUDGMENTS = (
     "fact-truth",
@@ -82,14 +91,7 @@ EXCLUDED_JUDGMENTS = (
     "strategy",
     "filing-readiness",
 )
-FINDING_FIELDS = (
-    "finding_id",
-    "check_id",
-    "severity",
-    "artifact",
-    "location",
-    "message",
-)
+FINDING_FIELDS = ("code", "location", "message")
 SECTION_HEADINGS = (
     "caption",
     "introduction",
@@ -308,7 +310,7 @@ def assert_machine_contract(test, path):
     if not path.is_file():
         return
     contract = json.loads(path.read_text(encoding="utf-8"))
-    test.assertEqual(contract["version"], 1)
+    test.assertEqual(contract["version"], 2)
     test.assertEqual(contract["owner"], GENERAL_PACKAGE)
     test.assertEqual(
         tuple(section["id"] for section in contract["sections"]),
@@ -328,13 +330,13 @@ def assert_machine_contract(test, path):
     test.assertEqual(tuple(contract["count_cardinality"]), COUNT_CARDINALITY)
     test.assertEqual(tuple(contract["required_count_fields"]), REQUIRED_COUNT_FIELDS)
     test.assertIn("capacity", contract["required_count_fields"])
-    test.assertNotIn("capacity", contract["count_cardinality"])
+    test.assertIn("capacity", contract["count_cardinality"])
     test.assertEqual(
         tuple(contract["conditional_qualified_immunity_fields"]),
         QUALIFIED_IMMUNITY_FIELDS,
     )
     test.assertEqual(tuple(contract["mechanical_checks"]), MECHANICAL_CHECKS)
-    test.assertEqual(tuple(contract["excluded_judgments"]), EXCLUDED_JUDGMENTS)
+    test.assertEqual(tuple(contract["excluded_deterministic_judgments"]), EXCLUDED_JUDGMENTS)
     test.assertEqual(tuple(contract["finding_fields"]), FINDING_FIELDS)
     test.assertEqual(contract["hard_failure_exit_status"], "nonzero")
 

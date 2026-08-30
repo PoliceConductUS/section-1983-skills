@@ -314,10 +314,14 @@ def _provider_request(packet, model):
 
 
 def _openai_transport(body, headers, timeout_seconds):
+    request_headers = dict(headers)
+    if "Authorization" not in request_headers:
+        api_key = _api_key(os.environ.get("OPENAI_API_KEY", ""))
+        request_headers["Authorization"] = f"Bearer {api_key}"
     request = urllib.request.Request(
         OPENAI_RESPONSES_URL,
         data=body,
-        headers=headers,
+        headers=request_headers,
         method="POST",
     )
     try:
@@ -504,25 +508,20 @@ def _extract_review(provider_response, approved_source_ids, raw_body):
     return validate_review_response(review, approved_source_ids)
 
 
-def run_trusted_review(
+def run_review(
     packet,
     model,
-    api_key,
     timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
     transport=None,
 ):
     validated = validate_packet(packet)
     validated_model = _runtime_string(model, "model")
-    validated_key = _api_key(api_key)
     timeout = _positive_timeout(timeout_seconds)
     request = _provider_request(validated, validated_model)
     body = json.dumps(request, ensure_ascii=False, separators=(",", ":")).encode(
         "utf-8"
     )
-    headers = {
-        "Authorization": f"Bearer {validated_key}",
-        "Content-Type": "application/json",
-    }
+    headers = {"Content-Type": "application/json"}
     provider_transport = transport or _openai_transport
     try:
         status, response_body = provider_transport(body, headers, timeout)
@@ -870,10 +869,9 @@ def _internet_source(run_time, response_sha256):
     }
 
 
-def execute_trusted_review(
+def execute_review(
     packet,
     model,
-    api_key,
     filing_root,
     approved_sources_root,
     filing_target,
@@ -895,10 +893,9 @@ def execute_trusted_review(
         )
     run_time, normalized_run_id = _run_identity(now, run_id)
     try:
-        result = run_trusted_review(
+        result = run_review(
             validated,
             model,
-            api_key,
             timeout_seconds=timeout_seconds,
             transport=transport,
         )
@@ -982,8 +979,17 @@ def _error_result(error):
 
 
 def _json_result(result):
-    value = dict(result)
-    value["report"] = value.pop("report_bytes").decode("utf-8")
+    value = {
+        "outcome": result["outcome"],
+        "report": result["report_bytes"].decode("utf-8"),
+        "internet_sources": result["internet_sources"],
+    }
+    if "artifact_path" in result:
+        value["artifact_path"] = result["artifact_path"]
+    if "dispatch" in result:
+        value["dispatch"] = result["dispatch"]
+    if "error" in result:
+        value["error"] = result["error"]
     return value
 
 
@@ -999,11 +1005,9 @@ def main(
     source = sys.stdin.buffer.read() if input_bytes is None else input_bytes
     try:
         packet = json.loads(source.decode("utf-8"))
-        environment = os.environ if environ is None else environ
-        result = execute_trusted_review(
+        result = execute_review(
             packet,
             model=arguments.model,
-            api_key=environment.get("OPENAI_API_KEY", ""),
             filing_root=arguments.filing_root,
             approved_sources_root=arguments.approved_sources_root,
             filing_target=arguments.filing_target,

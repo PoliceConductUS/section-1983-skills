@@ -44,5 +44,5 @@
 
 - [x] 4.1 Record exact verification evidence and implementation commit
       identifiers in the change artifacts.
-- [ ] 4.2 Archive the completed OpenSpec change on its owning branch after
+- [x] 4.2 Archive the completed OpenSpec change on its owning branch after
       implementation review.

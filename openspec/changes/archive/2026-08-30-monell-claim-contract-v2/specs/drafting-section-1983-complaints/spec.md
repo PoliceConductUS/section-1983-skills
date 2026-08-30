@@ -37,7 +37,7 @@ injury, relief, and result.
 - **THEN** the qualified-immunity fields are inapplicable without relaxing any
   other required count field
 
-### Requirement: Deterministic complaint-contract validation
+### Requirement: Deterministic external-checker handoff
 
 The canonical package SHALL publish one machine-readable contract identifying
 the owner, version, ordered sections, count cardinality, required fields,

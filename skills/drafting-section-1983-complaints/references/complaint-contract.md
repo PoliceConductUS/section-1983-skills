@@ -47,6 +47,41 @@ supported chronological or substantive order. When no arrest occurred, preserve
 the caller's defendant order unless a verified governing-court requirement
 controls it.
 
+## Unknown and new-defendant limitations gate
+
+Apply this gate whenever a complaint amendment adds, identifies, or substitutes
+an individual defendant after the calculated limitations deadline has passed.
+Apply the same gate before that deadline when the supplied record, an opposing
+party, the court, or the caller raises a limitations, relation-back, Rule 4(m)
+notice or service, diligence, concealment, or tolling issue. The reusable
+contract must not invent a universal numeric or day-count threshold for “near
+limitations.”
+
+Create a separate internal limitations record for every affected individual.
+Each record must contain:
+
+1. the supported accrual date and applicable limitations deadline;
+2. the original Doe designation or role description;
+3. a same transaction, conduct, or occurrence analysis;
+4. a Rule 15(c)(1)(A) analysis;
+5. a Rule 15(c)(1)(C) analysis;
+6. a supported mistake-versus-lack-of-knowledge classification;
+7. Rule 4(m) notice and service facts and dates;
+8. the earliest supported date on which the defendant's identity was knowable;
+9. concrete pre-limitations diligence acts, dates, and sources;
+10. defendant-specific concealment or tolling facts and the status of supporting
+    authority; and
+11. fallback claims and severable relief if substitution or relation back fails.
+
+Analyze Rule 15(c)(1)(A) separately from Rule 15(c)(1)(C). Do not collapse a
+mistake about identity into a lack of knowledge; classify the supported record
+and identify what remains unresolved.
+
+Every missing, unsupported, or unresolved required entry creates an internal
+filing-critical GAP. That GAP blocks filing-ready status and must be routed for
+a reserved litigation decision. Do not convert the internal risk assessment into
+an adverse merits characterization in filed text.
+
 ## Jurisdiction, venue, parties, and capacities
 
 Plead federal-question and civil-rights jurisdiction under 28 U.S.C. § 1331 and

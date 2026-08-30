@@ -33,6 +33,13 @@ function must be removed from filed text or moved to internal chronology.
 
 A count is complete only if:
 
+- [ ] when the unknown and new-defendant limitations gate applies, every
+      affected individual has a limitations record that is complete under the
+      canonical complaint contract;
+- [ ] every missing, unsupported, or unresolved required limitations-record
+      entry creates an internal filing-critical GAP, and that filing-critical
+      GAP blocks filing-ready status without adding an adverse merits
+      characterization to filed text;
 - [ ] the arrest audit is complete and, when an arrest occurred, the primary
       arresting officer appears first in the caption, Parties section, defendant
       lists or tables, and defendant-grouped claim presentation;

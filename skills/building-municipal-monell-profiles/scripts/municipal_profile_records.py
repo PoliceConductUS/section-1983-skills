@@ -123,6 +123,100 @@ _DOMAIN_FIELDS = {
     "questions",
 }
 _GAP_FIELDS = {"gap_id", "domain", "description"}
+_PREREQUISITE_STAGES = ("collection", "analysis", "assessment", "profile")
+_PREREQUISITE_STATE_FIELDS = {
+    "state",
+    "terminal_receipt",
+    "expected_artifacts",
+    "validation_passed",
+    "fingerprints_match",
+}
+_COLLECTION_AUTHORIZATION_FIELDS = {
+    "internet",
+    "fees_required",
+    "fees_approved",
+}
+_STAGE_CONTRACTS = {
+    "collection": {
+        "skill": "collecting-police-policy-sources",
+        "ready_status": "ready-for-collection",
+        "roles": (
+            "department-identity",
+            "jurisdiction",
+            "approved-source-system",
+            "research-scope",
+        ),
+        "internet": "authorized",
+        "postconditions": (
+            "terminal-run-receipt-success",
+            "policy-source-candidates.yaml-present",
+            "policy-source-gaps.yaml-present",
+            "candidate-source-files-and-SOURCE.yaml-present",
+            "domain-validation-passed",
+            "input-fingerprints-match",
+            "independent-approved-for-analysis-review",
+        ),
+    },
+    "analysis": {
+        "skill": "analyzing-police-policy-sources",
+        "ready_status": "ready-for-analysis",
+        "roles": (
+            "department-identity",
+            "jurisdiction",
+            "policy-source",
+            "analysis-scope",
+        ),
+        "internet": "disabled",
+        "postconditions": (
+            "terminal-run-receipt-success",
+            "policy-requirements.yaml-present",
+            "policy-analysis-gaps.yaml-present",
+            "policy-analysis.md-present",
+            "policy-analysis-validation.json-present",
+            "domain-validation-passed",
+            "input-fingerprints-match",
+        ),
+    },
+    "assessment": {
+        "skill": "assessing-police-policy-compliance",
+        "ready_status": "ready-for-assessment",
+        "roles": (
+            "policy-catalog",
+            "actor",
+            "event",
+            "phase",
+            "case-record",
+            "assessment-scope",
+        ),
+        "internet": "disabled",
+        "postconditions": (
+            "terminal-run-receipt-success",
+            "policy-assessments.yaml-present",
+            "policy-assessment-gaps.yaml-present",
+            "policy-assessment.md-present",
+            "policy-assessment-validation.json-present",
+            "domain-validation-passed",
+            "input-fingerprints-match",
+            "actor-event-phase-separation-preserved",
+            "unresolved-gaps-preserved",
+        ),
+    },
+    "profile": {
+        "skill": "building-municipal-monell-profiles",
+        "ready_status": "ready-for-profile",
+        "roles": _ROLES,
+        "internet": "disabled",
+        "postconditions": (
+            "terminal-run-receipt-success",
+            "municipal-profile.yaml-present",
+            "municipal-profile-gaps.yaml-present",
+            "municipal-profile.md-present",
+            "municipal-profile-validation.json-present",
+            "domain-validation-passed",
+            "input-fingerprints-match",
+        ),
+    },
+}
 
 
 class MunicipalProfileError(ValueError):
@@ -475,6 +569,263 @@ def _reject_conclusive_language(value):
     rendered = json.dumps(value, sort_keys=True)
     if any(pattern.search(rendered) for pattern in _CONCLUSIVE_LANGUAGE):
         _fail("conclusive-profile-language")
+
+
+def _prerequisite_state(value, *, name, states):
+    if type(value) is not dict:
+        _fail(f"invalid-prerequisite-{name}")
+    fields = set(value)
+    allowed_fields = _PREREQUISITE_STATE_FIELDS | {"substantive_gaps"}
+    if fields not in {
+        frozenset(_PREREQUISITE_STATE_FIELDS),
+        frozenset(allowed_fields),
+    }:
+        _fail(f"invalid-prerequisite-{name}")
+    if value["state"] not in states:
+        _fail(f"invalid-prerequisite-{name}")
+    for field in _PREREQUISITE_STATE_FIELDS - {"state"}:
+        if type(value[field]) is not bool:
+            _fail(f"invalid-prerequisite-{name}")
+    if "substantive_gaps" in value and type(value["substantive_gaps"]) is not bool:
+        _fail(f"invalid-prerequisite-{name}")
+    if value["state"] == "absent" and any(
+        value[field] for field in _PREREQUISITE_STATE_FIELDS - {"state"}
+    ):
+        _fail(f"invalid-prerequisite-{name}")
+    return {
+        field: value[field]
+        for field in (
+            "state",
+            "terminal_receipt",
+            "expected_artifacts",
+            "validation_passed",
+            "fingerprints_match",
+        )
+    } | {"substantive_gaps": value.get("substantive_gaps", False)}
+
+
+def _prerequisite_roles(value):
+    if type(value) is not dict or set(value) != set(_PREREQUISITE_STAGES):
+        _fail("invalid-prerequisite-roles")
+    result = {}
+    for stage in _PREREQUISITE_STAGES:
+        roles = value[stage]
+        contract_roles = _STAGE_CONTRACTS[stage]["roles"]
+        if (
+            type(roles) is not list
+            or any(type(role) is not str or role not in contract_roles for role in roles)
+            or len(roles) != len(set(roles))
+        ):
+            _fail("invalid-prerequisite-roles")
+        result[stage] = set(roles)
+    return result
+
+
+def _prerequisite_outputs(value):
+    if type(value) is not dict or set(value) != set(_PREREQUISITE_STAGES):
+        _fail("invalid-prerequisite-output-folders")
+    if any(type(value[stage]) is not bool for stage in _PREREQUISITE_STAGES):
+        _fail("invalid-prerequisite-output-folders")
+    return dict(value)
+
+
+def _collection_authorization(value):
+    record = _exact(
+        value,
+        _COLLECTION_AUTHORIZATION_FIELDS,
+        "invalid-prerequisite-collection-authorization",
+    )
+    if any(type(record[field]) is not bool for field in record):
+        _fail("invalid-prerequisite-collection-authorization")
+    return dict(record)
+
+
+def _mechanical_failure(name, record):
+    if record["state"] == "invalid":
+        return f"{name}-invalid"
+    checks = (
+        ("terminal_receipt", "terminal-receipt-missing"),
+        ("expected_artifacts", "expected-artifacts-missing"),
+        ("validation_passed", "validation-failed"),
+        ("fingerprints_match", "fingerprints-mismatch"),
+    )
+    if record["state"] != "absent":
+        for field, suffix in checks:
+            if not record[field]:
+                return f"{name}-{suffix}"
+    return None
+
+
+def _render_prerequisite_plan(document):
+    yaml_bytes = _yaml(document)
+    lines = [
+        "# Municipal profile prerequisites",
+        "",
+        f"- Status: `{document['status']}`",
+        f"- Next skill: `{document['next_skill'] or 'none'}`",
+        f"- Internet: `{document['internet']}`",
+        "",
+        "## Required roles",
+        "",
+    ]
+    lines.extend(
+        [f"- `{role}`" for role in document["required_roles"]] or ["- None"]
+    )
+    lines.extend(["", "## Missing roles", ""])
+    lines.extend(
+        [f"- `{role}`" for role in document["missing_roles"]] or ["- None"]
+    )
+    lines.extend(["", "## Blocking reasons", ""])
+    lines.extend(
+        [f"- `{reason}`" for reason in document["blocking_reasons"]]
+        or ["- None"]
+    )
+    lines.extend(["", "## Postconditions", ""])
+    lines.extend(
+        [f"- `{item}`" for item in document["postconditions"]] or ["- None"]
+    )
+    markdown_bytes = ("\n".join(lines) + "\n").encode()
+    return {
+        **document,
+        "artifacts": [
+            {
+                "path": "municipal-profile-prerequisites.yaml",
+                "bytes": yaml_bytes,
+                "internet_sources": [],
+            },
+            {
+                "path": "municipal-profile-prerequisites.md",
+                "bytes": markdown_bytes,
+                "internet_sources": [],
+            },
+        ],
+    }
+
+
+def _stage_prerequisite_plan(stage, roles, outputs, authorization):
+    contract = _STAGE_CONTRACTS[stage]
+    required_roles = list(contract["roles"])
+    missing_roles = [role for role in required_roles if role not in roles[stage]]
+    output_supplied = outputs[stage]
+    blocking_reasons = [f"missing-role:{role}" for role in missing_roles]
+    status = contract["ready_status"]
+    if missing_roles:
+        status = "input-required"
+    elif stage == "collection" and not authorization["internet"]:
+        status = "authorization-required"
+        blocking_reasons = ["bounded-internet-authorization-required"]
+    elif (
+        stage == "collection"
+        and authorization["fees_required"]
+        and not authorization["fees_approved"]
+    ):
+        status = "authorization-required"
+        blocking_reasons = ["fee-authorization-required"]
+    elif not output_supplied:
+        status = "input-required"
+        blocking_reasons = ["fresh-output-folder-required"]
+    document = {
+        "version": 1,
+        "workflow": "municipal-profile-prerequisites",
+        "status": status,
+        "next_skill": contract["skill"],
+        "required_roles": required_roles,
+        "missing_roles": missing_roles,
+        "internet": contract["internet"],
+        "output_folder": {"required": True, "supplied": output_supplied},
+        "blocking_reasons": blocking_reasons,
+        "postconditions": list(contract["postconditions"]),
+    }
+    return _render_prerequisite_plan(document)
+
+
+def _blocked_prerequisite_plan(stage, reason, roles):
+    contract = _STAGE_CONTRACTS[stage]
+    required_roles = list(contract["roles"])
+    document = {
+        "version": 1,
+        "workflow": "municipal-profile-prerequisites",
+        "status": "blocked-invalid",
+        "next_skill": contract["skill"],
+        "required_roles": required_roles,
+        "missing_roles": [
+            role for role in required_roles if role not in roles[stage]
+        ],
+        "internet": contract["internet"],
+        "output_folder": {"required": True, "supplied": False},
+        "blocking_reasons": [reason],
+        "postconditions": list(contract["postconditions"]),
+    }
+    return _render_prerequisite_plan(document)
+
+
+def build_prerequisite_plan(
+    *,
+    policy_source_state,
+    policy_catalog,
+    policy_assessment,
+    available_roles,
+    output_folders,
+    collection_authorization,
+):
+    """Return one deterministic next-stage plan from trusted-host state."""
+    source = _prerequisite_state(
+        policy_source_state,
+        name="policy-source-state",
+        states={"absent", "candidate", "approved", "invalid"},
+    )
+    catalog = _prerequisite_state(
+        policy_catalog,
+        name="policy-catalog",
+        states={"absent", "valid", "invalid"},
+    )
+    assessment = _prerequisite_state(
+        policy_assessment,
+        name="policy-assessment",
+        states={"absent", "valid", "invalid"},
+    )
+    roles = _prerequisite_roles(available_roles)
+    outputs = _prerequisite_outputs(output_folders)
+    authorization = _collection_authorization(collection_authorization)
+
+    failure = _mechanical_failure("policy-catalog", catalog)
+    if failure:
+        return _blocked_prerequisite_plan("analysis", failure, roles)
+    failure = _mechanical_failure("policy-assessment", assessment)
+    if failure:
+        return _blocked_prerequisite_plan("assessment", failure, roles)
+    if assessment["state"] == "valid" and catalog["state"] != "valid":
+        return _blocked_prerequisite_plan(
+            "analysis", "policy-assessment-without-valid-catalog", roles
+        )
+    if catalog["state"] == "valid" and assessment["state"] == "valid":
+        return _stage_prerequisite_plan("profile", roles, outputs, authorization)
+    if catalog["state"] == "valid":
+        return _stage_prerequisite_plan("assessment", roles, outputs, authorization)
+
+    failure = _mechanical_failure("policy-source", source)
+    if failure:
+        return _blocked_prerequisite_plan("collection", failure, roles)
+    if source["state"] == "approved":
+        return _stage_prerequisite_plan("analysis", roles, outputs, authorization)
+    if source["state"] == "candidate":
+        return _render_prerequisite_plan(
+            {
+                "version": 1,
+                "workflow": "municipal-profile-prerequisites",
+                "status": "review-required",
+                "next_skill": None,
+                "required_roles": [],
+                "missing_roles": [],
+                "internet": "disabled",
+                "output_folder": {"required": False, "supplied": False},
+                "blocking_reasons": [
+                    "independent-policy-source-review-required"
+                ],
+                "postconditions": ["approved_for_analysis-review-present"],
+            }
+        )
+    return _stage_prerequisite_plan("collection", roles, outputs, authorization)
 
 
 def build_profile_plan(

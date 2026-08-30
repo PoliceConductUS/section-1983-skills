@@ -65,7 +65,7 @@ work. `temp/` is not a durable artifact destination.
 | `analyzing-police-policy-sources`                 | Offline decomposition of reviewed adopted-policy files into source-bounded atomic requirement and gap YAML.                                                                |
 | `assessing-police-policy-compliance`              | Offline actor-, event-, and phase-specific assessment of validated policy requirements against source-documented case records.                                             |
 | `collecting-legal-authority-sources`              | Bounded authorized collection of ordinary legal-authority source files, adjacent YAML provenance, candidate identities, and search gaps.                                   |
-| `building-municipal-monell-profiles`              | Offline evidence-coded municipal profiles preserving five analysis domains, institutional records, counterevidence, questions, and gaps.                                   |
+| `building-municipal-monell-profiles`              | Staged prerequisite resolution followed by separate offline evidence-coded municipal-profile compilation preserving five domains, counterevidence, questions, and gaps.    |
 | `judicial-reviewer`                               | Findings-only review of comprehension, procedure, authority presentation, record traceability, and gaps under a validated judicial profile.                                |
 | `opposing-counsel`                                | Findings-only source-backed opposing-counsel simulation under a validated defense-counsel profile without impersonation or disposition.                                    |
 | `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
@@ -123,14 +123,19 @@ registry, graph, or case-management runtime is required.
 10. Use `collecting-legal-authority-sources` for bounded authorized acquisition
     of ordinary authority files and adjacent source YAML. A separate
     `audit-authorities` invocation must verify every proposed authority use.
-11. Use `building-municipal-monell-profiles` to organize validated policy,
-    assessment, case-record, and authority input folders into a five-domain
-    evidence profile without deciding Monell liability or selecting a theory. In
-    a later invocation, supply that ordinary output folder as the
-    `municipal-profile` role to complaint drafting, city Rule 12 planning,
-    written discovery, deposition outlines, or adversarial review. Each consumer
-    must validate the profile files and preserve its own record, authority,
-    target, and strategy boundaries.
+11. Use `building-municipal-monell-profiles` prerequisite resolution when the
+    validated policy catalog or assessment is missing or invalid. Follow its
+    one-state plan through separate collection, independent review, offline
+    analysis, and offline assessment invocations, each with the owning skill's
+    exact roles and a fresh explicit output folder. Only after it returns
+    `ready-for-profile`, start the separate seven-role offline compilation to
+    organize validated policy, assessment, case-record, and authority input
+    folders into a five-domain evidence profile without deciding Monell
+    liability or selecting a theory. In a later invocation, supply that ordinary
+    output folder as the `municipal-profile` role to complaint drafting, city
+    Rule 12 planning, written discovery, deposition outlines, or adversarial
+    review. Each consumer must validate the profile files and preserve its own
+    record, authority, target, and strategy boundaries.
 12. Add `building-litigation-alignment-overlays` before an amended complaint,
     motion for leave, or other filing that should consume the current docket's
     actual adversary positions and judicial treatment.

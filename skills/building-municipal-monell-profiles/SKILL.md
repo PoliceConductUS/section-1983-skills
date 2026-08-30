@@ -1,9 +1,10 @@
 ---
 name: building-municipal-monell-profiles
 description: >-
-  Use when approved municipal, department, policy, case-record, and authority
-  folders must be organized into an evidence-bounded Monell profile without
-  deciding municipal liability.
+  Use when municipal-profile policy prerequisites must be resolved or approved
+  municipal, department, policy, case-record, and authority folders must be
+  organized into an evidence-bounded Monell profile without deciding municipal
+  liability.
 ---
 
 # Building Municipal Monell Profiles
@@ -12,9 +13,24 @@ Organize source-bounded institutional evidence and questions for later Section
 1983 work. A municipal profile is not proof, governing law, legal advice, or a
 selected litigation theory.
 
+## Choose exactly one operation
+
+Use **prerequisite resolution** when a validated `policy-catalog` or
+`policy-assessment` is unavailable, invalid, or of unknown mechanical status.
+Read and follow the
+[prerequisite-resolution contract](references/prerequisite-resolution.md).
+Return its deterministic next-stage artifacts and stop at the named input,
+authorization, independent-review, or invalid-output gate. Do not compile a
+profile in the same operation.
+
+Use **profile compilation** only after prerequisite resolution returns
+`ready-for-profile` and the trusted host separately validates every compilation
+input. Compilation does not collect sources, approve sources, analyze policy, or
+assess conduct.
+
 ## Folder inputs and output
 
-Contract: [folder contract](references/folder-contract.json).
+Compilation contract: [folder contract](references/folder-contract.json).
 
 Only caller-declared input folders are available and recursively read-only. The
 exact roles are:

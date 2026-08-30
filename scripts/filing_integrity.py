@@ -287,7 +287,7 @@ def _validate_selection(value: Any) -> FilingIntegritySelection:
         value.authority_documentation_paths,
     )
     if (
-        value.checker_id != "section-1983-complaint-v1"
+        value.checker_id != "section-1983-complaint-v2"
         or any(type(group) is not tuple or not group for group in path_groups)
         or sum(len(group) for group in path_groups) > _MAX_SELECTIONS
         or any(

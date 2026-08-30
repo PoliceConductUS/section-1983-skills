@@ -45,7 +45,7 @@ Use the required target in the declared `filing-source` role and only the five
 other declared roles listed above. The trusted host validates selected domain
 YAML, relative paths, hashes, dates, and ordinary source bytes before invoking
 `scripts/run_filing_ci.py`. The installed Section 1983 complaint checker ID is
-`section-1983-complaint-v1`.
+`section-1983-complaint-v2`.
 
 - Dispatch only the exact registered installed checker ID.
 - Do not accept or infer a command, executable path, flag list, source path,
@@ -68,6 +68,34 @@ the result. If the installed checker cannot execute, report **unavailable
 execution** and do not claim that a deterministic check ran. If promised output
 is malformed or cannot be reliably interpreted, report **malformed promised
 output** and leave the filing gate open.
+
+## Complaint contract version 2
+
+For a Section 1983 complaint handoff, also run the canonical install-local
+`drafting-section-1983-complaints/scripts/validate_complaint_handoff.py` against
+contract version 2. Version 1 is unsupported. Preserve the validator's
+`structural_validation`, `casegraph_assessment`, and `filing_gate` result layers
+separately. Do not collapse them into an unqualified overall pass.
+
+Drafting mode may continue when structural validation passes and the graph
+status is explicitly `not_run_missing`, `not_run_invalid`,
+`not_run_incompatible`, or `not_run_stale`. It must report that legal assessment
+did not complete. A `partial` assessment reports the components assessed and
+every missing connection; it is not a completed merits result.
+
+Filing mode requires a current `completed` assessment covering every included
+claim unit and the current document fingerprint. Each authority proposition used
+by the assessment must resolve to the verified opinion artifact and hash, cited
+pinpoint, and exact matching passage in a provenance-linked text representation.
+A `partial`, `not_run_missing`, `not_run_invalid`, `not_run_incompatible`, or
+`not_run_stale` status leaves the filing gate open. Missing, ambiguous, or
+nonmatching authority text also leaves the filing gate open for every dependent
+component.
+
+The canonical validator verifies the receipt, referenced-file hashes, and exact
+text match. It does not independently decide fact truth, authority quality,
+legal sufficiency, or litigation strategy. Preserve the reasoned assessment's
+component findings without recasting them as deterministic checker conclusions.
 
 ## Return findings to drafting
 

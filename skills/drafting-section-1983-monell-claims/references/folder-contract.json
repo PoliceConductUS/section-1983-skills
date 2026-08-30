@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "drafting-section-1983-monell-claims",
+  "input_roles": ["planning-handoff", "record", "authorities", "filing"],
+  "target": { "policy": "optional", "roles": ["filing"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

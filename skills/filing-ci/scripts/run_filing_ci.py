@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path, PurePosixPath
 
 
-CHECKER_ID = "section-1983-complaint-v1"
+CHECKER_ID = "section-1983-complaint-v2"
 MAX_FILING_BYTES = 5 * 1024 * 1024
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
 _SHORT_FORM = re.compile(r"^Ex\. [A-Za-z0-9][A-Za-z0-9.-]*$")

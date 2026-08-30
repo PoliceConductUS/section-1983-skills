@@ -45,37 +45,39 @@ work. `temp/` is not a durable artifact destination.
 
 ## Skills
 
-| Skill                                             | Role                                                                                                                                                                       |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adversarial-filing-review`                       | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.               |
-| `building-litigation-alignment-overlays`          | Immutable docket-derived defendant alignment, adversary attack, plaintiff-response, judicial-treatment, review-plan, and filing-manifest overlays.                         |
-| `building-defense-counsel-overlays`               | Immutable professional defense-attorney identity, counsel-team behavior, court-treatment, and calibrated next-move overlays from approved public sources.                  |
-| `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
-| `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
-| `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
-| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and fixed install-local mechanical check.                                             |
-| `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
-| `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                             |
-| `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                   |
-| `drafting-section-1983-meet-and-confer`           | Neutral meet-and-confer correspondence from a completed discovery-response audit, with a separate factual conference record.                                               |
-| `auditing-section-1983-privilege-logs`            | Source-bounded privilege-log requirements and entry audit without invented metadata, privilege adjudication, or automatic waiver.                                          |
-| `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                            |
-| `building-judicial-reasoning-profiles`            | Generic builder for evidence-bounded Judicial Reasoning Profile files with domain YAML provenance from approved public sources.                                            |
-| `collecting-police-policy-sources`                | Bounded authorized collection of ordinary police-policy source files with adjacent YAML provenance and explicit coverage gaps.                                             |
-| `analyzing-police-policy-sources`                 | Offline decomposition of reviewed adopted-policy files into source-bounded atomic requirement and gap YAML.                                                                |
-| `assessing-police-policy-compliance`              | Offline actor-, event-, and phase-specific assessment of validated policy requirements against source-documented case records.                                             |
-| `collecting-legal-authority-sources`              | Bounded authorized collection of ordinary legal-authority source files, adjacent YAML provenance, candidate identities, and search gaps.                                   |
-| `building-municipal-monell-profiles`              | Staged prerequisite resolution followed by separate offline evidence-coded municipal-profile compilation preserving five domains, counterevidence, questions, and gaps.    |
-| `judicial-reviewer`                               | Findings-only review of comprehension, procedure, authority presentation, record traceability, and gaps under a validated judicial profile.                                |
-| `opposing-counsel`                                | Findings-only source-backed opposing-counsel simulation under a validated defense-counsel profile without impersonation or disposition.                                    |
-| `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
-| `rrd`                                             | Generic Response Requirements Document planner; routes Section 1983 Rule 12 matters to the specialized RRD skills.                                                         |
-| `rrd-rule12`                                      | Base Rule 12 response-planning contract.                                                                                                                                   |
-| `rrd-rule12-officers`                             | Officer-motion specialization with claim-by-claim and officer-by-officer qualified-immunity analysis.                                                                      |
-| `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
-| `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
-| `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
-| `filing-ci`                                       | Runs fixed installed deterministic filing checks over declared folders and preserves a fail-closed filing gate.                                                            |
+| Skill                                             | Role                                                                                                                                                                        |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adversarial-filing-review`                       | Independent clean-room adversarial review of a canonical Section 1983 filing, with read-only categorized findings and plaintiff-reserved strategy decisions.                |
+| `building-litigation-alignment-overlays`          | Immutable docket-derived defendant alignment, adversary attack, plaintiff-response, judicial-treatment, review-plan, and filing-manifest overlays.                          |
+| `building-defense-counsel-overlays`               | Immutable professional defense-attorney identity, counsel-team behavior, court-treatment, and calibrated next-move overlays from approved public sources.                   |
+| `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                               |
+| `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                  |
+| `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                              |
+| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, strict version-2 handoff, limitations gate, and fixed install-local mechanical checks. |
+| `planning-section-1983-monell-claims`             | Path-separated municipal-liability planning, candid recommendations, and optional read-only on-disk graph assessment.                                                       |
+| `drafting-section-1983-monell-claims`             | Approved-path-only Monell complaint deltas returned to the canonical complaint owner.                                                                                       |
+| `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression.  |
+| `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                              |
+| `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                    |
+| `drafting-section-1983-meet-and-confer`           | Neutral meet-and-confer correspondence from a completed discovery-response audit, with a separate factual conference record.                                                |
+| `auditing-section-1983-privilege-logs`            | Source-bounded privilege-log requirements and entry audit without invented metadata, privilege adjudication, or automatic waiver.                                           |
+| `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                             |
+| `building-judicial-reasoning-profiles`            | Generic builder for evidence-bounded Judicial Reasoning Profile files with domain YAML provenance from approved public sources.                                             |
+| `collecting-police-policy-sources`                | Bounded authorized collection of ordinary police-policy source files with adjacent YAML provenance and explicit coverage gaps.                                              |
+| `analyzing-police-policy-sources`                 | Offline decomposition of reviewed adopted-policy files into source-bounded atomic requirement and gap YAML.                                                                 |
+| `assessing-police-policy-compliance`              | Offline actor-, event-, and phase-specific assessment of validated policy requirements against source-documented case records.                                              |
+| `collecting-legal-authority-sources`              | Bounded authorized collection of ordinary legal-authority source files, adjacent YAML provenance, candidate identities, and search gaps.                                    |
+| `building-municipal-monell-profiles`              | Staged prerequisite resolution followed by separate offline evidence-coded municipal-profile compilation preserving five domains, counterevidence, questions, and gaps.     |
+| `judicial-reviewer`                               | Findings-only review of comprehension, procedure, authority presentation, record traceability, and gaps under a validated judicial profile.                                 |
+| `opposing-counsel`                                | Findings-only source-backed opposing-counsel simulation under a validated defense-counsel profile without impersonation or disposition.                                     |
+| `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                        |
+| `rrd`                                             | Generic Response Requirements Document planner; routes Section 1983 Rule 12 matters to the specialized RRD skills.                                                          |
+| `rrd-rule12`                                      | Base Rule 12 response-planning contract.                                                                                                                                    |
+| `rrd-rule12-officers`                             | Officer-motion specialization with claim-by-claim and officer-by-officer qualified-immunity analysis.                                                                       |
+| `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                       |
+| `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                       |
+| `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                      |
+| `filing-ci`                                       | Runs fixed installed deterministic filing checks over declared folders and preserves a fail-closed filing gate.                                                             |
 
 ## How the skills compose
 
@@ -107,23 +109,27 @@ registry, graph, or case-management runtime is required.
    summary judgment, add `drafting-section-1983-declarations-and-evidence`.
 3. For a Section 1983 Rule 59(e) filing, add `drafting-section-1983-rule-59e`.
 4. For complaints, add `drafting-section-1983-complaints`.
-5. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
+5. For municipal claims, add `planning-section-1983-monell-claims`; after the
+   litigation principal approves paths, add
+   `drafting-section-1983-monell-claims` and return its deltas to the canonical
+   complaint owner.
+6. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
    incorporated-video issues, add `drafting-false-arrest-complaints`.
-6. Use `building-judicial-reasoning-profiles` to acquire approved public sources
+7. Use `building-judicial-reasoning-profiles` to acquire approved public sources
    with `SOURCE.yaml` provenance or compile validated profile files for the
    assigned judge. A later shared launcher owns profile-backed judicial review.
-7. Use `collecting-police-policy-sources` for bounded authorized acquisition of
+8. Use `collecting-police-policy-sources` for bounded authorized acquisition of
    ordinary policy files and adjacent source YAML. Policy analysis remains a
    separate later invocation over a reviewed read-only folder.
-8. Use `analyzing-police-policy-sources` to decompose reviewed adopted-policy
+9. Use `analyzing-police-policy-sources` to decompose reviewed adopted-policy
    files into source-bounded requirement and gap YAML without assessing conduct.
-9. Use `assessing-police-policy-compliance` to assess validated requirements
-   against separately declared actor, event, phase, and case-record folders
-   without deciding legal liability.
-10. Use `collecting-legal-authority-sources` for bounded authorized acquisition
+10. Use `assessing-police-policy-compliance` to assess validated requirements
+    against separately declared actor, event, phase, and case-record folders
+    without deciding legal liability.
+11. Use `collecting-legal-authority-sources` for bounded authorized acquisition
     of ordinary authority files and adjacent source YAML. A separate
     `audit-authorities` invocation must verify every proposed authority use.
-11. Use `building-municipal-monell-profiles` prerequisite resolution when the
+12. Use `building-municipal-monell-profiles` prerequisite resolution when the
     validated policy catalog or assessment is missing or invalid. Follow its
     one-state plan through separate collection, independent review, offline
     analysis, and offline assessment invocations, each with the owning skill's
@@ -136,30 +142,30 @@ registry, graph, or case-management runtime is required.
     Rule 12 planning, written discovery, deposition outlines, or adversarial
     review. Each consumer must validate the profile files and preserve its own
     record, authority, target, and strategy boundaries.
-12. Add `building-litigation-alignment-overlays` before an amended complaint,
+13. Add `building-litigation-alignment-overlays` before an amended complaint,
     motion for leave, or other filing that should consume the current docket's
     actual adversary positions and judicial treatment.
-13. Add `building-defense-counsel-overlays` when an actual-adversary review
+14. Add `building-defense-counsel-overlays` when an actual-adversary review
     should consume validated professional history for the effective defense
     team. Keep that material out of the blind common-attack review.
-14. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
+15. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
     specialization. Those planners hand amendment work back to the applicable
     complaint skills.
-15. For discovery, use `drafting-section-1983-written-discovery`,
+16. For discovery, use `drafting-section-1983-written-discovery`,
     `auditing-section-1983-discovery-responses`,
     `drafting-section-1983-meet-and-confer`,
     `auditing-section-1983-privilege-logs`, or
     `drafting-section-1983-deposition-outlines` for its named task. The existing
     drafting entrypoint supplies routing and the shared coordination contract;
     each peer remains independently usable.
-16. Before treating legal work as filing-ready, run `audit-authorities`,
+17. Before treating legal work as filing-ready, run `audit-authorities`,
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-17. Run `adversarial-filing-review` in a fresh clean-room context after
+18. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-18. Run `filing-ci` after the applicable prose and authority audits, after each
+19. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.
@@ -209,7 +215,20 @@ with `OutputRun` and records the append-immutable terminal receipt. A missing
 credential, unavailable provider, or invalid response returns a bounded
 unavailable report and a nonzero exit; it is not a completed independent review.
 
-## Complaint checker boundary
+## Complaint contract and assessment boundary
+
+The canonical JSON complaint contract and install-local validator enforce strict
+contract version 2. The validator checks typed individual-capacity, QI, and
+Monell records plus on-disk graph assessment receipts. It does not decide fact
+truth, legal sufficiency, authority fit, material analogy, strategy, or filing
+readiness.
+
+An optional reasoned assessment reads an explicitly supplied graph directly from
+disk and read-only; it does not require or invoke a graph CLI. Every used
+authority proposition must resolve to verified opinion bytes and hash, pinpoint,
+and an exact matching passage. Filing CI preserves structural and assessment
+results separately and fails closed in filing mode when the current assessment
+is missing, incomplete, stale, or unresolved.
 
 The canonical JSON complaint contract drives the install-local
 `scripts/check_complaint.py` mechanical checker. It does not decide fact truth,

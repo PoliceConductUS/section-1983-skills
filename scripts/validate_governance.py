@@ -202,6 +202,13 @@ APPROVED_FOLDER_CONTRACTS = {
         "disabled",
         ["municipal-profile"],
     ),
+    "drafting-section-1983-monell-claims": folder_contract(
+        "drafting-section-1983-monell-claims",
+        ["planning-handoff", "record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
     "drafting-section-1983-declarations-and-evidence": folder_contract(
         "drafting-section-1983-declarations-and-evidence",
         ["record", "authorities"],
@@ -252,6 +259,14 @@ APPROVED_FOLDER_CONTRACTS = {
         "required",
         ["filing-source"],
         "disabled",
+    ),
+    "planning-section-1983-monell-claims": folder_contract(
+        "planning-section-1983-monell-claims",
+        ["record", "authorities", "municipal-source", "strategy"],
+        "none",
+        [],
+        "disabled",
+        ["municipal-profile", "casegraph"],
     ),
     "horan-bad-words": folder_contract(
         "horan-bad-words", ["filing"], "required", ["filing"], "disabled"

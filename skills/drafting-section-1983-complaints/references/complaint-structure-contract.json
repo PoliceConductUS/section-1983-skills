@@ -1,45 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "owner": "drafting-section-1983-complaints",
+  "validator": "scripts/validate_complaint_handoff.py",
   "sections": [
-    {
-      "id": "caption",
-      "optional": false
-    },
-    {
-      "id": "introduction",
-      "optional": true
-    },
-    {
-      "id": "jurisdiction-and-venue",
-      "optional": false
-    },
-    {
-      "id": "parties",
-      "optional": false
-    },
-    {
-      "id": "statement-of-facts",
-      "optional": false
-    },
-    {
-      "id": "counts",
-      "optional": false
-    },
-    {
-      "id": "prayer-for-relief",
-      "optional": false
-    },
-    {
-      "id": "jury-demand",
-      "optional": false
-    },
-    {
-      "id": "signature-block",
-      "optional": false
-    }
+    { "id": "caption", "optional": false },
+    { "id": "introduction", "optional": true },
+    { "id": "jurisdiction-and-venue", "optional": false },
+    { "id": "parties", "optional": false },
+    { "id": "statement-of-facts", "optional": false },
+    { "id": "counts", "optional": false },
+    { "id": "prayer-for-relief", "optional": false },
+    { "id": "jury-demand", "optional": false },
+    { "id": "signature-block", "optional": false }
   ],
-  "count_cardinality": ["claim", "defendant", "challenged_act"],
+  "count_cardinality": ["claim", "defendant", "capacity", "challenged_act"],
   "required_count_fields": [
     "count_id",
     "claim",
@@ -56,11 +30,26 @@
     "application",
     "injury",
     "relief",
-    "result"
+    "result",
+    "qualified_immunity",
+    "monell_paths"
+  ],
+  "individual_capacity_required_fields": [
+    "personal_act_or_causal_role",
+    "event_stage",
+    "relevant_time",
+    "facts_then_known",
+    "underlying_violation",
+    "application",
+    "injury",
+    "causation"
   ],
   "conditional_qualified_immunity_fields": [
     "event_date",
     "precise_right",
+    "jurisdiction",
+    "prong_one_result",
+    "prong_two_result",
     "binding_pre_event_authority",
     "authority_audit_status",
     "materially_similar_facts",
@@ -68,15 +57,163 @@
     "fair_warning",
     "rule_of_orderliness_review_status",
     "later_history_review_status",
-    "prong_one_result",
-    "prong_two_result"
+    "later_authority_treatment"
+  ],
+  "monell_path_types": {
+    "formal_policy": [
+      "policy_source",
+      "operative_status",
+      "promulgating_or_adopting_authority",
+      "application_to_challenged_conduct"
+    ],
+    "custom_or_practice": [
+      "similar_incidents",
+      "similarity_rule",
+      "frequency_duration_or_persistence",
+      "knowledge_route"
+    ],
+    "final_policymaker_decision": [
+      "decision",
+      "decisionmaker",
+      "source_of_final_authority",
+      "decision_timing",
+      "causal_application"
+    ],
+    "ratification": [
+      "subordinate_act_and_basis",
+      "policymaker_knowledge",
+      "approval_or_adoption",
+      "ratification_timing",
+      "causable_injury"
+    ],
+    "failure_to_train": [
+      "precise_task_and_deficiency",
+      "responsible_authority",
+      "notice_basis",
+      "deliberate_indifference",
+      "training_causal_chain"
+    ],
+    "failure_to_supervise_or_discipline": [
+      "precise_supervisory_or_disciplinary_deficiency",
+      "responsible_authority",
+      "notice",
+      "deliberate_indifference",
+      "supervision_causal_chain"
+    ]
+  },
+  "monell_common_fields": [
+    "path_id",
+    "path_type",
+    "challenged_policy_custom_decision_or_omission",
+    "supporting_facts",
+    "complaint_locations",
+    "municipal_inference",
+    "attribution_route",
+    "implementation_or_transmission_mechanism",
+    "underlying_constitutional_violation",
+    "particular_injury",
+    "moving_force_chain",
+    "temporal_lanes",
+    "information_and_belief_basis",
+    "principal_decision"
+  ],
+  "temporal_lane_values": [
+    "pre_event_notice",
+    "event_implementation",
+    "post_event_ratification",
+    "recurrence",
+    "later_injury",
+    "corroboration"
+  ],
+  "information_and_belief_fields": [
+    "used",
+    "known_facts",
+    "expected_information",
+    "controller",
+    "inference",
+    "affected_fields"
+  ],
+  "principal_decision_fields": [
+    "status",
+    "approver",
+    "scope",
+    "approved_narrowing",
+    "decision_record_path",
+    "decision_record_sha256"
+  ],
+  "casegraph_assessment_statuses": [
+    "completed",
+    "partial",
+    "not_run_missing",
+    "not_run_invalid",
+    "not_run_incompatible",
+    "not_run_stale"
+  ],
+  "casegraph_assessment_receipt_fields": [
+    "status",
+    "document_sha256",
+    "claim_unit_ids",
+    "graph_api_version",
+    "graph_files",
+    "claim_assessments",
+    "authority_resolutions"
+  ],
+  "component_assessment_values": {
+    "element_coverage": ["satisfied", "partial", "missing", "not_applicable"],
+    "connection_quality": [
+      "direct",
+      "strong_supported_inference",
+      "plausible_inference",
+      "weak_inference",
+      "unsupported",
+      "contradicted"
+    ],
+    "confidence": ["high", "medium", "low"],
+    "opinion": [
+      "likely_sufficient",
+      "plausibly_sufficient_but_vulnerable",
+      "likely_insufficient",
+      "indeterminate"
+    ]
+  },
+  "authority_resolution_statuses": [
+    "resolved",
+    "missing",
+    "hash_mismatch",
+    "pinpoint_unresolved",
+    "text_mismatch",
+    "ambiguous_match"
+  ],
+  "authority_resolution_required_fields": [
+    "proposition_uid",
+    "authority_uid",
+    "verified_unit_path",
+    "source_metadata_path",
+    "canonical_opinion_path",
+    "canonical_opinion_sha256",
+    "text_representation_path",
+    "text_representation_sha256",
+    "pinpoint",
+    "exact_matched_text",
+    "stable_locator",
+    "normalization",
+    "status"
   ],
   "mechanical_checks": [
+    "strict-contract-version",
     "section-presence",
     "section-order",
-    "paragraph-numbering-continuity",
-    "count-numbering-continuity",
     "unique-count-id",
+    "claim-defendant-capacity-challenged-act-cardinality",
+    "paragraph-reference-target",
+    "typed-individual-capacity-unit",
+    "conditional-qualified-immunity-unit",
+    "separated-monell-path",
+    "path-specific-monell-fields",
+    "assessment-document-fingerprint",
+    "assessment-claim-coverage",
+    "authority-artifact-hash",
+    "authority-exact-passage",
     "claim-defendant-challenged-act-cardinality",
     "cross-reference-target",
     "incorporation-target",
@@ -87,7 +224,84 @@
     "limitations-record-structure",
     "limitations-filing-critical-status"
   ],
-  "excluded_judgments": [
+  "packaged_checker": {
+    "count_cardinality": ["claim", "defendant", "challenged_act"],
+    "conditional_qualified_immunity_fields": [
+      "event_date",
+      "precise_right",
+      "binding_pre_event_authority",
+      "authority_audit_status",
+      "materially_similar_facts",
+      "material_differences",
+      "fair_warning",
+      "rule_of_orderliness_review_status",
+      "later_history_review_status",
+      "prong_one_result",
+      "prong_two_result"
+    ],
+    "required_count_fields": [
+      "count_id",
+      "claim",
+      "constitutional_source",
+      "defendant",
+      "capacity",
+      "challenged_act",
+      "event_stage",
+      "standard",
+      "standard_pincite",
+      "decisive_fact_paragraphs",
+      "incorporated_paragraphs",
+      "relevant_time_knowledge",
+      "application",
+      "injury",
+      "relief",
+      "result"
+    ],
+    "mechanical_checks": [
+      "section-presence",
+      "section-order",
+      "paragraph-numbering-continuity",
+      "count-numbering-continuity",
+      "unique-count-id",
+      "claim-defendant-challenged-act-cardinality",
+      "cross-reference-target",
+      "incorporation-target",
+      "required-count-field-location",
+      "limitations-gate-presence",
+      "limitations-trigger-structure",
+      "limitations-record-cardinality",
+      "limitations-record-structure",
+      "limitations-filing-critical-status"
+    ],
+    "excluded_judgments": [
+      "fact-truth",
+      "legal-sufficiency",
+      "authority-fit",
+      "material-analogy",
+      "strategy",
+      "filing-readiness",
+      "relation-back",
+      "tolling",
+      "mistake",
+      "notice-sufficiency",
+      "service-sufficiency"
+    ],
+    "finding_fields": [
+      "finding_id",
+      "check_id",
+      "severity",
+      "artifact",
+      "location",
+      "message"
+    ],
+    "hard_failure_exit_status": "nonzero"
+  },
+  "result_layers": [
+    "structural_validation",
+    "casegraph_assessment",
+    "filing_gate"
+  ],
+  "excluded_deterministic_judgments": [
     "fact-truth",
     "legal-sufficiency",
     "authority-fit",
@@ -100,13 +314,6 @@
     "notice-sufficiency",
     "service-sufficiency"
   ],
-  "finding_fields": [
-    "finding_id",
-    "check_id",
-    "severity",
-    "artifact",
-    "location",
-    "message"
-  ],
+  "finding_fields": ["code", "location", "message"],
   "hard_failure_exit_status": "nonzero"
 }

@@ -1,0 +1,113 @@
+---
+name: planning-section-1983-monell-claims
+description: >-
+  Use when a Section 1983 plaintiff needs to inventory, compare, recommend, or
+  preserve municipal-liability paths before complaint drafting.
+---
+
+# Planning Section 1983 Monell Claims
+
+## Folder-scoped execution
+
+Contract: [folder contract](references/folder-contract.json).
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the operative pleading, rulings, proposed facts, event date,
+  chronology, and claim and gap controls.
+- `authorities` contains verified governing authority and audit material.
+- `municipal-source` contains the approved municipal, department, policy,
+  training, review, and practice material to evaluate.
+- `strategy` contains the litigation principal's recorded decisions and reserved
+  choices.
+- `municipal-profile` optionally contains a validated municipal evidence
+  profile.
+- `casegraph` optionally contains the explicitly supplied on-disk graph and its
+  source-linked records.
+
+`municipal-profile` and `casegraph` are the only optional input roles. Target is
+none. Internet is `disabled`. Return the planning records and structured
+findings; only the trusted host derives the canonical output-relative path and
+publishes them in append-immutable mode beneath the declared output folder.
+Report unavailable inputs or unresolved connections as gaps without searching
+undeclared paths.
+
+## Purpose and authority
+
+Create a source-bounded plan for municipal claims. Recommend paths candidly, but
+do not select, abandon, plead, or omit a claim for the litigation principal. The
+litigation principal approves the paths that proceed to drafting.
+
+Read both install-local references completely:
+
+- [references/path-planning-contract.md](references/path-planning-contract.md)
+- [references/casegraph-assessment-contract.md](references/casegraph-assessment-contract.md)
+
+If either is unavailable, report **Monell planning contract unavailable** and
+stop. Use `building-municipal-monell-profiles` when a municipal evidence profile
+must first be assembled; that neutral profile does not replace this planning
+decision record.
+
+## Required inputs
+
+Resolve the operative pleading, rulings, proposed facts, verified authority,
+municipal source material, event date, governing jurisdiction, and existing
+claim/gap controls. Keep allegations, supported facts, inferences, disputed
+interpretations, and discovery leads distinct.
+
+An on-disk CaseGraph is optional. Inspect it only through the declared
+`casegraph` input role when the user or project supplies that folder. Apply the
+read-only and exact-source contract in the CaseGraph reference.
+
+## One stable record per candidate path
+
+Evaluate all six recognized path types, including an explicit `omit` record when
+no distinct candidate exists for a type. Return one stable record for every
+distinct candidate policy, custom, decision, or omission; multiple records may
+have the same path type. Each record has exactly one path type:
+
+- `formal_policy`
+- `custom_or_practice`
+- `final_policymaker_decision`
+- `ratification`
+- `failure_to_train`
+- `failure_to_supervise_or_discipline`
+
+For each record, supply one recommendation: `include`, `include-with-narrowing`,
+`preserve-internal`, or `omit`. State the supporting facts and locations,
+municipal inference, attribution route, implementation or transmission
+mechanism, underlying violation, particular injury, moving-force chain, temporal
+lane, information-and-belief basis, contrary material, missing connections,
+reasons, and consequences. Set `principal_decision` to `pending` unless the
+litigation principal has made and recorded the decision. Record
+`graph_assessment_status` for each path rather than only once for the plan.
+
+Do not merge alternatives into an omnibus path. Do not require one
+conduct-to-leadership chain for every path: apply the attribution route that
+governing authority requires for that path. Do not treat repeated employee
+conduct, a supervisor's presence, or a statement that something is “policy” as
+self-proving final-policymaker authorization. They may be direct evidence of an
+implemented practice while the exact attribution connection remains identified.
+Repeated implementation and repeated statements identifying a rule as policy
+must also be evaluated as potential direct evidence for a narrowly framed
+`formal_policy` path. Where the policy text, operative status, or adopting
+authority is municipality-controlled, state the concrete information-and-belief
+basis; do not downgrade the evidence solely because those internal records are
+unavailable.
+
+## Assessment and recommendation
+
+Apply an explicit procedural lens, such as Rule 12(b)(6). For each required
+component distinguish coverage, connection quality, source quality, procedural
+usability, confidence, and the planning opinion. State contrary paths and
+missing links. A graph classification, score, or edge is evidence to evaluate,
+not a court finding.
+
+Return the complete path records, graph-assessment status, unresolved authority
+connections, a comparison of alternatives, and the decisions reserved to the
+litigation principal. Do not draft complaint allegations in this skill.

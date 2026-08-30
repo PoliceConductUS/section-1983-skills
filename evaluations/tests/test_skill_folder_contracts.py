@@ -22,6 +22,7 @@ OPTIONAL_INPUT_ROLES = {
     "drafting-section-1983-complaints": ["municipal-profile"],
     "drafting-section-1983-deposition-outlines": ["municipal-profile"],
     "drafting-section-1983-written-discovery": ["municipal-profile"],
+    "planning-section-1983-monell-claims": ["municipal-profile", "casegraph"],
     "rrd-rule12-city": ["municipal-profile"],
 }
 
@@ -159,6 +160,12 @@ CONTRACTS = {
         ["filing"],
         "disabled",
     ),
+    "drafting-section-1983-monell-claims": (
+        ["planning-handoff", "record", "authorities", "filing"],
+        "optional",
+        ["filing"],
+        "disabled",
+    ),
     "drafting-section-1983-declarations-and-evidence": (
         ["record", "authorities"],
         "optional",
@@ -200,6 +207,12 @@ CONTRACTS = {
         ],
         "required",
         ["filing-source"],
+        "disabled",
+    ),
+    "planning-section-1983-monell-claims": (
+        ["record", "authorities", "municipal-source", "strategy"],
+        "none",
+        [],
         "disabled",
     ),
     "horan-bad-words": (["filing"], "required", ["filing"], "disabled"),

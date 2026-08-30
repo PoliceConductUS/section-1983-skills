@@ -154,7 +154,7 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
     @staticmethod
     def selection():
         return FilingIntegritySelection(
-            checker_id="section-1983-complaint-v1",
+            checker_id="section-1983-complaint-v2",
             filing_documentation_path="filing.SOURCE.yaml",
             record_documentation_paths=("record.SOURCE.yaml",),
             exhibit_documentation_paths=("exhibit-a.SOURCE.yaml",),
@@ -190,7 +190,7 @@ class FolderNativeFilingIntegrityTest(unittest.TestCase):
         ).casefold()
         self.assertNotIn("packaged checker", text)
         self.assertNotIn("skill package", text)
-        self.assertNotIn("casegraph", text)
+        self.assertIn("casegraph", text)
 
     def test_readme_describes_filing_ci_as_folder_native_not_packaged(self):
         readme = (REPOSITORY / "README.md").read_text().casefold()

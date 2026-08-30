@@ -249,21 +249,25 @@ Record the following fields in this order:
 14. Injury (`injury`)
 15. Relief (`relief`)
 16. Result (`result`)
+17. Qualified-immunity applicability and analysis unit (`qualified_immunity`)
+18. Separated municipal-liability path collection (`monell_paths`)
 
 When qualified immunity applies to the mapping, also record these conditional
 fields:
 
 1. Event date (`event_date`)
 2. Conduct-specific right or rule (`precise_right`)
-3. Verified binding pre-event authority (`binding_pre_event_authority`)
-4. Authority-audit status (`authority_audit_status`)
-5. Materially similar facts (`materially_similar_facts`)
-6. Material differences (`material_differences`)
-7. Defendant-specific fair warning (`fair_warning`)
-8. Rule-of-orderliness review status (`rule_of_orderliness_review_status`)
-9. Later-history review status (`later_history_review_status`)
-10. Prong one result (`prong_one_result`)
-11. Prong two result (`prong_two_result`)
+3. Governing jurisdiction (`jurisdiction`)
+4. Prong one result (`prong_one_result`)
+5. Prong two result (`prong_two_result`)
+6. Verified binding pre-event authority (`binding_pre_event_authority`)
+7. Authority-audit status (`authority_audit_status`)
+8. Materially similar facts (`materially_similar_facts`)
+9. Material differences (`material_differences`)
+10. Defendant-specific fair warning (`fair_warning`)
+11. Rule-of-orderliness review status (`rule_of_orderliness_review_status`)
+12. Later-history review status (`later_history_review_status`)
+13. Later-authority treatment (`later_authority_treatment`)
 
 If a required universal field is missing or unverified, the mapping is
 incomplete. Any missing or unverified conditional qualified-immunity field
@@ -435,6 +439,47 @@ Conclude the count:
 The Result must follow from the element map. It cannot repair a missing
 allegation. Confirm that the count identifies the injury and relief before the
 Result.
+
+## Version-2 complaint handoff and validation
+
+The install-local
+[complaint-structure-contract.json](complaint-structure-contract.json) provides
+the strict version-2 mechanical interface. Version 1 is unsupported. Run the
+install-local `../scripts/validate_complaint_handoff.py` against every handoff.
+Keep its `structural_validation`, `casegraph_assessment`, and `filing_gate`
+results separate. A structural pass does not make or replace a legal judgment.
+
+Every individual-capacity count must include a typed `individual_capacity` unit
+identifying the personal act or causal role, event stage, relevant time, facts
+then known, underlying violation, application, injury, and causation. The typed
+`qualified_immunity` unit must state whether QI applies and, when it does, must
+include every field in the JSON contract.
+
+Every municipal count must contain one or more separately typed `monell_paths`.
+Do not combine formal policy, custom or practice, final-policymaker decision,
+ratification, failure to train, or failure to supervise or discipline in one
+path object. Each path must include the common causal and attribution fields and
+the fields specific to its one path type. An FTO method, jail handoff, complaint
+review, or similar process belongs in the implementation or transmission
+mechanism field unless verified authority supports treating it as a distinct
+path.
+
+An optional CaseGraph assessment is read-only and consumes an explicit on-disk
+graph path without invoking a CLI. Every authority proposition used in an
+assessment must resolve through the authority node and verified source metadata
+to the canonical opinion bytes and hash, the cited pinpoint, and an exact
+passage in a provenance-linked text representation. Record the exact passage,
+stable locator, hashes, and deterministic normalization. Citation labels,
+pinpoint strings, and semantic or fuzzy matches are insufficient.
+
+Deterministic checking is limited to the listed mechanical checks. It excludes
+fact truth, legal sufficiency, authority fit, material analogy, strategy, and
+filing readiness. A reasoned graph assessment may separately express a
+procedural-lens opinion, but it must expose its sources, contrary paths, missing
+connections, and exact authority-resolution status. Drafting mode may continue
+with an explicit unassessed graph state. Filing mode fails closed unless every
+included claim unit has a current completed assessment and no unresolved receipt
+finding.
 
 ## Packaged mechanical check
 

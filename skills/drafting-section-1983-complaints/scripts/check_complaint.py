@@ -57,15 +57,23 @@ def _load_contract():
         )
     except (OSError, json.JSONDecodeError) as error:
         raise ComplaintCheckError("complaint-contract-unavailable", str(error)) from error
+    packaged = contract.get("packaged_checker")
     if (
-        contract.get("owner") != "drafting-section-1983-complaints"
+        contract.get("version") != 2
+        or contract.get("owner") != "drafting-section-1983-complaints"
+        or not isinstance(packaged, dict)
         or limitations_schema.get("$id")
         != "https://policeconduct.us/schemas/section-1983-limitations-record-v1.json"
     ):
         raise ComplaintCheckError(
             "complaint-contract-unavailable", "unexpected complaint contract owner"
         )
-    return contract
+    return {
+        "version": contract["version"],
+        "owner": contract["owner"],
+        "sections": contract["sections"],
+        **packaged,
+    }
 
 
 def _target_path(input_root, relative_target):
@@ -810,7 +818,7 @@ def check_complaint(input_root, relative_target):
     except OSError as error:
         raise ComplaintCheckError("unreadable-input", str(error)) from error
     if len(content) > MAX_COMPLAINT_BYTES:
-        raise ComplaintCheckError("input-too-large", "complaint exceeds the packaged checker bound")
+        raise ComplaintCheckError("input-too-large", "complaint exceeds the installed checker bound")
     try:
         document = json.loads(content)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
@@ -818,7 +826,7 @@ def check_complaint(input_root, relative_target):
     findings = _mechanical_findings(document, contract, target)
     report = {
         "schema_version": 1,
-        "checker_id": "section-1983-complaint-v1",
+        "checker_id": "section-1983-complaint-v2",
         "target": target,
         "target_sha256": hashlib.sha256(content).hexdigest(),
         "checks": contract["mechanical_checks"],

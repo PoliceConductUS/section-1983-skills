@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "skill": "planning-section-1983-monell-claims",
+  "input_roles": ["record", "authorities", "municipal-source", "strategy"],
+  "optional_input_roles": ["municipal-profile", "casegraph"],
+  "target": { "policy": "none", "roles": [] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

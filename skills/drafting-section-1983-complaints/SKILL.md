@@ -61,11 +61,13 @@ amendment proffer, read both install-local canonical references:
 - [references/complaint-structure-contract.json](references/complaint-structure-contract.json)
 - [references/limitations-record.schema.json](references/limitations-record.schema.json)
 
-The Markdown reference controls the complete general complaint skeleton,
+The Markdown reference controls the complete general complaint skeleton and
 detailed count contract, and unknown/new-defendant limitations gate. The JSON
-references define the install-local mechanical check and limitations-record
-schema implemented by `scripts/check_complaint.py`; neither the contracts nor
-the checker makes a legal judgment.
+references define strict contract version 2 and the limitations-record schema.
+Run `scripts/validate_complaint_handoff.py` for every version-2 handoff and use
+`scripts/check_complaint.py` for the folder-scoped packaged mechanical check.
+The validators check structure, assessment receipts, and the limitations gate;
+they do not make a legal judgment.
 
 If either reference cannot be read, report **complaint contract unavailable**
 and do not draft, revise, or audit the complaint. Do not invent or reconstruct
@@ -87,6 +89,12 @@ probable cause, alternative offenses, seizure timing, or incorporated arrest
 video, also use `drafting-false-arrest-complaints`. Load each applicable skill
 once; this skill owns the general complaint contract and the false-arrest skill
 adds the specialized contract.
+
+When a complaint includes municipal liability, use
+`planning-section-1983-monell-claims` first. After the litigation principal
+approves the paths to plead, use `drafting-section-1983-monell-claims` to
+produce typed complaint deltas. This skill remains the canonical whole-complaint
+owner and integrates those deltas before rerunning the version-2 validator.
 
 Before drafting, apply the authority, source, citation, and gap rules supplied
 in the declared input roles. If a required rule is absent, report the gap. Use

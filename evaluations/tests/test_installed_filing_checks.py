@@ -13,7 +13,7 @@ COMPLAINT_SKILL = REPOSITORY / "skills" / "drafting-section-1983-complaints"
 FILING_CI_SKILL = REPOSITORY / "skills" / "filing-ci"
 COMPLAINT_SCRIPT = COMPLAINT_SKILL / "scripts" / "check_complaint.py"
 FILING_CI_SCRIPT = FILING_CI_SKILL / "scripts" / "run_filing_ci.py"
-CHECKER_ID = "section-1983-complaint-v1"
+CHECKER_ID = "section-1983-complaint-v2"
 COMPLAINT_LIMITATIONS_SCHEMA = (
     COMPLAINT_SKILL / "references" / "limitations-record.schema.json"
 )
@@ -209,6 +209,22 @@ def load_module(name, path):
     return module
 
 
+def packaged_complaint_contract():
+    canonical = json.loads(
+        (
+            COMPLAINT_SKILL
+            / "references"
+            / "complaint-structure-contract.json"
+        ).read_text()
+    )
+    return {
+        "version": canonical["version"],
+        "owner": canonical["owner"],
+        "sections": canonical["sections"],
+        **canonical["packaged_checker"],
+    }
+
+
 def complaint_document():
     required_fields = json.loads(
         (
@@ -270,13 +286,7 @@ class InstalledFilingChecksTest(unittest.TestCase):
             self.assertNotIn("subprocess", source)
             self.assertNotIn("urllib", source)
             self.assertNotIn("socket", source)
-        canonical = json.loads(
-            (
-                COMPLAINT_SKILL
-                / "references"
-                / "complaint-structure-contract.json"
-            ).read_text()
-        )
+        canonical = packaged_complaint_contract()
         installed = json.loads(
             (FILING_CI_SKILL / "references" / "complaint-checker-contract.json").read_text()
         )
@@ -540,13 +550,7 @@ class InstalledFilingChecksTest(unittest.TestCase):
 
     def test_complaint_checker_is_deterministic_limited_and_non_mutating(self):
         checker = load_module("installed_complaint_checker", COMPLAINT_SCRIPT)
-        contract = json.loads(
-            (
-                COMPLAINT_SKILL
-                / "references"
-                / "complaint-structure-contract.json"
-            ).read_text()
-        )
+        contract = packaged_complaint_contract()
         with tempfile.TemporaryDirectory() as directory:
             filing_root = Path(directory)
             target = filing_root / "complaint.json"
@@ -569,13 +573,7 @@ class InstalledFilingChecksTest(unittest.TestCase):
 
     def test_complaint_checker_reports_only_declared_mechanical_findings(self):
         checker = load_module("installed_complaint_checker_findings", COMPLAINT_SCRIPT)
-        contract = json.loads(
-            (
-                COMPLAINT_SKILL
-                / "references"
-                / "complaint-structure-contract.json"
-            ).read_text()
-        )
+        contract = packaged_complaint_contract()
         document = complaint_document()
         document["sections"].remove("jury-demand")
         document["sections"][2], document["sections"][3] = (

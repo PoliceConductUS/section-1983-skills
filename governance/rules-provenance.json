@@ -151,6 +151,14 @@
       "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
     },
     {
+      "name": "drafting-section-1983-monell-claims",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-30",
+      "rationale": "Drafts approved municipal-liability paths under the canonical complaint contract.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
+    },
+    {
       "name": "drafting-section-1983-declarations-and-evidence",
       "rules_mode": "bundled-rules-dependent",
       "reviewed_on": "2026-08-20",
@@ -205,6 +213,14 @@
       "rules_mode": "rules-independent",
       "reviewed_on": "2026-08-20",
       "rationale": "Validates repository filing artifacts without supplying current rule content."
+    },
+    {
+      "name": "planning-section-1983-monell-claims",
+      "rules_mode": "bundled-rules-dependent",
+      "reviewed_on": "2026-08-30",
+      "rationale": "Plans municipal-liability paths using verified authority and case-specific sources supplied at runtime.",
+      "source_ids": ["federal-civil-rules"],
+      "jurisdiction_reference": "skills/section-1983-drafting/references/localization.md"
     },
     {
       "name": "horan-bad-words",

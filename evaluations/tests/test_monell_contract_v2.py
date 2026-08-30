@@ -1,0 +1,334 @@
+import hashlib
+import importlib.util
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+
+REPOSITORY = Path(__file__).resolve().parents[2]
+VALIDATOR = (
+    REPOSITORY
+    / "skills"
+    / "drafting-section-1983-complaints"
+    / "scripts"
+    / "validate_complaint_handoff.py"
+)
+
+
+def load_validator():
+    spec = importlib.util.spec_from_file_location("complaint_validator", VALIDATOR)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def sha256_text(value):
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def file_sha256_for_test(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def common_count():
+    return {
+        "count_id": "count-1",
+        "claim": "Fourth Amendment false arrest",
+        "constitutional_source": "Fourth Amendment",
+        "defendant": "Officer One",
+        "capacity": "individual",
+        "challenged_act": "arrest",
+        "event_stage": "arrest decision",
+        "standard": "probable cause",
+        "standard_pincite": "Case, 1 F.4th 1, 5",
+        "decisive_fact_paragraphs": [21, 22],
+        "incorporated_paragraphs": [21, 22],
+        "relevant_time_knowledge": "Facts known before arrest",
+        "application": "Those facts did not establish the offense.",
+        "injury": "custodial arrest",
+        "relief": "damages",
+        "result": "violation alleged",
+        "individual_capacity": {
+            "personal_act_or_causal_role": "ordered the arrest",
+            "event_stage": "arrest decision",
+            "relevant_time": "2023-12-04T22:15:00-06:00",
+            "facts_then_known": ["speech", "no observed intoxication fact"],
+            "underlying_violation": "arrest without probable cause",
+            "application": "The then-known facts did not establish probable cause.",
+            "injury": "custodial arrest",
+            "causation": "The order caused the arrest.",
+        },
+        "qualified_immunity": {
+            "applies": True,
+            "event_date": "2023-12-04",
+            "precise_right": "freedom from arrest without probable cause",
+            "jurisdiction": "Fifth Circuit",
+            "prong_one_result": "violation alleged",
+            "prong_two_result": "fair warning alleged",
+            "binding_pre_event_authority": ["authority-1"],
+            "authority_audit_status": "verified",
+            "materially_similar_facts": "same missing offense element",
+            "material_differences": "none material",
+            "fair_warning": "authority supplied fair warning",
+            "rule_of_orderliness_review_status": "complete",
+            "later_history_review_status": "complete",
+            "later_authority_treatment": "not used for fair warning",
+        },
+        "monell_paths": [],
+    }
+
+
+def handoff(count=None, assessment=None):
+    return {
+        "contract_version": 2,
+        "document": {
+            "path": "complaint.md",
+            "sha256": "a" * 64,
+            "paragraphs": [21, 22],
+        },
+        "sections": [
+            "caption",
+            "jurisdiction-and-venue",
+            "parties",
+            "statement-of-facts",
+            "counts",
+            "prayer-for-relief",
+            "jury-demand",
+            "signature-block",
+        ],
+        "counts": [count or common_count()],
+        "casegraph_assessment": assessment
+        or {"status": "not_run_missing", "claim_unit_ids": ["count-1"]},
+    }
+
+
+def formal_policy_path():
+    return {
+        "path_id": "formal-1",
+        "path_type": "formal_policy",
+        "challenged_policy_custom_decision_or_omission": "answer-conditioned release",
+        "supporting_facts": [{"fact_id": "fact-1", "location": "¶ 30"}],
+        "complaint_locations": [30],
+        "municipal_inference": "employees implemented a municipal rule",
+        "attribution_route": "expressly implemented policy",
+        "implementation_or_transmission_mechanism": "jail handoff",
+        "underlying_constitutional_violation": "continued detention",
+        "particular_injury": "additional detention",
+        "moving_force_chain": "rule caused continued detention",
+        "temporal_lanes": [
+            {"lane": "event_implementation", "supporting_fact_refs": ["fact-1"]}
+        ],
+        "information_and_belief_basis": {
+            "used": True,
+            "known_facts": ["repeated policy statements"],
+            "expected_information": ["operative policy record"],
+            "controller": "City",
+            "inference": "the repeated rule was municipal policy",
+            "affected_fields": ["policy_source"],
+        },
+        "principal_decision": {
+            "status": "approved",
+            "approver": "Litigation Principal",
+            "scope": "formal-1 only",
+            "approved_narrowing": "implemented rule only",
+            "decision_record_path": "approval.md",
+            "decision_record_sha256": "b" * 64,
+        },
+        "policy_source": "municipality-controlled record",
+        "operative_status": "alleged on information and belief",
+        "promulgating_or_adopting_authority": "municipality-controlled identity",
+        "application_to_challenged_conduct": "jailers applied the rule",
+    }
+
+
+class MonellContractV2Tests(unittest.TestCase):
+    def test_validator_exists_and_accepts_complete_v2_drafting_handoff(self):
+        validator = load_validator()
+        result = validator.validate_handoff(handoff(), mode="drafting")
+        self.assertEqual("pass", result["structural_validation"]["status"])
+        self.assertEqual("not_run_missing", result["casegraph_assessment"]["status"])
+
+    def test_version_one_is_rejected_with_stable_code(self):
+        validator = load_validator()
+        candidate = handoff()
+        candidate["contract_version"] = 1
+        result = validator.validate_handoff(candidate)
+        self.assertIn(
+            "unsupported_contract_version",
+            {item["code"] for item in result["structural_validation"]["findings"]},
+        )
+
+    def test_individual_capacity_and_qi_are_conditionally_required(self):
+        validator = load_validator()
+        candidate = handoff()
+        del candidate["counts"][0]["individual_capacity"]["causation"]
+        del candidate["counts"][0]["qualified_immunity"]["fair_warning"]
+        result = validator.validate_handoff(candidate)
+        codes = {item["code"] for item in result["structural_validation"]["findings"]}
+        self.assertIn("missing_individual_capacity_field", codes)
+        self.assertIn("missing_qualified_immunity_field", codes)
+
+    def test_monell_path_requires_one_type_and_type_specific_fields(self):
+        validator = load_validator()
+        count = common_count()
+        count["capacity"] = "municipal"
+        count["defendant"] = "City"
+        count.pop("individual_capacity")
+        count["qualified_immunity"] = {"applies": False}
+        count["monell_paths"] = [
+            {
+                "path_id": "policy-1",
+                "path_type": ["formal_policy", "custom_or_practice"],
+                "challenged_policy_custom_decision_or_omission": "release condition",
+            },
+            {
+                "path_id": "training-1",
+                "path_type": "failure_to_train",
+                "challenged_policy_custom_decision_or_omission": "FTO instruction",
+            },
+        ]
+        result = validator.validate_handoff(handoff(count))
+        codes = {item["code"] for item in result["structural_validation"]["findings"]}
+        self.assertIn("invalid_monell_path_type", codes)
+        self.assertIn("missing_monell_path_field", codes)
+
+    def test_every_monell_path_type_enforces_its_specific_fields(self):
+        validator = load_validator()
+        path_fields = {
+            "formal_policy": ["policy_source", "operative_status", "promulgating_or_adopting_authority", "application_to_challenged_conduct"],
+            "custom_or_practice": ["similar_incidents", "similarity_rule", "frequency_duration_or_persistence", "knowledge_route"],
+            "final_policymaker_decision": ["decision", "decisionmaker", "source_of_final_authority", "decision_timing", "causal_application"],
+            "ratification": ["subordinate_act_and_basis", "policymaker_knowledge", "approval_or_adoption", "ratification_timing", "causable_injury"],
+            "failure_to_train": ["precise_task_and_deficiency", "responsible_authority", "notice_basis", "deliberate_indifference", "training_causal_chain"],
+            "failure_to_supervise_or_discipline": ["precise_supervisory_or_disciplinary_deficiency", "responsible_authority", "notice", "deliberate_indifference", "supervision_causal_chain"],
+        }
+        for path_type, fields in path_fields.items():
+            with self.subTest(path_type=path_type):
+                count = common_count()
+                count["capacity"] = "municipal"
+                count["defendant"] = "City"
+                count.pop("individual_capacity")
+                count["qualified_immunity"] = {"applies": False}
+                path = formal_policy_path()
+                for field in path_fields["formal_policy"]:
+                    path.pop(field)
+                path["path_type"] = path_type
+                path.update({field: f"value for {field}" for field in fields})
+                missing = fields[-1]
+                path.pop(missing)
+                count["monell_paths"] = [path]
+                result = validator.validate_handoff(handoff(count))
+                locations = {item["location"] for item in result["structural_validation"]["findings"]}
+                self.assertTrue(any(location.endswith(f".{missing}") for location in locations))
+
+    def test_monell_path_rejects_unapproved_and_dangling_temporal_records(self):
+        validator = load_validator()
+        count = common_count()
+        count["capacity"] = "municipal"
+        count["defendant"] = "City"
+        count.pop("individual_capacity")
+        count["qualified_immunity"] = {"applies": False}
+        path = formal_policy_path()
+        path["principal_decision"] = {"status": "pending"}
+        path["temporal_lanes"][0]["supporting_fact_refs"] = ["missing-fact"]
+        count["monell_paths"] = [path]
+        result = validator.validate_handoff(handoff(count))
+        codes = {item["code"] for item in result["structural_validation"]["findings"]}
+        self.assertIn("monell_path_not_approved", codes)
+        self.assertIn("unresolved_temporal_fact_reference", codes)
+        self.assertIn("unmapped_supporting_fact", codes)
+
+        count["monell_paths"] = [formal_policy_path()]
+        result = validator.validate_handoff(handoff(count))
+        self.assertIn(
+            "principal_decision_verification_unavailable",
+            {item["code"] for item in result["structural_validation"]["findings"]},
+        )
+
+    def test_exact_authority_passage_and_hash_are_verified(self):
+        validator = load_validator()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            text = "Page 12\nA municipality is liable only when its policy is the moving force.\n"
+            source = root / "opinion.txt"
+            source.write_text(text, encoding="utf-8")
+            graph_file = root / "root.yaml"
+            graph_file.write_text("apiVersion: casegraph.policeconduct.org/v1alpha1\n", encoding="utf-8")
+            resolution = {
+                "status": "resolved",
+                "proposition_uid": "prop-1",
+                "authority_uid": "auth-1",
+                "verified_unit_path": "verified/auth-1",
+                "source_metadata_path": "verified/auth-1/SOURCE.yaml",
+                "canonical_opinion_path": "opinion.txt",
+                "canonical_opinion_sha256": sha256_text(text),
+                "text_representation_path": "opinion.txt",
+                "text_representation_sha256": sha256_text(text),
+                "pinpoint": "12",
+                "exact_matched_text": "A municipality is liable only when its policy is the moving force.",
+                "stable_locator": "page 12",
+                "normalization": "none",
+            }
+            assessment = {
+                "status": "completed",
+                "claim_unit_ids": ["count-1"],
+                "document_sha256": "a" * 64,
+                "graph_api_version": "casegraph.policeconduct.org/v1alpha1",
+                "graph_files": [
+                    {"path": "root.yaml", "sha256": file_sha256_for_test(graph_file)}
+                ],
+                "claim_assessments": [
+                    {
+                        "claim_unit_id": "count-1",
+                        "procedural_lens": "Rule 12(b)(6)",
+                        "components": [
+                            {
+                                "component_id": "element-1",
+                                "element_coverage": "satisfied",
+                                "connection_quality": "direct",
+                                "source_quality": "verified authority",
+                                "procedural_usability": "pleading allegation",
+                                "confidence": "high",
+                                "opinion": "likely_sufficient",
+                                "explanation": "Synthetic resolved component.",
+                                "supporting_path": ["prop-1"],
+                                "contrary_path": [],
+                                "missing_connection": [],
+                                "authority_resolution_refs": ["prop-1"],
+                            }
+                        ],
+                    }
+                ],
+                "authority_resolutions": [resolution],
+            }
+            result = validator.validate_handoff(handoff(assessment=assessment), root)
+            self.assertEqual("completed", result["casegraph_assessment"]["status"])
+            self.assertEqual([], result["casegraph_assessment"]["findings"])
+
+            assessment.pop("graph_files")
+            result = validator.validate_handoff(handoff(assessment=assessment), root)
+            self.assertIn(
+                "missing_graph_file_receipt",
+                {item["code"] for item in result["casegraph_assessment"]["findings"]},
+            )
+            assessment["graph_files"] = [
+                {"path": "root.yaml", "sha256": file_sha256_for_test(graph_file)}
+            ]
+
+            resolution["exact_matched_text"] = "A semantic near match."
+            result = validator.validate_handoff(handoff(assessment=assessment), root)
+            self.assertIn(
+                "text_mismatch",
+                {item["code"] for item in result["casegraph_assessment"]["findings"]},
+            )
+
+    def test_filing_mode_fails_closed_without_current_complete_assessment(self):
+        validator = load_validator()
+        result = validator.validate_handoff(handoff(), mode="filing")
+        self.assertEqual("fail", result["filing_gate"]["status"])
+        self.assertIn("assessment_required", {x["code"] for x in result["filing_gate"]["findings"]})
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -193,6 +193,35 @@ class MonellContractV2Tests(unittest.TestCase):
         self.assertIn("invalid_monell_path_type", codes)
         self.assertIn("missing_monell_path_field", codes)
 
+    def test_every_monell_path_type_enforces_its_specific_fields(self):
+        validator = load_validator()
+        path_fields = {
+            "formal_policy": ["policy_source", "operative_status", "promulgating_or_adopting_authority", "application_to_challenged_conduct"],
+            "custom_or_practice": ["similar_incidents", "similarity_rule", "frequency_duration_or_persistence", "knowledge_route"],
+            "final_policymaker_decision": ["decision", "decisionmaker", "source_of_final_authority", "decision_timing", "causal_application"],
+            "ratification": ["subordinate_act_and_basis", "policymaker_knowledge", "approval_or_adoption", "ratification_timing", "causable_injury"],
+            "failure_to_train": ["precise_task_and_deficiency", "responsible_authority", "notice_basis", "deliberate_indifference", "training_causal_chain"],
+            "failure_to_supervise_or_discipline": ["precise_supervisory_or_disciplinary_deficiency", "responsible_authority", "notice", "deliberate_indifference", "supervision_causal_chain"],
+        }
+        for path_type, fields in path_fields.items():
+            with self.subTest(path_type=path_type):
+                count = common_count()
+                count["capacity"] = "municipal"
+                count["defendant"] = "City"
+                count.pop("individual_capacity")
+                count["qualified_immunity"] = {"applies": False}
+                path = formal_policy_path()
+                for field in path_fields["formal_policy"]:
+                    path.pop(field)
+                path["path_type"] = path_type
+                path.update({field: f"value for {field}" for field in fields})
+                missing = fields[-1]
+                path.pop(missing)
+                count["monell_paths"] = [path]
+                result = validator.validate_handoff(handoff(count))
+                locations = {item["location"] for item in result["structural_validation"]["findings"]}
+                self.assertTrue(any(location.endswith(f".{missing}") for location in locations))
+
     def test_monell_path_rejects_unapproved_and_dangling_temporal_records(self):
         validator = load_validator()
         count = common_count()

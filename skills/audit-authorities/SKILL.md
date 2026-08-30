@@ -20,25 +20,21 @@ case material if the host cannot enforce the filesystem and network boundary.
 
 ## Folder inputs and output
 
-- `filing` contains the document whose citations and propositions are audited.
-- `authorities` contains the approved opinions, metadata, and source records.
+- `filing-source` contains the document whose citations and propositions are
+  audited.
+- `verified-authority` contains selected ordinary opinions and their strict
+  corpus, authority, and `SOURCE.yaml` documentation.
 
-Target is required in `filing`. Internet is `authorized` for bounded primary-
-source verification and later-history checks. Return audit content and
-structured findings; only the trusted host derives the canonical output-relative
-path and publishes the report append-immutable. Report missing authority,
-pinpoint, metadata, or source material as a filing-critical gap rather than
-substituting another folder.
+Target is required in `filing-source`. Internet is `disabled` for `audit` and
+`authorized` only for the distinct `freshness-research` operation. Return audit
+content and structured findings; only the trusted host derives the canonical
+output-relative path and publishes the report append-immutable. Report missing
+authority, pinpoint, metadata, or source material as a filing-critical gap
+rather than substituting another folder.
 
-## FilingPacket boundary
-
-When a declared filing folder is a FilingPacket, follow
-[the folder-backed FilingPacket contract](references/filing-packet-contract.md).
-Validate \`filing-packet.json\` and every hashed member before work. The
-manifest targets the whole packet; any document target must be one exact
-manifest-listed member. Member review does not count as whole-packet coverage.
-Drafting or revision returns proposed members for trusted-host publication as a
-complete new packet and never mutates the source packet.
+Every cache, extraction artifact, staging file, process working directory,
+`TMPDIR`, `TMP`, and `TEMP` must stay under `<output-folder>/temp/`. The two
+declared folders are the audit's complete readable scope.
 
 ## Goal
 
@@ -61,35 +57,34 @@ replies, briefs, declarations, and appendices.
 
 ## Declared authority sources
 
-Use the required target in `filing` and only the source units available in
-`authorities`. A citation tracker inside a declared role is optional and never
-replaces the document body or authority source. Do not accept an arbitrary path
-or infer another source folder. Return the structured audit for trusted-host
-publication under the folder output contract above.
+Use the required target in `filing-source` and only the ordinary authority files
+selected by corpus, authority, and source YAML inside `verified-authority`. A
+citation tracker inside a declared role is optional and never replaces the
+document body or authority source. Do not accept an arbitrary path or infer
+another source folder. Return the structured audit for trusted-host publication
+under the folder output contract above.
 
 ### Authority sourcing and verification
 
-Resolve each verified authority unit from the declared `authorities` role. If
-the role does not contain the required opinion and source metadata, report the
-gap and do not mark the citation verified. A public or installed skill must not
-assume a machine-specific or undeclared path.
+Resolve each verified authority only from selected relative files in the
+declared `verified-authority` role. If that folder does not contain the required
+opinion and source documentation, report the gap and do not mark the citation
+verified. A public or installed skill must not assume a machine-specific or
+undeclared path.
 
 Every case citation must pass all three gates below before the citation or the
 document can be marked verified:
 
-1. **Verified-library gate.** Find the case's authority unit inside the resolved
-   canonical verified-case root. Record the unit path, `SOURCE.yaml` path, and
-   exact cited document. A downloaded PDF elsewhere, a web result, a citation
-   tracker, or memory of the case does not pass. If the case is absent, mark the
-   citation **FATAL / filing-critical GAP**. Do not silently add it to the
-   verified library.
-2. **Binding-status gate.** Open that unit's `SOURCE.yaml` and require an
-   explicit `spec.binding: true` or `spec.binding: false`. Record the value and
-   verify it against the deciding court, publication or precedential status,
-   governing court, later history, and rule of orderliness. A case may be
-   described as binding only when the metadata says `true` and the legal check
-   agrees. A `false` case must be labeled nonbinding or persuasive. Missing or
-   ambiguous binding metadata is a **FATAL / filing-critical GAP**.
+1. **Selected-authority gate.** Find the case in the selected corpus YAML and
+   validate its authority YAML, `SOURCE.yaml`, exact relative document path, and
+   hashes. A downloaded PDF elsewhere, a web result, a citation tracker, or
+   memory of the case does not pass. If the case is absent, mark the citation
+   **FATAL / filing-critical GAP**. Do not silently add another file.
+2. **Binding-status gate.** Require explicit authority-YAML court, publication,
+   precedential, binding, decision-date, later-history, and rule-of-orderliness
+   fields. Verify those documented values against the filing's governing court
+   and relevant event date. Missing or ambiguous status is a **FATAL /
+   filing-critical GAP**.
 3. **Exact-quotation gate.** For every direct quotation, open the exact opinion,
    order, concurrence, dissent, or other document cited from the verified unit.
    The quoted words must exist verbatim in that exact document at the stated
@@ -97,21 +92,24 @@ document can be marked verified:
    later opinion does not pass. If the exact quotation is not present, mark it
    **FATAL** and do not approve the filing text.
 
-External retrieval may help investigate a gap, but it does not satisfy these
-gates until the user-authorized verified authority unit and its metadata exist
-under the canonical root.
+External retrieval during a separately authorized `freshness-research`
+invocation may identify candidate material, but it does not satisfy these gates
+until a later audit selects valid YAML and exact ordinary authority bytes from
+`verified-authority`.
 
 After the three gates pass, complete the remaining authority audit:
 
-1. Use the verified unit's source metadata and canonical document.
-2. If later-history or identity confirmation requires another source, use
-   primary sources where available:
+1. Use the selected authority and source YAML plus the exact documented file.
+2. If later-history or identity confirmation requires another source, return the
+   gap. A separately authorized `freshness-research` invocation may inspect
+   primary sources such as:
    - **SCOTUS**: Library of Congress
      (`tile.loc.gov/storage-services/service/ll/usrep/`)
    - **Fifth Circuit**: `ca5.uscourts.gov/opinions/`
    - **General**: CourtListener RECAP archive
-3. Preserve source and retrieval provenance in the returned audit and trusted-
-   host receipt.
+3. Freshness research returns candidate material and provenance for a later
+   audit; it does not certify good law. Preserve selected source provenance in
+   the audit and trusted-host receipt.
 4. Do not mark an authority verified merely because a PDF was downloaded.
    Verification requires identity, court, publication and binding status,
    proposition and pinpoint, holding classification, procedural posture,
@@ -126,7 +124,7 @@ After the three gates pass, complete the remaining authority audit:
 - **Defendants' authorities cited only to distinguish**: Stages 2 (identity), 5
   (on-point / posture match), and 9 (differentiator validity) only - skip
   proposition-level pinpoint and context review when no proposition is being
-  attributed. The verified-library gate, binding-status gate, and exact-
+  attributed. The selected-authority gate, binding-status gate, and exact-
   quotation gate still apply to every cited case and every direct quote without
   exception.
 
@@ -212,17 +210,17 @@ For a full authority audit, read
 completely before beginning. It owns Stages 0 through 10, including the
 clearly-established-law audit. For a deliberately limited adverse-authority
 audit, use only the stages required by **Audit depth by citation role** above.
-The verified-library, binding-status, and exact-quotation gates in this
+The selected-authority, binding-status, and exact-quotation gates in this
 entrypoint always control.
 
 ## Quality bar: "Would I sign this?"
 
 Before finalizing:
 
-- Every cited case exists under the canonical verified-case root, and the audit
-  records its authority-unit path and exact cited document.
-- Every case unit has an explicit, legally checked `spec.binding` value; the
-  draft never calls a `false` or unresolved authority binding.
+- Every cited case exists in the selected corpus YAML, and the audit records its
+  authority YAML, source YAML, and exact relative document path.
+- Every authority has explicit, legally checked status fields; the draft never
+  calls a persuasive, nonbinding, or unresolved authority binding.
 - Every direct quotation exists verbatim in the exact cited document at the
   cited pinpoint.
 - Every paragraph with a legal conclusion has at least one authority that

@@ -1,8 +1,8 @@
 {
   "version": 1,
   "skill": "audit-authorities",
-  "input_roles": ["filing", "authorities"],
-  "target": { "policy": "required", "roles": ["filing"] },
-  "internet": "authorized",
+  "input_roles": ["filing-source", "verified-authority"],
+  "target": { "policy": "required", "roles": ["filing-source"] },
+  "internet": { "audit": "disabled", "freshness-research": "authorized" },
   "output": { "mode": "append-immutable" }
 }

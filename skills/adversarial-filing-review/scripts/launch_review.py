@@ -511,7 +511,6 @@ def _extract_review(provider_response, approved_source_ids, raw_body):
 def run_trusted_review(
     packet,
     model,
-    api_key,
     timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
     transport=None,
 ):
@@ -523,8 +522,6 @@ def run_trusted_review(
         "utf-8"
     )
     headers = {"Content-Type": "application/json"}
-    if api_key is not None:
-        headers["Authorization"] = f"Bearer {_api_key(api_key)}"
     provider_transport = transport or _openai_transport
     try:
         status, response_body = provider_transport(body, headers, timeout)
@@ -883,7 +880,6 @@ def _internet_source(run_time, response_sha256):
 def execute_trusted_review(
     packet,
     model,
-    api_key,
     filing_root,
     approved_sources_root,
     filing_target,
@@ -909,7 +905,6 @@ def execute_trusted_review(
         result = run_trusted_review(
             validated,
             model,
-            api_key,
             timeout_seconds=timeout_seconds,
             transport=transport,
         )
@@ -1023,7 +1018,6 @@ def main(
         result = execute_trusted_review(
             packet,
             model=arguments.model,
-            api_key=None,
             filing_root=arguments.filing_root,
             approved_sources_root=arguments.approved_sources_root,
             filing_target=arguments.filing_target,

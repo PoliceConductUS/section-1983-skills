@@ -211,6 +211,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             "internet_policy",
         }
         forbidden = {
+            "api_key",
             "project_boundary",
             "version_folder",
             "artifact_path",
@@ -246,7 +247,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             }
             arguments = {
                 "model": "gpt-synthetic",
-                "api_key": "secret-test-key",
                 "filing_root": filing,
                 "approved_sources_root": approved_sources,
                 "filing_target": "filing.md",
@@ -340,7 +340,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 self.execute_folder_review(
                     packet(),
                     model="gpt-synthetic",
-                    api_key="secret-test-key",
                     filing_root=filing,
                     approved_sources_root=approved_sources,
                     filing_target="filing.md",
@@ -354,7 +353,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             result = self.execute_folder_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -370,7 +368,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             result = self.execute_folder_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -386,7 +383,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             response_failure = self.execute_folder_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -442,7 +438,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             multibyte = self.execute_folder_review(
                 packet(),
                 model="é" * 5000,
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -509,7 +504,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                         self.execute_folder_review(
                             packet(),
                             model="gpt-synthetic",
-                            api_key="secret-test-key",
                             filing_root=filing,
                             approved_sources_root=approved_sources,
                             filing_target=target,
@@ -535,7 +529,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                         self.execute_folder_review(
                             packet(),
                             model="gpt-synthetic",
-                            api_key="secret-test-key",
                             filing_root=filing,
                             approved_sources_root=supplied_root,
                             filing_target="filing.md",
@@ -554,7 +547,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 self.execute_folder_review(
                     packet(),
                     model="gpt-synthetic",
-                    api_key="secret-test-key",
                     filing_root=filing,
                     approved_sources_root=approved_sources,
                     filing_target="filing.md",
@@ -621,7 +613,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 packet(),
                 module=module,
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -639,7 +630,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         result = run_trusted_review(
             packet(),
             model="gpt-synthetic",
-            api_key="secret-test-key",
             timeout_seconds=3,
             transport=transport,
         )
@@ -660,7 +650,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             set(HEADINGS),
         )
         self.assertNotIn("secret-test-key", raw_body.decode("utf-8"))
-        self.assertEqual(headers["Authorization"], "Bearer secret-test-key")
+        self.assertEqual(headers, {"Content-Type": "application/json"})
         self.assertEqual(timeout_seconds, 3)
         dispatched_packet = json.loads(request["input"][0]["content"][0]["text"])
         self.assertEqual(dispatched_packet, packet())
@@ -674,7 +664,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             result = self.launcher.run_trusted_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key=None,
             )
 
         self.assertEqual(len(transport.calls), 1)
@@ -717,25 +706,22 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         self.assertEqual(urlopen.call_args.kwargs["timeout"], 3)
         self.assertEqual((status, body), (200, b"{}"))
 
-    def test_packet_model_and_credentials_validate_before_transport(self):
+    def test_packet_and_model_validate_before_transport(self):
         run_trusted_review = self.trusted_api("run_trusted_review")
         invalid_packet = packet()
         invalid_packet["draft"]["sha256"] = "0" * 64
         invalid_source_id = packet()
         invalid_source_id["sources"][0]["id"] = "SRC-1\n## Forged"
         invalid_cases = (
-            ("packet", invalid_packet, "gpt-synthetic", "key"),
-            ("source-id", invalid_source_id, "gpt-synthetic", "key"),
-            ("model-empty", packet(), "", "key"),
-            ("model-whitespace", packet(), " \t", "key"),
-            ("model-surrogate", packet(), "\ud800", "key"),
-            ("model-line-break", packet(), "gpt\nforged", "key"),
-            ("credential-empty", packet(), "gpt-synthetic", ""),
-            ("credential-whitespace", packet(), "gpt-synthetic", " \t"),
-            ("credential-newline", packet(), "gpt-synthetic", "key\nvalue"),
+            ("packet", invalid_packet, "gpt-synthetic"),
+            ("source-id", invalid_source_id, "gpt-synthetic"),
+            ("model-empty", packet(), ""),
+            ("model-whitespace", packet(), " \t"),
+            ("model-surrogate", packet(), "\ud800"),
+            ("model-line-break", packet(), "gpt\nforged"),
         )
 
-        for label, supplied_packet, model, api_key in invalid_cases:
+        for label, supplied_packet, model in invalid_cases:
             with self.subTest(case=label):
                 transport = TransportSpy()
                 expected_error = (
@@ -747,7 +733,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                     run_trusted_review(
                         supplied_packet,
                         model=model,
-                        api_key=api_key,
                         transport=transport,
                     )
                 self.assertEqual(transport.calls, [])
@@ -801,7 +786,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                     run_trusted_review(
                         packet(),
                         model="gpt-synthetic",
-                        api_key="secret-test-key",
                         transport=transport,
                     )
                 error = captured.exception

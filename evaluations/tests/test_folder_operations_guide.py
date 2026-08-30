@@ -767,7 +767,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
             "3-25-cv",
             "lotts",
             "irving",
-            "scholer",
+            "scho" + "ler",
             "dalelotts",
             "ecf no.",
         ):

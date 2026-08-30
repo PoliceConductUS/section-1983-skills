@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "profile_id": "fictional-judge-thin-profile",
+  "checked_through": "2026-08-24",
+  "judge_identity": {
+    "subject_id": "judge-thin",
+    "display_name": "Judge Thin Example",
+    "fictional": true,
+    "source_id": "identity-source",
+    "checked_on": "2026-08-24"
+  },
+  "court_scope": {
+    "court_id": "example-district",
+    "jurisdiction": "Fictional Federal District",
+    "tenure_start": null,
+    "tenure_end": null,
+    "source_id": "court-source",
+    "checked_on": "2026-08-24"
+  },
+  "records": [],
+  "comparisons": [],
+  "neutral_transfers": [],
+  "assumptions": [],
+  "gaps": [
+    {
+      "id": "no-revealed-reasoning",
+      "description": "No independently reasoned source addresses the selected issue and posture.",
+      "source_ids": []
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "validator": "judicial-profile-validator",
+    "version": "1",
+    "validated_at": "2026-08-24T12:00:00Z"
+  }
+}

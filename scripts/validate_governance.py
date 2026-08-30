@@ -18,6 +18,7 @@ FOLDER_CONTRACT_FIELDS = {
 SAFE_ROLE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SOURCE_DOCUMENTED_SKILLS = (
     "building-defense-counsel-overlays",
+    "building-judicial-reasoning-profiles",
     "building-litigation-alignment-overlays",
 )
 
@@ -76,17 +77,22 @@ APPROVED_FOLDER_CONTRACTS = {
         ["docket-snapshot"],
         "disabled",
     ),
+    "building-judicial-reasoning-profiles": folder_contract(
+        "building-judicial-reasoning-profiles",
+        [
+            "judge-identity",
+            "court-scope",
+            "approved-sources",
+            "verified-authorities",
+        ],
+        "none",
+        [],
+        {"acquisition": "authorized", "compilation": "disabled"},
+    ),
     "drafting-false-arrest-complaints": folder_contract(
         "drafting-false-arrest-complaints",
         ["record", "authorities", "filing"],
         "optional",
-        ["filing"],
-        "disabled",
-    ),
-    "drafting-for-judge-scholer": folder_contract(
-        "drafting-for-judge-scholer",
-        ["filing", "judge-corpus", "court-conduct"],
-        "required",
         ["filing"],
         "disabled",
     ),
@@ -742,7 +748,23 @@ def validate_folder_contract_document(document, expected_skill):
     if not target_valid:
         errors.append("invalid-folder-contract-target")
 
-    if document.get("internet") not in {"disabled", "authorized"}:
+    internet = document.get("internet")
+    if isinstance(internet, str):
+        internet_valid = internet in {"disabled", "authorized"}
+    else:
+        internet_valid = (
+            isinstance(internet, dict)
+            and bool(internet)
+            and all(
+                isinstance(operation, str) and SAFE_ROLE.fullmatch(operation)
+                for operation in internet
+            )
+            and all(
+                policy in {"disabled", "authorized"}
+                for policy in internet.values()
+            )
+        )
+    if not internet_valid:
         errors.append("invalid-folder-contract-internet")
     if document.get("output") != {"mode": "append-immutable"}:
         errors.append("invalid-folder-contract-output")

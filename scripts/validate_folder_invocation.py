@@ -14,7 +14,17 @@ from typing import Any
 
 _IDENTIFIER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _ENVELOPE_FIELDS = frozenset(
-    {"version", "skill", "inputs", "output", "runtime", "internet", "isolation", "target"}
+    {
+        "version",
+        "skill",
+        "operation",
+        "inputs",
+        "output",
+        "runtime",
+        "internet",
+        "isolation",
+        "target",
+    }
 )
 _CONTRACT_FIELDS = frozenset(
     {"version", "skill", "input_roles", "target", "internet", "output"}
@@ -38,6 +48,7 @@ class ValidatedInvocation:
     runtime: dict[str, int]
     internet: str
     target: tuple[str, Path] | None
+    operation: str | None = None
     contract_target_policy: str | None = None
     contract_target_roles: tuple[str, ...] | None = None
 
@@ -150,7 +161,20 @@ def _validate_skill_contract(value: Any) -> dict[str, Any]:
         or (target["policy"] != "none" and not target_roles)
     ):
         _fail("invalid-skill-contract")
-    if contract["internet"] not in {"disabled", "authorized"}:
+    internet = contract["internet"]
+    if isinstance(internet, str):
+        internet_valid = internet in {"disabled", "authorized"}
+    else:
+        internet_valid = (
+            type(internet) is dict
+            and bool(internet)
+            and all(_is_identifier(operation) for operation in internet)
+            and all(
+                policy in {"disabled", "authorized"}
+                for policy in internet.values()
+            )
+        )
+    if not internet_valid:
         _fail("invalid-skill-contract")
     output = _require_exact_object(
         contract["output"],
@@ -198,8 +222,18 @@ def validate_installed_skill_invocation(
         return validate_invocation(envelope)
     if [item.get("role") for item in inputs] != contract["input_roles"]:
         _fail("contract-input-roles")
-    if envelope.get("internet") != contract["internet"]:
-        _fail("contract-internet")
+    contract_internet = contract["internet"]
+    if isinstance(contract_internet, str):
+        if "operation" in envelope:
+            _fail("contract-operation")
+        if envelope.get("internet") != contract_internet:
+            _fail("contract-internet")
+    else:
+        operation = envelope.get("operation")
+        if operation not in contract_internet:
+            _fail("contract-operation")
+        if envelope.get("internet") != contract_internet[operation]:
+            _fail("contract-internet")
     target_policy = contract["target"]["policy"]
     target = envelope.get("target")
     if target_policy == "required" and "target" not in envelope:
@@ -222,6 +256,8 @@ def validate_invocation(envelope: dict) -> ValidatedInvocation:
     if type(envelope) is not dict:
         _fail("invalid-envelope")
     required_envelope_fields = {"version", "skill", "inputs", "output", "runtime", "internet", "isolation"}
+    if "operation" in envelope:
+        required_envelope_fields.add("operation")
     if "target" in envelope:
         required_envelope_fields.add("target")
     _require_exact_object(envelope, required_envelope_fields, set(_ENVELOPE_FIELDS), "invalid-envelope")
@@ -230,6 +266,8 @@ def validate_invocation(envelope: dict) -> ValidatedInvocation:
         _fail("invalid-version")
     if not _is_identifier(envelope["skill"]):
         _fail("invalid-skill")
+    if "operation" in envelope and not _is_identifier(envelope["operation"]):
+        _fail("invalid-operation")
 
     inputs_value = envelope["inputs"]
     if type(inputs_value) is not list or not inputs_value:
@@ -305,6 +343,7 @@ def validate_invocation(envelope: dict) -> ValidatedInvocation:
         runtime={"max_seconds": runtime["max_seconds"], "max_input_bytes": runtime["max_input_bytes"]},
         internet=envelope["internet"],
         target=resolved_target,
+        operation=envelope.get("operation"),
     )
 
 

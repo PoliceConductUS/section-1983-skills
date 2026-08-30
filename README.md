@@ -60,7 +60,7 @@ work. `temp/` is not a durable artifact destination.
 | `drafting-section-1983-meet-and-confer`           | Neutral meet-and-confer correspondence from a completed discovery-response audit, with a separate factual conference record.                                               |
 | `auditing-section-1983-privilege-logs`            | Source-bounded privilege-log requirements and entry audit without invented metadata, privilege adjudication, or automatic waiver.                                          |
 | `drafting-section-1983-deposition-outlines`       | Chronology- and element-gap-driven deposition outlines that ask grounded questions without scripting testimony.                                                            |
-| `drafting-for-judge-scholer`                      | Judge-specific overlay for matters assigned to Judge Karen Gren Scholer.                                                                                                   |
+| `building-judicial-reasoning-profiles`            | Generic builder for evidence-bounded Judicial Reasoning Profile files with domain YAML provenance from approved public sources.                                            |
 | `studying-rule-59e-decisions`                     | Evidence-coded research contract for governing Rule 59 law, judge-specific decision corpora, denominator limits, and transfer cards.                                       |
 | `rrd`                                             | Generic Response Requirements Document planner; routes Section 1983 Rule 12 matters to the specialized RRD skills.                                                         |
 | `rrd-rule12`                                      | Base Rule 12 response-planning contract.                                                                                                                                   |
@@ -101,7 +101,9 @@ registry, graph, or case-management runtime is required.
 4. For complaints, add `drafting-section-1983-complaints`.
 5. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
    incorporated-video issues, add `drafting-false-arrest-complaints`.
-6. Add `drafting-for-judge-scholer` when Judge Scholer is assigned.
+6. Use `building-judicial-reasoning-profiles` to acquire approved public sources
+   with `SOURCE.yaml` provenance or compile validated profile files for the
+   assigned judge. A later shared launcher owns profile-backed judicial review.
 7. Add `building-litigation-alignment-overlays` before an amended complaint,
    leave package, or other filing that should consume the current docket's
    actual adversary positions and judicial treatment.

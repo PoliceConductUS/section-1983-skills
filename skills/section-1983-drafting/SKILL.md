@@ -77,8 +77,9 @@ Load each applicable skill once, in this order:
 4. Add `drafting-false-arrest-complaints` when false arrest, probable cause,
    arguable probable cause, alternative offenses, seizure timing, or
    incorporated arrest video is material.
-5. Add an assigned-judge overlay, such as `drafting-for-judge-scholer`, after
-   the applicable document and claim skills.
+5. Build an assigned-judge profile with `building-judicial-reasoning-profiles`
+   when approved public sources support one. Profile-backed review remains a
+   separate downstream invocation.
 6. Add `building-litigation-alignment-overlays` before drafting an amended
    complaint, leave-to-amend package, or other filing that should consume actual
    adversary attacks or judicial treatment from the current approved docket

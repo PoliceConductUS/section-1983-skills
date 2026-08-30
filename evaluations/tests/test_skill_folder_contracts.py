@@ -39,6 +39,17 @@ CONTRACTS = {
         ["research-snapshot"],
         "disabled",
     ),
+    "building-judicial-reasoning-profiles": (
+        [
+            "judge-identity",
+            "court-scope",
+            "approved-sources",
+            "verified-authorities",
+        ],
+        "none",
+        [],
+        {"acquisition": "authorized", "compilation": "disabled"},
+    ),
     "building-litigation-alignment-overlays": (
         ["docket-snapshot", "filing"],
         "required",
@@ -48,12 +59,6 @@ CONTRACTS = {
     "drafting-false-arrest-complaints": (
         ["record", "authorities", "filing"],
         "optional",
-        ["filing"],
-        "disabled",
-    ),
-    "drafting-for-judge-scholer": (
-        ["filing", "judge-corpus", "court-conduct"],
-        "required",
         ["filing"],
         "disabled",
     ),
@@ -128,6 +133,13 @@ def expected_contract(skill, values):
 
 def schema_errors(instance, schema, path="$"):
     errors = []
+    if "oneOf" in schema:
+        matches = [
+            candidate
+            for candidate in schema["oneOf"]
+            if not schema_errors(instance, candidate, path)
+        ]
+        return [] if len(matches) == 1 else [f"{path}: oneOf mismatch"]
     expected_type = schema.get("type")
     type_matches = {
         "object": isinstance(instance, dict),
@@ -413,19 +425,25 @@ class SkillFolderContractsTest(unittest.TestCase):
                     inputs.append({"role": role, "root": str(role_root)})
                 output_root = root / "output"
                 output_root.mkdir()
+                if isinstance(internet, dict):
+                    operation, invocation_internet = next(iter(internet.items()))
+                else:
+                    operation, invocation_internet = None, internet
                 envelope = {
                     "version": 1,
                     "skill": skill,
                     "inputs": inputs,
                     "output": {"root": str(output_root)},
                     "runtime": {"max_seconds": 60, "max_input_bytes": 1048576},
-                    "internet": internet,
+                    "internet": invocation_internet,
                     "isolation": {
                         "inputs": "read-only",
                         "output": "read-write",
                         "undeclared": "none",
                     },
                 }
+                if operation is not None:
+                    envelope["operation"] = operation
                 if target_policy == "required":
                     envelope["target"] = {
                         "role": target_roles[0],
@@ -451,18 +469,41 @@ class SkillFolderContractsTest(unittest.TestCase):
                     mutations.append(
                         ("reordered-roles", reordered, "contract-input-roles")
                     )
-                mutations.append(
-                    (
-                        "internet-mismatch",
-                        {
-                            **envelope,
-                            "internet": (
-                                "authorized" if internet == "disabled" else "disabled"
-                            ),
-                        },
-                        "contract-internet",
+                if isinstance(internet, str):
+                    mutations.append(
+                        (
+                            "internet-mismatch",
+                            {
+                                **envelope,
+                                "internet": (
+                                    "authorized"
+                                    if internet == "disabled"
+                                    else "disabled"
+                                ),
+                            },
+                            "contract-internet",
+                        )
                     )
-                )
+                else:
+                    alternate_policy = (
+                        "disabled"
+                        if invocation_internet == "authorized"
+                        else "authorized"
+                    )
+                    mutations.append(
+                        (
+                            "operation-internet-mismatch",
+                            {**envelope, "internet": alternate_policy},
+                            "contract-internet",
+                        )
+                    )
+                    mutations.append(
+                        (
+                            "unknown-operation",
+                            {**envelope, "operation": "unknown-operation"},
+                            "contract-operation",
+                        )
+                    )
                 if target_policy == "required":
                     without_target = dict(envelope)
                     del without_target["target"]

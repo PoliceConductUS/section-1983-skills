@@ -62,6 +62,12 @@ role. The validator does not create the target. Internet is either `disabled` or
 `authorized`; this generic synthetic example disables it. When internet is
 authorized, the trusted host enforces the approved host policy.
 
+Most installed contracts declare one exact internet policy and omit `operation`.
+A multi-operation contract instead maps each operation name to its exact
+internet policy. Those invocations add the matching top-level `"operation"`
+identifier; a missing, unknown, or wrongly paired operation fails before any
+input root is traversed.
+
 ```json
 {
   "version": 1,

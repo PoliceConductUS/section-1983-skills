@@ -15,7 +15,6 @@ from scripts.validate_folder_invocation import validate_installed_skill_invocati
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "skills" / "section-1983-drafting"
-OVERLAY_SKILL = ROOT / "skills" / "drafting-for-judge-scholer"
 SCRIPT = PACKAGE / "scripts" / "judge_overlay_receipt.py"
 ANTI_GAMING_CHECKS = (
     "assignment-manipulation",
@@ -142,10 +141,24 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
         return self.api("execute_receipt")(value, **arguments)
 
     def invocation(self, filing, judge_corpus, court_conduct, output):
+        installed = output.parent / "installed-static-judge-overlay"
+        references = installed / "references"
+        references.mkdir(parents=True)
+        (references / "folder-contract.json").write_text(
+            """{
+  "version": 1,
+  "skill": "drafting-for-judge-example",
+  "input_roles": ["filing", "judge-corpus", "court-conduct"],
+  "target": {"policy": "required", "roles": ["filing"]},
+  "internet": "disabled",
+  "output": {"mode": "append-immutable"}
+}
+"""
+        )
         return validate_installed_skill_invocation(
             {
                 "version": 1,
-                "skill": "drafting-for-judge-scholer",
+                "skill": "drafting-for-judge-example",
                 "inputs": [
                     {"role": "filing", "root": str(filing)},
                     {"role": "judge-corpus", "root": str(judge_corpus)},
@@ -161,7 +174,7 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
                     "undeclared": "none",
                 },
             },
-            OVERLAY_SKILL,
+            installed,
         )
 
     def test_complete_packet_validates_without_mutation(self):

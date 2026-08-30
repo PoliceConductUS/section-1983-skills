@@ -392,10 +392,13 @@ helper write, and overwrite permissions in current public contracts.
 
 Every public `SKILL.md` MUST link to a schema-valid install-local
 `references/folder-contract.json` that states the exact ordered input roles,
-target policy and roles, internet policy, and `append-immutable` output mode.
-The skill MUST also carry the compact recursive input-read-only, output-only,
-internet, and host-enforcement boundary. The full protocol SHALL remain in the
-repository's canonical execution owner and MUST NOT be copied into every skill.
+target policy and roles, allowed internet policy or policies, and declared
+output mode. A multi-operation skill MAY map each operation name to its exact
+internet policy, while each invocation MUST choose one known operation and its
+matching policy. The skill MUST also carry the compact recursive
+input-read-only, output-only, internet, and host-enforcement boundary. The full
+protocol SHALL remain in the repository's canonical execution owner and MUST NOT
+be copied into every skill.
 
 #### Scenario: Skill is installed alone
 
@@ -589,3 +592,18 @@ generic root envelope.
   repository around it
 - **THEN** its installed skill retains the source-documented-folder boundary and
   its domain-specific validator
+
+### Requirement: Participant profiles remain data rather than skills
+
+The repository MUST keep judge-, attorney-, team-, court-, source-class-, and
+assumption-specific information in ordinary files within declared read-only
+input folders. It MUST NOT publish real-participant skills, generate
+person-specific skills, or permit profile data to alter protected installed
+behavior.
+
+#### Scenario: Maintainer adds a new participant profile
+
+- **WHEN** the profile is intended for an agent simulating that participant's
+  litigation role
+- **THEN** the maintainer adds or regenerates validated profile files and
+  domain-owned YAML source records while reusable behavior remains unchanged

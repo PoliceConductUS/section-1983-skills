@@ -23,6 +23,30 @@ document title. Keep any introduction short, outcome-first, and factual. Use
 lettered subparagraphs in the prayer for relief. The signature block must
 satisfy Rule 11.
 
+## Arrest-driven defendant presentation order
+
+Before drafting or materially revising a complaint that names defendants, audit
+the declared inputs to determine whether an arrest occurred and identify every
+source-documented arresting officer. Report a gap rather than inventing an
+arrest or officer identity.
+
+When an arrest occurred, put the primary arresting officer first in the caption,
+Parties section, every defendant list or table, and any defendant-grouped claim
+presentation. A prior complaint's different order does not control the new or
+revised complaint.
+
+If one arresting officer is identified, that officer is primary. If multiple
+arresting officers are identified, use the primary declared by the caller. When
+the caller has not made that declaration, stop and ask which officer is primary;
+never infer the designation from rank, chronology, report authorship, physical
+contact, or prior complaint order.
+
+Defendant presentation does not reorder the Statement of Facts, event stages,
+claim-specific allegations, or merits analysis. Keep those materials in their
+supported chronological or substantive order. When no arrest occurred, preserve
+the caller's defendant order unless a verified governing-court requirement
+controls it.
+
 ## Jurisdiction, venue, parties, and capacities
 
 Plead federal-question and civil-rights jurisdiction under 28 U.S.C. § 1331 and

@@ -47,14 +47,14 @@ APPROVED_FOLDER_CONTRACTS = {
     "auditing-section-1983-discovery-responses": folder_contract(
         "auditing-section-1983-discovery-responses",
         ["served-discovery", "responses", "production", "authorities"],
-        "optional",
+        "required",
         ["served-discovery", "responses"],
         "disabled",
     ),
     "auditing-section-1983-privilege-logs": folder_contract(
         "auditing-section-1983-privilege-logs",
         ["privilege-log", "served-discovery", "authorities"],
-        "optional",
+        "required",
         ["privilege-log"],
         "disabled",
     ),
@@ -296,6 +296,10 @@ QUALITY_CONTROL_REPORT_RULES = (
         "The skill or helper may publish the report directly.",
     ),
     (
+        "The trusted host accepts quality-control publication only from an invocation bound to the installed skill's target policy and approved target roles; it rejects an unbound invocation or a target outside those approved roles.",
+        "The trusted host may publish from an unbound invocation or a target outside the installed skill's approved roles.",
+    ),
+    (
         "Prior quality-control reports must not become implicit input.",
         "Prior quality-control reports may become implicit input.",
     ),
@@ -312,8 +316,32 @@ QUALITY_CONTROL_REPORT_RULES = (
         "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
     ),
     (
-        "The report identifies the logical input roles and hashes, selected target path and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
-        "The report may omit its logical input roles, target fingerprint, scope, sources, or result.",
+        "The trusted host prefixes the report with the canonical quality-control metadata envelope containing the skill and version, filtered logical input roles and reviewed artifact hashes, selected target role, relative path, SHA-256 fingerprint, and byte size, quality-control kind, UTC run time, run ID, scope, approved source identities, result, failed findings, passing-but-suboptimal recommendations, and terminal run-manifest identity.",
+        "The report may omit its skill version, reviewed artifact hashes, target fingerprint, findings, recommendations, or run-manifest identity.",
+    ),
+    (
+        "The trusted host derives the report path as `quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and publishes exactly one report through the shared output writer.",
+        "The skill may choose any report path or publish more than one report.",
+    ),
+    (
+        "Generated reports beneath `quality-control-reports/` are excluded from the reviewed-input manifest and fingerprint unless one exact report is the explicit target; selecting one report does not include sibling or older reports.",
+        "Generated reports beneath `quality-control-reports/` are always included in the reviewed-input manifest and fingerprint.",
+    ),
+    (
+        "The canonical quality-control metadata envelope identifies a generated report even when the report directory itself is a declared input root.",
+        "A report is not generated when its declared input root omits the `quality-control-reports/` path segment.",
+    ),
+    (
+        "A quality-control run ID must be a canonical lowercase UUIDv4; weak, malformed, or reused identities fail closed before publication.",
+        "A quality-control run may use a weak, malformed, or reused identity.",
+    ),
+    (
+        "The quality-control run is complete only after both report bytes and the terminal success manifest are durable and incomplete state is absent.",
+        "The quality-control run may report completion before its report or terminal success manifest is durable.",
+    ),
+    (
+        "The skill returns report content and structured findings; it does not build the canonical metadata envelope or publish output.",
+        "The skill builds the canonical metadata envelope and publishes output directly.",
     ),
     (
         "Separate failed findings from passing-but-suboptimal observations.",

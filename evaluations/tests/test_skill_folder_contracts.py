@@ -23,13 +23,13 @@ CONTRACTS = {
     "audit-authorities": (["filing", "authorities"], "required", ["filing"], "authorized"),
     "auditing-section-1983-discovery-responses": (
         ["served-discovery", "responses", "production", "authorities"],
-        "optional",
+        "required",
         ["served-discovery", "responses"],
         "disabled",
     ),
     "auditing-section-1983-privilege-logs": (
         ["privilege-log", "served-discovery", "authorities"],
-        "optional",
+        "required",
         ["privilege-log"],
         "disabled",
     ),

@@ -90,12 +90,37 @@ EXPLICIT_OUTPUT_RULES = (
     "existing destinations.",
     "Only the trusted host may publish the report through the shared output "
     "boundary.",
+    "The trusted host accepts quality-control publication only from an "
+    "invocation bound to the installed skill's target policy and approved "
+    "target roles; it rejects an unbound invocation or a target outside those "
+    "approved roles.",
     "Prior quality-control reports must not become implicit input.",
     "A report may be reviewed only when that exact report is expressly present "
     "in a declared input role and selected consistently with the reviewing "
     "skill's target policy.",
     "The reviewing stage must propose a different new append-immutable report "
     "for trusted-host publication.",
+    "The trusted host derives the report path as "
+    "`quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and "
+    "publishes exactly one report through the shared output writer.",
+    "Generated reports beneath `quality-control-reports/` are excluded from "
+    "the reviewed-input manifest and fingerprint unless one exact report is "
+    "the explicit target; selecting one report does not include sibling or "
+    "older reports.",
+    "The canonical quality-control metadata envelope identifies a generated "
+    "report even when the report directory itself is a declared input root.",
+    "A quality-control run ID must be a canonical lowercase UUIDv4; weak, "
+    "malformed, or reused identities fail closed before publication.",
+    "The trusted host prefixes the report with the canonical quality-control "
+    "metadata envelope containing the skill and version, filtered logical "
+    "input roles and reviewed artifact hashes, selected target role, relative "
+    "path, SHA-256 fingerprint, and byte size, quality-control kind, UTC run "
+    "time, run ID, scope, approved source identities, result, failed findings, "
+    "passing-but-suboptimal recommendations, and terminal run-manifest identity.",
+    "The quality-control run is complete only after both report bytes and the "
+    "terminal success manifest are durable and incomplete state is absent.",
+    "The skill returns report content and structured findings; it does not "
+    "build the canonical metadata envelope or publish output.",
 )
 OBSOLETE_REPORT_RULES = (
     "resolve exactly one existing version-specific folder",
@@ -197,6 +222,28 @@ class NonMutatingQualityControlTest(unittest.TestCase):
                 skill = (REPOSITORY / "skills" / name / "SKILL.md").read_text()
                 assert_contract(self, skill)
                 assert_explicit_output_contract(self, skill)
+
+    def test_quality_control_only_skills_require_one_primary_target(self):
+        quality_control_only = {
+            "adversarial-filing-review",
+            "audit-authorities",
+            "auditing-section-1983-discovery-responses",
+            "auditing-section-1983-privilege-logs",
+            "filing-ci",
+        }
+        for name in sorted(quality_control_only):
+            with self.subTest(skill=name):
+                contract = json.loads(
+                    (
+                        REPOSITORY
+                        / "skills"
+                        / name
+                        / "references"
+                        / "folder-contract.json"
+                    ).read_text()
+                )
+                self.assertEqual(contract["target"]["policy"], "required")
+                self.assertTrue(contract["target"]["roles"])
 
     def test_clean_room_review_exposes_no_command_authority_before_any_write(self):
         launcher = launcher_module()

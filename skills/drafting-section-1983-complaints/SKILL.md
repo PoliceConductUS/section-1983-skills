@@ -24,10 +24,12 @@ case material if the host cannot enforce the filesystem and network boundary.
 - `filing` contains any complaint or amendment being drafted or audited.
 
 Target is optional in `filing`; without one, draft from the supplied record and
-user request. Internet is `disabled`. Return the complaint or mechanical handoff
-as a canonical output-relative path and deterministic bytes; only the trusted
-host may publish it append-immutable. Report missing facts, actors, claims,
-authority, or required contract material as a gap without inventing it.
+user request. Internet is `disabled`. Return complaint content or mechanical
+handoff content and structured findings; only the trusted host derives the
+canonical output-relative path for a QC report and validates a proposed
+drafting-artifact path before publishing append-immutable. Report missing facts,
+actors, claims, authority, or required contract material as a gap without
+inventing it.
 
 ## Required complaint contract
 
@@ -310,7 +312,10 @@ exactly one unique append-immutable output-relative report beneath the
 caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
 target must fail closed without a fallback write. The report path must reject
 absolute paths, traversal, symlink escapes, and existing destinations. Only the
-trusted host may publish the report through the shared output boundary.
+trusted host may publish the report through the shared output boundary. The
+trusted host accepts quality-control publication only from an invocation bound
+to the installed skill's target policy and approved target roles; it rejects an
+unbound invocation or a target outside those approved roles.
 
 Prior quality-control reports must not become implicit input. A report may be
 reviewed only when that exact report is expressly present in a declared input
@@ -319,9 +324,29 @@ reviewing stage must propose a different new append-immutable report for
 trusted-host publication. Existing reports are immutable and must not be edited,
 overwritten, replaced, renamed, or deleted.
 
-The report identifies the logical input roles and hashes, selected target path
-and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
-approved source identities, and result. Separate failed findings from
-passing-but-suboptimal observations. Recommendations, proposed language, and
-copy-ready replacements for failures or passing-but-suboptimal observations are
-advisory and do not authorize implementation.
+The trusted host derives the report path as
+`quality-control-reports/<check-kind>-<utc-run-time>-<run-id>.md` and publishes
+exactly one report through the shared output writer. Generated reports beneath
+`quality-control-reports/` are excluded from the reviewed-input manifest and
+fingerprint unless one exact report is the explicit target; selecting one report
+does not include sibling or older reports. The canonical quality-control
+metadata envelope identifies a generated report even when the report directory
+itself is a declared input root. A quality-control run ID must be a canonical
+lowercase UUIDv4; weak, malformed, or reused identities fail closed before
+publication.
+
+The trusted host prefixes the report with the canonical quality-control metadata
+envelope containing the skill and version, filtered logical input roles and
+reviewed artifact hashes, selected target role, relative path, SHA-256
+fingerprint, and byte size, quality-control kind, UTC run time, run ID, scope,
+approved source identities, result, failed findings, passing-but-suboptimal
+recommendations, and terminal run-manifest identity. The skill returns report
+content and structured findings; it does not build the canonical metadata
+envelope or publish output.
+
+The quality-control run is complete only after both report bytes and the
+terminal success manifest are durable and incomplete state is absent. Separate
+failed findings from passing-but-suboptimal observations. Recommendations,
+proposed language, and copy-ready replacements for failures or
+passing-but-suboptimal observations are advisory and do not authorize
+implementation.

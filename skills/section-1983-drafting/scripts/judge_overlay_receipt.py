@@ -523,10 +523,6 @@ def execute_receipt(
     outcome, failure_class, changes = _normalize(validated, artifacts)
     timestamp = _utc_time(now)
     selected_run_id = _run_id(run_id)
-    artifact_path = (
-        "reports/judge-overlay-execution-"
-        f"{timestamp.strftime('%Y%m%dT%H%M%SZ')}-{selected_run_id}.md"
-    )
     report = _render(
         validated,
         artifacts,
@@ -540,7 +536,6 @@ def execute_receipt(
     return {
         "outcome": outcome,
         "failure_class": failure_class,
-        "artifact_path": artifact_path,
         "report_bytes": report.encode("utf-8"),
     }
 

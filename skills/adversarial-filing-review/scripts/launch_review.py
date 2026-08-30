@@ -711,9 +711,8 @@ def _run_identity(now, run_id):
             "review-output-invalid",
             "run id must be a canonical UUID",
         )
-    filename_time = current.strftime("%Y%m%dT%H%M%SZ")
     display_time = current.strftime("%Y-%m-%dT%H:%M:%SZ")
-    return filename_time, display_time, supplied_run_id
+    return display_time, supplied_run_id
 
 
 def _within(path, root):
@@ -862,13 +861,6 @@ def _bounded_report_bytes(markdown):
     return prefix.encode("utf-8") + marker
 
 
-def _artifact_path(filename_time, run_id):
-    return (
-        "reports/"
-        f"adversarial-filing-review-{filename_time}-{run_id}.md"
-    )
-
-
 def _internet_source(run_time, response_sha256):
     return {
         "url": OPENAI_RESPONSES_URL,
@@ -899,8 +891,7 @@ def execute_review(
             "internet-not-authorized",
             "provider dispatch is not authorized",
         )
-    filename_time, run_time, normalized_run_id = _run_identity(now, run_id)
-    artifact_path = _artifact_path(filename_time, normalized_run_id)
+    run_time, normalized_run_id = _run_identity(now, run_id)
     try:
         result = run_review(
             validated,
@@ -927,7 +918,6 @@ def execute_review(
         )
         return {
             "outcome": "unavailable",
-            "artifact_path": artifact_path,
             "report_bytes": report_bytes,
             "internet_sources": internet_sources,
             "error": {
@@ -945,7 +935,6 @@ def execute_review(
     )
     return {
         "outcome": "completed",
-        "artifact_path": artifact_path,
         "report_bytes": render_review_markdown(
             result["review"],
             receipt,
@@ -992,10 +981,11 @@ def _error_result(error):
 def _json_result(result):
     value = {
         "outcome": result["outcome"],
-        "artifact_path": result["artifact_path"],
         "report": result["report_bytes"].decode("utf-8"),
         "internet_sources": result["internet_sources"],
     }
+    if "artifact_path" in result:
+        value["artifact_path"] = result["artifact_path"]
     if "dispatch" in result:
         value["dispatch"] = result["dispatch"]
     if "error" in result:

@@ -7,7 +7,7 @@ import json
 import os
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +38,8 @@ class ValidatedInvocation:
     runtime: dict[str, int]
     internet: str
     target: tuple[str, Path] | None
+    contract_target_policy: str | None = None
+    contract_target_roles: tuple[str, ...] | None = None
 
 
 def _fail(code: str) -> None:
@@ -207,7 +209,12 @@ def validate_installed_skill_invocation(
     if "target" in envelope:
         if type(target) is not dict or target.get("role") not in contract["target"]["roles"]:
             _fail("contract-target")
-    return validate_invocation(envelope)
+    invocation = validate_invocation(envelope)
+    return replace(
+        invocation,
+        contract_target_policy=target_policy,
+        contract_target_roles=tuple(contract["target"]["roles"]),
+    )
 
 
 def validate_invocation(envelope: dict) -> ValidatedInvocation:

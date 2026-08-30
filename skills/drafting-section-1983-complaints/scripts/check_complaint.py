@@ -4,7 +4,6 @@ from pathlib import Path, PurePosixPath
 
 
 MAX_COMPLAINT_BYTES = 5 * 1024 * 1024
-REPORT_PATH = "reports/complaint-mechanical-check.json"
 
 
 class ComplaintCheckError(Exception):
@@ -195,7 +194,6 @@ def check_complaint(input_root, relative_target):
     return {
         "status": report["status"],
         "exit_status": 1 if findings else 0,
-        "artifact": REPORT_PATH,
         "findings": findings,
         "report_bytes": _report_bytes(report),
     }

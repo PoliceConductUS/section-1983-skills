@@ -4,7 +4,6 @@ from pathlib import Path, PurePosixPath
 
 
 CHECKER_ID = "section-1983-complaint-v1"
-REPORT_PATH = "reports/filing-ci.json"
 MAX_FILING_BYTES = 5 * 1024 * 1024
 
 
@@ -24,7 +23,6 @@ def _unavailable(checker_id, reason):
         "status": "unavailable",
         "reason": reason,
         "checker_id": checker_id,
-        "artifact": REPORT_PATH,
         "report_bytes": _bytes(report),
     }
 
@@ -194,7 +192,6 @@ def run_filing_ci(filing_root, filing_target, authorities_root, checker_id):
     return {
         "status": status,
         "checker_id": checker_id,
-        "artifact": REPORT_PATH,
         "findings": findings,
         "report_bytes": _bytes(report),
     }

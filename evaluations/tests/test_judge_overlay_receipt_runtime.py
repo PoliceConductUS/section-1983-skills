@@ -9,12 +9,13 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from scripts.skill_output_writer import OutputError, OutputRun
-from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
+from scripts.quality_control_report import publish_quality_control_report
+from scripts.validate_folder_invocation import validate_installed_skill_invocation
 
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = ROOT / "skills" / "section-1983-drafting"
+OVERLAY_SKILL = ROOT / "skills" / "drafting-for-judge-scholer"
 SCRIPT = PACKAGE / "scripts" / "judge_overlay_receipt.py"
 ANTI_GAMING_CHECKS = (
     "assignment-manipulation",
@@ -141,7 +142,7 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
         return self.api("execute_receipt")(value, **arguments)
 
     def invocation(self, filing, judge_corpus, court_conduct, output):
-        return validate_invocation(
+        return validate_installed_skill_invocation(
             {
                 "version": 1,
                 "skill": "drafting-for-judge-scholer",
@@ -159,7 +160,8 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
                     "output": "read-write",
                     "undeclared": "none",
                 },
-            }
+            },
+            OVERLAY_SKILL,
         )
 
     def test_complete_packet_validates_without_mutation(self):
@@ -202,10 +204,7 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
             self.assertEqual(first, second)
             self.assertEqual(first["outcome"], "no-judge-specific-drafting-change")
             self.assertIsNone(first["failure_class"])
-            self.assertEqual(
-                first["artifact_path"],
-                "reports/judge-overlay-execution-20260822T083000Z-11111111-1111-4111-8111-111111111111.md",
-            )
+            self.assertNotIn("artifact_path", first)
             self.assertIsInstance(first["report_bytes"], bytes)
             report = first["report_bytes"].decode("utf-8")
             self.assertIn("no judge-specific drafting change", report)
@@ -223,30 +222,25 @@ class JudgeOverlayReceiptRuntimeTest(unittest.TestCase):
             )
 
             invocation = self.invocation(filing, corpus, conduct, output)
-            manifest = build_input_manifest(invocation)
-            run = OutputRun.start(
+            receipt = publish_quality_control_report(
                 invocation,
-                run_id="judge-overlay-run",
-                skill_version="1",
-                mode="append-immutable",
-                input_manifest=manifest,
+                skill_version="v3",
+                quality_control_kind="judge-overlay-execution",
+                run_id=FIXED_RUN,
+                run_at=FIXED_TIME,
+                scope=packet()["scope"],
+                result=first["outcome"],
+                approved_source_identities=packet()["approved_source_ids"],
+                failed_findings=[],
+                passing_but_suboptimal_recommendations=[],
+                body=first["report_bytes"].decode("utf-8"),
             )
-            run.write(first["artifact_path"], first["report_bytes"])
-            receipt = run.complete()
             self.assertEqual(receipt["status"], "success")
             self.assertEqual(receipt["internet"], {"policy": "disabled", "used": False})
-            self.assertEqual((output / first["artifact_path"]).read_bytes(), first["report_bytes"])
-
-            collision = OutputRun.start(
-                invocation,
-                run_id="judge-overlay-collision-run",
-                skill_version="1",
-                mode="append-immutable",
-                input_manifest=manifest,
+            self.assertEqual(
+                receipt["artifacts"][0]["path"],
+                "quality-control-reports/judge-overlay-execution-20260822T083000Z-11111111-1111-4111-8111-111111111111.md",
             )
-            with self.assertRaises(OutputError) as captured:
-                collision.write(first["artifact_path"], first["report_bytes"])
-            self.assertEqual(captured.exception.code, "output-collision")
 
     def test_supported_change_records_only_used_neutral_cards(self):
         value = packet()

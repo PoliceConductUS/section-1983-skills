@@ -1,0 +1,6 @@
+interface:
+  display_name: "Draft Section 1983 Monell Claims"
+  short_description: "Draft only approved municipal-liability paths"
+  default_prompt: >-
+    Use $drafting-section-1983-monell-claims to turn my expressly approved
+    Monell planning paths into typed complaint deltas.

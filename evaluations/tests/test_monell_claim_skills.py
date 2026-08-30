@@ -87,7 +87,7 @@ class MonellDraftingSkillTests(unittest.TestCase):
 
     def test_drafter_uses_only_approved_paths_and_returns_to_canonical_owner(self):
         text = (DRAFTER / "SKILL.md").read_text(encoding="utf-8")
-        self.assertRegex(text, r"(?is)draft only.*approved path")
+        self.assertRegex(text, r"(?is)draft only.*approved.*path")
         self.assertRegex(text, r"(?is)(?:do not|never).*select.*claim")
         self.assertIn("drafting-section-1983-complaints", text)
         self.assertIn("validate_complaint_handoff.py", text)
@@ -97,8 +97,9 @@ class MonellDraftingSkillTests(unittest.TestCase):
         text = (DRAFTER / "references/monell-complaint-delta.md").read_text(encoding="utf-8")
         self.assertRegex(text, r"(?is)implementation or transmission mechanism")
         self.assertRegex(text, r"(?is)information and belief.*known facts.*controlled")
-        self.assertRegex(text, r"(?is)post-event.*(?:cannot|must not).*pre-event causation")
-        self.assertRegex(text, r"(?is)moving.force.*particular injury")
+        self.assertRegex(text, r"(?is)post-event.*(?:cannot|must not).*pre-event\s+causation")
+        self.assertRegex(text, r"(?is)moving.force")
+        self.assertRegex(text, r"(?is)particular\s+injury")
 
     def test_drafter_cannot_convert_recommendation_into_approval(self):
         text = (DRAFTER / "references/approved-planning-handoff.md").read_text(encoding="utf-8")

@@ -154,6 +154,24 @@ QUALITY_CONTROL_REPORT_RULES = (
         "Report recommendations and copy-ready replacements authorize implementation.",
     ),
 )
+FOLDER_SCOPE_RULES = (
+    (
+        "Only caller-declared input folders are available and recursively read-only.",
+        "Any input folder is available and writable.",
+    ),
+    (
+        "Writes occur only beneath the caller-declared output folder.",
+        "Writes may occur outside the caller-declared output folder.",
+    ),
+    (
+        "Internet is used only when that skill expressly authorizes it.",
+        "Internet may be used without that skill expressly authorizing it.",
+    ),
+    (
+        "Execution stops before reading case material if the host cannot enforce the filesystem and network boundary.",
+        "Execution may read case material when the host cannot enforce the filesystem and network boundary.",
+    ),
+)
 QUALITY_CONTROL_TRIGGER = re.compile(
     r"(?:\buse when\b.{0,120}\b(?:independently\s+)?(?:auditing|reviewing|"
     r"verifying|evaluating|checking|assessing|performing quality control|"
@@ -346,6 +364,10 @@ def validate_policy(repository_root):
         "judgment-routing",
         "rules-provenance",
         "tool-ownership",
+        "folder scope",
+        "recursive input non-mutation",
+        "output confinement",
+        "declared internet policy",
         "explicit human review",
         "thin skill wrapper",
         "owning repository",
@@ -440,6 +462,31 @@ def validate_quality_control_contracts(repository_root):
     return errors
 
 
+def folder_scope_contract_missing(text):
+    contract = normalized(text)
+    return any(
+        normalized(affirmative) not in contract or normalized(inversion) in contract
+        for affirmative, inversion in FOLDER_SCOPE_RULES
+    )
+
+
+def validate_folder_scope_contracts(repository_root):
+    errors = []
+    for path in sorted((repository_root / "skills").glob("*/SKILL.md")):
+        try:
+            text = path.read_text()
+        except OSError:
+            errors.append(
+                f"folder-scope-contract-language-missing: {path.parent.name}"
+            )
+            continue
+        if folder_scope_contract_missing(text):
+            errors.append(
+                f"folder-scope-contract-language-missing: {path.parent.name}"
+            )
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
@@ -447,6 +494,7 @@ def validate_repository(repository_root):
     errors.extend(validate_pull_request_template(repository_root))
     errors.extend(validate_contribution_contract(repository_root))
     errors.extend(validate_quality_control_contracts(repository_root))
+    errors.extend(validate_folder_scope_contracts(repository_root))
     return errors
 
 

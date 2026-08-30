@@ -8,6 +8,13 @@ description:
 
 # Drafting Section 1983 Rule 59(e) Filings
 
+## Folder-scoped execution
+
+Only caller-declared input folders are available and recursively read-only.
+Writes occur only beneath the caller-declared output folder. Internet is used
+only when that skill expressly authorizes it. Execution stops before reading
+case material if the host cannot enforce the filesystem and network boundary.
+
 ## Purpose
 
 Build one genuine request for district-court relief. When the case strategy

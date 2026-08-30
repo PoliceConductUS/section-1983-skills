@@ -48,9 +48,17 @@ for failures or passing-but-suboptimal observations are advisory and do not
 authorize implementation.
 
 Verification, factual and authority source, permission, filing-readiness,
-judgment-routing, rules-provenance, and tool-ownership are protected gates. Any
-change that weakens, bypasses, removes, or changes a protected gate requires
-explicit human review that identifies the affected gate and rationale.
+judgment-routing, rules-provenance, tool-ownership, folder scope, recursive
+input non-mutation, output confinement, and declared internet policy are
+protected gates. Any change that weakens, bypasses, removes, or changes a
+protected gate requires explicit human review that identifies the affected gate
+and rationale.
+
+A contribution that broadens input mutation, output placement, undeclared path
+access, or internet authority must identify the affected protected gate and
+rationale and request explicit human review before acceptance. The canonical
+folder-execution protocol is
+[FOLDER_SCOPED_EXECUTION.md](FOLDER_SCOPED_EXECUTION.md).
 
 This repository retains public skill instructions and repository-specific
 validation or evaluation support. General-purpose executable tooling for rule

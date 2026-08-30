@@ -56,6 +56,11 @@ Changes to a protected gate named in [GOVERNANCE.md](GOVERNANCE.md) must name
 the affected gate and rationale in the pull-request template and request
 explicit human review before acceptance.
 
+Folder scope, recursive input non-mutation, output confinement, and declared
+internet policy are protected contribution gates. Follow the canonical folder
+boundary in [GOVERNANCE.md](GOVERNANCE.md) without copying its full protocol
+into contribution guidance.
+
 ## Scripts
 
 Scripts use the Python standard library only, so an installed skill runs with no

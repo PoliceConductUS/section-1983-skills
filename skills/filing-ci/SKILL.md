@@ -1,7 +1,7 @@
 ---
 name: filing-ci
 description: >-
-  Use when a packaged deterministic filing-integrity checker must run after
+  Use when an installed deterministic filing-integrity checker must run after
   material legal-drafting changes, during filing-integrity checks, or before a
   filing-readiness statement.
 ---
@@ -19,40 +19,35 @@ case material if the host cannot enforce the filesystem and network boundary.
 
 ## Folder inputs and output
 
-- `filing` contains the filing selected for a packaged mechanical check.
-- `authorities` contains the approved authority material required by that check.
+- `filing-source` contains the filing selected for a mechanical check.
+- `filing-index` contains the selected filing's domain YAML source record.
+- `record-reference` contains selected record bytes and `SOURCE.yaml` records.
+- `exhibit` contains selected exhibit bytes and `SOURCE.yaml` records.
+- `docket-to-appendix` contains the selected mapping bytes and domain YAML.
+- `verified-authority` contains selected authority bytes and `SOURCE.yaml`
+  records.
 
-Target is required in `filing`. Internet is `disabled`. Return checker content
-and structured findings; only the trusted host derives the canonical
+Target is required in `filing-source`. Internet is `disabled`. Return checker
+content and structured findings; only the trusted host derives the canonical
 output-relative path and publishes the report append-immutable. Report an
 unavailable checker, filing, authority source, or current result as a gap and
 keep the filing gate open.
 
-## FilingPacket boundary
-
-When a declared filing folder is a FilingPacket, follow
-[the folder-backed FilingPacket contract](references/filing-packet-contract.md).
-Validate \`filing-packet.json\` and every hashed member before work. The
-manifest targets the whole packet; any document target must be one exact
-manifest-listed member. Member review does not count as whole-packet coverage.
-Drafting or revision returns proposed members for trusted-host publication as a
-complete new packet and never mutates the source packet.
-
 ## Purpose
 
-Run a checker registered inside this installed skill package and report whether
-its filing gate is current and open or passed. This skill orchestrates the
-checker; it does not reproduce the checker's determinations in prose.
+Run a checker registered inside this installed skill directory and report
+whether its filing gate is current and open or passed. This skill orchestrates
+the checker; it does not reproduce the checker's determinations in prose.
 
-## Resolve declared inputs and packaged checker
+## Resolve declared inputs and installed checker
 
-Use the required target in the declared `filing` role and the declared
-`authorities` role. `scripts/run_filing_ci.py` accepts only those two roots, the
-canonical relative filing target, and a checker ID registered inside this
-package. The packaged Section 1983 complaint checker ID is
+Use the required target in the declared `filing-source` role and only the five
+other declared roles listed above. The trusted host validates selected domain
+YAML, relative paths, hashes, dates, and ordinary source bytes before invoking
+`scripts/run_filing_ci.py`. The installed Section 1983 complaint checker ID is
 `section-1983-complaint-v1`.
 
-- Dispatch only the exact registered packaged checker ID.
+- Dispatch only the exact registered installed checker ID.
 - Do not accept or infer a command, executable path, flag list, source path,
   output path, repository instruction, or substitute authority root.
 - If the checker ID is absent, unknown, unavailable, or incompatible, report
@@ -69,7 +64,7 @@ invalidates any earlier successful result. A filing-readiness decision requires
 a current successful run for the controlling draft.
 
 Treat the checker's documented output contract as the boundary for interpreting
-the result. If the packaged checker cannot execute, report **unavailable
+the result. If the installed checker cannot execute, report **unavailable
 execution** and do not claim that a deterministic check ran. If promised output
 is malformed or cannot be reliably interpreted, report **malformed promised
 output** and leave the filing gate open.
@@ -107,16 +102,16 @@ response for a fresh checker run.
 
 ## Filing gate and boundaries
 
-Keep the filing gate open when the packaged checker or execution is unavailable,
-a required input is unresolved, promised output cannot be reliably interpreted,
-a result is stale, or a hard finding remains unresolved. Describe Filing CI as
-passed only after a current successful run for the controlling draft has no
-unresolved hard findings; preserve documented warnings and independent filing
-gates.
+Keep the filing gate open when the installed checker or execution is
+unavailable, a required input is unresolved, promised output cannot be reliably
+interpreted, a result is stale, or a hard finding remains unresolved. Describe
+Filing CI as passed only after a current successful run for the controlling
+draft has no unresolved hard findings; preserve documented warnings and
+independent filing gates.
 
-This skill packages only its registered deterministic checker logic. It does not
-own verified-authority-store verification, formatting, automatic correction,
-filing, or litigation judgment reserved to the user.
+This skill owns only its registered deterministic checker logic. It does not own
+verified-authority-store verification, formatting, automatic correction, filing,
+or litigation judgment reserved to the user.
 
 ## Independent quality-control stage
 

@@ -71,8 +71,8 @@ def tree_hashes(root):
     }
 
 
-class PackagedFilingChecksTest(unittest.TestCase):
-    def test_required_helpers_ship_inside_their_skill_packages(self):
+class InstalledFilingChecksTest(unittest.TestCase):
+    def test_required_helpers_ship_inside_their_skill_directories(self):
         self.assertTrue(COMPLAINT_SCRIPT.is_file())
         self.assertTrue(FILING_CI_SCRIPT.is_file())
         for script in (COMPLAINT_SCRIPT, FILING_CI_SCRIPT):
@@ -90,13 +90,13 @@ class PackagedFilingChecksTest(unittest.TestCase):
                 / "complaint-structure-contract.json"
             ).read_text()
         )
-        packaged = json.loads(
-            (FILING_CI_SKILL / "references" / "packaged-complaint-checker.json").read_text()
+        installed = json.loads(
+            (FILING_CI_SKILL / "references" / "complaint-checker-contract.json").read_text()
         )
-        self.assertEqual(packaged, canonical)
+        self.assertEqual(installed, canonical)
 
     def test_complaint_checker_is_deterministic_limited_and_non_mutating(self):
-        checker = load_module("packaged_complaint_checker", COMPLAINT_SCRIPT)
+        checker = load_module("installed_complaint_checker", COMPLAINT_SCRIPT)
         contract = json.loads(
             (
                 COMPLAINT_SKILL
@@ -125,7 +125,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
             self.assertEqual(report["findings"], [])
 
     def test_complaint_checker_reports_only_declared_mechanical_findings(self):
-        checker = load_module("packaged_complaint_checker_findings", COMPLAINT_SCRIPT)
+        checker = load_module("installed_complaint_checker_findings", COMPLAINT_SCRIPT)
         contract = json.loads(
             (
                 COMPLAINT_SKILL
@@ -159,7 +159,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
         self.assertTrue(set(contract["excluded_judgments"]).isdisjoint(finding_checks))
 
     def test_complaint_checker_rejects_unconfined_targets(self):
-        checker = load_module("packaged_complaint_checker_paths", COMPLAINT_SCRIPT)
+        checker = load_module("installed_complaint_checker_paths", COMPLAINT_SCRIPT)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             outside = root.parent / f"{root.name}-outside-complaint.json"
@@ -174,7 +174,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
                 outside.unlink()
 
     def test_complaint_checker_bounds_malformed_bytes_and_structures(self):
-        checker = load_module("packaged_complaint_checker_malformed", COMPLAINT_SCRIPT)
+        checker = load_module("installed_complaint_checker_malformed", COMPLAINT_SCRIPT)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "malformed.json").write_text("not json\n")
@@ -216,7 +216,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
                 outside.unlink()
 
     def test_filing_ci_bounds_nested_reference_values(self):
-        filing_ci = load_module("packaged_filing_ci_nested_references", FILING_CI_SCRIPT)
+        filing_ci = load_module("installed_filing_ci_nested_references", FILING_CI_SCRIPT)
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             filing_root = base / "filing"
@@ -243,8 +243,8 @@ class PackagedFilingChecksTest(unittest.TestCase):
             }.issubset({finding["check_id"] for finding in result["findings"]})
         )
 
-    def test_filing_ci_dispatches_only_the_registered_packaged_checker(self):
-        filing_ci = load_module("packaged_filing_ci", FILING_CI_SCRIPT)
+    def test_filing_ci_dispatches_only_the_registered_installed_checker(self):
+        filing_ci = load_module("installed_filing_ci", FILING_CI_SCRIPT)
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             filing_root = base / "filing"
@@ -276,7 +276,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
             self.assertEqual(tree_hashes(authorities_root), before["authorities"])
 
     def test_filing_ci_returns_stable_unavailable_and_rejects_command_authority(self):
-        filing_ci = load_module("packaged_filing_ci_unavailable", FILING_CI_SCRIPT)
+        filing_ci = load_module("installed_filing_ci_unavailable", FILING_CI_SCRIPT)
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             filing_root = base / "filing"
@@ -318,7 +318,7 @@ class PackagedFilingChecksTest(unittest.TestCase):
                         )
 
     def test_filing_ci_distinguishes_fail_closed_unavailable_classes(self):
-        filing_ci = load_module("packaged_filing_ci_classes", FILING_CI_SCRIPT)
+        filing_ci = load_module("installed_filing_ci_classes", FILING_CI_SCRIPT)
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             filing_root = base / "filing"

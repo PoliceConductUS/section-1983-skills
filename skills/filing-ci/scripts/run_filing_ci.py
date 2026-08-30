@@ -1,10 +1,13 @@
 import hashlib
 import json
+import re
 from pathlib import Path, PurePosixPath
 
 
 CHECKER_ID = "section-1983-complaint-v1"
 MAX_FILING_BYTES = 5 * 1024 * 1024
+_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]*$")
+_SHORT_FORM = re.compile(r"^Ex\. [A-Za-z0-9][A-Za-z0-9.-]*$")
 
 
 def _bytes(document):
@@ -28,7 +31,7 @@ def _unavailable(checker_id, reason):
 
 
 def _contract():
-    path = Path(__file__).resolve().parents[1] / "references" / "packaged-complaint-checker.json"
+    path = Path(__file__).resolve().parents[1] / "references" / "complaint-checker-contract.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -149,7 +152,201 @@ def _complaint_findings(document, contract, target):
     return findings
 
 
-def run_filing_ci(filing_root, filing_target, authorities_root, checker_id):
+def _integrity_findings(document, context, target):
+    findings = []
+    if not isinstance(document, dict) or not isinstance(context, dict):
+        return [_finding("filing-structure", target, "filing", "filing context is invalid")]
+
+    sections = document.get("sections", [])
+    owners = document.get("section_owners")
+    if not isinstance(owners, dict):
+        findings.append(
+            _finding("section-owner", target, "section_owners", "section ownership must be an object")
+        )
+        owners = {}
+    for section in sections if isinstance(sections, list) else []:
+        owner = owners.get(section)
+        if not isinstance(owner, str) or not owner.strip():
+            findings.append(
+                _finding(
+                    "section-owner",
+                    target,
+                    f"section_owners.{section}",
+                    "each declared section requires one owner",
+                )
+            )
+
+    exhibit_ids = set(context.get("exhibit_ids", []))
+    exhibit_references = document.get("exhibit_references")
+    if not isinstance(exhibit_references, list):
+        findings.append(
+            _finding(
+                "exhibit-reference",
+                target,
+                "exhibit_references",
+                "exhibit references must be an array",
+            )
+        )
+        exhibit_references = []
+    for index, reference in enumerate(exhibit_references):
+        location = f"exhibit_references[{index}]"
+        if not isinstance(reference, dict):
+            findings.append(
+                _finding("exhibit-reference", target, location, "exhibit reference must be an object")
+            )
+            continue
+        exhibit_id = reference.get("exhibit_id")
+        if exhibit_id not in exhibit_ids:
+            findings.append(
+                _finding(
+                    "exhibit-reference",
+                    target,
+                    f"{location}.exhibit_id",
+                    "exhibit source is not selected",
+                )
+            )
+        start = reference.get("paragraph_start")
+        end = reference.get("paragraph_end")
+        if (
+            type(start) is not int
+            or type(end) is not int
+            or start < 1
+            or end < start
+        ):
+            findings.append(
+                _finding(
+                    "exhibit-paragraph-range",
+                    target,
+                    location,
+                    "exhibit paragraph range must be positive and ordered",
+                )
+            )
+        short_form = reference.get("short_form")
+        if not isinstance(short_form, str) or _SHORT_FORM.fullmatch(short_form) is None:
+            findings.append(
+                _finding(
+                    "internal-short-form",
+                    target,
+                    f"{location}.short_form",
+                    "exhibit short form must use Ex. plus a stable label",
+                )
+            )
+
+    docket_entries = context.get("docket_entries", [])
+    docket_citations = document.get("docket_citations")
+    if not isinstance(docket_citations, list):
+        findings.append(
+            _finding(
+                "docket-appendix-consistency",
+                target,
+                "docket_citations",
+                "docket citations must be an array",
+            )
+        )
+        docket_citations = []
+    for index, citation in enumerate(docket_citations):
+        matched = False
+        if isinstance(citation, dict):
+            for entry in docket_entries:
+                if (
+                    citation.get("docket_entry") == entry["docket_entry"]
+                    and citation.get("docket_page") == entry["docket_page"]
+                    and type(citation.get("appendix_page")) is int
+                    and entry["appendix_start"]
+                    <= citation["appendix_page"]
+                    <= entry["appendix_end"]
+                ):
+                    matched = True
+                    break
+        if not matched:
+            findings.append(
+                _finding(
+                    "docket-appendix-consistency",
+                    target,
+                    f"docket_citations[{index}]",
+                    "docket citation has no selected appendix mapping",
+                )
+            )
+
+    available_targets = {
+        "authority": set(context.get("authority_ids", [])),
+        "record": set(context.get("record_ids", [])),
+        "exhibit": exhibit_ids,
+        "docket": set(context.get("docket_ids", [])),
+    }
+    citations = document.get("persistent_citations")
+    if not isinstance(citations, list):
+        findings.append(
+            _finding(
+                "persistent-citation-id",
+                target,
+                "persistent_citations",
+                "persistent citations must be an array",
+            )
+        )
+        citations = []
+    seen_ids = set()
+    for index, citation in enumerate(citations):
+        location = f"persistent_citations[{index}]"
+        if not isinstance(citation, dict):
+            findings.append(
+                _finding("persistent-citation-id", target, location, "citation must be an object")
+            )
+            continue
+        citation_id = citation.get("id")
+        if (
+            not isinstance(citation_id, str)
+            or _IDENTIFIER.fullmatch(citation_id) is None
+            or citation_id in seen_ids
+        ):
+            findings.append(
+                _finding(
+                    "persistent-citation-id",
+                    target,
+                    f"{location}.id",
+                    "citation ID must be stable and unique",
+                )
+            )
+        else:
+            seen_ids.add(citation_id)
+        citation_type = citation.get("type")
+        citation_target = citation.get("target")
+        if (
+            citation_type not in available_targets
+            or citation_target not in available_targets.get(citation_type, set())
+            or citation.get("status") != "resolved"
+            or not isinstance(citation.get("visible_text"), str)
+            or not citation["visible_text"].strip()
+        ):
+            findings.append(
+                _finding(
+                    "persistent-citation-target",
+                    target,
+                    location,
+                    "citation target or resolution state is unavailable",
+                )
+            )
+
+    gates = document.get("filing_gates")
+    if not isinstance(gates, list):
+        findings.append(
+            _finding("open-filing-gate", target, "filing_gates", "filing gates must be an array")
+        )
+        gates = []
+    for index, gate in enumerate(gates):
+        if not isinstance(gate, dict) or gate.get("status") != "closed":
+            findings.append(
+                _finding(
+                    "open-filing-gate",
+                    target,
+                    f"filing_gates[{index}]",
+                    "filing gate remains open or malformed",
+                )
+            )
+    return findings
+
+
+def run_filing_ci(filing_root, filing_target, authorities_root, checker_id, context=None):
     if checker_id != CHECKER_ID:
         return _unavailable(checker_id, "checker-unavailable")
     try:
@@ -177,8 +374,11 @@ def run_filing_ci(filing_root, filing_target, authorities_root, checker_id):
     try:
         contract = _contract()
         findings = _complaint_findings(document, contract, target)
+        if context is not None:
+            findings.extend(_integrity_findings(document, context, target))
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
         return _unavailable(checker_id, "unavailable-execution")
+    findings = sorted(findings, key=lambda finding: finding["finding_id"])
     status = "failed" if findings else "passed"
     report = {
         "schema_version": 1,
@@ -186,7 +386,7 @@ def run_filing_ci(filing_root, filing_target, authorities_root, checker_id):
         "status": status,
         "target": target,
         "target_sha256": hashlib.sha256(content).hexdigest(),
-        "authority_role": "authorities",
+        "authority_role": "verified-authority",
         "findings": findings,
     }
     return {

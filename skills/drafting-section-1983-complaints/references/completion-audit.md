@@ -31,6 +31,15 @@ one function: an element, an actual defense premise, a material chronology
 function, or a candor/preservation function. A paragraph without a permitted
 function must be removed from filed text or moved to internal chronology.
 
+Fail the audit when the court must search several factual sections and construct
+the fact-to-element application; when actors with different acts, stages, or
+knowledge share broad incorporation without closed individual applications; when
+a qualified-immunity paragraph gives only a paragraph range and conclusion; when
+later-only facts enter an earlier relevant-time knowledge set without an express
+statement excluding them from that earlier knowledge set; or when a supporting
+brief must cure a missing complaint-level application. Every unresolved required
+component is filing-critical.
+
 A count is complete only if:
 
 - [ ] when the unknown and new-defendant limitations gate applies, every
@@ -74,6 +83,11 @@ A count is complete only if:
 - [ ] every claim–defendant–challenged-act mapping satisfies all applicable
       fields and the fail-closed disposition in the canonical checklist in the
       complaint contract;
+- [ ] every claim–Defendant–challenged-act unit identifies its own incorporated
+      factual paragraphs and directly supplies the challenged act and time,
+      then-known decisive facts, disputed element, fact-to-element application,
+      later-fact boundary, personal causal role, injury, and both QI-prong
+      applications when qualified immunity applies;
 - [ ] the count's Standard states the governing test in the controlling
       authority's own formulation, faithful and not loosely paraphrased, and
       each test, element, factor, or offense element carries its own verified

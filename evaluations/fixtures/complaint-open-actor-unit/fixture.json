@@ -1,0 +1,55 @@
+{
+  "id": "complaint-open-actor-unit",
+  "synthetic": true,
+  "target_skill": "drafting-false-arrest-complaints",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "paragraph-range-without-application",
+      "candidate": "regression-open-actor-unit.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Count I — False Arrest",
+      "Officer Alder",
+      "Officer Birch",
+      "Later-Fact Boundary",
+      "Causation and Injury"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "paragraph-range-without-application",
+        "pattern": "(?is)the relevant facts are pleaded in paragraphs?\\s+\\d+\\s*[-–—]\\s*\\d+"
+      }
+    ],
+    "required_citations": ["ACTOR-FACTS", "ACTOR-AUTHORITY"]
+  },
+  "rubric": [
+    {
+      "id": "actor-specific-incorporation",
+      "description": "Each officer unit identifies its own incorporated factual paragraphs instead of relying on omnibus incorporation or a broad paragraph range."
+    },
+    {
+      "id": "relevant-time-element-application",
+      "description": "Each officer unit states the facts known to that officer at the challenged seizure point and directly applies those facts to entry, notice, probable cause, and arguable probable cause."
+    },
+    {
+      "id": "later-fact-boundary",
+      "description": "The later report and charging decision have an express limited later function and do not enter either officer's earlier knowledge set."
+    },
+    {
+      "id": "personal-causation-and-injury",
+      "description": "Each officer's personal causal stage and resulting loss of liberty are stated separately."
+    },
+    {
+      "id": "both-qualified-immunity-prongs",
+      "description": "Each officer unit applies QI prong one and QI prong two, including conduct-specific fair warning from the approved pre-event authority."
+    }
+  ]
+}

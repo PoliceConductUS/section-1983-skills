@@ -189,6 +189,39 @@ unit. It SHALL NOT use an opaque composite percentage as the opinion.
 - **THEN** the affected component is `indeterminate` or incomplete, the missing
   connection is identified, and no edge is invented
 
+### Requirement: Verified authority pinpoint and exact-text resolution
+
+Every authority proposition used in a graph assessment SHALL resolve from the
+proposition node through its authority reference to a verified authority unit,
+that unit's source metadata, the canonical opinion artifact and matching hash,
+the cited pinpoint, and an exact matching passage in a provenance-linked text
+representation. The assessment SHALL record the matched text and stable source
+locator. A citation string, reporter pinpoint, graph label, or semantic near
+match alone SHALL NOT satisfy this requirement.
+
+#### Scenario: Pinpoint and exact passage resolve
+
+- **WHEN** the authority reference, verified source metadata, canonical opinion
+  hash, provenance-linked text, pinpoint, and exact passage all resolve
+- **THEN** the authority connection is `resolved` and the assessment records the
+  artifact identities, hashes, pinpoint, exact text, locator, and any
+  deterministic normalization applied
+
+#### Scenario: Citation exists but source text does not match
+
+- **WHEN** an authority proposition supplies a citation and pinpoint but the
+  verified source has no exact matching passage at that pinpoint
+- **THEN** the authority connection is `text_mismatch` or `pinpoint_unresolved`,
+  the dependent component is incomplete, and the evaluator does not substitute a
+  semantic or fuzzy match
+
+#### Scenario: Derived opinion text lacks provenance
+
+- **WHEN** exact text appears in a derived representation that is not linked by
+  verified provenance to the hashed canonical opinion
+- **THEN** the representation is unusable for authority resolution and the
+  dependent component remains incomplete
+
 ### Requirement: Stable graph fallback states
 
 Graph assessment SHALL return exactly one of `completed`, `partial`,

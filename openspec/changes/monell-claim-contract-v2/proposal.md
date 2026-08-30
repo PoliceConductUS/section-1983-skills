@@ -13,6 +13,9 @@ Monell analysis needed to test a Section 1983 claim.
 - Add a narrow install-local validator for the version-2 handoff.
 - Permit optional read-only legal assessment from a valid CaseGraph stored on
   disk, without invoking a CaseGraph CLI.
+- Require graph-used authority propositions to resolve to the verified opinion
+  artifact, pinpoint, and exact matching passage rather than accepting a
+  citation string alone.
 - Give Filing CI distinct drafting and filing modes and explicit graph states.
 
 ## Capabilities

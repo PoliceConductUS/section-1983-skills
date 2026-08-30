@@ -73,6 +73,21 @@ invoking a CaseGraph CLI or writing to the graph.
 - **THEN** the planner reports the exact assessment status, continues with
   source-bounded planning when possible, and does not invent graph connections
 
+### Requirement: Authority use requires verified pinpoint text
+
+When the planner relies on a graph authority proposition, it SHALL resolve the
+proposition to the verified authority source, canonical opinion artifact and
+hash, cited pinpoint, and exact matching text. If that chain is incomplete, the
+planner SHALL report the authority connection as unresolved and SHALL NOT use
+the graph label as verified support.
+
+#### Scenario: Graph proposition has only a citation label
+
+- **WHEN** a proposition node identifies a case and pinpoint but cannot resolve
+  the verified opinion artifact and exact matching passage
+- **THEN** the planner treats the authority connection as incomplete and states
+  the missing artifact, provenance, pinpoint, or text link
+
 ### Requirement: Deterministic planning handoff
 
 The planner SHALL return one stable record per candidate path with its path ID,

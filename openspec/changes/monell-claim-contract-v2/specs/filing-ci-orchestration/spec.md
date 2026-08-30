@@ -75,3 +75,17 @@ assessment SHALL NOT be converted into an unqualified pass.
 - **WHEN** the structural result passes but graph assessment is
   `not_run_invalid`
 - **THEN** both states remain visible and filing mode exits nonzero
+
+### Requirement: Authority resolution remains visible
+
+Filing CI SHALL preserve every authority-resolution status supplied by the graph
+assessment. It SHALL NOT treat a citation or pinpoint string as resolved unless
+the assessment identifies the verified opinion artifact and hash and an exact
+matching passage at the cited pinpoint.
+
+#### Scenario: Used authority has no exact source match
+
+- **WHEN** an assessed component relies on an authority proposition whose
+  pinpoint or exact-text resolution is missing, ambiguous, or nonmatching
+- **THEN** Filing CI reports the unresolved authority connection and preserves
+  the affected component as incomplete or indeterminate

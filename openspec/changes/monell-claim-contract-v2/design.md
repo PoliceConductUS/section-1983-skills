@@ -29,6 +29,8 @@ evaluator must consume that representation directly and read-only.
 - Separate deterministic contract validation from reasoned legal assessment.
 - Use a valid on-disk CaseGraph when available and expose exact fallback states
   when it is unavailable or unusable.
+- Resolve every authority proposition used by the assessment to the verified
+  opinion artifact, cited pinpoint, and exact matching source passage.
 - Produce traceable opinions under an identified procedural lens without
   presenting them as court findings or historical adjudications.
 
@@ -170,6 +172,11 @@ evaluator verifies:
 - every reference traversed for the assessment resolves;
 - source paths and hashes are present where the conclusion depends on source
   content;
+- every used authority proposition resolves through its `authorityRef` to one
+  verified authority unit, that unit's `SOURCE.yaml`, the canonical opinion
+  artifact and matching SHA-256, and a provenance-linked text representation;
+- every used authority pinpoint resolves to an exact passage in that text
+  representation, with the matched text and page or stable locator recorded;
 - the evaluated pleading or draft fingerprint matches;
 - authority propositions identify their authority and case-specific posture;
 - procedural context, relevant date, and governing jurisdiction are present; and
@@ -180,6 +187,16 @@ reference, path escape, or pleading-fingerprint mismatch prevents use of the
 affected graph slice. Unrelated graph defects are reported but do not invalidate
 an otherwise independent slice. A structurally valid slice with missing
 substantive nodes is incomplete, not invalid.
+
+Authority resolution is fail-closed. Whitespace, Unicode punctuation, and PDF
+line-break normalization may be recorded and applied deterministically, but
+semantic or fuzzy similarity does not count as an exact match. If the canonical
+opinion has no usable text layer, the evaluator may use a derived text artifact
+only when `SOURCE.yaml` or another verified provenance record connects that
+representation to the hashed canonical opinion. A missing artifact, hash
+mismatch, unresolved pinpoint, ambiguous multiple match, or nonmatching passage
+makes that authority connection incomplete and prevents a completed opinion for
+the component that depends on it.
 
 The evaluator never edits graph files, follows an unresolved write instruction,
 or treats graph labels as self-proving. Each proposition retains its graph
@@ -210,6 +227,14 @@ Each element or path component receives:
   `likely_insufficient`, or `indeterminate`; and
 - an explanation citing the supporting path, contrary path, and missing
   connection.
+
+Each authority proposition used in that explanation also receives an
+`authority_resolution` record containing the graph proposition UID, authority
+UID, verified-unit path, source-metadata path, canonical opinion path and
+SHA-256, text-representation path and SHA-256, cited pinpoint, exact matched
+text, stable match locator, normalization applied, and one of `resolved`,
+`missing`, `hash_mismatch`, `pinpoint_unresolved`, `text_mismatch`, or
+`ambiguous_match`.
 
 The report may include transparent coverage counts, but no opaque composite
 percentage or unstated weighting controls the opinion.
@@ -279,6 +304,10 @@ classification, OpenSpec validation, the evaluation corpus, formatting, and
   separately.
 - **A partial graph could be mistaken for an adverse merits conclusion.** → Use
   `partial` and `indeterminate`; inventory missing connections.
+- **A citation label could be mistaken for verified authority support.** →
+  Require artifact, hash, pinpoint, and exact-text resolution for every
+  authority proposition used in an assessment; otherwise keep the component
+  incomplete.
 - **A structural pass could be mistaken for legal sufficiency.** → Keep the two
   result layers and labels separate in machine and human output.
 - **Alternative Monell paths could be collapsed.** → Require stable path IDs and

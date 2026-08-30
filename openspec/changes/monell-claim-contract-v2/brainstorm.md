@@ -47,6 +47,11 @@ The user approved the third approach and a strict version-2 migration.
 - Treat a missing, invalid, incompatible, stale, or incomplete graph as an
   explicit assessment state. Never silently convert it into a merits pass.
 - Keep all graph access read-only.
+- Require every authority proposition used in an assessment to resolve through
+  the graph to the verified authority unit, its `SOURCE.yaml`, the canonical
+  opinion artifact and hash, the cited pinpoint, and an exact matching passage
+  in a provenance-linked text representation. A citation label or pinpoint
+  string alone is incomplete.
 
 ## Monell paths
 
@@ -70,10 +75,13 @@ The CaseGraph codebase is incomplete and is not a runtime dependency. The
 optional evaluator consumes the graph already stored on disk. A valid graph
 slice has parseable recognized envelopes, unique and matching UIDs, resolvable
 claim-relevant references, source and authority provenance, the required
-procedural context, and a complaint fingerprint matching the evaluated draft.
-Unrelated graph defects do not invalidate a claim slice, but they remain
-reported. Missing relevant nodes produce an incomplete or indeterminate
-assessment rather than invented connections.
+procedural context, and a complaint fingerprint matching the evaluated draft. An
+authority proposition is usable only when its authority reference resolves to a
+verified case source, the canonical opinion bytes match the declared hash, and
+the pinpoint resolves to exact matching text in a verified or provenance-linked
+representation of that opinion. Unrelated graph defects do not invalidate a
+claim slice, but they remain reported. Missing relevant nodes produce an
+incomplete or indeterminate assessment rather than invented connections.
 
 ## Open questions
 

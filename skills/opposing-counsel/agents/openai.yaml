@@ -1,0 +1,6 @@
+interface:
+  display_name: Opposing Counsel
+  short_description: Run a bounded source-backed defense attack
+  default_prompt: >-
+    Use $opposing-counsel to run the fixed opposing-counsel-simulation role
+    against one selected filing and validated source-documented counsel profile.

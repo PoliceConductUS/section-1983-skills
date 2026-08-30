@@ -89,6 +89,20 @@ APPROVED_FOLDER_CONTRACTS = {
         [],
         {"acquisition": "authorized", "compilation": "disabled"},
     ),
+    "judicial-reviewer": folder_contract(
+        "judicial-reviewer",
+        ["profile", "filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
+    "opposing-counsel": folder_contract(
+        "opposing-counsel",
+        ["profile", "filing", "approved-sources"],
+        "required",
+        ["filing"],
+        "disabled",
+    ),
     "drafting-false-arrest-complaints": folder_contract(
         "drafting-false-arrest-complaints",
         ["record", "authorities", "filing"],

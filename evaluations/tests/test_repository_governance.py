@@ -1372,6 +1372,7 @@ description: Use when independently auditing a synthetic artifact.
                 "building-defense-counsel-overlays",
                 "building-judicial-reasoning-profiles",
                 "building-litigation-alignment-overlays",
+                "collecting-legal-authority-sources",
                 "collecting-police-policy-sources",
             ),
         )

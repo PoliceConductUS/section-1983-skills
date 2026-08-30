@@ -22,13 +22,18 @@ case material if the host cannot enforce the filesystem and network boundary.
 
 - `filing` contains the canonical draft selected for review.
 - `approved-sources` contains the exact source material permitted in the review
-  packet.
+  and the applicable domain-owned source-documentation YAML.
+
+Validate each selected source and YAML record under
+[the approved-source documentation contract](references/approved-source-documentation.md).
 
 Target is required in `filing`. Internet is `authorized` only for the approved
-review provider. Return categorized report bytes and structured findings; only
-the trusted host derives the canonical output-relative path and publishes the
-report append-immutable. Report unavailable filing, source, provider, or
-validation material as a gap without broadening the input set.
+review provider. The trusted host selects ordinary files from both input folders
+and dispatches them through the shared static-role launcher. Return categorized
+report bytes and structured findings; only the trusted host derives the
+canonical output-relative path and publishes the report append-immutable. Report
+unavailable filing, source, provider, or validation material as a gap without
+broadening the input set.
 
 ## FilingPacket boundary
 
@@ -62,39 +67,32 @@ The packet contains exactly `draft`, `document_family`, `sources`, `skill`,
 drafting history, redlines, strategy or control conclusions, prior reviews,
 checker output or results, and inherited conversation or session state.
 
-Use the launcher's built-in trusted OpenAI mode. Supply the model explicitly,
-keep `OPENAI_API_KEY` in the environment, and send the packet through standard
-input. The declared `filing` role root contains the selected filing. The
-declared `approved-sources` role root contains every exact source byte embedded
-in the packet. A required filing target selects one canonical relative file
-inside `filing`. Internet is authorized for this provider dispatch.
+Use the fixed adversarial role definition supplied by
+`scripts/adversarial_review_role.py` through the shared static-role launcher.
+The declared `filing` role root contains the selected filing. The declared
+`approved-sources` role root contains every exact selected source byte and its
+domain-owned source-documentation YAML. A required filing target selects one
+canonical relative file inside `filing`. Internet is authorized only for the
+fixed provider adapter.
 
-```bash
-python3 skills/adversarial-filing-review/scripts/launch_review.py \
-  --trusted-openai \
-  --model "$OPENAI_REVIEW_MODEL" \
-  --filing-root "$FILING_ROOT" \
-  --approved-sources-root "$APPROVED_SOURCES_ROOT" \
-  --filing-target "$FILING_TARGET" \
-  --internet-policy authorized \
-  < "$REVIEW_PACKET"
-```
+The trusted host validates required YAML, source identities, folder-relative
+references, content fingerprints, checked-through dates, and the filing target
+before binding the role. The launcher sends one path-free bounded request to a
+fresh process whose working directory and all temporary paths are beneath
+`<output-folder>/temp/`. The adapter sends one stateless provider request with
+no tools, storage, conversation, session continuation, filesystem, repository,
+or browser access. The reviewer has no capabilities. Neither task text nor
+source data can select the adapter, add commands, or alter role behavior. The
+child receives no input root, project, version, repository, or ambient-workspace
+path.
 
-The trusted adapter sends one stateless request with no tools, storage,
-conversation, session continuation, filesystem, repository, or browser access.
-The reviewer has no capabilities beyond the embedded packet. The adapter
-validates the complete packet, filing target, approved source membership, and
-fingerprints before dispatch. It has no arbitrary-command API and accepts no
-project, version, artifact, or output path.
-
-The processor returns report bytes, structured findings, and validated
-internet-source records. It never selects an output path, opens an output
-folder, or writes a report. Only the trusted host derives the canonical path,
-builds the metadata envelope, publishes through the shared writer, and records
-the terminal append-immutable receipt. Missing credentials, provider failure, or
-an invalid provider response returns only an honest, bounded
-`independent review unavailable` report. Do not simulate the review in the
-drafting context or relabel an unavailable result as completed.
+The role-specific validator returns one proposed advisory report artifact. It
+never opens an output folder or writes a report. Only the trusted host derives
+the canonical publication path, builds the metadata envelope, publishes through
+the shared writer, and records the terminal append-immutable receipt. Missing
+credentials, provider failure, or an invalid provider response returns only an
+honest, bounded `independent review unavailable` result. Do not simulate the
+review in the drafting context or relabel an unavailable result as completed.
 
 ## Apply the attack checklist
 

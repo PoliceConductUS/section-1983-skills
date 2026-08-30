@@ -31,6 +31,19 @@ CONTRACTS = {
         [],
         "disabled",
     ),
+    "assessing-police-policy-compliance": (
+        [
+            "policy-catalog",
+            "actor",
+            "event",
+            "phase",
+            "case-record",
+            "assessment-scope",
+        ],
+        "none",
+        [],
+        "disabled",
+    ),
     "audit-authorities": (
         ["filing-source", "verified-authority"],
         "required",

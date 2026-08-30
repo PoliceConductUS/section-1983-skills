@@ -44,7 +44,7 @@
       },
       {
         "id": "retroactive-notice",
-        "pattern": "(?is)post-event.*supplies pre-event notice"
+        "pattern": "(?is)post-event.*supplies\\s+pre-event notice"
       },
       {
         "id": "citation-string-only",

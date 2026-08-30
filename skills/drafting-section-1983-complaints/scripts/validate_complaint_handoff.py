@@ -27,6 +27,10 @@ RESOLUTION_STATUSES = {
     "text_mismatch",
     "ambiguous_match",
 }
+ELEMENT_COVERAGE = {"satisfied", "partial", "missing", "not_applicable"}
+CONNECTION_QUALITY = {"direct", "strong_supported_inference", "plausible_inference", "weak_inference", "unsupported", "contradicted"}
+CONFIDENCE = {"high", "medium", "low"}
+OPINIONS = {"likely_sufficient", "plausibly_sufficient_but_vulnerable", "likely_insufficient", "indeterminate"}
 COMMON_COUNT_FIELDS = (
     "count_id",
     "claim",
@@ -388,6 +392,52 @@ def validate_handoff(data, base_dir=None, mode="drafting"):
             status = "not_run_stale"
         if assessed_ids != expected_ids:
             assessment_findings.append(finding("assessment_claim_coverage_mismatch", "casegraph_assessment.claim_unit_ids", "Assessment does not cover every and only current claim unit."))
+        if not is_present(assessment, "graph_api_version"):
+            assessment_findings.append(finding("missing_graph_api_version", "casegraph_assessment.graph_api_version", "Assessment receipt must identify the on-disk graph API version."))
+        graph_files = assessment.get("graph_files")
+        if not isinstance(graph_files, list) or not graph_files:
+            assessment_findings.append(finding("missing_graph_file_receipt", "casegraph_assessment.graph_files", "Assessment receipt must fingerprint every graph file used."))
+        else:
+            for file_index, graph_file in enumerate(graph_files):
+                file_location = f"casegraph_assessment.graph_files[{file_index}]"
+                if not isinstance(graph_file, dict) or not is_present(graph_file, "path") or not is_present(graph_file, "sha256"):
+                    assessment_findings.append(finding("invalid_graph_file_receipt", file_location, "Graph-file receipt requires path and SHA-256."))
+                    continue
+                graph_path = resolve_file(base_dir, graph_file["path"])
+                if graph_path is None or not graph_path.is_file():
+                    assessment_findings.append(finding("missing_graph_file", f"{file_location}.path", "Graph file is missing or outside the assessment boundary."))
+                elif file_sha256(graph_path) != str(graph_file["sha256"]).lower():
+                    assessment_findings.append(finding("graph_file_hash_mismatch", f"{file_location}.sha256", "Graph-file hash does not match the assessed bytes."))
+        claim_assessments = assessment.get("claim_assessments")
+        if not isinstance(claim_assessments, list) or not claim_assessments:
+            assessment_findings.append(finding("missing_claim_assessments", "casegraph_assessment.claim_assessments", "Assessment receipt must include reasoned records for every claim unit."))
+        else:
+            receipt_ids = set()
+            for claim_index, claim_assessment in enumerate(claim_assessments):
+                claim_location = f"casegraph_assessment.claim_assessments[{claim_index}]"
+                if not isinstance(claim_assessment, dict):
+                    assessment_findings.append(finding("invalid_claim_assessment", claim_location, "Claim assessment must be an object."))
+                    continue
+                require_fields(claim_assessment, ("claim_unit_id", "procedural_lens", "components"), "missing_claim_assessment_field", claim_location, assessment_findings)
+                receipt_ids.add(claim_assessment.get("claim_unit_id"))
+                components = claim_assessment.get("components")
+                if not isinstance(components, list) or not components:
+                    assessment_findings.append(finding("missing_component_assessment", f"{claim_location}.components", "Each claim assessment requires component records."))
+                    continue
+                for component_index, component in enumerate(components):
+                    component_location = f"{claim_location}.components[{component_index}]"
+                    if not isinstance(component, dict):
+                        assessment_findings.append(finding("invalid_component_assessment", component_location, "Component assessment must be an object."))
+                        continue
+                    require_fields(component, ("component_id", "element_coverage", "connection_quality", "source_quality", "procedural_usability", "confidence", "opinion", "explanation", "supporting_path", "authority_resolution_refs"), "missing_component_assessment_field", component_location, assessment_findings)
+                    for optional_empty_field in ("contrary_path", "missing_connection"):
+                        if optional_empty_field not in component:
+                            assessment_findings.append(finding("missing_component_assessment_field", f"{component_location}.{optional_empty_field}", f"Component assessment must record {optional_empty_field}, even when empty."))
+                    for field, allowed in (("element_coverage", ELEMENT_COVERAGE), ("connection_quality", CONNECTION_QUALITY), ("confidence", CONFIDENCE), ("opinion", OPINIONS)):
+                        if component.get(field) not in allowed:
+                            assessment_findings.append(finding("invalid_component_assessment_value", f"{component_location}.{field}", f"Unrecognized {field} value."))
+            if receipt_ids != expected_ids:
+                assessment_findings.append(finding("claim_assessment_record_mismatch", "casegraph_assessment.claim_assessments", "Reasoned claim-assessment records do not cover every and only current claim unit."))
         resolutions = assessment.get("authority_resolutions", [])
         if not isinstance(resolutions, list):
             assessment_findings.append(finding("invalid_authority_resolutions", "casegraph_assessment.authority_resolutions", "Authority resolutions must be an array."))

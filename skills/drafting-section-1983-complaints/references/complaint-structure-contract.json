@@ -149,6 +149,33 @@
     "not_run_incompatible",
     "not_run_stale"
   ],
+  "casegraph_assessment_receipt_fields": [
+    "status",
+    "document_sha256",
+    "claim_unit_ids",
+    "graph_api_version",
+    "graph_files",
+    "claim_assessments",
+    "authority_resolutions"
+  ],
+  "component_assessment_values": {
+    "element_coverage": ["satisfied", "partial", "missing", "not_applicable"],
+    "connection_quality": [
+      "direct",
+      "strong_supported_inference",
+      "plausible_inference",
+      "weak_inference",
+      "unsupported",
+      "contradicted"
+    ],
+    "confidence": ["high", "medium", "low"],
+    "opinion": [
+      "likely_sufficient",
+      "plausibly_sufficient_but_vulnerable",
+      "likely_insufficient",
+      "indeterminate"
+    ]
+  },
   "authority_resolution_statuses": [
     "resolved",
     "missing",

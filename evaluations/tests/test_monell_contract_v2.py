@@ -27,6 +27,10 @@ def sha256_text(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def file_sha256_for_test(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def common_count():
     return {
         "count_id": "count-1",
@@ -206,6 +210,13 @@ class MonellContractV2Tests(unittest.TestCase):
         self.assertIn("unresolved_temporal_fact_reference", codes)
         self.assertIn("unmapped_supporting_fact", codes)
 
+        count["monell_paths"] = [formal_policy_path()]
+        result = validator.validate_handoff(handoff(count))
+        self.assertIn(
+            "principal_decision_verification_unavailable",
+            {item["code"] for item in result["structural_validation"]["findings"]},
+        )
+
     def test_exact_authority_passage_and_hash_are_verified(self):
         validator = load_validator()
         with tempfile.TemporaryDirectory() as directory:
@@ -213,6 +224,8 @@ class MonellContractV2Tests(unittest.TestCase):
             text = "Page 12\nA municipality is liable only when its policy is the moving force.\n"
             source = root / "opinion.txt"
             source.write_text(text, encoding="utf-8")
+            graph_file = root / "root.yaml"
+            graph_file.write_text("apiVersion: casegraph.policeconduct.org/v1alpha1\n", encoding="utf-8")
             resolution = {
                 "status": "resolved",
                 "proposition_uid": "prop-1",
@@ -232,11 +245,47 @@ class MonellContractV2Tests(unittest.TestCase):
                 "status": "completed",
                 "claim_unit_ids": ["count-1"],
                 "document_sha256": "a" * 64,
+                "graph_api_version": "casegraph.policeconduct.org/v1alpha1",
+                "graph_files": [
+                    {"path": "root.yaml", "sha256": file_sha256_for_test(graph_file)}
+                ],
+                "claim_assessments": [
+                    {
+                        "claim_unit_id": "count-1",
+                        "procedural_lens": "Rule 12(b)(6)",
+                        "components": [
+                            {
+                                "component_id": "element-1",
+                                "element_coverage": "satisfied",
+                                "connection_quality": "direct",
+                                "source_quality": "verified authority",
+                                "procedural_usability": "pleading allegation",
+                                "confidence": "high",
+                                "opinion": "likely_sufficient",
+                                "explanation": "Synthetic resolved component.",
+                                "supporting_path": ["prop-1"],
+                                "contrary_path": [],
+                                "missing_connection": [],
+                                "authority_resolution_refs": ["prop-1"],
+                            }
+                        ],
+                    }
+                ],
                 "authority_resolutions": [resolution],
             }
             result = validator.validate_handoff(handoff(assessment=assessment), root)
             self.assertEqual("completed", result["casegraph_assessment"]["status"])
             self.assertEqual([], result["casegraph_assessment"]["findings"])
+
+            assessment.pop("graph_files")
+            result = validator.validate_handoff(handoff(assessment=assessment), root)
+            self.assertIn(
+                "missing_graph_file_receipt",
+                {item["code"] for item in result["casegraph_assessment"]["findings"]},
+            )
+            assessment["graph_files"] = [
+                {"path": "root.yaml", "sha256": file_sha256_for_test(graph_file)}
+            ]
 
             resolution["exact_matched_text"] = "A semantic near match."
             result = validator.validate_handoff(handoff(assessment=assessment), root)

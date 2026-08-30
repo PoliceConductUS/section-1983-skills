@@ -1,0 +1,33 @@
+{
+  "id": "authority-grounding-inverted-holding",
+  "synthetic": true,
+  "target_skill": "audit-authorities",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "inverts-majority-holding",
+      "candidate": "regression.md",
+      "expected_findings": ["banned-term"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": ["Proposition Audit"],
+    "banned_terms": [
+      {
+        "id": "inverted-holding",
+        "term": "the court held that the officer had reasonable suspicion"
+      }
+    ],
+    "banned_patterns": [],
+    "required_citations": ["INV-OPINION"]
+  },
+  "rubric": [
+    {
+      "id": "preserves-holding-direction",
+      "description": "Records the majority holding without reversing its direction and marks the inverted proposition incorrect."
+    }
+  ]
+}

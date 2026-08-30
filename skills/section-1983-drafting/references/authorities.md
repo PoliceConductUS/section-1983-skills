@@ -24,6 +24,18 @@ Use the first available source, in this order:
 
 ## Rules regardless of source
 
+- Treat legal-AI, RAG, semantic-search, citator, snippet, and generated research
+  as a retrieval lead until an independent audit verifies the exact source. A
+  real citation, working link, source list, or positive treatment symbol does
+  not establish proposition support or current applicability.
+- Split every material generated or filing-near statement into atomic
+  propositions before authority approval. Verify each atomic proposition against
+  the exact source, pinpoint, context, qualifiers, jurisdiction, date, posture,
+  precedential force, and source voice. One citation may support several
+  propositions only when it independently supports every one.
+- Distinguish majority holding, court dicta, party argument, lower-court ruling
+  under review, factual or procedural background, concurrence, dissent, and
+  quoted secondary authority. Do not attribute one voice to another.
 - Never invent a citation, a quotation, a pin cite, or a parenthetical. An
   argument without a citation is weaker; an argument with a false one is
   sanctionable and can sink the case.

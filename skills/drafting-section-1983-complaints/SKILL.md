@@ -59,11 +59,13 @@ amendment proffer, read both install-local canonical references:
 
 - [references/complaint-contract.md](references/complaint-contract.md)
 - [references/complaint-structure-contract.json](references/complaint-structure-contract.json)
+- [references/limitations-record.schema.json](references/limitations-record.schema.json)
 
-The Markdown reference controls the complete general complaint skeleton and
-detailed count contract. The JSON reference defines the install-local mechanical
-check implemented by `scripts/check_complaint.py`; neither the contract nor the
-checker makes a legal judgment.
+The Markdown reference controls the complete general complaint skeleton,
+detailed count contract, and unknown/new-defendant limitations gate. The JSON
+references define the install-local mechanical check and limitations-record
+schema implemented by `scripts/check_complaint.py`; neither the contracts nor
+the checker makes a legal judgment.
 
 If either reference cannot be read, report **complaint contract unavailable**
 and do not draft, revise, or audit the complaint. Do not invent or reconstruct

@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+from datetime import date
 from pathlib import Path, PurePosixPath
 
 
@@ -33,6 +34,17 @@ def _unavailable(checker_id, reason):
 def _contract():
     path = Path(__file__).resolve().parents[1] / "references" / "complaint-checker-contract.json"
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _limitations_schema():
+    path = Path(__file__).resolve().parents[1] / "references" / "limitations-record.schema.json"
+    schema = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        schema.get("$id")
+        != "https://policeconduct.us/schemas/section-1983-limitations-record-v1.json"
+    ):
+        raise ValueError("unexpected limitations schema")
+    return schema
 
 
 def _target(input_root, relative_target):
@@ -83,6 +95,229 @@ def _numbering(values, target, key, check_id, location):
 
 def _valid_paragraph_reference(value, paragraph_numbers):
     return type(value) is int and value in paragraph_numbers
+
+
+def _schema_type(value, expected):
+    return {
+        "object": isinstance(value, dict),
+        "array": isinstance(value, list),
+        "string": isinstance(value, str),
+        "boolean": type(value) is bool,
+        "integer": type(value) is int,
+        "null": value is None,
+    }.get(expected, False)
+
+
+def _resolve_schema(schema, root):
+    reference = schema.get("$ref")
+    if reference is None:
+        return schema
+    if not reference.startswith("#/"):
+        raise ValueError("external schema reference")
+    resolved = root
+    for segment in reference[2:].split("/"):
+        resolved = resolved[segment.replace("~1", "/").replace("~0", "~")]
+    return resolved
+
+
+def _schema_errors(value, schema, root, location):
+    schema = _resolve_schema(schema, root)
+    one_of = schema.get("oneOf")
+    if one_of is not None:
+        matches = [
+            branch
+            for branch in one_of
+            if not _schema_errors(value, branch, root, location)
+        ]
+        return [] if len(matches) == 1 else [f"{location}:oneOf"]
+    if "const" in schema and value != schema["const"]:
+        return [f"{location}:const"]
+    if "enum" in schema and value not in schema["enum"]:
+        return [f"{location}:enum"]
+    expected = schema.get("type")
+    if expected is not None and not _schema_type(value, expected):
+        return [f"{location}:type"]
+
+    errors = []
+    if isinstance(value, dict):
+        required = schema.get("required", [])
+        errors.extend(
+            f"{location}.{field}:required" for field in required if field not in value
+        )
+        properties = schema.get("properties", {})
+        if schema.get("additionalProperties") is False:
+            errors.extend(
+                f"{location}.{field}:additional"
+                for field in value
+                if field not in properties
+            )
+        for field, child in value.items():
+            child_schema = properties.get(field)
+            if child_schema is not None:
+                errors.extend(
+                    _schema_errors(child, child_schema, root, f"{location}.{field}")
+                )
+    elif isinstance(value, list):
+        if len(value) < schema.get("minItems", 0):
+            errors.append(f"{location}:minItems")
+        if schema.get("uniqueItems"):
+            serialized = [
+                json.dumps(item, sort_keys=True, separators=(",", ":"))
+                for item in value
+            ]
+            if len(serialized) != len(set(serialized)):
+                errors.append(f"{location}:uniqueItems")
+        item_schema = schema.get("items")
+        if item_schema is not None:
+            for index, child in enumerate(value):
+                errors.extend(
+                    _schema_errors(child, item_schema, root, f"{location}[{index}]")
+                )
+    elif isinstance(value, str):
+        if len(value) < schema.get("minLength", 0):
+            errors.append(f"{location}:minLength")
+        pattern = schema.get("pattern")
+        if pattern is not None and re.fullmatch(pattern, value) is None:
+            errors.append(f"{location}:pattern")
+        if schema.get("format") == "date":
+            try:
+                parsed = date.fromisoformat(value)
+            except ValueError:
+                errors.append(f"{location}:date")
+            else:
+                if parsed.isoformat() != value:
+                    errors.append(f"{location}:date")
+    return errors
+
+
+def _affected_defendants(gate):
+    affected = set()
+    for entry in gate.get("intended_individuals", []):
+        if not isinstance(entry, dict) or not isinstance(entry.get("defendant_id"), str):
+            continue
+        if (
+            entry.get("identity_status") != "named-serviceable"
+            or entry.get("risk_raised") is True
+            or (
+                entry.get("amendment_action") in {"added", "identified", "substituted"}
+                and entry.get("deadline_status") in {"passed", "unresolved"}
+            )
+        ):
+            affected.add(entry["defendant_id"])
+    return affected
+
+
+def _contains_unresolved(value):
+    if isinstance(value, dict):
+        if value.get("status") == "unresolved":
+            return True
+        if value.get("authority_status") in {
+            "binding-status-unresolved",
+            "unresolved",
+        }:
+            return True
+        if value.get("service_status") == "unresolved":
+            return True
+        if value.get("extension_request_status") == "unresolved":
+            return True
+        return any(_contains_unresolved(child) for child in value.values())
+    if isinstance(value, list):
+        return any(_contains_unresolved(child) for child in value)
+    return False
+
+
+def _limitations_findings(document, target):
+    if not isinstance(document, dict) or "limitations_gate" not in document:
+        return [
+            _finding(
+                "limitations-gate-presence",
+                target,
+                "limitations_gate",
+                "the complaint handoff requires a limitations_gate object",
+            )
+        ]
+    gate = document["limitations_gate"]
+    schema = _limitations_schema()
+    schema_errors = _schema_errors(gate, schema, schema, "limitations_gate")
+    findings = [
+        _finding(
+            "limitations-record-structure",
+            target,
+            error.rsplit(":", 1)[0],
+            "limitations material does not match the installed schema",
+        )
+        for error in sorted(set(schema_errors))
+    ]
+    critical = bool(schema_errors)
+    if not isinstance(gate, dict):
+        return findings
+
+    seen_defendant_ids = set()
+    intended = gate.get("intended_individuals")
+    for index, entry in enumerate(intended if isinstance(intended, list) else []):
+        defendant_id = entry.get("defendant_id") if isinstance(entry, dict) else None
+        if isinstance(defendant_id, str) and defendant_id in seen_defendant_ids:
+            findings.append(
+                _finding(
+                    "limitations-trigger-structure",
+                    target,
+                    f"limitations_gate.intended_individuals[{index}]",
+                    "intended-defendant IDs must be unique",
+                )
+            )
+            critical = True
+        elif isinstance(defendant_id, str):
+            seen_defendant_ids.add(defendant_id)
+
+    affected = _affected_defendants(gate)
+    records = gate.get("records") if isinstance(gate.get("records"), list) else []
+    records_by_defendant = {}
+    seen_record_ids = set()
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            continue
+        defendant_id = record.get("defendant_id")
+        record_id = record.get("record_id")
+        if isinstance(record_id, str) and record_id in seen_record_ids:
+            findings.append(
+                _finding(
+                    "limitations-record-cardinality",
+                    target,
+                    f"limitations_gate.records[{index}]",
+                    "record IDs must be unique",
+                )
+            )
+            critical = True
+        elif isinstance(record_id, str):
+            seen_record_ids.add(record_id)
+        if isinstance(defendant_id, str):
+            records_by_defendant.setdefault(defendant_id, []).append(record)
+    for defendant_id in sorted(affected):
+        matches = records_by_defendant.get(defendant_id, [])
+        if len(matches) != 1:
+            findings.append(
+                _finding(
+                    "limitations-record-cardinality",
+                    target,
+                    f"limitations_gate.records.{defendant_id}",
+                    "each affected intended individual requires one limitations record",
+                )
+            )
+            critical = True
+        elif _contains_unresolved(matches[0]):
+            critical = True
+
+    gaps = gate.get("filing_critical_gaps")
+    if critical or gate.get("status") == "blocked" or (isinstance(gaps, list) and gaps):
+        findings.append(
+            _finding(
+                "limitations-filing-critical-status",
+                target,
+                "limitations_gate.status",
+                "the limitations gate remains blocked or contains unresolved material",
+            )
+        )
+    return findings
 
 
 def _complaint_findings(document, contract, target):
@@ -149,6 +384,7 @@ def _complaint_findings(document, contract, target):
             for value in incorporated
         ):
             findings.append(_finding("incorporation-target", target, f"counts[{index}].incorporated_paragraphs", "incorporated paragraph target is missing"))
+    findings.extend(_limitations_findings(document, target))
     return findings
 
 

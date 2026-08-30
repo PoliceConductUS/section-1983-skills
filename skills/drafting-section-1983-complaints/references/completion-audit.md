@@ -36,6 +36,27 @@ A count is complete only if:
 - [ ] when the unknown and new-defendant limitations gate applies, every
       affected individual has a limitations record that is complete under the
       canonical complaint contract;
+- [ ] every intended individual defendant who remains unnamed, role-only,
+      misnamed, or not serviceable activates the limitations gate even when no
+      deadline has passed and no supplied source, opponent, court, or caller has
+      raised limitations, while an unidentified non-defendant does not;
+- [ ] every affected limitations record preserves source availability, source
+      possession, objective ascertainability with its basis, and actual
+      identification with its source and method as four separate events, without
+      treating one event as proof of another;
+- [ ] pre-limitations, post-filing/pre-identification, and
+      post-identification/pre-service diligence remain separate dated and
+      sourced histories;
+- [ ] record control, requests, responses, denials, and follow-ups identify the
+      actual holder, controller, or recipient and separately state supported
+      municipal, custodian, and individual attribution without imputation;
+- [ ] Rule 15(c)(1)(C) notice, service, and Rule 4(m) extension facts remain
+      separate, and every relied-on authority route states jurisdiction,
+      authority, pinpoint, status, proposition, defendant-specific application,
+      sources, and unresolved status;
+- [ ] the complaint mechanical handoff includes one schema-conforming
+      `limitations_gate` record per affected intended individual and the current
+      installed checker reports no limitations hard finding;
 - [ ] every missing, unsupported, or unresolved required limitations-record
       entry creates an internal filing-critical GAP, and that filing-critical
       GAP blocks filing-ready status without adding an adverse merits

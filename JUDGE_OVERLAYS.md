@@ -77,6 +77,44 @@ Use this source hierarchy:
 Never treat search visibility as the denominator. Seek favorable, unfavorable,
 and adverse and disconfirming evidence under the same declared method.
 
+### CourtListener discovery recipe
+
+Use the CourtListener REST API to discover candidates while preserving the
+source hierarchy above:
+
+1. Resolve the judge identity first with a `type=p` search and prefer the
+   returned stable judge identifier. If only a name-query fallback is possible,
+   document the query and unresolved identity ambiguity.
+2. For opinions, use `type=o` and record opinion authorship through `author_id`
+   or a documented `judge` name search. For dockets or RECAP results, use
+   `type=d` or `type=r` and record docket assignment through `assigned_to_id` or
+   `assignedTo`, and referral through `referred_to_id` or `referredTo`. Do not
+   treat authorship, assignment, and referral as interchangeable.
+3. Narrow by `court_id`, the judge's tenure or other date range, case category,
+   procedural posture, and the research question. `suitNature`, `cause`, Section
+   1983 terms, and police or law-enforcement terms are discovery leads, not
+   inclusion findings.
+4. Verify from primary docket material the judge relationship, Section 1983
+   basis, police or law-enforcement involvement, and relevant posture before
+   inclusion. Give every reviewed candidate a selection or exclusion status and
+   an inspectable reason, including agency-only, unidentified-actor, non-police,
+   non-Section 1983, and unresolved candidates.
+5. Preserve the sanitized query type and parameters, stable result identity and
+   rank, checked date, pagination or cursor identity, and coverage gap. Search
+   visibility and approximate result counts do not establish a complete corpus
+   or denominator.
+
+Never persist API tokens, credentials, cookies, authorization headers, or
+unsanitized request data.
+
+### Optional official fallback
+
+Use PACER or court-specific CM/ECF only as the optional official fallback for
+docket identity, assignment, status, and completeness. Require explicit access
+authorization separately from separate fee approval. Credentials remain
+runtime-only. Without the required authorization, record the coverage gap and do
+not imply that the official docket was checked.
+
 ## 2. Build and validate the corpus
 
 Code one motion-disposition pair as the unit of analysis and link each related

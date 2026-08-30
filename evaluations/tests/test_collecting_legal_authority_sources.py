@@ -44,11 +44,43 @@ def fixture(name):
 def proposal():
     source = fixture("mirror-opinion.json")["source"]
     source["artifact_bytes"] = source.pop("artifact_text").encode()
+    source.update(
+        {
+            "frame_id": "frame-qualified-immunity-notice",
+            "source_system_id": "fictional-official-search",
+            "provider_or_product_id": "fictional-search-v1",
+            "execution_date": "2026-08-25",
+            "retrieval_order": 1,
+            "proposed_legal_role": "candidate pre-event circuit authority",
+            "rejection_reason": None,
+        }
+    )
     return source
 
 
 def gap():
-    return fixture("coverage-gap.json")["gap"]
+    value = fixture("coverage-gap.json")["gap"]
+    value.update(
+        {
+            "frame_id": "frame-qualified-immunity-notice",
+            "known_missingness": "The index omits sealed and unindexed dockets.",
+        }
+    )
+    return value
+
+
+def retrieval_frame():
+    return fixture("retrieval-frame.json")["frame"]
+
+
+def premise_records():
+    return fixture("premises.json")["premises"]
+
+
+def build(records, sources, gaps):
+    return records.build_collection_plan(
+        retrieval_frame(), premise_records(), sources, gaps
+    )
 
 
 def artifact(plan, path):
@@ -84,14 +116,16 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
 
     def test_helper_returns_deterministic_ordinary_files_and_source_yaml(self):
         records = load_module()
-        first = records.build_collection_plan([proposal()], [gap()], "2026-08-25")
-        second = records.build_collection_plan([proposal()], [gap()], "2026-08-25")
+        first = build(records, [proposal()], [gap()])
+        second = build(records, [proposal()], [gap()])
         self.assertEqual(first, second)
         self.assertEqual(
             paths(first),
             [
                 "sources/fictional-opinion-mirror.txt",
                 "sources/fictional-opinion-mirror.SOURCE.yaml",
+                "authority-retrieval-frame.yaml",
+                "authority-retrieval-premises.yaml",
                 "authority-source-candidates.yaml",
                 "authority-source-gaps.yaml",
             ],
@@ -130,7 +164,13 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
             "checked_date": "2026-08-25",
             "coverage_limit": "The bounded query returned no result; nonexistence is not established.",
         }
-        plan = records.build_collection_plan([], [gap(), empty], "2026-08-25")
+        empty.update(
+            {
+                "frame_id": "frame-qualified-immunity-notice",
+                "known_missingness": "The public index may omit docket material.",
+            }
+        )
+        plan = build(records, [], [gap(), empty])
         gaps = yaml.safe_load(
             artifact(plan, "authority-source-gaps.yaml")["bytes"]
         )["gaps"]
@@ -141,7 +181,7 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
 
     def test_changed_bytes_and_untrusted_fields_fail_closed(self):
         records = load_module()
-        plan = records.build_collection_plan([proposal()], [], "2026-08-25")
+        plan = build(records, [proposal()], [])
         changed = copy.deepcopy(plan)
         artifact(changed, "sources/fictional-opinion-mirror.txt")[
             "bytes"
@@ -153,7 +193,7 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
         injected = proposal()
         injected["command"] = ["read", "/undeclared"]
         with self.assertRaises(records.AuthoritySourceError) as captured:
-            records.build_collection_plan([injected], [], "2026-08-25")
+            build(records, [injected], [])
         self.assertEqual(captured.exception.code, "invalid-source-record")
 
     def test_duplicates_mistaken_identity_and_unofficial_sources_stay_explicit(self):
@@ -167,9 +207,10 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
         mistaken["citation_identity"]["status"] = "mistaken"
         mistaken["review_state"] = "rejected"
         mistaken["duplicate_of"] = [mirror["source_id"]]
-        plan = records.build_collection_plan(
-            [mistaken, mirror], [], "2026-08-25"
-        )
+        mistaken["retrieval_order"] = 1
+        mirror["retrieval_order"] = 2
+        mistaken["rejection_reason"] = "wrong-issue"
+        plan = build(records, [mistaken, mirror], [])
         candidates = yaml.safe_load(
             artifact(plan, "authority-source-candidates.yaml")["bytes"]
         )["sources"]
@@ -201,9 +242,8 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
         second["artifact_path"] = "sources/second-opinion.txt"
         second["source_documentation_path"] = "sources/second-opinion.SOURCE.yaml"
         second["result_identity"] = "example-invalid:second-opinion"
-        duplicate_identity = records.build_collection_plan(
-            [proposal(), second], [], "2026-08-25"
-        )
+        second["retrieval_order"] = 2
+        duplicate_identity = build(records, [proposal(), second], [])
         second_documentation = artifact(
             duplicate_identity, "sources/second-opinion.SOURCE.yaml"
         )
@@ -211,6 +251,18 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
         second_yaml["result_identity"] = "example-invalid:fictional-opinion"
         second_documentation["bytes"] = yaml.safe_dump(
             second_yaml, sort_keys=False
+        ).encode()
+        candidate_index = artifact(
+            duplicate_identity, "authority-source-candidates.yaml"
+        )
+        candidate_yaml = yaml.safe_load(candidate_index["bytes"])
+        next(
+            item
+            for item in candidate_yaml["sources"]
+            if item["source_id"] == "src-second-opinion"
+        )["result_identity"] = "example-invalid:fictional-opinion"
+        candidate_index["bytes"] = yaml.safe_dump(
+            candidate_yaml, sort_keys=False
         ).encode()
         with self.assertRaises(records.AuthoritySourceError) as captured:
             records.validate_collection_plan(duplicate_identity)
@@ -274,9 +326,7 @@ class CollectingLegalAuthoritySourcesTest(unittest.TestCase):
             )
             expected_temp = str(output.resolve() / "temp")
             self.assertEqual(run.process_configuration()["cwd"], expected_temp)
-            plan = records.build_collection_plan(
-                [proposal()], [gap()], "2026-08-25"
-            )
+            plan = build(records, [proposal()], [gap()])
             for item in plan["artifacts"]:
                 run.write(
                     item["path"],

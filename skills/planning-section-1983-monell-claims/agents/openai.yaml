@@ -1,0 +1,6 @@
+interface:
+  display_name: "Plan Section 1983 Monell Claims"
+  short_description: "Compare source-bounded municipal-liability paths"
+  default_prompt: >-
+    Use $planning-section-1983-monell-claims to inventory and compare the
+    supported Monell paths without selecting claims for me.

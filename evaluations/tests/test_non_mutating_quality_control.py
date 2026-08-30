@@ -280,7 +280,7 @@ class NonMutatingQualityControlTest(unittest.TestCase):
             }
 
             with self.assertRaises(TypeError):
-                launcher.execute_trusted_review(
+                launcher.execute_review(
                     packet,
                     model="gpt-synthetic",
                     api_key="secret-test-key",

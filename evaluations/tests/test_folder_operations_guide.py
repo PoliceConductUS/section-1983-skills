@@ -32,16 +32,16 @@ FIRST_HOUR_HEADINGS = (
     "## 6. Verify outputs and the terminal manifest",
 )
 OPERATION_OWNERS = {
-    "folder-backed filing packet": "skills/section-1983-drafting/SKILL.md",
+    "ordinary filing folder": "skills/section-1983-drafting/SKILL.md",
     "immutable qc report": "skills/filing-ci/SKILL.md",
     "source-documented profile": "skills/building-defense-counsel-overlays/SKILL.md",
     "research corpus": "skills/studying-rule-59e-decisions/SKILL.md",
     "isolated role run": "skills/adversarial-filing-review/SKILL.md",
 }
 OPERATION_CONTRACTS = {
-    "folder-backed filing packet": (
-        "filing packet inputs",
-        "versioned drafting or audit output",
+    "ordinary filing folder": (
+        "selected ordinary filing inputs",
+        "new drafting or audit output",
     ),
     "immutable qc report": (
         "filing or discovery inputs",
@@ -233,7 +233,7 @@ class FolderOperationsGuideTest(unittest.TestCase):
 
     def test_fenced_markdown_decoys_cannot_supply_headings_or_prose(self):
         decoy = "```markdown\n" + "\n".join(FIRST_HOUR_HEADINGS) + "\n"
-        decoy += "trusted host hashes manifests folder-backed filing packet\n```\n"
+        decoy += "trusted host hashes manifests ordinary filing folder\n```\n"
         prose = prose_markdown(decoy)
         for heading in FIRST_HOUR_HEADINGS:
             with self.subTest(heading=heading):

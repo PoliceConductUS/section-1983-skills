@@ -552,27 +552,29 @@ contract is missing or inverted.
   identify the terminal run manifest
 - **THEN** repository validation exits nonzero and identifies that skill
 
-### Requirement: Public filing workflows preserve packet boundaries
+### Requirement: Public filing workflows use ordinary folders
 
-Public filing-generation and quality-control skills MUST describe a FilingPacket
-as a manifest-listed set of ordinary files under declared folder authority. They
-MUST preserve kind/role separation, source packet immutability, trusted-host
-publication, packet/member target semantics, and complete packet-level gate
-coverage without adding CaseGraph or ambient filesystem authority.
+Public filing-generation and quality-control skills MUST describe ordinary files
+under declared recursive read-only folder authority. A one-file task MUST
+identify the declared input role and folder-relative path. A whole-folder task
+MUST expressly identify the ordinary files in scope and MUST NOT infer
+membership from a folder-wide manifest, loader, registry, or shared folder
+object. Skills MUST preserve input immutability, trusted-host publication,
+explicit targets, exact output-folder writes, and exclusive temporary use of
+`<output-folder>/temp/`.
 
-#### Scenario: A public skill reviews one packet member
+#### Scenario: A public skill reviews one filing
 
-- **WHEN** the caller selects a manifest-listed member rather than the whole
-  packet
-- **THEN** the skill identifies the member by stable document ID and does not
-  silently treat the result as whole-packet coverage
+- **WHEN** the caller selects one role-relative filing target
+- **THEN** the skill reviews only that ordinary file and does not silently treat
+  the result as coverage of sibling files
 
 #### Scenario: A current public filing skill is installed independently
 
 - **WHEN** any currently published skill that drafts or reviews a filing is
   copied without the repository around it
-- **THEN** its package retains the install-local FilingPacket contract and its
-  entrypoint links to that contract
+- **THEN** its entrypoint retains the ordinary filing-folder boundary without a
+  repository-local persistence helper
 
 ### Requirement: Public data workflows use source-documented folders
 

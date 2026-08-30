@@ -33,15 +33,15 @@ trusted host may publish either result append-immutable. Report missing offense,
 seizure, actor, timing, or source material as a gap without supplying it from
 another location.
 
-## FilingPacket boundary
+## Filing folder boundary
 
-When a declared filing folder is a FilingPacket, follow
-[the folder-backed FilingPacket contract](references/filing-packet-contract.md).
-Validate \`filing-packet.json\` and every hashed member before work. The
-manifest targets the whole packet; any document target must be one exact
-manifest-listed member. Member review does not count as whole-packet coverage.
-Drafting or revision returns proposed members for trusted-host publication as a
-complete new packet and never mutates the source packet.
+Filing inputs are ordinary files in declared recursive read-only folders. When
+the task targets one file, identify its declared input role and folder-relative
+path. A whole-folder task must expressly identify the ordinary files in scope;
+there is no folder-wide manifest. Never mutate an input. Return proposed files
+for trusted-host publication directly beneath the exact output folder, and keep
+all cache, extraction, staging, working-directory, and temporary bytes beneath
+`<output-folder>/temp/`.
 
 ## Core principle
 

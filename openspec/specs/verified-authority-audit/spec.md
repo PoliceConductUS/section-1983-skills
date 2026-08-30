@@ -13,8 +13,7 @@ The skill MUST read only one required target inside `filing-source` and selected
 ordinary files inside `verified-authority`. It MUST publish only beneath one
 explicit output folder and MUST use its `temp/` directory for all transient
 work. It MUST NOT require a case-data package, manifest-based input format,
-FilingPacket, graph, CaseGraph, repository, Git, global datastore, or ambient
-workspace.
+graph, CaseGraph, repository, Git, global datastore, or ambient workspace.
 
 #### Scenario: Authority YAML names another root
 

@@ -88,11 +88,12 @@ roles across the stack or enlarges one skill's filesystem or internet authority.
 Output from one skill is available to another only through a new invocation that
 expressly supplies it in the receiving skill's declared input role.
 
-Multi-document filing workflows use
-[folder-backed FilingPackets](FILING_PACKETS.md): ordinary files plus one strict
-manifest that fixes member identity, order, kind, packet role, path, hash, and
-revision provenance. Source packets remain read-only; the trusted host publishes
-a complete new packet beneath the explicit output folder.
+Filing workflows use ordinary filing folders. Inputs are recursively read-only,
+and one file is selected by its declared input role and folder-relative path
+when the task targets a single file. There is no folder-wide manifest, loader,
+registry, or inferred membership. Generated files are published directly beneath
+the exact caller-selected output folder, and every temporary byte stays beneath
+`<output-folder>/temp/`.
 
 Profile, overlay, and research-corpus workflows use
 [source-documented folders](SOURCE_DOCUMENTED_FOLDERS.md): ordinary files from
@@ -131,7 +132,7 @@ registry, graph, or case-management runtime is required.
     must validate the profile files and preserve its own record, authority,
     target, and strategy boundaries.
 12. Add `building-litigation-alignment-overlays` before an amended complaint,
-    leave package, or other filing that should consume the current docket's
+    motion for leave, or other filing that should consume the current docket's
     actual adversary positions and judicial treatment.
 13. Add `building-defense-counsel-overlays` when an actual-adversary review
     should consume validated professional history for the effective defense

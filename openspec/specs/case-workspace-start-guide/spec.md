@@ -114,16 +114,17 @@ or unavailable state and SHALL NOT be presented as completed or filing-ready.
 
 ### Requirement: Product-independent folder-backed artifacts
 
-The guide SHALL map filing packet inputs to a versioned drafting or audit
+The guide SHALL map ordinary filing-folder inputs to a new drafting or audit
 output, filing or discovery inputs to an immutable QC report, public sources and
 approved identity records to ordinary profile files with domain YAML provenance,
 verified authorities and decisions to a research corpus, and selected files from
-declared input folders to an isolated review report. It SHALL explain these
-patterns using hashes, domain source records, checked-through dates, and
-retrieval provenance without requiring Git or a case-management product. It
-SHALL state that a separate product may adapt its own data into declared folders
-and import outputs, but no adapter is part of or required by the skills
-contract.
+declared input folders to an isolated review report. It SHALL require explicit
+role-relative filing targets and state that no folder-wide manifest supplies
+membership. It SHALL explain these patterns using hashes, domain source records,
+checked-through dates, and retrieval provenance without requiring Git or a
+case-management product. It SHALL state that a separate product may adapt its
+own data into declared folders and import outputs, but no adapter is part of or
+required by the skills contract.
 
 #### Scenario: Separate product supplies folders
 

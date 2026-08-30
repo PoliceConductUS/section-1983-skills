@@ -508,7 +508,7 @@ def _extract_review(provider_response, approved_source_ids, raw_body):
     return validate_review_response(review, approved_source_ids)
 
 
-def run_trusted_review(
+def run_review(
     packet,
     model,
     timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
@@ -877,7 +877,7 @@ def _internet_source(run_time, response_sha256):
     }
 
 
-def execute_trusted_review(
+def execute_review(
     packet,
     model,
     filing_root,
@@ -902,7 +902,7 @@ def execute_trusted_review(
     filename_time, run_time, normalized_run_id = _run_identity(now, run_id)
     artifact_path = _artifact_path(filename_time, normalized_run_id)
     try:
-        result = run_trusted_review(
+        result = run_review(
             validated,
             model,
             timeout_seconds=timeout_seconds,
@@ -1015,7 +1015,7 @@ def main(
     source = sys.stdin.buffer.read() if input_bytes is None else input_bytes
     try:
         packet = json.loads(source.decode("utf-8"))
-        result = execute_trusted_review(
+        result = execute_review(
             packet,
             model=arguments.model,
             filing_root=arguments.filing_root,

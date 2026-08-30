@@ -314,10 +314,14 @@ def _provider_request(packet, model):
 
 
 def _openai_transport(body, headers, timeout_seconds):
+    request_headers = dict(headers)
+    if "Authorization" not in request_headers:
+        api_key = _api_key(os.environ.get("OPENAI_API_KEY", ""))
+        request_headers["Authorization"] = f"Bearer {api_key}"
     request = urllib.request.Request(
         OPENAI_RESPONSES_URL,
         data=body,
-        headers=headers,
+        headers=request_headers,
         method="POST",
     )
     try:
@@ -513,16 +517,14 @@ def run_trusted_review(
 ):
     validated = validate_packet(packet)
     validated_model = _runtime_string(model, "model")
-    validated_key = _api_key(api_key)
     timeout = _positive_timeout(timeout_seconds)
     request = _provider_request(validated, validated_model)
     body = json.dumps(request, ensure_ascii=False, separators=(",", ":")).encode(
         "utf-8"
     )
-    headers = {
-        "Authorization": f"Bearer {validated_key}",
-        "Content-Type": "application/json",
-    }
+    headers = {"Content-Type": "application/json"}
+    if api_key is not None:
+        headers["Authorization"] = f"Bearer {_api_key(api_key)}"
     provider_transport = transport or _openai_transport
     try:
         status, response_body = provider_transport(body, headers, timeout)
@@ -1018,11 +1020,10 @@ def main(
     source = sys.stdin.buffer.read() if input_bytes is None else input_bytes
     try:
         packet = json.loads(source.decode("utf-8"))
-        environment = os.environ if environ is None else environ
         result = execute_trusted_review(
             packet,
             model=arguments.model,
-            api_key=environment.get("OPENAI_API_KEY", ""),
+            api_key=None,
             filing_root=arguments.filing_root,
             approved_sources_root=arguments.approved_sources_root,
             filing_target=arguments.filing_target,
@@ -1041,8 +1042,6 @@ def main(
     ) as error:
         print(json.dumps(_error_result(error), sort_keys=True))
         return 1
-    # _json_result projects only declared public fields and rejects secret spillover.
-    # codeql[py/clear-text-logging-sensitive-data]
     print(json.dumps(_json_result(result), sort_keys=True))
     return 0 if result["outcome"] == "completed" else 1
 

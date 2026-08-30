@@ -9,6 +9,7 @@ import unittest
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest import mock
 
 from scripts.skill_output_writer import OutputRun
 from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
@@ -665,6 +666,56 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         self.assertEqual(dispatched_packet, packet())
         self.assertEqual(result["dispatch"]["capabilities"], [])
         self.assertEqual(result["review"], review_response())
+
+    def test_default_transport_keeps_credentials_out_of_review_runtime(self):
+        transport = TransportSpy()
+
+        with mock.patch.object(self.launcher, "_openai_transport", transport):
+            result = self.launcher.run_trusted_review(
+                packet(),
+                model="gpt-synthetic",
+                api_key=None,
+            )
+
+        self.assertEqual(len(transport.calls), 1)
+        _, headers, _ = transport.calls[0]
+        self.assertEqual(headers, {"Content-Type": "application/json"})
+        self.assertEqual(result["review"], review_response())
+
+    def test_openai_transport_adds_environment_credential_at_http_boundary(self):
+        class Response:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self, _limit):
+                return b'{}'
+
+        with (
+            mock.patch.dict(
+                self.launcher.os.environ,
+                {"OPENAI_API_KEY": "secret-test-key"},
+            ),
+            mock.patch.object(
+                self.launcher.urllib.request,
+                "urlopen",
+                return_value=Response(),
+            ) as urlopen,
+        ):
+            status, body = self.launcher._openai_transport(
+                b"{}",
+                {"Content-Type": "application/json"},
+                3,
+            )
+
+        request = urlopen.call_args.args[0]
+        self.assertEqual(request.get_header("Authorization"), "Bearer secret-test-key")
+        self.assertEqual(urlopen.call_args.kwargs["timeout"], 3)
+        self.assertEqual((status, body), (200, b"{}"))
 
     def test_packet_model_and_credentials_validate_before_transport(self):
         run_trusted_review = self.trusted_api("run_trusted_review")

@@ -1370,6 +1370,7 @@ description: Use when independently auditing a synthetic artifact.
                 "building-defense-counsel-overlays",
                 "building-judicial-reasoning-profiles",
                 "building-litigation-alignment-overlays",
+                "collecting-police-policy-sources",
             ),
         )
         self.assertEqual(validate_source_documented_folder_guidance(REPOSITORY), [])

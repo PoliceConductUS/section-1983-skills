@@ -1,0 +1,11 @@
+{
+  "gap": {
+    "gap_id": "gap-policy-version-2024",
+    "gap_type": "incomplete",
+    "source_system_id": "fictional-department-policy-site",
+    "query": "site:example.invalid fictional department policy 2024",
+    "filters": ["policy", "2024"],
+    "checked_date": "2026-08-25",
+    "coverage_limit": "The source system exposed only the current revision and no archived 2024 version."
+  }
+}

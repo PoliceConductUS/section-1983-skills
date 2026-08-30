@@ -55,6 +55,17 @@ CONTRACTS = {
         [],
         {"acquisition": "authorized", "compilation": "disabled"},
     ),
+    "collecting-police-policy-sources": (
+        [
+            "department-identity",
+            "jurisdiction",
+            "approved-source-system",
+            "research-scope",
+        ],
+        "none",
+        [],
+        "authorized",
+    ),
     "judicial-reviewer": (
         ["profile", "filing", "approved-sources"],
         "required",

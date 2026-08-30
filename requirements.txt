@@ -1,1 +1,2 @@
 eyecite==2.7.6
+PyYAML==6.0.3

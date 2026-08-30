@@ -99,6 +99,45 @@ def handoff(count=None, assessment=None):
     }
 
 
+def formal_policy_path():
+    return {
+        "path_id": "formal-1",
+        "path_type": "formal_policy",
+        "challenged_policy_custom_decision_or_omission": "answer-conditioned release",
+        "supporting_facts": [{"fact_id": "fact-1", "location": "¶ 30"}],
+        "complaint_locations": [30],
+        "municipal_inference": "employees implemented a municipal rule",
+        "attribution_route": "expressly implemented policy",
+        "implementation_or_transmission_mechanism": "jail handoff",
+        "underlying_constitutional_violation": "continued detention",
+        "particular_injury": "additional detention",
+        "moving_force_chain": "rule caused continued detention",
+        "temporal_lanes": [
+            {"lane": "event_implementation", "supporting_fact_refs": ["fact-1"]}
+        ],
+        "information_and_belief_basis": {
+            "used": True,
+            "known_facts": ["repeated policy statements"],
+            "expected_information": ["operative policy record"],
+            "controller": "City",
+            "inference": "the repeated rule was municipal policy",
+            "affected_fields": ["policy_source"],
+        },
+        "principal_decision": {
+            "status": "approved",
+            "approver": "Litigation Principal",
+            "scope": "formal-1 only",
+            "approved_narrowing": "implemented rule only",
+            "decision_record_path": "approval.md",
+            "decision_record_sha256": "b" * 64,
+        },
+        "policy_source": "municipality-controlled record",
+        "operative_status": "alleged on information and belief",
+        "promulgating_or_adopting_authority": "municipality-controlled identity",
+        "application_to_challenged_conduct": "jailers applied the rule",
+    }
+
+
 class MonellContractV2Tests(unittest.TestCase):
     def test_validator_exists_and_accepts_complete_v2_drafting_handoff(self):
         validator = load_validator()
@@ -149,6 +188,23 @@ class MonellContractV2Tests(unittest.TestCase):
         codes = {item["code"] for item in result["structural_validation"]["findings"]}
         self.assertIn("invalid_monell_path_type", codes)
         self.assertIn("missing_monell_path_field", codes)
+
+    def test_monell_path_rejects_unapproved_and_dangling_temporal_records(self):
+        validator = load_validator()
+        count = common_count()
+        count["capacity"] = "municipal"
+        count["defendant"] = "City"
+        count.pop("individual_capacity")
+        count["qualified_immunity"] = {"applies": False}
+        path = formal_policy_path()
+        path["principal_decision"] = {"status": "pending"}
+        path["temporal_lanes"][0]["supporting_fact_refs"] = ["missing-fact"]
+        count["monell_paths"] = [path]
+        result = validator.validate_handoff(handoff(count))
+        codes = {item["code"] for item in result["structural_validation"]["findings"]}
+        self.assertIn("monell_path_not_approved", codes)
+        self.assertIn("unresolved_temporal_fact_reference", codes)
+        self.assertIn("unmapped_supporting_fact", codes)
 
     def test_exact_authority_passage_and_hash_are_verified(self):
         validator = load_validator()

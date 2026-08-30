@@ -11,10 +11,24 @@ description:
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `motion` contains the Rule 12 motion and its ordered arguments.
+- `record` contains the operative pleading and approved pleading-stage record.
+- `authorities` contains approved Rule 12 and claim-specific law.
+
+Target is required in `motion`. Internet is `disabled`. Return the Rule 12 RRD
+as a canonical output-relative path and deterministic bytes; only the trusted
+host may publish it append-immutable. Report missing headings, pleading
+material, record-gate facts, authority, or amendment information as a gap
+without drafting the response brief.
 
 Generate a **Response Requirements Document (RRD)** that functions as the
 drafting blueprint for an opposition/response to a **Rule 12 motion to dismiss**
@@ -26,8 +40,9 @@ facts must be treated as **plausible**, what authority must be cited, what the
 stage.
 
 This skill is designed to be run **once per motion**. If there are two motions
-(e.g., **officers MTD** and **city MTD**), run it **twice** and write to two
-separate folders.
+(e.g., **officers MTD** and **city MTD**), invoke it **twice** with each motion
+declared separately and publish each returned artifact through its own output
+run.
 
 ---
 
@@ -36,10 +51,11 @@ separate folders.
 1. Receive the motion arguments the user must respond to (or a summary)
 2. Ask **3–5 essential** clarifying questions (lettered options)
 3. Generate a structured **RRD** (Rule 12 optimized)
-4. Save to the response path required by the repository; if none is defined,
-   default to `responses/<response-due-date>/<motion-folder>/rrd.yaml`
-5. Be **idempotent**: re-running the skill updates/merges the existing
-   `rrd.yaml` without duplicating Response Units.
+4. Return `rrd.yaml` bytes with a canonical output-relative path for trusted-
+   host publication.
+5. Be **idempotent**: when a prior RRD is expressly supplied in `record`, merge
+   it without duplicating Response Units and return a new append-immutable
+   artifact.
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
@@ -139,8 +155,8 @@ never duplicate or silently delete them.
 Before producing `rrd.yaml`, read
 [references/rrd-yaml-contract.md](references/rrd-yaml-contract.md) completely.
 It owns the file layout, top-level and Response Unit schemas, amendment handoff,
-false-arrest fields, conditional video map, and repository-sensitive source
-metadata. Do not substitute an incompatible schema.
+false-arrest fields, conditional video map, and declared-role source metadata.
+Do not substitute an incompatible schema.
 
 ## Step 3 — RRD Sections (content requirements)
 
@@ -242,6 +258,6 @@ Before saving:
 - [ ] Judicial notice used for existence/filing only unless undisputed
 - [ ] Gaps are explicitly labeled with mitigation (amendment / later proof)
 - [ ] Every proposed amendment has a complete `amendment_handoff` entry
-- [ ] Saved to the repository-defined response path, or the documented default
-      when none exists
+- [ ] Returned with a canonical output-relative path for append-immutable
+      trusted-host publication
 - [ ] No internal tool artifacts in output

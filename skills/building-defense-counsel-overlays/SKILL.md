@@ -10,10 +10,23 @@ description: >-
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `research-snapshot` contains the approved public-source snapshot.
+- `case-record` contains the current-case materials and optional filing pins.
+
+Target is required in `research-snapshot`. Internet is `disabled`. Return the
+validated counsel overlay as a canonical output-relative path and deterministic
+bytes; only the trusted host may publish it append-immutable. Report incomplete
+identity, source, checked-date, or comparable-matter material as a gap and keep
+the resulting profile bounded.
 
 ## Purpose
 
@@ -32,10 +45,10 @@ Read these install-local contracts completely:
 - [references/counsel-research-snapshot.schema.json](references/counsel-research-snapshot.schema.json)
 - [references/defense-counsel-overlay.schema.json](references/defense-counsel-overlay.schema.json)
 
-Use only one existing snapshot that passed its approved project preflight. Do
-not browse, open an unlisted path or URL, silently refresh a source, or incur a
-PACER or other fee. Missing public content and unavailable paid content are
-scoped gaps unless the user separately authorizes retrieval.
+Use only the selected `research-snapshot` target after the packaged validator
+passes. Do not browse, open an unlisted path or URL, silently refresh a source,
+or incur a PACER or other fee. Missing public content and unavailable paid
+content are scoped gaps unless the user separately authorizes retrieval.
 
 ## Separate identity from behavior
 
@@ -100,9 +113,18 @@ replace, remove, or displace any common attack or the independent blind review.
 Run:
 
 ```bash
-python3 scripts/validate_counsel_overlays.py SNAPSHOT_JSON OVERLAY_JSON \
-  --filing-manifest FILING_MANIFEST_JSON
+python3 scripts/validate_counsel_overlays.py \
+  --research-snapshot-root "$RESEARCH_SNAPSHOT_ROOT" \
+  --research-snapshot-target "$RESEARCH_SNAPSHOT_TARGET" \
+  --case-record-root "$CASE_RECORD_ROOT" \
+  --filing-manifest-target "$FILING_MANIFEST_TARGET" \
+  < candidate-overlay.json
 ```
+
+The roots are caller-declared role folders and each target is a canonical
+relative path inside its named root. The generated overlay arrives as bounded
+standard-input JSON. The helper returns deterministic JSON and never writes or
+publishes the overlay.
 
 Pin counsel identity and counsel team as separate overlay kinds in the filing-
 version manifest. A stale, mismatched, or failing pin produces no specialized

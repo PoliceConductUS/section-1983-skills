@@ -3,8 +3,8 @@
 ## Output: File Layout
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** use the repository-defined response path; default to
-  `responses/<response-due-date>/<motion-folder>/rrd.yaml`
+- **Publication:** return a canonical output-relative path and bytes for the
+  trusted host's append-immutable output boundary
 - **Filename:** fixed `rrd.yaml`
 
 Example:
@@ -20,8 +20,9 @@ responses/
         └── rrd.yaml
 ```
 
-Create or update source metadata only when the repository's source schema
-requires it. `rrd.yaml` should reference repository source IDs when available.
+Reference the stable source IDs supplied in `motion`, `record`, and
+`authorities`. If required source metadata is absent, record a gap; do not
+create or update a separate source schema.
 
 ---
 
@@ -166,8 +167,7 @@ amendment_handoff:
     exact_defect: []
     proposed_factual_cure: []
     source_or_supported_inference: []
-    proposed_complaint_version:
-      "next numbered version or repository-defined version"
+    proposed_complaint_version: "new append-immutable filing artifact"
     target_complaint_section_or_count: []
     target_paragraphs: []
     clearly_established_law_cure:
@@ -200,10 +200,12 @@ video_dispute_map:
 
 ---
 
-## Step 4 — Source metadata (when repository-required)
+## Step 4 — Supplied source metadata
 
-If the repository requires `SOURCE.yaml` and it is missing, create it under that
-repository's schema. A minimal fallback is:
+Use only source metadata supplied through `motion`, `record`, and `authorities`.
+A missing source ID or provenance field is a gap, not permission to create a
+fallback source record. The following is an example of metadata that may be
+supplied:
 
 ```yaml
 meta:

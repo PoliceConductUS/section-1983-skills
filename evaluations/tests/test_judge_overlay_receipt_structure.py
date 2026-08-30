@@ -49,7 +49,7 @@ class JudgeOverlayReceiptStructureTest(unittest.TestCase):
             ["passed", "missing", "stale", "failed", "unavailable"],
         )
 
-    def test_generic_and_assigned_judge_skills_require_receipt_after_composition(self):
+    def test_skills_require_folder_native_receipt_after_composition(self):
         generic = prose(GENERIC_SKILL)
         scholer = prose(SCHOLER_SKILL)
 
@@ -59,12 +59,22 @@ class JudgeOverlayReceiptStructureTest(unittest.TestCase):
                     text,
                     r"judge.{0,80}overlay.{0,160}after.{0,100}(?:document|claim).{0,100}skill",
                 )
+                self.assertRegex(text, r"declared.{0,100}filing.{0,100}(?:role|root)")
+                self.assertRegex(text, r"required.{0,80}filing target")
                 self.assertRegex(
                     text,
-                    r"immutable.{0,100}(?:execution )?receipt.{0,160}audits/",
+                    r"(?:return|emit).{0,100}(?:receipt bytes|artifact bytes)",
+                )
+                self.assertRegex(
+                    text,
+                    r"(?:trusted host|outputrun).{0,120}(?:publish|write)",
                 )
                 self.assertIn("no judge-specific drafting change", text)
                 self.assertRegex(text, r"absence.{0,100}(?:prose|receipt).{0,100}(?:not|does not).{0,100}ran")
+                self.assertNotRegex(
+                    text,
+                    r"(?is)(?:--project-boundary|--version-folder|<version-folder>/audits/|canonical `audits/`)",
+                )
 
     def test_judge_guide_routes_to_schema_script_and_quality_control_boundary(self):
         guide = JUDGE_GUIDE.read_text()
@@ -81,6 +91,14 @@ class JudgeOverlayReceiptStructureTest(unittest.TestCase):
         self.assertRegex(lower, r"no judge-specific drafting change.{0,160}bounded reason")
         self.assertRegex(lower, r"missing.{0,50}stale.{0,50}(?:invalid|failed).{0,50}unavailable.{0,100}fail")
         self.assertRegex(lower, r"must not.{0,100}(?:edit|modify).{0,100}(?:filing|artifact)")
+        self.assertRegex(lower, r"declared.{0,100}filing.{0,100}(?:role|root)")
+        self.assertRegex(lower, r"judge-corpus.{0,100}court-conduct")
+        self.assertRegex(lower, r"required.{0,80}filing target")
+        self.assertRegex(lower, r"(?:trusted host|outputrun).{0,120}(?:publish|write)")
+        self.assertNotRegex(
+            lower,
+            r"(?:project boundary|version folder|canonical `?audits/?`? directory)",
+        )
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ import urllib.error
 import urllib.request
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 DEFAULT_TIMEOUT_SECONDS = 60
@@ -73,12 +73,20 @@ class PacketValidationError(ValueError):
 
 
 class ReviewLaunchError(RuntimeError):
-    def __init__(self, finding_id, reason, stdout="", stderr=""):
+    def __init__(
+        self,
+        finding_id,
+        reason,
+        stdout="",
+        stderr="",
+        response_sha256=None,
+    ):
         super().__init__(f"{finding_id}: {reason}")
         self.finding_id = finding_id
         self.reason = reason
         self.stdout = _bounded(stdout)
         self.stderr = _bounded(stderr)
+        self.response_sha256 = response_sha256
 
 
 def _text(value):
@@ -168,14 +176,6 @@ def validate_packet(packet):
     if packet["capabilities"] != []:
         _packet_error("reviewer capabilities must be empty")
     return packet
-
-
-def _command(command):
-    if not isinstance(command, list) or not command or not all(
-        isinstance(argument, str) and argument for argument in command
-    ):
-        raise ValueError("reviewer command must be a nonempty JSON argument array")
-    return command
 
 
 def _positive_timeout(timeout_seconds):
@@ -314,10 +314,14 @@ def _provider_request(packet, model):
 
 
 def _openai_transport(body, headers, timeout_seconds):
+    request_headers = dict(headers)
+    if "Authorization" not in request_headers:
+        api_key = _api_key(os.environ.get("OPENAI_API_KEY", ""))
+        request_headers["Authorization"] = f"Bearer {api_key}"
     request = urllib.request.Request(
         OPENAI_RESPONSES_URL,
         data=body,
-        headers=headers,
+        headers=request_headers,
         method="POST",
     )
     try:
@@ -504,25 +508,20 @@ def _extract_review(provider_response, approved_source_ids, raw_body):
     return validate_review_response(review, approved_source_ids)
 
 
-def run_trusted_review(
+def run_review(
     packet,
     model,
-    api_key,
     timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
     transport=None,
 ):
     validated = validate_packet(packet)
     validated_model = _runtime_string(model, "model")
-    validated_key = _api_key(api_key)
     timeout = _positive_timeout(timeout_seconds)
     request = _provider_request(validated, validated_model)
     body = json.dumps(request, ensure_ascii=False, separators=(",", ":")).encode(
         "utf-8"
     )
-    headers = {
-        "Authorization": f"Bearer {validated_key}",
-        "Content-Type": "application/json",
-    }
+    headers = {"Content-Type": "application/json"}
     provider_transport = transport or _openai_transport
     try:
         status, response_body = provider_transport(body, headers, timeout)
@@ -536,21 +535,29 @@ def run_trusted_review(
             "provider-unavailable",
             f"Provider unavailable: {error}",
         ) from error
+    response_sha256 = (
+        hashlib.sha256(response_body).hexdigest()
+        if isinstance(response_body, bytes)
+        else None
+    )
     if not isinstance(status, int) or not isinstance(response_body, bytes):
         raise ReviewLaunchError(
             "provider-response-incomplete",
             "Provider transport returned an invalid response",
+            response_sha256=response_sha256,
         )
     if status < 200 or status >= 300:
         raise ReviewLaunchError(
             "provider-http-error",
             f"Provider returned HTTP {status}",
+            response_sha256=response_sha256,
         )
     if len(response_body) > PROVIDER_BODY_LIMIT:
         raise ReviewLaunchError(
             "provider-response-too-large",
             "Provider response exceeded the permitted size",
             stdout=response_body,
+            response_sha256=response_sha256,
         )
     try:
         decoded = response_body.decode("utf-8")
@@ -560,15 +567,21 @@ def run_trusted_review(
             "provider-response-malformed-json",
             "Provider response was not valid UTF-8 JSON",
             stdout=response_body,
+            response_sha256=response_sha256,
         ) from error
     approved_source_ids = {source["id"] for source in validated["sources"]}
-    review = _extract_review(provider_response, approved_source_ids, response_body)
+    try:
+        review = _extract_review(provider_response, approved_source_ids, response_body)
+    except ReviewLaunchError as error:
+        error.response_sha256 = response_sha256
+        raise
     return {
         "dispatch": {
             "payload": validated,
             "capabilities": [],
             "runtime": "openai-responses-stateless",
             "request": request,
+            "response_sha256": response_sha256,
         },
         "review": review,
     }
@@ -684,14 +697,6 @@ def _canonical_json_sha256(value):
     return hashlib.sha256(encoded).hexdigest()
 
 
-def _inside(path, boundary):
-    try:
-        path.relative_to(boundary)
-    except ValueError:
-        return False
-    return path != boundary
-
-
 def _run_identity(now, run_id):
     current = now or datetime.now(timezone.utc)
     if not isinstance(current, datetime) or current.tzinfo is None:
@@ -711,129 +716,112 @@ def _run_identity(now, run_id):
     return filename_time, display_time, supplied_run_id
 
 
-def _prepare_output(
-    packet,
-    project_boundary,
-    version_folder,
-    artifact_path,
-    now,
-    run_id,
-):
+def _within(path, root):
+    return path == root or root in path.parents
+
+
+def _input_root(value):
     try:
-        project = Path(project_boundary).resolve(strict=True)
-        version = Path(version_folder).resolve(strict=True)
-        artifact = Path(artifact_path).resolve(strict=True)
-    except (OSError, TypeError) as error:
+        root = Path(value).resolve(strict=True)
+    except (OSError, TypeError, ValueError) as error:
         raise ReviewLaunchError(
-            "review-output-invalid",
-            f"review output preflight failed: {error}",
+            "invalid-input-root",
+            "declared input root is unavailable",
         ) from error
-    if not project.is_dir() or not version.is_dir() or not _inside(version, project):
+    if not root.is_dir():
         raise ReviewLaunchError(
-            "review-output-invalid",
-            "version folder must be an existing child of the project boundary",
+            "invalid-input-root",
+            "declared input root is unavailable",
         )
-    if not artifact.is_file() or not _inside(artifact, version):
-        raise ReviewLaunchError(
-            "review-output-invalid",
-            "audited artifact must be an existing file inside the version folder",
-        )
-    artifact_bytes = artifact.read_bytes()
+    return root
+
+
+def _filing_artifact(filing_root, filing_target, packet):
+    if (
+        not isinstance(filing_target, str)
+        or not filing_target
+        or "\\" in filing_target
+    ):
+        raise ReviewLaunchError("invalid-target", "filing target is invalid")
+    target = PurePosixPath(filing_target)
+    if (
+        target.is_absolute()
+        or target.as_posix() != filing_target
+        or any(part in {"", ".", ".."} for part in target.parts)
+    ):
+        raise ReviewLaunchError("invalid-target", "filing target is invalid")
+    try:
+        artifact = filing_root.joinpath(*target.parts).resolve(strict=True)
+    except (OSError, ValueError) as error:
+        raise ReviewLaunchError("invalid-target", "filing target is invalid") from error
+    if not artifact.is_file() or not _within(artifact, filing_root):
+        raise ReviewLaunchError("invalid-target", "filing target is invalid")
+    try:
+        artifact_bytes = artifact.read_bytes()
+    except OSError as error:
+        raise ReviewLaunchError("invalid-target", "filing target is invalid") from error
     draft_bytes = packet["draft"]["content"].encode("utf-8")
-    artifact_sha256 = hashlib.sha256(artifact_bytes).hexdigest()
     if (
         artifact_bytes != draft_bytes
-        or artifact_sha256 != packet["draft"]["sha256"]
+        or hashlib.sha256(artifact_bytes).hexdigest() != packet["draft"]["sha256"]
     ):
         raise ReviewLaunchError(
             "review-artifact-fingerprint-mismatch",
-            "audited artifact does not match the validated packet draft",
+            "filing target does not match the validated packet draft",
         )
-    audits = version / "audits"
-    if audits.exists() or audits.is_symlink():
-        try:
-            resolved_audits = audits.resolve(strict=True)
-        except OSError as error:
-            raise ReviewLaunchError(
-                "review-output-invalid",
-                f"audits directory cannot be resolved: {error}",
-            ) from error
-        if not resolved_audits.is_dir() or not _inside(resolved_audits, version):
-            raise ReviewLaunchError(
-                "review-output-invalid",
-                "audits directory resolves outside the version folder",
-            )
-    else:
-        resolved_audits = audits
-    filename_time, display_time, supplied_run_id = _run_identity(now, run_id)
-    report_path = resolved_audits / (
-        f"adversarial-filing-review-{filename_time}-{supplied_run_id}.md"
-    )
-    if report_path.exists() or report_path.is_symlink():
-        raise ReviewLaunchError(
-            "review-report-collision",
-            "review report path already exists",
-        )
-    return {
-        "version": version,
-        "artifact": artifact,
-        "audits": resolved_audits,
-        "report_path": report_path,
-        "run_time": display_time,
-        "run_id": supplied_run_id,
-    }
+    return artifact
 
 
-def _write_report(output, markdown):
-    directory_fd = None
-    report_fd = None
+def _approved_source_fingerprints(approved_sources_root):
+    fingerprints = set()
     try:
-        output["audits"].mkdir(parents=False, exist_ok=True)
-        directory_fd = os.open(
-            output["audits"],
-            os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
-        )
-        report_fd = os.open(
-            output["report_path"].name,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
-            0o600,
-            dir_fd=directory_fd,
-        )
-        with os.fdopen(
-            report_fd,
-            "w",
-            encoding="utf-8",
-            newline="\n",
-        ) as stream:
-            report_fd = None
-            stream.write(markdown)
-    except FileExistsError as error:
-        raise ReviewLaunchError(
-            "review-report-collision",
-            "review report path already exists",
-        ) from error
+        candidates = sorted(approved_sources_root.rglob("*"))
     except OSError as error:
         raise ReviewLaunchError(
-            "review-output-unavailable",
-            f"review report could not be written: {error}",
+            "invalid-input-root",
+            "declared input root is unavailable",
         ) from error
-    finally:
-        if report_fd is not None:
-            os.close(report_fd)
-        if directory_fd is not None:
-            os.close(directory_fd)
-    return output["report_path"]
+    for candidate in candidates:
+        try:
+            resolved = candidate.resolve(strict=True)
+            if not _within(resolved, approved_sources_root):
+                raise ReviewLaunchError(
+                    "invalid-input-root",
+                    "declared input root is unavailable",
+                )
+            if resolved.is_file():
+                content = resolved.read_bytes()
+                fingerprints.add((hashlib.sha256(content).hexdigest(), content))
+        except ReviewLaunchError:
+            raise
+        except OSError as error:
+            raise ReviewLaunchError(
+                "invalid-input-root",
+                "declared input root is unavailable",
+            ) from error
+    return fingerprints
 
 
-def _receipt(packet, output, model, outcome, failure_id=None):
+def _validate_approved_sources(packet, approved_sources_root):
+    available = _approved_source_fingerprints(approved_sources_root)
+    for source in packet["sources"]:
+        content = source["content"].encode("utf-8")
+        if (source["sha256"], content) not in available:
+            raise ReviewLaunchError(
+                "approved-source-unavailable",
+                "approved packet source is unavailable",
+            )
+
+
+def _receipt(packet, filing_target, model, run_time, run_id, outcome, failure_id=None):
     receipt = {
         "runtime": "openai-responses-stateless",
         "model": model,
-        "run_id": output["run_id"],
-        "run_time": output["run_time"],
+        "run_id": run_id,
+        "run_time": run_time,
         "document_family": packet["document_family"],
         "draft_version": packet["draft"]["version"],
-        "artifact_path": str(output["artifact"]),
+        "artifact_path": filing_target,
         "draft_sha256": packet["draft"]["sha256"],
         "packet_sha256": _canonical_json_sha256(packet),
         "source_ids": [source["id"] for source in packet["sources"]],
@@ -845,67 +833,126 @@ def _receipt(packet, output, model, outcome, failure_id=None):
 
 
 def _unavailable_markdown(receipt, error):
+    safe_reason = "independent review unavailable"
     return (
         _receipt_markdown(receipt)
         + "\n\n## Independent review unavailable\n\n"
-        + _labeled_text("Reason", _bounded(error.reason))
+        + _labeled_text("Reason", safe_reason)
         + "\n"
     )
 
 
-def execute_trusted_review(
+def _safe_receipt_model(value):
+    if not isinstance(value, str) or not value.strip():
+        return "unavailable"
+    safe = value.encode("utf-8", errors="replace").decode("utf-8")
+    if len(safe) > 256:
+        return safe[: 256 - len(TRUNCATION_MARKER)] + TRUNCATION_MARKER
+    return safe
+
+
+def _bounded_report_bytes(markdown):
+    encoded = markdown.encode("utf-8")
+    if len(encoded) <= STREAM_LIMIT:
+        return encoded
+    marker = TRUNCATION_MARKER.encode("utf-8")
+    prefix = encoded[: STREAM_LIMIT - len(marker)].decode(
+        "utf-8", errors="ignore"
+    )
+    return prefix.encode("utf-8") + marker
+
+
+def _artifact_path(filename_time, run_id):
+    return (
+        "reports/"
+        f"adversarial-filing-review-{filename_time}-{run_id}.md"
+    )
+
+
+def _internet_source(run_time, response_sha256):
+    return {
+        "url": OPENAI_RESPONSES_URL,
+        "retrieved_at": run_time,
+        "sha256": response_sha256,
+    }
+
+
+def execute_review(
     packet,
     model,
-    api_key,
-    project_boundary,
-    version_folder,
-    artifact_path,
+    filing_root,
+    approved_sources_root,
+    filing_target,
+    internet_policy,
     timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
     transport=None,
     now=None,
     run_id=None,
 ):
     validated = validate_packet(packet)
-    output = _prepare_output(
-        validated,
-        project_boundary,
-        version_folder,
-        artifact_path,
-        now,
-        run_id,
-    )
+    resolved_filing_root = _input_root(filing_root)
+    resolved_sources_root = _input_root(approved_sources_root)
+    _filing_artifact(resolved_filing_root, filing_target, validated)
+    _validate_approved_sources(validated, resolved_sources_root)
+    if internet_policy != "authorized":
+        raise ReviewLaunchError(
+            "internet-not-authorized",
+            "provider dispatch is not authorized",
+        )
+    filename_time, run_time, normalized_run_id = _run_identity(now, run_id)
+    artifact_path = _artifact_path(filename_time, normalized_run_id)
     try:
-        result = run_trusted_review(
+        result = run_review(
             validated,
             model,
-            api_key,
             timeout_seconds=timeout_seconds,
             transport=transport,
         )
     except ReviewLaunchError as error:
-        safe_model = model if isinstance(model, str) and model.strip() else "unavailable"
+        safe_model = _safe_receipt_model(model)
         receipt = _receipt(
             validated,
-            output,
+            filing_target,
             safe_model,
+            run_time,
+            normalized_run_id,
             "unavailable",
             error.finding_id,
         )
-        report_path = _write_report(output, _unavailable_markdown(receipt, error))
+        report_bytes = _bounded_report_bytes(_unavailable_markdown(receipt, error))
+        internet_sources = (
+            [_internet_source(run_time, error.response_sha256)]
+            if error.response_sha256
+            else []
+        )
         return {
             "outcome": "unavailable",
-            "report_path": str(report_path),
+            "artifact_path": artifact_path,
+            "report_bytes": report_bytes,
+            "internet_sources": internet_sources,
             "error": {
                 "id": error.finding_id,
-                "reason": error.reason,
+                "reason": "independent review unavailable",
             },
         }
-    receipt = _receipt(validated, output, model, "completed")
-    markdown = render_review_markdown(result["review"], receipt)
-    report_path = _write_report(output, markdown)
+    receipt = _receipt(
+        validated,
+        filing_target,
+        model,
+        run_time,
+        normalized_run_id,
+        "completed",
+    )
     return {
         "outcome": "completed",
-        "report_path": str(report_path),
+        "artifact_path": artifact_path,
+        "report_bytes": render_review_markdown(
+            result["review"],
+            receipt,
+        ).encode("utf-8"),
+        "internet_sources": [
+            _internet_source(run_time, result["dispatch"]["response_sha256"])
+        ],
         "dispatch": {
             "runtime": result["dispatch"]["runtime"],
             "capabilities": result["dispatch"]["capabilities"],
@@ -913,32 +960,19 @@ def execute_trusted_review(
     }
 
 
-def launch_review(
-    packet,
-    reviewer_command,
-    runtime_enforces_empty_capabilities,
-    timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
-):
-    validate_packet(packet)
-    _command(reviewer_command)
-    _positive_timeout(timeout_seconds)
-    raise ReviewLaunchError(
-        "independent-review-unavailable",
-        "independent review unavailable: a caller assertion cannot prove command isolation",
-    )
-
-
 def _parser():
     parser = argparse.ArgumentParser()
-    mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--trusted-openai", action="store_true")
-    mode.add_argument("--reviewer-command-json")
-    parser.add_argument("--runtime-enforces-empty-capabilities", action="store_true")
+    parser.add_argument("--trusted-openai", action="store_true", required=True)
     parser.add_argument("--timeout-seconds", type=float, default=DEFAULT_TIMEOUT_SECONDS)
-    parser.add_argument("--model")
-    parser.add_argument("--project-boundary")
-    parser.add_argument("--version-folder")
-    parser.add_argument("--artifact")
+    parser.add_argument("--model", required=True)
+    parser.add_argument("--filing-root", required=True)
+    parser.add_argument("--approved-sources-root", required=True)
+    parser.add_argument("--filing-target", required=True)
+    parser.add_argument(
+        "--internet-policy",
+        choices=("authorized", "disabled"),
+        required=True,
+    )
     return parser
 
 
@@ -955,6 +989,20 @@ def _error_result(error):
     return result
 
 
+def _json_result(result):
+    value = {
+        "outcome": result["outcome"],
+        "artifact_path": result["artifact_path"],
+        "report": result["report_bytes"].decode("utf-8"),
+        "internet_sources": result["internet_sources"],
+    }
+    if "dispatch" in result:
+        value["dispatch"] = result["dispatch"]
+    if "error" in result:
+        value["error"] = result["error"]
+    return value
+
+
 def main(
     argv=None,
     input_bytes=None,
@@ -967,68 +1015,17 @@ def main(
     source = sys.stdin.buffer.read() if input_bytes is None else input_bytes
     try:
         packet = json.loads(source.decode("utf-8"))
-        if arguments.trusted_openai:
-            required = {
-                "model": arguments.model,
-                "project boundary": arguments.project_boundary,
-                "version folder": arguments.version_folder,
-                "artifact": arguments.artifact,
-            }
-            missing = [label for label, value in required.items() if not value]
-            if missing:
-                raise ValueError(f"trusted runtime requires {', '.join(missing)}")
-            environment = os.environ if environ is None else environ
-            effective_now = now or datetime.now(timezone.utc)
-            effective_run_id = run_id or uuid.uuid4()
-            filename_time, _, normalized_run_id = _run_identity(
-                effective_now,
-                effective_run_id,
-            )
-            report_path = (
-                Path(arguments.version_folder).resolve(strict=True)
-                / "audits"
-                / f"adversarial-filing-review-{filename_time}-{normalized_run_id}.md"
-            )
-            result = execute_trusted_review(
-                packet,
-                model=arguments.model,
-                api_key=environment.get("OPENAI_API_KEY", ""),
-                project_boundary=arguments.project_boundary,
-                version_folder=arguments.version_folder,
-                artifact_path=arguments.artifact,
-                timeout_seconds=arguments.timeout_seconds,
-                transport=transport,
-                now=effective_now,
-                run_id=effective_run_id,
-            )
-            if result["outcome"] == "completed":
-                public_result = {
-                    "outcome": "completed",
-                    "report_path": str(report_path),
-                    "dispatch": {
-                        "runtime": "openai-responses-stateless",
-                        "capabilities": [],
-                    },
-                }
-                exit_code = 0
-            else:
-                public_result = {
-                    "outcome": "unavailable",
-                    "report_path": str(report_path),
-                    "error": {
-                        "id": "independent-review-unavailable",
-                        "reason": "independent review unavailable",
-                    },
-                }
-                exit_code = 1
-            print(json.dumps(public_result, sort_keys=True))
-            return exit_code
-        command = json.loads(arguments.reviewer_command_json)
-        result = launch_review(
+        result = execute_review(
             packet,
-            command,
-            arguments.runtime_enforces_empty_capabilities,
-            arguments.timeout_seconds,
+            model=arguments.model,
+            filing_root=arguments.filing_root,
+            approved_sources_root=arguments.approved_sources_root,
+            filing_target=arguments.filing_target,
+            internet_policy=arguments.internet_policy,
+            timeout_seconds=arguments.timeout_seconds,
+            transport=transport,
+            now=now,
+            run_id=run_id,
         )
     except (
         PacketValidationError,
@@ -1039,8 +1036,8 @@ def main(
     ) as error:
         print(json.dumps(_error_result(error), sort_keys=True))
         return 1
-    print(json.dumps(result, sort_keys=True))
-    return 0
+    print(json.dumps(_json_result(result), sort_keys=True))
+    return 0 if result["outcome"] == "completed" else 1
 
 
 if __name__ == "__main__":

@@ -5,12 +5,21 @@ delta between the two scores is the signal. The linter checks form only. It
 cannot judge whether a fact is well pleaded.
 """
 
+import argparse
 import json
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from banned_terms import BONUS_WORDS, MORE_WORDS, TOP_FIFTY_WORDS
+
+MAX_INPUT_BYTES = 1_000_000
+
+
+class LintInputError(ValueError):
+    def __init__(self, code):
+        super().__init__(code)
+        self.code = code
 
 EXEMPT_PHRASES = (
     "clearly established",
@@ -350,22 +359,106 @@ def lint(text, artifact="<memory>"):
     }
 
 
-def lint_paths(paths):
-    return {path: lint(Path(path).read_text(), artifact=path) for path in paths}
+def _input_root(value):
+    try:
+        path = Path(value)
+        if not path.is_absolute():
+            raise ValueError
+        resolved = path.resolve(strict=True)
+        if not resolved.is_dir():
+            raise ValueError
+        return resolved
+    except (OSError, RuntimeError, TypeError, ValueError) as error:
+        raise LintInputError("invalid-root") from error
+
+
+def _relative_target(value):
+    if (
+        not isinstance(value, str)
+        or not value
+        or "\\" in value
+        or "\x00" in value
+        or (len(value) >= 3 and value[0].isalpha() and value[1:3] == ":/")
+    ):
+        raise LintInputError("invalid-target")
+    try:
+        relative = PurePosixPath(value)
+    except (TypeError, ValueError) as error:
+        raise LintInputError("invalid-target") from error
+    if (
+        relative.is_absolute()
+        or str(relative) != value
+        or any(part in {"", ".", ".."} for part in value.split("/"))
+    ):
+        raise LintInputError("invalid-target")
+    return Path(*relative.parts)
+
+
+def lint_folder_target(
+    *, filing_root, filing_target, max_input_bytes=MAX_INPUT_BYTES
+):
+    root = _input_root(filing_root)
+    relative = _relative_target(filing_target)
+    if type(max_input_bytes) is not int or max_input_bytes < 1:
+        raise LintInputError("invalid-limit")
+    max_input_bytes = min(max_input_bytes, MAX_INPUT_BYTES)
+    try:
+        resolved = (root / relative).resolve(strict=True)
+        resolved.relative_to(root)
+        if not resolved.is_file():
+            raise ValueError
+        with resolved.open("rb") as source:
+            payload = source.read(max_input_bytes + 1)
+    except (OSError, RuntimeError, TypeError, ValueError) as error:
+        raise LintInputError("invalid-target") from error
+    if len(payload) > max_input_bytes:
+        raise LintInputError("input-too-large")
+    try:
+        text = payload.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise LintInputError("malformed-input") from error
+    return lint(text, artifact=filing_target)
 
 
 def format_report(reports):
     return json.dumps(reports, indent=2)
 
 
+def _parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--filing-root")
+    parser.add_argument("--filing-target")
+    return parser
+
+
 def main(arguments):
-    reports = (
-        lint_paths(arguments)
-        if arguments
-        else lint(sys.stdin.read(), artifact="<stdin>")
-    )
-    print(format_report(reports))
+    parsed = _parser().parse_args(arguments)
+    try:
+        if (parsed.filing_root is None) != (parsed.filing_target is None):
+            raise LintInputError("invalid-invocation")
+        if parsed.filing_root is not None:
+            report = lint_folder_target(
+                filing_root=parsed.filing_root,
+                filing_target=parsed.filing_target,
+            )
+        else:
+            stream = getattr(sys.stdin, "buffer", sys.stdin)
+            payload = stream.read(MAX_INPUT_BYTES + 1)
+            if isinstance(payload, str):
+                payload = payload.encode("utf-8")
+            if len(payload) > MAX_INPUT_BYTES:
+                raise LintInputError("input-too-large")
+            try:
+                text = payload.decode("utf-8")
+            except UnicodeDecodeError as error:
+                raise LintInputError("malformed-input") from error
+            report = lint(text, artifact="<stdin>")
+    except LintInputError as error:
+        print(json.dumps({"error": error.code}, sort_keys=True))
+        return 1
+    print(format_report(report))
+    return 0
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    raise SystemExit(main(sys.argv[1:]))

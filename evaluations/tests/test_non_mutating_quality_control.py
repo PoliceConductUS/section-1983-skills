@@ -2,9 +2,7 @@ import hashlib
 import importlib.util
 import json
 import re
-import sys
 import tempfile
-import textwrap
 import unittest
 from pathlib import Path
 
@@ -44,7 +42,7 @@ QUALITY_CONTROL_RULES = (
         "An independent quality-control stage may mutate an artifact under review.",
     ),
     (
-        "It may read designated artifacts and write only its designated report or result.",
+        "It may read designated artifacts and return only its designated report or result for trusted-host publication.",
         "It may write changes to an artifact under review.",
     ),
     (
@@ -79,6 +77,31 @@ QUALITY_CONTROL_RULES = (
         "An internal self-check inside an explicitly authorized drafting or revision stage may guide edits within that stage, but it is not an independent quality-control result.",
         "An internal drafting self-check is an independent quality-control result.",
     ),
+)
+
+EXPLICIT_OUTPUT_RULES = (
+    "An independent quality-control stage must select exactly one artifact "
+    "through its declared input roles and target policy.",
+    "It must propose exactly one unique append-immutable output-relative report "
+    "beneath the caller-declared output folder.",
+    "A missing, ambiguous, nonexistent, or out-of-role target must fail closed "
+    "without a fallback write.",
+    "The report path must reject absolute paths, traversal, symlink escapes, and "
+    "existing destinations.",
+    "Only the trusted host may publish the report through the shared output "
+    "boundary.",
+    "Prior quality-control reports must not become implicit input.",
+    "A report may be reviewed only when that exact report is expressly present "
+    "in a declared input role and selected consistently with the reviewing "
+    "skill's target policy.",
+    "The reviewing stage must propose a different new append-immutable report "
+    "for trusted-host publication.",
+)
+OBSOLETE_REPORT_RULES = (
+    "resolve exactly one existing version-specific folder",
+    "designated project boundary",
+    "`<version-folder>/audits/`",
+    "canonical audits directory",
 )
 
 
@@ -124,6 +147,18 @@ def assert_contract(test, text):
             test.assertNotIn(normalized(inversion), contract)
 
 
+def assert_explicit_output_contract(test, text):
+    contract = normalized(text)
+    missing = [rule for rule in EXPLICIT_OUTPUT_RULES if normalized(rule) not in contract]
+    obsolete = [
+        rule for rule in OBSOLETE_REPORT_RULES if normalized(rule) in contract
+    ]
+    test.assertEqual(
+        {"missing": [], "obsolete": []},
+        {"missing": missing, "obsolete": obsolete},
+    )
+
+
 def launcher_module():
     specification = importlib.util.spec_from_file_location(
         "quality_control_adversarial_launcher",
@@ -149,65 +184,69 @@ class NonMutatingQualityControlTest(unittest.TestCase):
                 skill = (REPOSITORY / "skills" / name / "SKILL.md").read_text()
                 assert_contract(self, skill)
 
-    def test_clean_room_review_rejects_unproved_command_before_any_write(self):
+    def test_governance_uses_explicit_output_instead_of_project_shaped_reports(self):
+        governance = (REPOSITORY / "GOVERNANCE.md").read_text()
+
+        assert_contract(self, governance)
+        assert_explicit_output_contract(self, governance)
+
+    def test_each_quality_control_skill_carries_the_explicit_output_contract(self):
+        self.assertSetEqual(discovered_quality_control_skills(), QUALITY_CONTROL_SKILLS)
+        for name in sorted(QUALITY_CONTROL_SKILLS):
+            with self.subTest(skill=name):
+                skill = (REPOSITORY / "skills" / name / "SKILL.md").read_text()
+                assert_contract(self, skill)
+                assert_explicit_output_contract(self, skill)
+
+    def test_clean_room_review_exposes_no_command_authority_before_any_write(self):
         launcher = launcher_module()
-        with tempfile.TemporaryDirectory() as artifact_directory:
-            artifact_root = Path(artifact_directory)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact_root = root / "filing"
+            approved_sources = root / "approved-sources"
+            artifact_root.mkdir()
+            approved_sources.mkdir()
             artifact = artifact_root / "canonical-draft.md"
             draft = b"# Synthetic Filing\n\nCanonical allegation.\n"
             artifact.write_bytes(draft)
+            source = b"Synthetic source.\n"
+            (approved_sources / "SRC-1.txt").write_bytes(source)
             before = sha256_bytes(artifact.read_bytes())
-            with tempfile.TemporaryDirectory() as command_directory:
-                reviewer = Path(command_directory) / "reviewer.py"
-                reviewer.write_text(
-                    textwrap.dedent(
-                        """
-                        import json
-                        import pathlib
-                        import sys
+            packet = {
+                "draft": {
+                    "content": draft.decode(),
+                    "version": "synthetic-v1",
+                    "sha256": sha256_bytes(draft),
+                },
+                "document_family": "complaint or amended complaint",
+                "sources": [
+                    {
+                        "id": "SRC-1",
+                        "role": "record",
+                        "content": source.decode(),
+                        "sha256": sha256_bytes(source),
+                    }
+                ],
+                "skill": {"content": "Synthetic public skill."},
+                "checklist": {"content": "Synthetic public checklist."},
+                "capabilities": [],
+            }
 
-                        packet = json.load(sys.stdin)
-                        pathlib.Path("canonical-draft.md").write_text(
-                            packet["draft"]["content"] + "\\nUnauthorized correction.\\n"
-                        )
-                        pathlib.Path("extra-output.md").write_text("Unauthorized output.\\n")
-                        print(json.dumps({"report": "Synthetic read-only result."}))
-                        """
-                    )
+            with self.assertRaises(TypeError):
+                launcher.execute_review(
+                    packet,
+                    model="gpt-synthetic",
+                    api_key="secret-test-key",
+                    filing_root=artifact_root,
+                    approved_sources_root=approved_sources,
+                    filing_target="canonical-draft.md",
+                    internet_policy="authorized",
+                    reviewer_command=["unauthorized-reviewer"],
                 )
-                packet = {
-                    "draft": {
-                        "content": draft.decode(),
-                        "version": "synthetic-v1",
-                        "sha256": sha256_bytes(draft),
-                    },
-                    "document_family": "complaint or amended complaint",
-                    "sources": [
-                        {
-                            "id": "SRC-1",
-                            "role": "record",
-                            "content": "Synthetic source.\n",
-                            "sha256": sha256_bytes(b"Synthetic source.\n"),
-                        }
-                    ],
-                    "skill": {"content": "Synthetic public skill."},
-                    "checklist": {"content": "Synthetic public checklist."},
-                    "capabilities": [],
-                }
-
-                with self.assertRaises(launcher.ReviewLaunchError) as captured:
-                    launcher.launch_review(
-                        packet,
-                        [sys.executable, str(reviewer)],
-                        runtime_enforces_empty_capabilities=True,
-                    )
 
             self.assertEqual(sha256_bytes(artifact.read_bytes()), before)
             self.assertEqual([path.name for path in artifact_root.iterdir()], [artifact.name])
-            self.assertEqual(
-                captured.exception.finding_id,
-                "independent-review-unavailable",
-            )
+            self.assertFalse(hasattr(launcher, "launch_review"))
 
 
 if __name__ == "__main__":

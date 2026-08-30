@@ -42,11 +42,12 @@ premise. An expected source does not prove what it depicts, records, or says.
 
 ## Localization and sources
 
-Use only user- or repository-approved sources. Verify court-specific numerical
-limits, timing, conference duties, privilege-log requirements, and other local
-rules through the project's approved localization sources. `audit-authorities`
-owns authority verification. A missing approved rule or order is a scoped gap,
-not permission to supply a generic rule.
+Use only sources supplied in the declared input roles or retrieved under the
+skill's internet policy. Verify court-specific numerical limits, timing,
+conference duties, privilege-log requirements, and other local rules through
+approved localization sources. `audit-authorities` owns authority verification.
+A missing approved rule or order is a scoped gap, not permission to supply a
+generic rule.
 
 ## Stable downstream links
 

@@ -16,6 +16,10 @@ _IDENTIFIER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _ENVELOPE_FIELDS = frozenset(
     {"version", "skill", "inputs", "output", "runtime", "internet", "isolation", "target"}
 )
+_CONTRACT_FIELDS = frozenset(
+    {"version", "skill", "input_roles", "target", "internet", "output"}
+)
+_MAX_CONTRACT_BYTES = 65_536
 
 
 class InvocationError(ValueError):
@@ -106,6 +110,104 @@ def _resolve_existing_child(root: Path, relative_path: Any, code: str) -> Path:
     if not _is_within(resolved, root):
         _fail(code)
     return resolved
+
+
+def _validate_skill_contract(value: Any) -> dict[str, Any]:
+    contract = _require_exact_object(
+        value,
+        set(_CONTRACT_FIELDS),
+        set(_CONTRACT_FIELDS),
+        "invalid-skill-contract",
+    )
+    if type(contract["version"]) is not int or contract["version"] != 1:
+        _fail("invalid-skill-contract")
+    if not _is_identifier(contract["skill"]):
+        _fail("invalid-skill-contract")
+    input_roles = contract["input_roles"]
+    if (
+        type(input_roles) is not list
+        or not input_roles
+        or any(not _is_identifier(role) for role in input_roles)
+        or len(input_roles) != len(set(input_roles))
+    ):
+        _fail("invalid-skill-contract")
+    target = _require_exact_object(
+        contract["target"],
+        {"policy", "roles"},
+        {"policy", "roles"},
+        "invalid-skill-contract",
+    )
+    target_roles = target["roles"]
+    if (
+        target["policy"] not in {"required", "optional", "none"}
+        or type(target_roles) is not list
+        or any(not _is_identifier(role) for role in target_roles)
+        or len(target_roles) != len(set(target_roles))
+        or any(role not in input_roles for role in target_roles)
+        or (target["policy"] == "none" and target_roles)
+        or (target["policy"] != "none" and not target_roles)
+    ):
+        _fail("invalid-skill-contract")
+    if contract["internet"] not in {"disabled", "authorized"}:
+        _fail("invalid-skill-contract")
+    output = _require_exact_object(
+        contract["output"],
+        {"mode"},
+        {"mode"},
+        "invalid-skill-contract",
+    )
+    if output["mode"] != "append-immutable":
+        _fail("invalid-skill-contract")
+    return contract
+
+
+def _load_installed_skill_contract(skill_package: Path) -> dict[str, Any]:
+    try:
+        package_root = Path(skill_package).resolve(strict=True)
+        contract_path = (package_root / "references" / "folder-contract.json").resolve(
+            strict=True
+        )
+        if (
+            not package_root.is_dir()
+            or not contract_path.is_file()
+            or not _is_within(contract_path, package_root)
+            or contract_path.stat().st_size > _MAX_CONTRACT_BYTES
+        ):
+            _fail("invalid-skill-contract")
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    except InvocationError:
+        raise
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
+        _fail("invalid-skill-contract")
+    return _validate_skill_contract(contract)
+
+
+def validate_installed_skill_invocation(
+    envelope: dict, skill_package: Path
+) -> ValidatedInvocation:
+    """Validate an envelope against one installed skill before resolving roots."""
+    contract = _load_installed_skill_contract(skill_package)
+    if type(envelope) is not dict:
+        return validate_invocation(envelope)
+    if envelope.get("skill") != contract["skill"]:
+        _fail("contract-skill")
+    inputs = envelope.get("inputs")
+    if type(inputs) is not list or any(type(item) is not dict for item in inputs):
+        return validate_invocation(envelope)
+    if [item.get("role") for item in inputs] != contract["input_roles"]:
+        _fail("contract-input-roles")
+    if envelope.get("internet") != contract["internet"]:
+        _fail("contract-internet")
+    target_policy = contract["target"]["policy"]
+    target = envelope.get("target")
+    if target_policy == "required" and "target" not in envelope:
+        _fail("contract-target")
+    if target_policy == "none" and "target" in envelope:
+        _fail("contract-target")
+    if "target" in envelope:
+        if type(target) is not dict or target.get("role") not in contract["target"]["roles"]:
+            _fail("contract-target")
+    return validate_invocation(envelope)
 
 
 def validate_invocation(envelope: dict) -> ValidatedInvocation:

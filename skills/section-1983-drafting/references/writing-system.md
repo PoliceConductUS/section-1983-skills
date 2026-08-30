@@ -73,7 +73,7 @@ ASD-STE100 controls. Known applications of the rule:
 
 - No semicolons: write two sentences, or use lettered subparagraphs. [STE]
 - No exclamation marks. [Horan]
-- No em dashes or en dashes. [project rule, per the source repo's note]
+- No em dashes or en dashes. [skill rule]
 - Standard commas, colons, quotation marks, and apostrophes per the McAlpin
   polish checklist; when a comma rule is debatable, recast the sentence so the
   question disappears. [McAlpin]
@@ -143,14 +143,16 @@ ASD-STE100 controls. Known applications of the rule:
 9. Same thing named two ways? Pick one name everywhere.
 10. Any semicolon, em dash, or contraction? Remove it.
 11. Any paragraph with more than one set of circumstances? Split it.
-12. Run `scripts/draft_lint.py`, revise, and rerun it. The score delta is
-    editing feedback only, never a merits verdict, legal-sufficiency decision,
-    or filing-readiness decision. Target zero unexempted violations. Reconcile
-    every residual hit exactly once as an unexempted violation, an accurate
-    quotation verified against its approved source, or a controlling term of art
-    supported by the linter exemption record. Repair every unexempted violation.
-    Review warnings separately as review heuristics; they do not change the
-    score or establish filing readiness.
+12. Run
+    `scripts/draft_lint.py --filing-root "$FILING_ROOT" --filing-target "$FILING_TARGET"`,
+    revise, and rerun it. The score delta is editing feedback only, never a
+    merits verdict, legal-sufficiency decision, or filing-readiness decision.
+    Target zero unexempted violations. Reconcile every residual hit exactly once
+    as an unexempted violation, an accurate quotation verified against its
+    approved source, or a controlling term of art supported by the linter
+    exemption record. Repair every unexempted violation. Review warnings
+    separately as review heuristics; they do not change the score or establish
+    filing readiness.
 
 The full _Bad Words_ inventory (Top 50, additional words and phrases, and the
 bonus lists) is merged into `banned-words.md` and enforced by the linter. The

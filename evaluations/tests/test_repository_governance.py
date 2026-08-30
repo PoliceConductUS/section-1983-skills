@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.validate_governance import APPROVED_FOLDER_CONTRACTS
+
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 VALIDATOR = REPOSITORY / "scripts" / "validate_governance.py"
@@ -100,7 +102,7 @@ QUALITY_CONTROL_RULES = (
     ),
     (
         "report-only output",
-        "It may read designated artifacts and write only its designated report or result.",
+        "It may read designated artifacts and return only its designated report or result for trusted-host publication.",
         "It may write changes to an artifact under review.",
     ),
     (
@@ -146,24 +148,44 @@ QUALITY_CONTROL_RULES = (
 )
 QUALITY_CONTROL_REPORT_RULES = (
     (
-        "version directory",
-        "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
-        "A quality-control stage may choose any convenient output folder.",
+        "declared target",
+        "Before review, an independent quality-control stage must select exactly one artifact through its declared input roles and target policy.",
+        "An independent quality-control stage may select an artifact outside its declared input roles or target policy.",
     ),
     (
-        "version-local report",
-        "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
-        "A report may be written outside the audited version's `audits/` directory.",
+        "explicit append-immutable output",
+        "It must propose exactly one unique append-immutable output-relative report beneath the caller-declared output folder.",
+        "It may propose a mutable or non-unique report outside the caller-declared output folder.",
     ),
     (
-        "unique filename",
-        "Name it `<check-kind>-<UTC timestamp>-<run-id>.md`.",
-        "Use a stable shared filename for the latest report.",
+        "no fallback",
+        "A missing, ambiguous, nonexistent, or out-of-role target must fail closed without a fallback write.",
+        "A missing, ambiguous, nonexistent, or out-of-role target may use a fallback write.",
     ),
     (
-        "exclusive creation",
-        "Create the report exclusively; if the path exists, fail closed and preserve its bytes.",
-        "If the path exists, overwrite the prior report.",
+        "path confinement",
+        "The report path must reject absolute paths, traversal, symlink escapes, and existing destinations.",
+        "The report path may be absolute, traverse, follow symlink escapes, or replace an existing destination.",
+    ),
+    (
+        "host-only publication",
+        "Only the trusted host may publish the report through the shared output boundary.",
+        "The skill or helper may publish the report directly.",
+    ),
+    (
+        "prior report exclusion",
+        "Prior quality-control reports must not become implicit input.",
+        "Prior quality-control reports may become implicit input.",
+    ),
+    (
+        "declared prior report",
+        "A report may be reviewed only when that exact report is expressly present in a declared input role and selected consistently with the reviewing skill's target policy.",
+        "A report may be reviewed from ambient output without a declared input role or target.",
+    ),
+    (
+        "new review report",
+        "The reviewing stage must propose a different new append-immutable report for trusted-host publication.",
+        "The reviewing stage may update or replace the report under review.",
     ),
     (
         "immutable reports",
@@ -171,24 +193,9 @@ QUALITY_CONTROL_REPORT_RULES = (
         "Existing reports may be edited, overwritten, replaced, renamed, or deleted.",
     ),
     (
-        "report input exclusion",
-        "Exclude `audits/` from review input unless one exact report is expressly designated; write any review of that report to a different new report.",
-        "Include `audits/` in every review and update the report being reviewed.",
-    ),
-    (
-        "unresolved version",
-        "If the version folder is missing, ambiguous, nonexistent, or outside the designated boundary, report output is unavailable and write nowhere else.",
-        "If the version folder cannot be resolved, write the report to a fallback location.",
-    ),
-    (
-        "path confinement",
-        "Reject traversal and any `audits/` symlink that resolves outside the canonical audits directory.",
-        "Follow traversal or an `audits/` symlink outside the canonical audits directory.",
-    ),
-    (
         "report identity",
-        "The report identifies the audited version, artifact paths and SHA-256 fingerprints, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
-        "The report may omit its audited version, artifact fingerprints, scope, sources, or result.",
+        "The report identifies the logical input roles and hashes, selected target path and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope, approved source identities, and result.",
+        "The report may omit its logical input roles, target fingerprint, scope, sources, or result.",
     ),
     (
         "separate observations",
@@ -233,6 +240,9 @@ PARAPHRASED_REPORT_PERMISSIONS = (
     "An independent audit may save its report in a shared project folder.",
     "The latest audit report may replace the previous report.",
     "Prior audit reports are included in every re-audit.",
+    "Before review, resolve exactly one existing version-specific folder inside the designated project boundary.",
+    "Write exactly one new report under the canonical `<version-folder>/audits/` directory.",
+    "Exclude `audits/` from review input unless one exact report is expressly designated.",
 )
 QUALITY_CONTROL_DESCRIPTIONS = (
     "Use when auditing a synthetic artifact.",
@@ -403,7 +413,8 @@ validation or evaluation support. General-purpose executable tooling belongs in
 its owning repository; this repository keeps only a thin skill wrapper.
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit,
 overwrite, correct, regenerate, or otherwise modify an artifact under review. A
 combined instruction to audit and fix does not authorize same-stage mutation.
 Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
@@ -416,25 +427,27 @@ remediated artifact. An internal self-check inside an explicitly authorized
 drafting or revision stage may guide edits within that stage, but it is not an
 independent quality-control result.
 
-Before review, resolve exactly one existing version-specific folder inside the
-designated project boundary. Write exactly one new report under the canonical
-`<version-folder>/audits/` directory. Name it
-`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
-the path exists, fail closed and preserve its bytes. Existing reports are
-immutable and must not be edited, overwritten, replaced, renamed, or deleted.
-Exclude `audits/` from review input unless one exact report is expressly
-designated; write any review of that report to a different new report. If the
-version folder is missing, ambiguous, nonexistent, or outside the designated
-boundary, report output is unavailable and write nowhere else.
-Reject traversal and any `audits/` symlink that resolves outside the canonical
-audits directory.
+Before review, an independent quality-control stage must select exactly one
+artifact through its declared input roles and target policy. It must propose
+exactly one unique append-immutable output-relative report beneath the
+caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
+target must fail closed without a fallback write. The report path must reject
+absolute paths, traversal, symlink escapes, and existing destinations. Only the
+trusted host may publish the report through the shared output boundary.
 
-The report identifies the audited version, artifact paths and SHA-256
-fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
-identities, and result. Separate failed findings from passing-but-suboptimal
-observations. Recommendations, proposed language, and copy-ready replacements
-for failures or passing-but-suboptimal observations are advisory and do not
-authorize implementation.
+Prior quality-control reports must not become implicit input. A report may be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage must propose a different new append-immutable report for
+trusted-host publication. Existing reports are immutable and must not be
+edited, overwritten, replaced, renamed, or deleted.
+
+The report identifies the logical input roles and hashes, selected target path
+and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
+approved source identities, and result. Separate failed findings from
+passing-but-suboptimal observations. Recommendations, proposed language, and
+copy-ready replacements for failures or passing-but-suboptimal observations are
+advisory and do not authorize implementation.
 """
 
 
@@ -478,14 +491,15 @@ def valid_quality_control_skill(
     description="Use when independently auditing a synthetic artifact.",
 ):
     return f"""---
-name: example-skill
+name: filing-ci
 description: {description}
 ---
 
 # Example skill
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit,
 overwrite, correct, regenerate, or otherwise modify an artifact under review. A
 combined instruction to audit and fix does not authorize same-stage mutation.
 Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
@@ -498,35 +512,39 @@ remediated artifact. An internal self-check inside an explicitly authorized
 drafting or revision stage may guide edits within that stage, but it is not an
 independent quality-control result.
 
-Before review, resolve exactly one existing version-specific folder inside the
-designated project boundary. Write exactly one new report under the canonical
-`<version-folder>/audits/` directory. Name it
-`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
-the path exists, fail closed and preserve its bytes. Existing reports are
-immutable and must not be edited, overwritten, replaced, renamed, or deleted.
-Exclude `audits/` from review input unless one exact report is expressly
-designated; write any review of that report to a different new report. If the
-version folder is missing, ambiguous, nonexistent, or outside the designated
-boundary, report output is unavailable and write nowhere else.
-Reject traversal and any `audits/` symlink that resolves outside the canonical
-audits directory.
+Before review, an independent quality-control stage must select exactly one
+artifact through its declared input roles and target policy. It must propose
+exactly one unique append-immutable output-relative report beneath the
+caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
+target must fail closed without a fallback write. The report path must reject
+absolute paths, traversal, symlink escapes, and existing destinations. Only the
+trusted host may publish the report through the shared output boundary.
 
-The report identifies the audited version, artifact paths and SHA-256
-fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
-identities, and result. Separate failed findings from passing-but-suboptimal
-observations. Recommendations, proposed language, and copy-ready replacements
-for failures or passing-but-suboptimal observations are advisory and do not
-authorize implementation.
+Prior quality-control reports must not become implicit input. A report may be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage must propose a different new append-immutable report for
+trusted-host publication. Existing reports are immutable and must not be
+edited, overwritten, replaced, renamed, or deleted.
+
+The report identifies the logical input roles and hashes, selected target path
+and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
+approved source identities, and result. Separate failed findings from
+passing-but-suboptimal observations. Recommendations, proposed language, and
+copy-ready replacements for failures or passing-but-suboptimal observations are
+advisory and do not authorize implementation.
 """
 
 
-def valid_folder_scope_skill():
-    return """---
-name: example-skill
+def valid_folder_scope_skill(name="filing-ci"):
+    return f"""---
+name: {name}
 description: Use when preparing a synthetic artifact.
 ---
 
 # Example skill
+
+[Folder contract](references/folder-contract.json)
 
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
@@ -536,6 +554,7 @@ case material if the host cannot enforce the filesystem and network boundary.
 
 
 def valid_registry():
+    fixture_skill = "filing-ci"
     return {
         "version": 1,
         "sources": [
@@ -547,13 +566,23 @@ def valid_registry():
         ],
         "skills": [
             {
-                "name": "example-skill",
+                "name": fixture_skill,
                 "rules_mode": "bundled-rules-dependent",
                 "reviewed_on": VALID_DATE,
                 "rationale": "Contains current federal procedural rule content.",
                 "source_ids": ["federal-rules"],
-                "jurisdiction_reference": "skills/example-skill/references/jurisdiction.md",
-            }
+                "jurisdiction_reference": f"skills/{fixture_skill}/references/jurisdiction.md",
+            },
+            *(
+                {
+                    "name": name,
+                    "rules_mode": "rules-independent",
+                    "reviewed_on": VALID_DATE,
+                    "rationale": "Contains no current procedural rule content.",
+                }
+                for name in sorted(APPROVED_FOLDER_CONTRACTS)
+                if name != fixture_skill
+            ),
         ],
     }
 
@@ -584,13 +613,20 @@ def write_temporary_repository(
     contributing=None,
     skill_text=None,
 ):
-    (root / "skills" / "example-skill" / "references").mkdir(parents=True)
     (root / "governance").mkdir()
     (root / ".github").mkdir()
-    (root / "skills" / "example-skill" / "SKILL.md").write_text(
-        skill_text or valid_folder_scope_skill()
+    for name, contract in APPROVED_FOLDER_CONTRACTS.items():
+        package = root / "skills" / name
+        (package / "references").mkdir(parents=True)
+        (package / "SKILL.md").write_text(valid_folder_scope_skill(name))
+        (package / "references" / "folder-contract.json").write_text(
+            json.dumps(contract)
+        )
+    fixture_package = root / "skills" / "filing-ci"
+    (fixture_package / "SKILL.md").write_text(
+        skill_text or valid_folder_scope_skill("filing-ci")
     )
-    (root / "skills" / "example-skill" / "references" / "jurisdiction.md").write_text(
+    (fixture_package / "references" / "jurisdiction.md").write_text(
         "Jurisdiction: Example District\n"
         "Authoritative source: https://www.uscourts.gov\n"
         f"Checked date: {VALID_DATE}\n"
@@ -780,7 +816,7 @@ class RepositoryGovernanceTest(unittest.TestCase):
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "folder-scope-contract-language-missing: example-skill",
+                    "folder-scope-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -792,7 +828,7 @@ class RepositoryGovernanceTest(unittest.TestCase):
     def test_governance_validator_rejects_missing_or_inverted_quality_control_contract(self):
         valid = valid_quality_control_skill()
         mutations = [("missing contract", """---
-name: example-skill
+name: filing-ci
 description: Use when independently auditing a synthetic artifact.
 ---
 
@@ -814,7 +850,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-contract-language-missing: example-skill",
+                    "quality-control-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -831,13 +867,15 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-contract-language-missing: example-skill",
+                    "quality-control-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
     def test_governance_validator_rejects_missing_or_inverted_quality_control_report_contract(self):
         valid = valid_quality_control_skill()
-        without_report = valid.partition("\nBefore review, resolve exactly one")[0]
+        without_report = valid.partition(
+            "\nBefore review, an independent quality-control stage"
+        )[0]
         mutations = [("missing report contract", without_report)]
         mutations.extend(
             (
@@ -855,7 +893,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -863,7 +901,7 @@ description: Use when independently auditing a synthetic artifact.
         for description in QUALITY_CONTROL_DESCRIPTIONS:
             with self.subTest(description=description):
                 skill = valid_quality_control_skill(description).partition(
-                    "\nBefore review, resolve exactly one"
+                    "\nBefore review, an independent quality-control stage"
                 )[0]
                 with tempfile.TemporaryDirectory() as directory:
                     root = Path(directory)
@@ -872,7 +910,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -892,7 +930,7 @@ description: Use when independently auditing a synthetic artifact.
 
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                     result.stdout + result.stderr,
                 )
 
@@ -902,7 +940,7 @@ description: Use when independently auditing a synthetic artifact.
                 (
                     "skill",
                     {"skill_text": valid_quality_control_skill() + permission},
-                    "quality-control-report-contract-language-missing: example-skill",
+                    "quality-control-report-contract-language-missing: filing-ci",
                 ),
                 (
                     "governance",
@@ -926,7 +964,7 @@ description: Use when independently auditing a synthetic artifact.
                 (
                     "skill",
                     {"skill_text": valid_quality_control_skill() + permission},
-                    "quality-control-contract-language-missing: example-skill",
+                    "quality-control-contract-language-missing: filing-ci",
                 ),
                 (
                     "governance",
@@ -948,14 +986,14 @@ description: Use when independently auditing a synthetic artifact.
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             write_temporary_repository(root, skill_text=valid_quality_control_skill())
-            skill_path = root / "skills" / "example-skill" / "SKILL.md"
+            skill_path = root / "skills" / "filing-ci" / "SKILL.md"
             skill_path.unlink()
             skill_path.mkdir()
             result = run_validator(root)
 
         self.assertNotEqual(result.returncode, 0)
         self.assertIn(
-            "quality-control-contract-unreadable: example-skill",
+            "quality-control-contract-unreadable: filing-ci",
             result.stdout + result.stderr,
         )
 
@@ -989,7 +1027,9 @@ description: Use when independently auditing a synthetic artifact.
 
     def test_governance_validator_rejects_missing_or_inverted_quality_control_report_policy(self):
         valid = valid_policy()
-        without_report = valid.partition("\nBefore review, resolve exactly one")[0]
+        without_report = valid.partition(
+            "\nBefore review, an independent quality-control stage"
+        )[0]
         mutations = [("missing report contract", without_report)]
         mutations.extend(
             (
@@ -1167,7 +1207,7 @@ description: Use when independently auditing a synthetic artifact.
             result = run_validator(root)
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("bundled-source-required: example-skill", result.stdout + result.stderr)
+        self.assertIn("bundled-source-required: filing-ci", result.stdout + result.stderr)
 
     def test_unknown_source_id_is_rejected(self):
         registry = valid_registry()
@@ -1178,7 +1218,7 @@ description: Use when independently auditing a synthetic artifact.
             result = run_validator(root)
 
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("unknown-source-id: example-skill", result.stdout + result.stderr)
+        self.assertIn("unknown-source-id: filing-ci", result.stdout + result.stderr)
 
     def test_insecure_source_url_is_rejected(self):
         self.assert_temporary_repository_error(

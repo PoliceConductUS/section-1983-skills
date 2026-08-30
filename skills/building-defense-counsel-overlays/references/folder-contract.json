@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "building-defense-counsel-overlays",
+  "input_roles": ["research-snapshot", "case-record"],
+  "target": { "policy": "required", "roles": ["research-snapshot"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

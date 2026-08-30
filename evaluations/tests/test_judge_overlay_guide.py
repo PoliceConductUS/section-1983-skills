@@ -448,11 +448,20 @@ class JudgeOverlayGuideTest(unittest.TestCase):
             [
                 "python3",
                 "skills/studying-rule-59e-decisions/scripts/validate_corpus.py",
-                "skills/studying-rule-59e-decisions/references/fixtures/valid-complete.json",
+                "--decisions-root",
+                "$PWD/skills/studying-rule-59e-decisions/references/fixtures",
+                "--corpus-target",
+                "valid-complete.json",
             ],
         )
-        for path in argv[1:]:
-            self.assertTrue((REPOSITORY_ROOT / path).is_file())
+        self.assertTrue((REPOSITORY_ROOT / argv[1]).is_file())
+        decisions_root = (
+            REPOSITORY_ROOT
+            / "skills/studying-rule-59e-decisions/references/fixtures"
+        )
+        self.assertTrue(decisions_root.is_dir())
+        self.assertTrue((decisions_root / argv[5]).is_file())
+        argv[3] = str(decisions_root)
         completed = subprocess.run(
             argv,
             cwd=REPOSITORY_ROOT,

@@ -1,17 +1,18 @@
-import contextlib
 import copy
 import hashlib
 import importlib.util
-import io
+import inspect
 import json
-import os
-import stat
+import shutil
 import tempfile
 import unittest
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest import mock
+
+from scripts.skill_output_writer import OutputRun
+from scripts.validate_folder_invocation import build_input_manifest, validate_invocation
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -170,14 +171,465 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         artifact.write_text(packet()["draft"]["content"])
         return project, version, artifact
 
+    def make_declared_roles(self, directory):
+        invocation = Path(directory) / "invocation"
+        filing = invocation / "filing"
+        approved_sources = invocation / "approved-sources"
+        output = invocation / "output"
+        filing.mkdir(parents=True)
+        approved_sources.mkdir()
+        output.mkdir()
+        (filing / "filing.md").write_text(packet()["draft"]["content"])
+        (approved_sources / "SRC-1.txt").write_text(
+            packet()["sources"][0]["content"]
+        )
+        return filing, approved_sources, output
+
+    def execute_folder_review(self, *args, module=None, **kwargs):
+        selected_module = module or self.launcher
+        execute = getattr(selected_module, "execute_review", None)
+        required = {
+            "filing_root",
+            "approved_sources_root",
+            "filing_target",
+            "internet_policy",
+        }
+        parameters = set(inspect.signature(execute).parameters) if execute else set()
+        self.assertTrue(
+            execute is not None and required <= parameters,
+            "folder-scoped execute_review API is not implemented",
+        )
+        return execute(*args, **kwargs)
+
+    def test_folder_processor_api_replaces_project_and_command_authority(self):
+        execute = self.trusted_api("execute_review")
+        parameters = set(inspect.signature(execute).parameters)
+        required = {
+            "filing_root",
+            "approved_sources_root",
+            "filing_target",
+            "internet_policy",
+        }
+        forbidden = {
+            "api_key",
+            "project_boundary",
+            "version_folder",
+            "artifact_path",
+            "output_path",
+            "output_root",
+            "command",
+        }
+        self.assertEqual(
+            {"missing": set(), "forbidden": set(), "command_api": False},
+            {
+                "missing": required - parameters,
+                "forbidden": forbidden & parameters,
+                "command_api": hasattr(self.launcher, "launch_review"),
+            },
+        )
+
+    def test_folder_processor_returns_deterministic_host_publishable_bytes(self):
+        fixed_time = datetime(2026, 8, 22, 6, 0, 0, tzinfo=timezone.utc)
+        fixed_run = "11111111-1111-4111-8111-111111111111"
+        with tempfile.TemporaryDirectory() as directory:
+            filing, approved_sources, output = self.make_declared_roles(directory)
+            input_before = {
+                "filing": {
+                    path.relative_to(filing).as_posix(): path.read_bytes()
+                    for path in filing.rglob("*")
+                    if path.is_file()
+                },
+                "approved-sources": {
+                    path.relative_to(approved_sources).as_posix(): path.read_bytes()
+                    for path in approved_sources.rglob("*")
+                    if path.is_file()
+                },
+            }
+            arguments = {
+                "model": "gpt-synthetic",
+                "filing_root": filing,
+                "approved_sources_root": approved_sources,
+                "filing_target": "filing.md",
+                "internet_policy": "authorized",
+                "transport": TransportSpy(),
+                "now": fixed_time,
+                "run_id": fixed_run,
+            }
+
+            first = self.execute_folder_review(packet(), **arguments)
+            arguments["transport"] = TransportSpy()
+            second = self.execute_folder_review(packet(), **arguments)
+
+            self.assertEqual(first, second)
+            self.assertEqual(first["outcome"], "completed")
+            self.assertIsInstance(first["report_bytes"], bytes)
+            self.assertFalse(Path(first["artifact_path"]).is_absolute())
+            self.assertNotIn("..", Path(first["artifact_path"]).parts)
+            self.assertEqual(list(output.iterdir()), [])
+            self.assertTrue(first["internet_sources"])
+            self.assertEqual(
+                {
+                    "filing": {
+                        path.relative_to(filing).as_posix(): path.read_bytes()
+                        for path in filing.rglob("*")
+                        if path.is_file()
+                    },
+                    "approved-sources": {
+                        path.relative_to(approved_sources).as_posix(): path.read_bytes()
+                        for path in approved_sources.rglob("*")
+                        if path.is_file()
+                    },
+                },
+                input_before,
+            )
+
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "adversarial-filing-review",
+                    "inputs": [
+                        {"role": "filing", "root": str(filing)},
+                        {
+                            "role": "approved-sources",
+                            "root": str(approved_sources),
+                        },
+                    ],
+                    "output": {"root": str(output)},
+                    "target": {"role": "filing", "path": "filing.md"},
+                    "runtime": {
+                        "max_seconds": 60,
+                        "max_input_bytes": 1_048_576,
+                    },
+                    "internet": "authorized",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            input_manifest = build_input_manifest(invocation)
+            run = OutputRun.start(
+                invocation,
+                run_id="adversarial-folder-run",
+                skill_version="1",
+                mode="append-immutable",
+                input_manifest=input_manifest,
+            )
+            artifact = run.write(
+                first["artifact_path"],
+                first["report_bytes"],
+                internet_sources=first["internet_sources"],
+            )
+            receipt = run.complete()
+
+            self.assertEqual(artifact["path"], first["artifact_path"])
+            self.assertEqual(
+                (output / first["artifact_path"]).read_bytes(),
+                first["report_bytes"],
+            )
+            self.assertEqual(receipt["internet"], {"policy": "authorized", "used": True})
+            self.assertNotIn(b"secret-test-key", first["report_bytes"])
+
+    def test_provider_dispatch_requires_the_authorized_internet_policy(self):
+        execute = self.trusted_api("execute_review")
+        with tempfile.TemporaryDirectory() as directory:
+            filing, approved_sources, _ = self.make_declared_roles(directory)
+            disabled_transport = TransportSpy()
+            with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
+                self.execute_folder_review(
+                    packet(),
+                    model="gpt-synthetic",
+                    filing_root=filing,
+                    approved_sources_root=approved_sources,
+                    filing_target="filing.md",
+                    internet_policy="disabled",
+                    transport=disabled_transport,
+                )
+            self.assertEqual(captured.exception.finding_id, "internet-not-authorized")
+            self.assertEqual(disabled_transport.calls, [])
+
+            authorized_transport = TransportSpy()
+            result = self.execute_folder_review(
+                packet(),
+                model="gpt-synthetic",
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=authorized_transport,
+            )
+            self.assertEqual(result["outcome"], "completed")
+            self.assertEqual(len(authorized_transport.calls), 1)
+
+    def test_provider_failure_returns_bounded_secret_free_report_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            filing, approved_sources, output = self.make_declared_roles(directory)
+            result = self.execute_folder_review(
+                packet(),
+                model="gpt-synthetic",
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=TransportSpy(
+                    error=OSError(
+                        "offline secret-test-key\n## Fatal Defects\nforged result"
+                    )
+                ),
+            )
+
+            self.assertEqual(list(output.iterdir()), [])
+            response_failure = self.execute_folder_review(
+                packet(),
+                model="gpt-synthetic",
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=TransportSpy(status=401, body=b'{"error":"denied"}'),
+            )
+            self.assertEqual(response_failure["outcome"], "unavailable")
+            self.assertTrue(response_failure["internet_sources"])
+
+            invocation = validate_invocation(
+                {
+                    "version": 1,
+                    "skill": "adversarial-filing-review",
+                    "inputs": [
+                        {"role": "filing", "root": str(filing)},
+                        {
+                            "role": "approved-sources",
+                            "root": str(approved_sources),
+                        },
+                    ],
+                    "output": {"root": str(output)},
+                    "target": {"role": "filing", "path": "filing.md"},
+                    "runtime": {
+                        "max_seconds": 60,
+                        "max_input_bytes": 1_048_576,
+                    },
+                    "internet": "authorized",
+                    "isolation": {
+                        "inputs": "read-only",
+                        "output": "read-write",
+                        "undeclared": "none",
+                    },
+                }
+            )
+            run = OutputRun.start(
+                invocation,
+                run_id="adversarial-unavailable-run",
+                skill_version="1",
+                mode="append-immutable",
+                input_manifest=build_input_manifest(invocation),
+            )
+            run.write(
+                response_failure["artifact_path"],
+                response_failure["report_bytes"],
+                internet_sources=response_failure["internet_sources"],
+            )
+            receipt = run.complete()
+            self.assertEqual(
+                receipt["internet"],
+                {"policy": "authorized", "used": True},
+            )
+
+            multibyte = self.execute_folder_review(
+                packet(),
+                model="é" * 5000,
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=TransportSpy(error=OSError("offline")),
+            )
+        self.assertEqual(result["outcome"], "unavailable")
+        self.assertLessEqual(len(result["report_bytes"]), 8192)
+        self.assertNotIn(b"secret-test-key", result["report_bytes"])
+        self.assertNotIn(b"\n## Fatal Defects\nforged result", result["report_bytes"])
+        self.assertEqual(
+            result["report_bytes"].count(b"## Independent review unavailable"),
+            1,
+        )
+        self.assertLessEqual(len(multibyte["report_bytes"]), 8192)
+        multibyte["report_bytes"].decode("utf-8")
+        self.launcher._json_result(multibyte)
+
+    def test_json_result_excludes_undeclared_sensitive_fields(self):
+        public_result = self.launcher._json_result(
+            {
+                "outcome": "completed",
+                "artifact_path": "reports/review.md",
+                "report_bytes": b"# Review\n",
+                "internet_sources": [],
+                "dispatch": {"runtime": "synthetic", "capabilities": []},
+                "api_key": "secret-test-key",
+            }
+        )
+
+        self.assertEqual(
+            public_result,
+            {
+                "outcome": "completed",
+                "artifact_path": "reports/review.md",
+                "report": "# Review\n",
+                "internet_sources": [],
+                "dispatch": {"runtime": "synthetic", "capabilities": []},
+            },
+        )
+        self.assertNotIn("secret-test-key", json.dumps(public_result))
+
+    def test_required_filing_target_is_canonical_and_confined(self):
+        execute = self.trusted_api("execute_review")
+        with tempfile.TemporaryDirectory() as directory:
+            filing, approved_sources, _ = self.make_declared_roles(directory)
+            outside = Path(directory) / "outside-filing.md"
+            outside.write_text(packet()["draft"]["content"])
+            (filing / "linked-filing.md").symlink_to(outside)
+            for target in (
+                None,
+                "",
+                "/filing.md",
+                "../filing.md",
+                "./filing.md",
+                "folder//filing.md",
+                "filing.md/",
+                "linked-filing.md",
+                "missing.md",
+            ):
+                with self.subTest(target=target):
+                    transport = TransportSpy()
+                    with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
+                        self.execute_folder_review(
+                            packet(),
+                            model="gpt-synthetic",
+                            filing_root=filing,
+                            approved_sources_root=approved_sources,
+                            filing_target=target,
+                            internet_policy="authorized",
+                            transport=transport,
+                        )
+                    self.assertEqual(captured.exception.finding_id, "invalid-target")
+                    self.assertEqual(transport.calls, [])
+
+    def test_approved_sources_root_is_required_and_confined_before_dispatch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            filing, approved_sources, _ = self.make_declared_roles(directory)
+            missing = root / "missing-approved-sources"
+            not_a_directory = root / "approved-sources.txt"
+            not_a_directory.write_text("not a directory")
+            cases = [None, missing, not_a_directory]
+
+            for supplied_root in cases:
+                with self.subTest(approved_sources_root=supplied_root):
+                    transport = TransportSpy()
+                    with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
+                        self.execute_folder_review(
+                            packet(),
+                            model="gpt-synthetic",
+                            filing_root=filing,
+                            approved_sources_root=supplied_root,
+                            filing_target="filing.md",
+                            internet_policy="authorized",
+                            transport=transport,
+                        )
+                    self.assertEqual(captured.exception.finding_id, "invalid-input-root")
+                    self.assertLessEqual(len(str(captured.exception)), 8192)
+                    self.assertNotIn(str(root), str(captured.exception))
+                    self.assertEqual(transport.calls, [])
+
+            self.assertTrue(approved_sources.is_dir())
+            (approved_sources / "SRC-1.txt").write_text("different approved bytes")
+            transport = TransportSpy()
+            with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
+                self.execute_folder_review(
+                    packet(),
+                    model="gpt-synthetic",
+                    filing_root=filing,
+                    approved_sources_root=approved_sources,
+                    filing_target="filing.md",
+                    internet_policy="authorized",
+                    transport=transport,
+                )
+            self.assertEqual(
+                captured.exception.finding_id,
+                "approved-source-unavailable",
+            )
+            self.assertLessEqual(len(str(captured.exception)), 8192)
+            self.assertNotIn(str(root), str(captured.exception))
+            self.assertNotIn("different approved bytes", str(captured.exception))
+            self.assertEqual(transport.calls, [])
+
+    def test_cli_exposes_only_folder_scoped_input_authority(self):
+        parser = self.trusted_api("_parser")()
+        options = {
+            option
+            for action in parser._actions
+            for option in action.option_strings
+        }
+        required = {
+            "--filing-root",
+            "--approved-sources-root",
+            "--filing-target",
+            "--internet-policy",
+        }
+        forbidden = {
+            "--project-boundary",
+            "--version-folder",
+            "--artifact",
+            "--artifact-path",
+            "--output-path",
+            "--output-root",
+            "--reviewer-command-json",
+            "--runtime-enforces-empty-capabilities",
+        }
+
+        self.assertEqual(
+            {"missing": set(), "forbidden": set()},
+            {"missing": required - options, "forbidden": forbidden & options},
+        )
+
+    def test_folder_processor_runs_from_the_isolated_skill_package(self):
+        with tempfile.TemporaryDirectory() as directory:
+            isolated = Path(directory) / "adversarial-filing-review"
+            shutil.copytree(REPOSITORY / "skills" / isolated.name, isolated)
+            isolated_script = isolated / "scripts" / "launch_review.py"
+            source = isolated_script.read_text()
+            self.assertNotRegex(
+                source,
+                r"(?m)^\s*(?:from|import)\s+scripts(?:\.|\s)",
+            )
+            specification = importlib.util.spec_from_file_location(
+                "isolated_adversarial_review",
+                isolated_script,
+            )
+            module = importlib.util.module_from_spec(specification)
+            specification.loader.exec_module(module)
+            filing, approved_sources, _ = self.make_declared_roles(directory)
+
+            result = self.execute_folder_review(
+                packet(),
+                module=module,
+                model="gpt-synthetic",
+                filing_root=filing,
+                approved_sources_root=approved_sources,
+                filing_target="filing.md",
+                internet_policy="authorized",
+                transport=TransportSpy(),
+            )
+
+        self.assertIsInstance(result["report_bytes"], bytes)
+        self.assertEqual(result["dispatch"]["capabilities"], [])
+
     def test_trusted_request_disables_tools_storage_and_session_continuation(self):
-        run_trusted_review = self.trusted_api("run_trusted_review")
+        run_review = self.trusted_api("run_review")
         transport = TransportSpy()
 
-        result = run_trusted_review(
+        result = run_review(
             packet(),
             model="gpt-synthetic",
-            api_key="secret-test-key",
             timeout_seconds=3,
             transport=transport,
         )
@@ -198,32 +650,78 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             set(HEADINGS),
         )
         self.assertNotIn("secret-test-key", raw_body.decode("utf-8"))
-        self.assertEqual(headers["Authorization"], "Bearer secret-test-key")
+        self.assertEqual(headers, {"Content-Type": "application/json"})
         self.assertEqual(timeout_seconds, 3)
         dispatched_packet = json.loads(request["input"][0]["content"][0]["text"])
         self.assertEqual(dispatched_packet, packet())
         self.assertEqual(result["dispatch"]["capabilities"], [])
         self.assertEqual(result["review"], review_response())
 
-    def test_packet_model_and_credentials_validate_before_transport(self):
-        run_trusted_review = self.trusted_api("run_trusted_review")
+    def test_default_transport_keeps_credentials_out_of_review_runtime(self):
+        transport = TransportSpy()
+
+        with mock.patch.object(self.launcher, "_openai_transport", transport):
+            result = self.launcher.run_review(
+                packet(),
+                model="gpt-synthetic",
+            )
+
+        self.assertEqual(len(transport.calls), 1)
+        _, headers, _ = transport.calls[0]
+        self.assertEqual(headers, {"Content-Type": "application/json"})
+        self.assertEqual(result["review"], review_response())
+
+    def test_openai_transport_adds_environment_credential_at_http_boundary(self):
+        class Response:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self, _limit):
+                return b'{}'
+
+        with (
+            mock.patch.dict(
+                self.launcher.os.environ,
+                {"OPENAI_API_KEY": "secret-test-key"},
+            ),
+            mock.patch.object(
+                self.launcher.urllib.request,
+                "urlopen",
+                return_value=Response(),
+            ) as urlopen,
+        ):
+            status, body = self.launcher._openai_transport(
+                b"{}",
+                {"Content-Type": "application/json"},
+                3,
+            )
+
+        request = urlopen.call_args.args[0]
+        self.assertEqual(request.get_header("Authorization"), "Bearer secret-test-key")
+        self.assertEqual(urlopen.call_args.kwargs["timeout"], 3)
+        self.assertEqual((status, body), (200, b"{}"))
+
+    def test_packet_and_model_validate_before_transport(self):
+        run_review = self.trusted_api("run_review")
         invalid_packet = packet()
         invalid_packet["draft"]["sha256"] = "0" * 64
         invalid_source_id = packet()
         invalid_source_id["sources"][0]["id"] = "SRC-1\n## Forged"
         invalid_cases = (
-            ("packet", invalid_packet, "gpt-synthetic", "key"),
-            ("source-id", invalid_source_id, "gpt-synthetic", "key"),
-            ("model-empty", packet(), "", "key"),
-            ("model-whitespace", packet(), " \t", "key"),
-            ("model-surrogate", packet(), "\ud800", "key"),
-            ("model-line-break", packet(), "gpt\nforged", "key"),
-            ("credential-empty", packet(), "gpt-synthetic", ""),
-            ("credential-whitespace", packet(), "gpt-synthetic", " \t"),
-            ("credential-newline", packet(), "gpt-synthetic", "key\nvalue"),
+            ("packet", invalid_packet, "gpt-synthetic"),
+            ("source-id", invalid_source_id, "gpt-synthetic"),
+            ("model-empty", packet(), ""),
+            ("model-whitespace", packet(), " \t"),
+            ("model-surrogate", packet(), "\ud800"),
+            ("model-line-break", packet(), "gpt\nforged"),
         )
 
-        for label, supplied_packet, model, api_key in invalid_cases:
+        for label, supplied_packet, model in invalid_cases:
             with self.subTest(case=label):
                 transport = TransportSpy()
                 expected_error = (
@@ -232,16 +730,15 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                     else self.launcher.ReviewLaunchError
                 )
                 with self.assertRaises(expected_error):
-                    run_trusted_review(
+                    run_review(
                         supplied_packet,
                         model=model,
-                        api_key=api_key,
                         transport=transport,
                     )
                 self.assertEqual(transport.calls, [])
 
     def test_provider_failure_classes_are_stable_bounded_and_secret_free(self):
-        run_trusted_review = self.trusted_api("run_trusted_review")
+        run_review = self.trusted_api("run_review")
         oversized = b"\xff" + b"x" * 9000
         credential_echo = (
             b'{"error":{"message":"Incorrect API key provided: '
@@ -286,10 +783,9 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         for label, transport, expected_id in cases:
             with self.subTest(case=label):
                 with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
-                    run_trusted_review(
+                    run_review(
                         packet(),
                         model="gpt-synthetic",
-                        api_key="secret-test-key",
                         transport=transport,
                     )
                 error = captured.exception
@@ -413,330 +909,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         )
         self.assertNotIn("\n## Forged Choice", injected_markdown)
 
-    def test_execute_verifies_artifact_then_writes_only_new_immutable_report(self):
-        execute_trusted_review = self.trusted_api("execute_trusted_review")
-        fixed_time = datetime(2026, 8, 22, 6, 0, 0, tzinfo=timezone.utc)
-        fixed_run = "11111111-1111-4111-8111-111111111111"
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            existing = version / "existing.txt"
-            existing.write_text("preserve")
-            before = {
-                path: path.read_bytes()
-                for path in version.rglob("*")
-                if path.is_file()
-            }
-
-            result = execute_trusted_review(
-                packet(),
-                model="gpt-synthetic",
-                api_key="secret-test-key",
-                project_boundary=project,
-                version_folder=version,
-                artifact_path=artifact,
-                transport=TransportSpy(),
-                now=fixed_time,
-                run_id=fixed_run,
-            )
-
-            expected = (
-                version
-                / "audits"
-                / "adversarial-filing-review-20260822T060000Z-11111111-1111-4111-8111-111111111111.md"
-            )
-            self.assertEqual(result["outcome"], "completed")
-            self.assertEqual(Path(result["report_path"]).resolve(), expected.resolve())
-            self.assertTrue(expected.is_file())
-            if os.name != "nt":
-                self.assertEqual(stat.S_IMODE(expected.stat().st_mode), 0o600)
-            report = expected.read_text()
-            self.assertIn("openai-responses-stateless", report)
-            self.assertIn("gpt-synthetic", report)
-            self.assertIn("SRC-1", report)
-            self.assertIn(packet()["draft"]["sha256"], report)
-            self.assertIn(str(artifact), report)
-            self.assertNotIn("secret-test-key", report)
-            for path, content in before.items():
-                self.assertEqual(path.read_bytes(), content)
-            self.assertEqual(
-                sorted(
-                    path.relative_to(version).as_posix()
-                    for path in version.rglob("*")
-                    if path.is_file() and path not in before
-                ),
-                [
-                    "audits/adversarial-filing-review-20260822T060000Z-11111111-1111-4111-8111-111111111111.md"
-                ],
-            )
-
-    def test_artifact_and_path_failures_happen_before_provider_execution(self):
-        execute_trusted_review = self.trusted_api("execute_trusted_review")
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            outside_version = Path(directory) / "outside-version"
-            outside_version.mkdir()
-            outside_artifact = outside_version / "filing.md"
-            outside_artifact.write_text(packet()["draft"]["content"])
-            mismatched = version / "mismatched.md"
-            mismatched.write_text("different bytes")
-            cases = (
-                ("outside-version", outside_version, outside_artifact),
-                ("outside-artifact", version, outside_artifact),
-                ("mismatched-artifact", version, mismatched),
-                ("missing-artifact", version, version / "missing.md"),
-            )
-            for label, supplied_version, supplied_artifact in cases:
-                with self.subTest(case=label):
-                    transport = TransportSpy()
-                    with self.assertRaises(self.launcher.ReviewLaunchError):
-                        execute_trusted_review(
-                            packet(),
-                            model="gpt-synthetic",
-                            api_key="secret-test-key",
-                            project_boundary=project,
-                            version_folder=supplied_version,
-                            artifact_path=supplied_artifact,
-                            transport=transport,
-                        )
-                    self.assertEqual(transport.calls, [])
-
-    def test_audits_escape_and_report_collision_preserve_existing_bytes(self):
-        execute_trusted_review = self.trusted_api("execute_trusted_review")
-        fixed_time = datetime(2026, 8, 22, 6, 0, 0, tzinfo=timezone.utc)
-        fixed_run = "11111111-1111-4111-8111-111111111111"
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            audits = version / "audits"
-            audits.mkdir()
-            collision = (
-                audits
-                / "adversarial-filing-review-20260822T060000Z-11111111-1111-4111-8111-111111111111.md"
-            )
-            collision.write_text("immutable prior report")
-
-            collision_transport = TransportSpy()
-            with self.assertRaises(self.launcher.ReviewLaunchError):
-                execute_trusted_review(
-                    packet(),
-                    model="gpt-synthetic",
-                    api_key="secret-test-key",
-                    project_boundary=project,
-                    version_folder=version,
-                    artifact_path=artifact,
-                    transport=collision_transport,
-                    now=fixed_time,
-                    run_id=fixed_run,
-                )
-            self.assertEqual(collision.read_text(), "immutable prior report")
-            self.assertEqual(collision_transport.calls, [])
-
-        if os.name != "nt":
-            with tempfile.TemporaryDirectory() as directory:
-                project, version, artifact = self.make_version(directory)
-                outside = Path(directory) / "outside-audits"
-                outside.mkdir()
-                (version / "audits").symlink_to(outside, target_is_directory=True)
-                transport = TransportSpy()
-                with self.assertRaises(self.launcher.ReviewLaunchError):
-                    execute_trusted_review(
-                        packet(),
-                        model="gpt-synthetic",
-                        api_key="secret-test-key",
-                        project_boundary=project,
-                        version_folder=version,
-                        artifact_path=artifact,
-                        transport=transport,
-                    )
-                self.assertEqual(transport.calls, [])
-                self.assertEqual(list(outside.iterdir()), [])
-
-            with tempfile.TemporaryDirectory() as directory:
-                project, version, artifact = self.make_version(directory)
-                outside = Path(directory) / "race-outside"
-                outside.mkdir()
-                audits = version / "audits"
-                original_mkdir = Path.mkdir
-
-                def replace_created_audits(path, *args, **kwargs):
-                    result = original_mkdir(path, *args, **kwargs)
-                    if path.name == audits.name:
-                        path.rmdir()
-                        path.symlink_to(outside, target_is_directory=True)
-                    return result
-
-                with mock.patch.object(Path, "mkdir", replace_created_audits):
-                    with self.assertRaises(self.launcher.ReviewLaunchError):
-                        execute_trusted_review(
-                            packet(),
-                            model="gpt-synthetic",
-                            api_key="secret-test-key",
-                            project_boundary=project,
-                            version_folder=version,
-                            artifact_path=artifact,
-                            transport=TransportSpy(),
-                        )
-                self.assertEqual(list(outside.iterdir()), [])
-
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            transport = TransportSpy()
-            with self.assertRaises(self.launcher.ReviewLaunchError):
-                execute_trusted_review(
-                    packet(),
-                    model="gpt-synthetic",
-                    api_key="secret-test-key",
-                    project_boundary=project,
-                    version_folder=version,
-                    artifact_path=artifact,
-                    transport=transport,
-                    run_id="../escape",
-                )
-            self.assertEqual(transport.calls, [])
-
-    def test_cli_success_and_unavailable_results_are_distinct_and_reported(self):
-        main = self.trusted_api("main")
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            stdout = io.StringIO()
-            with contextlib.redirect_stdout(stdout):
-                exit_code = main(
-                    [
-                        "--trusted-openai",
-                        "--model",
-                        "gpt-synthetic",
-                        "--project-boundary",
-                        str(project),
-                        "--version-folder",
-                        str(version),
-                        "--artifact",
-                        str(artifact),
-                    ],
-                    input_bytes=json.dumps(packet()).encode("utf-8"),
-                    transport=TransportSpy(),
-                    environ={"OPENAI_API_KEY": "secret-test-key"},
-                )
-            result = json.loads(stdout.getvalue())
-            self.assertEqual(exit_code, 0)
-            self.assertEqual(
-                set(result),
-                {"outcome", "report_path", "dispatch"},
-            )
-            self.assertEqual(result["outcome"], "completed")
-            self.assertTrue(Path(result["report_path"]).is_file())
-            self.assertEqual(
-                result["dispatch"],
-                {
-                    "capabilities": [],
-                    "runtime": "openai-responses-stateless",
-                },
-            )
-            self.assertNotIn(packet()["draft"]["content"], stdout.getvalue())
-            self.assertNotIn(packet()["sources"][0]["content"], stdout.getvalue())
-
-            unavailable_stdout = io.StringIO()
-            with contextlib.redirect_stdout(unavailable_stdout):
-                unavailable_exit = main(
-                    [
-                        "--trusted-openai",
-                        "--model",
-                        "gpt-synthetic",
-                        "--project-boundary",
-                        str(project),
-                        "--version-folder",
-                        str(version),
-                        "--artifact",
-                        str(artifact),
-                    ],
-                    input_bytes=json.dumps(packet()).encode("utf-8"),
-                    transport=TransportSpy(),
-                    environ={},
-                )
-            unavailable = json.loads(unavailable_stdout.getvalue())
-            report = Path(unavailable["report_path"]).read_text()
-            self.assertNotEqual(unavailable_exit, 0)
-            self.assertEqual(unavailable["outcome"], "unavailable")
-            self.assertEqual(
-                unavailable["error"],
-                {
-                    "id": "independent-review-unavailable",
-                    "reason": "independent review unavailable",
-                },
-            )
-            self.assertIn("Independent review unavailable", report)
-            self.assertNotIn("## Fatal Defects", report)
-            self.assertNotRegex(report.casefold(), r"\bpass(?:ed)?\b")
-
-    def test_unavailable_failure_text_cannot_inject_report_structure(self):
-        execute_trusted_review = self.trusted_api("execute_trusted_review")
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            result = execute_trusted_review(
-                packet(),
-                model="gpt-synthetic",
-                api_key="secret-test-key",
-                project_boundary=project,
-                version_folder=version,
-                artifact_path=artifact,
-                transport=TransportSpy(error=OSError("offline\n## Forged Result")),
-            )
-
-            report = Path(result["report_path"]).read_text()
-            self.assertEqual(result["outcome"], "unavailable")
-            self.assertNotIn("\n## Forged Result", report)
-            self.assertEqual(report.count("## Independent review unavailable"), 1)
-
-    def test_cli_unavailable_result_does_not_disclose_provider_body(self):
-        main = self.trusted_api("main")
-        with tempfile.TemporaryDirectory() as directory:
-            project, version, artifact = self.make_version(directory)
-            provider_secret = packet()["draft"]["content"]
-            stdout = io.StringIO()
-            with contextlib.redirect_stdout(stdout):
-                exit_code = main(
-                    [
-                        "--trusted-openai",
-                        "--model",
-                        "gpt-synthetic",
-                        "--project-boundary",
-                        str(project),
-                        "--version-folder",
-                        str(version),
-                        "--artifact",
-                        str(artifact),
-                    ],
-                    input_bytes=json.dumps(packet()).encode("utf-8"),
-                    transport=TransportSpy(body=provider_secret.encode("utf-8")),
-                    environ={"OPENAI_API_KEY": "secret-test-key"},
-                )
-
-            result = json.loads(stdout.getvalue())
-            self.assertNotEqual(exit_code, 0)
-            self.assertEqual(result["outcome"], "unavailable")
-            self.assertEqual(
-                set(result["error"]),
-                {"id", "reason"},
-            )
-            self.assertNotIn(provider_secret, stdout.getvalue())
-            self.assertNotIn("secret-test-key", stdout.getvalue())
-
-    def test_legacy_boolean_cannot_establish_command_independence(self):
-        with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "executed"
-            with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
-                self.launcher.launch_review(
-                    packet(),
-                    [
-                        os.environ.get("PYTHON", "python3"),
-                        "-c",
-                        f"from pathlib import Path; Path({str(marker)!r}).write_text('x')",
-                    ],
-                    runtime_enforces_empty_capabilities=True,
-                )
-            self.assertEqual(
-                captured.exception.finding_id,
-                "independent-review-unavailable",
-            )
-            self.assertFalse(marker.exists())
 
 
 if __name__ == "__main__":

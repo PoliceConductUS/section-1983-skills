@@ -9,10 +9,24 @@ description: >-
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the approved chronology, claim gaps, exhibits, and sources.
+- `authorities` contains approved deposition rules, orders, and limits.
+- `discovery` contains produced material and outstanding-document information.
+
+Target is optional in `record`; without one, use the supplied witness and gap
+scope. Internet is `disabled`. Return the deposition outline as a canonical
+output-relative path and deterministic bytes; only the trusted host may publish
+it append-immutable. Report missing witness, chronology, source, discovery, or
+authority material as a gap without predicting testimony.
 
 Build questions that test open element gaps without predicting testimony or
 choosing deposition strategy.

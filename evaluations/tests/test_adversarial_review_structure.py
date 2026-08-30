@@ -174,30 +174,38 @@ class AdversarialReviewStructureTest(unittest.TestCase):
             ),
         )
 
-    def test_public_route_uses_the_trusted_runtime_not_caller_asserted_isolation(self):
+    def test_public_route_uses_the_folder_processor_and_host_publication(self):
         skill = required_text(SKILL)
         readme = required_text(README)
 
         for artifact in (skill, readme):
             with self.subTest(artifact=artifact[:20]):
-                self.assertIn("--trusted-openai", artifact)
-                self.assertRegex(
+                assert_semantics(
+                    self,
                     artifact,
-                    r"(?is)(?:arbitrary|custom|legacy).{0,160}(?:cannot|must fail|untrusted).{0,100}(?:independen|isolat)",
+                    (
+                        ("filing role", (r"declared.{0,80}filing.{0,40}(?:role|root)",)),
+                        (
+                            "approved sources role",
+                            (r"declared.{0,80}approved-sources.{0,40}(?:role|root)",),
+                        ),
+                        ("required target", (r"required.{0,80}filing target",)),
+                        ("authorized internet", (r"internet.{0,40}authorized",)),
+                        (
+                            "host publication",
+                            (r"(?:trusted host|outputrun).{0,120}(?:publish|write)",),
+                        ),
+                        (
+                            "returned bytes",
+                            (r"(?:return|emit).{0,100}(?:report bytes|artifact bytes)",),
+                        ),
+                    ),
                 )
-                self.assertRegex(
+                self.assertNotRegex(
                     artifact,
-                    r"(?is)(?:immutable|new).{0,80}report.{0,120}audits/",
+                    r"(?is)(?:--project-boundary|--version-folder|--artifact\b|"
+                    r"--reviewer-command-json|<version-folder>/audits/)",
                 )
-                self.assertRegex(
-                    artifact,
-                    r"(?is)(?:unavailable|provider|credential).{0,180}nonzero",
-                )
-
-        self.assertNotRegex(
-            skill,
-            r"(?is)use\s+`scripts/launch_review\.py`.{0,180}only\s+after.{0,180}(?:caller|host).{0,120}(?:assert|establish)",
-        )
 
 
 if __name__ == "__main__":

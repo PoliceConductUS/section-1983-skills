@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "skill": "drafting-for-judge-scholer",
+  "input_roles": ["filing", "judge-corpus", "court-conduct"],
+  "target": { "policy": "required", "roles": ["filing"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

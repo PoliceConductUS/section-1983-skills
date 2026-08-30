@@ -11,10 +11,24 @@ description:
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `motion` contains the officers' Rule 12 motion and ordered arguments.
+- `record` contains the operative pleading and approved officer-specific record.
+- `authorities` contains approved Rule 12, claim, and qualified-immunity law.
+
+Target is required in `motion`. Internet is `disabled`. Return the officer-
+motion RRD as a canonical output-relative path and deterministic bytes; only the
+trusted host may publish it append-immutable. Report missing headings,
+officer-act facts, record support, authority, or amendment information as a gap
+without drafting the response brief.
 
 Create a detailed **Response Requirements Document (RRD)** for an **officers’
 Rule 12(b)(6) Motion to Dismiss** in a §1983 case, where **qualified immunity**
@@ -50,9 +64,10 @@ complete.
    - mirrors the motion’s heading order
    - breaks work into small, checkable “Response Units” (RUs)
    - forces officer-by-officer QI completion where needed
-4. Save to the repository-defined response path; if none exists, default to
-   `responses/<response-due-date>/<motion-folder>/rrd.yaml`
-5. Be **idempotent**: re-running updates/merges without duplicating RUs
+4. Return `rrd.yaml` bytes with a canonical output-relative path for trusted-
+   host publication.
+5. Be **idempotent**: merge without duplicating RUs only when a prior RRD is
+   expressly supplied in `record`, then return a new append-immutable artifact.
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
@@ -408,8 +423,7 @@ Remaining unknowns that block drafting.
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** repository-defined response path; default to
-  `responses/<response-due-date>/<motion-folder>/`
+- **Publication:** canonical output-relative path through the trusted host
 - **Filename:** `rrd.yaml`
 
 ---
@@ -433,5 +447,5 @@ Remaining unknowns that block drafting.
       conceded where disputed
 - [ ] Deterministic RU IDs + idempotent merge behavior
 - [ ] Every proposed amendment has a complete `amendment_handoff` entry
-- [ ] Saved to the repository-defined response path, or the documented default
-      when none exists
+- [ ] Returned with a canonical output-relative path for append-immutable
+      trusted-host publication

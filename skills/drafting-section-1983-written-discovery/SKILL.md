@@ -9,10 +9,24 @@ description: >-
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `record` contains the approved facts, chronology, and open factual gaps.
+- `authorities` contains approved discovery rules, orders, and numerical limits.
+- `claim-map` contains the stable claim, defendant, element, and target mapping.
+
+Target is optional in `claim-map`; without one, use the supplied mapped scope.
+Internet is `disabled`. Return the discovery requests and target map as a
+canonical output-relative path and deterministic bytes; only the trusted host
+may publish them append-immutable. Report missing claim, defendant, element,
+source, scope, or authority material as a gap without assuming evidence.
 
 Draft traceable, bounded written discovery without turning an expected source or
 answer into a factual premise.

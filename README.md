@@ -53,7 +53,7 @@ work. `temp/` is not a durable artifact destination.
 | `section-1983-drafting`                           | Entry point for document routing, deadlines, localization, authority sourcing, and the shared writing system.                                                              |
 | `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
 | `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
-| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and external-checker handoff.                                                         |
+| `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and packaged install-local mechanical check.                                          |
 | `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
 | `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                             |
 | `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                   |
@@ -68,12 +68,18 @@ work. `temp/` is not a durable artifact destination.
 | `rrd-rule12-city`                                 | Municipal-motion specialization with theory-specific Monell analysis.                                                                                                      |
 | `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                      |
 | `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                     |
-| `filing-ci`                                       | Orchestrates a project-configured deterministic filing-integrity checker and its fail-closed filing gate.                                                                  |
+| `filing-ci`                                       | Runs registered packaged deterministic filing checks and preserves a fail-closed filing gate.                                                                              |
 
 ## How the skills compose
 
 Load each applicable skill once. The more specific skill adds requirements; it
 does not replace source, authority, or court rules.
+
+Composition is sequential: the trusted host validates and invokes each skill
+separately against that installed skill's exact folder contract. It never unions
+roles across the stack or enlarges one skill's filesystem or internet authority.
+Output from one skill is available to another only through a new invocation that
+expressly supplies it in the receiving skill's declared input role.
 
 1. Start with `section-1983-drafting` for routing, localization, and writing
    rules.
@@ -127,62 +133,63 @@ The ownership boundaries are deliberate: the umbrella routes; complaint skills
 establish pleading sufficiency; false-arrest and judge skills add issue-specific
 constraints; RRD skills organize motion responses; discovery peers draft or
 audit only their named artifacts; the authority and writing skills are final
-gates, and Filing CI adds a separate configured integrity gate.
+gates, and Filing CI adds a separate packaged integrity gate.
 
 ### Trusted adversarial-review runtime
 
-Independent adversarial review uses the built-in stateless OpenAI runtime. An
-arbitrary reviewer command or a caller assertion cannot establish independent
-isolation. Set `OPENAI_API_KEY` and an explicit model, build the bounded packet
-required by the skill, and run from the repository root:
+Independent adversarial review uses the built-in stateless OpenAI runtime. The
+declared `filing` role root supplies the filing bytes, and the declared
+`approved-sources` role root supplies every approved packet source. A required
+filing target selects one canonical relative file inside `filing`. Internet is
+authorized for this provider dispatch. Set `OPENAI_API_KEY`, choose an explicit
+model, build the bounded packet required by the skill, and run the install-local
+processor:
 
 ```bash
 python3 skills/adversarial-filing-review/scripts/launch_review.py \
   --trusted-openai \
   --model "$OPENAI_REVIEW_MODEL" \
-  --project-boundary "$CASE_ROOT" \
-  --version-folder "$VERSION_FOLDER" \
-  --artifact "$CANONICAL_DRAFT" \
+  --filing-root "$FILING_ROOT" \
+  --approved-sources-root "$APPROVED_SOURCES_ROOT" \
+  --filing-target "$FILING_TARGET" \
+  --internet-policy authorized \
   < "$REVIEW_PACKET"
 ```
 
-The host verifies the canonical draft and writes a new immutable report under
-`<version-folder>/audits/`. A missing credential, unavailable provider, or
-invalid response produces an unavailable report and a nonzero exit; it is not a
-completed independent review.
+The processor returns report bytes, a canonical output-relative artifact path,
+and validated internet-source records. It accepts no arbitrary command or output
+folder and writes nothing directly. Only the trusted host publishes the bytes
+with `OutputRun` and records the append-immutable terminal receipt. A missing
+credential, unavailable provider, or invalid response returns a bounded
+unavailable report and a nonzero exit; it is not a completed independent review.
 
 ## Complaint checker boundary
 
-The canonical JSON complaint contract is a thin handoff for an external checker
-configured by the project. It does not provide or execute a checker and does not
-decide fact truth, legal sufficiency, authority fit, material analogy, strategy,
-or filing readiness. Filing CI may orchestrate only a complete
-project-configured checker invocation; it does not invent an executable, flags,
-inputs, or output paths.
+The canonical JSON complaint contract drives the install-local
+`scripts/check_complaint.py` mechanical checker. It does not decide fact truth,
+legal sufficiency, authority fit, material analogy, strategy, or filing
+readiness. Filing CI dispatches only checker IDs registered inside its installed
+package; an absent, unknown, unavailable, or incompatible checker returns an
+honest unavailable result. Neither helper accepts a command, executable, or
+output folder, and only the trusted host publishes returned report bytes.
 
-## Project inputs and portability
+## Invocation inputs and portability
 
-The skills describe artifact roles, not a required case-management product.
-Projects may use different filenames or keep the same information in one
-document. When a skill calls for a strategy, chronology or fact lock, claim
-ledger, gap register, authority library, or coded corpus:
+The skills consume named artifact roles, not a case-management product or
+repository layout. Callers may use different filenames or keep related
+information in one document, but each invocation exposes only the exact
+recursive read-only folders declared for that skill. Missing strategy,
+chronology, fact-lock, claim-ledger, gap-register, authority, or corpus material
+is reported as a gap; the skill does not search another folder or imply that an
+absent artifact was reviewed.
 
 New users can follow [Run folder-scoped skill operations](FOLDER_OPERATIONS.md)
-to map those roles to recursive read-only input folders, select one output
-folder, and verify a synthetic operation before using the drafting skills.
-
-- use the project's existing equivalent;
-- do not invent a file or imply that a missing artifact was reviewed;
-- ask before drafting without a strategy; and
-- create a minimal internal working table for other missing roles when the
-  document can still be prepared from verified sources.
-
-Localization results belong in a project-defined cache or returned internal
-audit, not inside an installed skill package. Logical input hashes and run
-manifests are required for every folder-scoped operation. These shared receipts
-bind the declared logical inputs to the terminal output run even when a caller
-maintains no packet-specific metadata. Project-specific extra packet controls
-remain optional and separate from the shared folder contract.
+to map roles to input folders, select one output folder, and verify a synthetic
+operation before using the drafting skills. Only the trusted host publishes
+returned artifacts. Logical input hashes and run manifests are required for
+every folder-scoped operation and bind the declared inputs to the terminal
+output run. Caller-specific additional packet controls remain optional and
+separate from the shared folder contract.
 
 Judge-specific observations are optional. If the reviewed corpus does not
 support an issue-specific conclusion, the judge overlay contributes no

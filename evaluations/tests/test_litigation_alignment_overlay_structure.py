@@ -36,6 +36,7 @@ class LitigationAlignmentOverlayStructureTest(unittest.TestCase):
         expected = {
             "SKILL.md",
             "agents/openai.yaml",
+            "references/folder-contract.json",
             "scripts/validate_overlays.py",
             *(f"references/{name}" for name in SCHEMAS),
             *(f"references/fixtures/{name}" for name in FIXTURES),

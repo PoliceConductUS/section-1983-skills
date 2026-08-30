@@ -10,10 +10,25 @@ description:
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `decisions` contains the evidence-coded corpus, records, and transfer cards.
+- `authorities` contains approved governing Rule 59(e) authority and source law.
+
+Target is optional in `decisions`; without one, study the supplied corpus scope
+or validated standard-input corpus. Internet is `authorized` for bounded
+primary-source retrieval and verification. Return the corpus, validation result,
+or transfer artifact with a canonical output-relative path and deterministic
+bytes; only the trusted host may publish it append-immutable. Report incomplete
+retrieval, denominator, authorship, source, or authority material as a gap
+without overstating the corpus.
 
 ## Purpose
 
@@ -30,9 +45,13 @@ Use
 for every published or transferred corpus and
 [references/transfer-card.schema.json](references/transfer-card.schema.json) for
 standalone downstream transfers. Before release, run
-`python3 scripts/validate_corpus.py <corpus.json>` from the installed skill
-directory. CSV, YAML, and databases remain valid working formats, but they must
-export canonical JSON that passes the validator before publication or transfer.
+`python3 scripts/validate_corpus.py --decisions-root "$DECISIONS_ROOT" --corpus-target "$CORPUS_TARGET"`
+from the installed skill directory. The target is a canonical relative path
+inside the caller-declared `decisions` role root. With neither flag, the helper
+accepts bounded corpus JSON on standard input. CSV, YAML, and databases remain
+valid working formats, but they must export canonical JSON that passes the
+validator before publication or transfer. The helper does not write or publish
+its deterministic result.
 
 ## Required companion skill
 
@@ -94,7 +113,7 @@ choices that the order does not identify.
    material.
 
 Preserve the source URL or canonical path, docket number, document number,
-retrieval date, and artifact hash when the repository requires hashes.
+retrieval date, and artifact hash in every returned corpus artifact.
 
 ## Coding rules
 
@@ -195,8 +214,9 @@ coded records.
 ## Update rule
 
 Before relying on an older corpus for a current filing, audit post-study
-decisions and later history through the new research date. Preserve the earlier
-corpus version and write a new versioned ledger and findings memo.
+decisions and later history through the new research date. Return a new ledger
+and findings memo as canonical output-relative artifact plans; only the trusted
+host may publish them append-immutable, preserving earlier artifacts.
 
 If the filing deadline prevents a complete study, issue a preliminary report
 limited to verified binding rules and documented examples. Do not state a grant

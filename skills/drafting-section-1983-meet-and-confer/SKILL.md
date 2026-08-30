@@ -9,10 +9,25 @@ description: >-
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `discovery-audit` contains the completed request-by-request audit.
+- `served-discovery` contains the exact served requests and responses.
+- `authorities` contains approved rules, orders, and agreements.
+- `conference-record` contains the supplied conference facts and proposed date.
+
+Target is required in `discovery-audit`. Internet is `disabled`. Return the
+neutral correspondence as a canonical output-relative path and deterministic
+bytes; only the trusted host may publish it append-immutable. Report an
+incomplete audit, missing served text, authority, or conference fact as a gap
+without redoing the audit or selecting escalation.
 
 Turn a completed request-by-request audit into neutral correspondence without
 redoing the audit, changing a served request, or selecting escalation.

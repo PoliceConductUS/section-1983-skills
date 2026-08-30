@@ -118,9 +118,9 @@ the complaint and log the missing proof as a GAP.
   record the unsupported proposition as a GAP.
 - Use the complaint as the pleading; do not turn the count into an evidentiary
   appendix.
-- If the repository or case strategy requires dual body-worn-camera timestamps,
-  give both elapsed duration and the visible overlay date/time, naming the
-  wearing officer: `BWC-Doe elapsed 04:17.900; overlay 2024-01-15 21:34:05.120`.
+- If the supplied strategy requires dual body-worn-camera timestamps, give both
+  elapsed duration and the visible overlay date/time, naming the wearing
+  officer: `BWC-Doe elapsed 04:17.900; overlay 2024-01-15 21:34:05.120`.
   Otherwise follow the case's verified recording-citation convention.
 - Describe what the recording shows. Mark uncertainty, occlusion, speaker
   attribution, and inference.

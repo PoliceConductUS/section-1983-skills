@@ -12,10 +12,24 @@ description:
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `filing` contains the filing selected for judge-overlay review.
+- `judge-corpus` contains the approved evidence-coded decision corpus.
+- `court-conduct` contains approved court-conduct observations and sources.
+
+Target is required in `filing`. Internet is `disabled`. Return any judge-
+specific receipt or bounded no-change result as a canonical output-relative path
+and deterministic bytes; only the trusted host may publish it append-immutable.
+Report unsupported, stale, incomplete, or unavailable overlay material as a gap
+and make no judge-specific change.
 
 ## Role in the skill stack
 
@@ -40,29 +54,32 @@ necessary clearly-established-law distinctions.
 
 ## Quick start
 
-1. Locate and follow the case strategy file: `strategy.md`, or the
-   highest-numbered `strategy-v*.md`, in the case or workstream folder; ask the
-   user for it if missing. Propose any needed departure as a new strategy
-   version and proceed only per the user's decision — never deviate silently,
-   and never edit a strategy version in place.
+1. Follow the strategy represented in the selected `filing` target and the
+   user's request. If a required strategy position is unavailable, report the
+   gap. Propose any departure and proceed only per the user's decision; never
+   deviate silently.
 2. Read [REFERENCE.md](REFERENCE.md).
 3. For each issue, determine whether the available corpus supports a documented
    example, a tendency, or no judge-specific conclusion. If it supports none,
    use no judge-specific proposition for that issue.
 4. Identify the document, posture, challenged claims, requested ruling, and
    record materials the court may consider.
-5. Apply the repository authority and factual-source gates. Research cases are
-   not citeable merely because they appear in the corpus.
+5. Apply the authority and factual-source gates supplied in the declared input
+   roles. Research cases are not citeable merely because they appear in the
+   corpus.
 6. Draft in this order: governing rule → actor-specific facts →
    element-by-element application → requested ruling.
 7. Ground every point in record facts, permitted inferences, and verified
    authority so the court has justification and reason to agree; persuasive or
    rhetorical argument is a small part of the document, if present at all.
-8. After the applicable document and claim skills compose the filing, write one
-   immutable judge-overlay execution receipt under the version's canonical
-   `audits/` directory. If no qualifying support permits a specialized change,
-   record `no judge-specific drafting change` and the bounded reason. The
-   absence of judge-specific prose or a receipt does not prove this overlay ran.
+8. After the applicable document and claim skills compose the filing, select the
+   required filing target inside the declared `filing` role root and use the
+   declared `judge-corpus` and `court-conduct` role roots. The packaged
+   processor returns immutable receipt bytes and one output-relative path; only
+   the trusted host may publish them through `OutputRun`. If no qualifying
+   support permits a specialized change, record
+   `no judge-specific drafting change` and the bounded reason. The absence of
+   judge-specific prose or a receipt does not prove this overlay ran.
 
 ## Evidence hierarchy
 
@@ -132,8 +149,8 @@ alleged causal policy is independently identified.
 - Confirm every point rests on cited record facts, expressly permitted
   inferences, or verified authority; cut or rewrite any sentence that cannot be
   traced to one.
-- Confirm the draft follows the case strategy file and its prescribed audits
-  ran.
+- Confirm the draft follows the user-approved strategy represented in the
+  selected filing and request, and that its prescribed audits ran.
 - End each argument with the precise ruling requested.
 - State corpus-derived observations as tendencies or documented examples, never
   predictions.
@@ -142,39 +159,43 @@ alleged causal policy is independently identified.
 - Run `audit-authorities` before treating any judge-specific or
   clearly-established-law proposition as filing-ready.
 - Run `horan-bad-words` after the last substantive or authority revision.
-- Create the immutable judge-overlay execution receipt only after the filing's
-  judge-specific composition and anti-gaming checks are complete.
+- Return the immutable judge-overlay execution receipt plan only after the
+  filing's judge-specific composition and anti-gaming checks are complete.
 
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated
-artifacts and write only its designated report or result. It must not edit,
-overwrite, correct, regenerate, or otherwise modify an artifact under review. A
-combined instruction to audit and fix does not authorize same-stage mutation.
-Deadline pressure, sunk cost, claimed prior approval, and contrary workflow
-instructions do not override this boundary. Recommendations, proposed language,
-corrections, and copy-ready replacements are advisory only and do not authorize
-implementation. Remediation requires a separately authorized drafting or
-revision stage. Create a new version when versioning applies. A new read-only
-quality-control stage must verify the remediated artifact. An internal
-self-check inside an explicitly authorized drafting or revision stage may guide
-edits within that stage, but it is not an independent quality-control result.
+artifacts and return only its designated report or result for trusted-host
+publication. It must not edit, overwrite, correct, regenerate, or otherwise
+modify an artifact under review. A combined instruction to audit and fix does
+not authorize same-stage mutation. Deadline pressure, sunk cost, claimed prior
+approval, and contrary workflow instructions do not override this boundary.
+Recommendations, proposed language, corrections, and copy-ready replacements are
+advisory only and do not authorize implementation. Remediation requires a
+separately authorized drafting or revision stage. Create a new version when
+versioning applies. A new read-only quality-control stage must verify the
+remediated artifact. An internal self-check inside an explicitly authorized
+drafting or revision stage may guide edits within that stage, but it is not an
+independent quality-control result.
 
-Before review, resolve exactly one existing version-specific folder inside the
-designated project boundary. Write exactly one new report under the canonical
-`<version-folder>/audits/` directory. Name it
-`<check-kind>-<UTC timestamp>-<run-id>.md`. Create the report exclusively; if
-the path exists, fail closed and preserve its bytes. Existing reports are
-immutable and must not be edited, overwritten, replaced, renamed, or deleted.
-Exclude `audits/` from review input unless one exact report is expressly
-designated; write any review of that report to a different new report. If the
-version folder is missing, ambiguous, nonexistent, or outside the designated
-boundary, report output is unavailable and write nowhere else. Reject traversal
-and any `audits/` symlink that resolves outside the canonical audits directory.
+Before review, an independent quality-control stage must select exactly one
+artifact through its declared input roles and target policy. It must propose
+exactly one unique append-immutable output-relative report beneath the
+caller-declared output folder. A missing, ambiguous, nonexistent, or out-of-role
+target must fail closed without a fallback write. The report path must reject
+absolute paths, traversal, symlink escapes, and existing destinations. Only the
+trusted host may publish the report through the shared output boundary.
 
-The report identifies the audited version, artifact paths and SHA-256
-fingerprints, quality-control kind, UTC run time, run ID, scope, approved source
-identities, and result. Separate failed findings from passing-but-suboptimal
-observations. Recommendations, proposed language, and copy-ready replacements
-for failures or passing-but-suboptimal observations are advisory and do not
-authorize implementation.
+Prior quality-control reports must not become implicit input. A report may be
+reviewed only when that exact report is expressly present in a declared input
+role and selected consistently with the reviewing skill's target policy. The
+reviewing stage must propose a different new append-immutable report for
+trusted-host publication. Existing reports are immutable and must not be edited,
+overwritten, replaced, renamed, or deleted.
+
+The report identifies the logical input roles and hashes, selected target path
+and SHA-256 fingerprint, quality-control kind, UTC run time, run ID, scope,
+approved source identities, and result. Separate failed findings from
+passing-but-suboptimal observations. Recommendations, proposed language, and
+copy-ready replacements for failures or passing-but-suboptimal observations are
+advisory and do not authorize implementation.

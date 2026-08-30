@@ -11,10 +11,24 @@ description:
 
 ## Folder-scoped execution
 
+Contract: [folder contract](references/folder-contract.json).
+
 Only caller-declared input folders are available and recursively read-only.
 Writes occur only beneath the caller-declared output folder. Internet is used
 only when that skill expressly authorizes it. Execution stops before reading
 case material if the host cannot enforce the filesystem and network boundary.
+
+## Folder inputs and output
+
+- `motion` contains the municipality's Rule 12 motion and ordered arguments.
+- `record` contains the operative pleading and approved Monell record.
+- `authorities` contains approved Rule 12, constitutional, and Monell law.
+
+Target is required in `motion`. Internet is `disabled`. Return the city-motion
+RRD as a canonical output-relative path and deterministic bytes; only the
+trusted host may publish it append-immutable. Report missing motion headings,
+Monell theory facts, record support, authority, or amendment information as a
+gap without drafting the response brief.
 
 Create a detailed **Response Requirements Document (RRD)** for a
 **City/municipality Rule 12(b)(6) Motion to Dismiss** in a §1983 case (Monell).
@@ -46,9 +60,10 @@ be plausibly alleged, what authority must be cited, and what the Rule 12
    - mirrors the motion’s heading order
    - breaks work into small Response Units (RUs)
    - maps each heading to Monell elements + required allegations
-4. Save to the repository-defined response path; if none exists, default to
-   `responses/<response-due-date>/<motion-folder>/rrd.yaml`
-5. Be **idempotent** with deterministic IDs
+4. Return `rrd.yaml` bytes with a canonical output-relative path for trusted-
+   host publication.
+5. Be **idempotent** with deterministic IDs; merge a prior RRD only when it is
+   expressly supplied in `record`, then return a new append-immutable artifact.
 
 **Important:** Do **NOT** draft the final response brief. Only produce the RRD.
 
@@ -304,8 +319,7 @@ Common city risks:
 ## Output
 
 - **Format:** YAML (`rrd.yaml`)
-- **Location:** repository-defined response path; default to
-  `responses/<response-due-date>/<motion-folder>/`
+- **Publication:** canonical output-relative path through the trusted host
 - **Filename:** `rrd.yaml`
 
 ---
@@ -326,5 +340,5 @@ Common city risks:
 - [ ] Record gate is explicit for each RU
 - [ ] Deterministic IDs + idempotent merge behavior
 - [ ] Every proposed amendment has a complete `amendment_handoff` entry
-- [ ] Saved to the repository-defined response path, or the documented default
-      when none exists
+- [ ] Returned with a canonical output-relative path for append-immutable
+      trusted-host publication

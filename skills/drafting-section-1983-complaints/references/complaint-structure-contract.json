@@ -60,12 +60,46 @@
     "later_authority_treatment"
   ],
   "monell_path_types": {
-    "formal_policy": ["policy_source", "operative_status", "promulgating_or_adopting_authority", "application_to_challenged_conduct"],
-    "custom_or_practice": ["similar_incidents", "similarity_rule", "frequency_duration_or_persistence", "knowledge_route"],
-    "final_policymaker_decision": ["decision", "decisionmaker", "source_of_final_authority", "decision_timing", "causal_application"],
-    "ratification": ["subordinate_act_and_basis", "policymaker_knowledge", "approval_or_adoption", "ratification_timing", "causable_injury"],
-    "failure_to_train": ["precise_task_and_deficiency", "responsible_authority", "notice_basis", "deliberate_indifference", "training_causal_chain"],
-    "failure_to_supervise_or_discipline": ["precise_supervisory_or_disciplinary_deficiency", "responsible_authority", "notice", "deliberate_indifference", "supervision_causal_chain"]
+    "formal_policy": [
+      "policy_source",
+      "operative_status",
+      "promulgating_or_adopting_authority",
+      "application_to_challenged_conduct"
+    ],
+    "custom_or_practice": [
+      "similar_incidents",
+      "similarity_rule",
+      "frequency_duration_or_persistence",
+      "knowledge_route"
+    ],
+    "final_policymaker_decision": [
+      "decision",
+      "decisionmaker",
+      "source_of_final_authority",
+      "decision_timing",
+      "causal_application"
+    ],
+    "ratification": [
+      "subordinate_act_and_basis",
+      "policymaker_knowledge",
+      "approval_or_adoption",
+      "ratification_timing",
+      "causable_injury"
+    ],
+    "failure_to_train": [
+      "precise_task_and_deficiency",
+      "responsible_authority",
+      "notice_basis",
+      "deliberate_indifference",
+      "training_causal_chain"
+    ],
+    "failure_to_supervise_or_discipline": [
+      "precise_supervisory_or_disciplinary_deficiency",
+      "responsible_authority",
+      "notice",
+      "deliberate_indifference",
+      "supervision_causal_chain"
+    ]
   },
   "monell_common_fields": [
     "path_id",
@@ -79,11 +113,50 @@
     "underlying_constitutional_violation",
     "particular_injury",
     "moving_force_chain",
-    "temporal_lane",
-    "information_and_belief_basis"
+    "temporal_lanes",
+    "information_and_belief_basis",
+    "principal_decision"
   ],
-  "casegraph_assessment_statuses": ["completed", "partial", "not_run_missing", "not_run_invalid", "not_run_incompatible", "not_run_stale"],
-  "authority_resolution_statuses": ["resolved", "missing", "hash_mismatch", "pinpoint_unresolved", "text_mismatch", "ambiguous_match"],
+  "temporal_lane_values": [
+    "pre_event_notice",
+    "event_implementation",
+    "post_event_ratification",
+    "recurrence",
+    "later_injury",
+    "corroboration"
+  ],
+  "information_and_belief_fields": [
+    "used",
+    "known_facts",
+    "expected_information",
+    "controller",
+    "inference",
+    "affected_fields"
+  ],
+  "principal_decision_fields": [
+    "status",
+    "approver",
+    "scope",
+    "approved_narrowing",
+    "decision_record_path",
+    "decision_record_sha256"
+  ],
+  "casegraph_assessment_statuses": [
+    "completed",
+    "partial",
+    "not_run_missing",
+    "not_run_invalid",
+    "not_run_incompatible",
+    "not_run_stale"
+  ],
+  "authority_resolution_statuses": [
+    "resolved",
+    "missing",
+    "hash_mismatch",
+    "pinpoint_unresolved",
+    "text_mismatch",
+    "ambiguous_match"
+  ],
   "authority_resolution_required_fields": [
     "proposition_uid",
     "authority_uid",
@@ -115,8 +188,19 @@
     "authority-artifact-hash",
     "authority-exact-passage"
   ],
-  "result_layers": ["structural_validation", "casegraph_assessment", "filing_gate"],
-  "excluded_deterministic_judgments": ["fact-truth", "legal-sufficiency", "authority-fit", "material-analogy", "strategy", "filing-readiness"],
+  "result_layers": [
+    "structural_validation",
+    "casegraph_assessment",
+    "filing_gate"
+  ],
+  "excluded_deterministic_judgments": [
+    "fact-truth",
+    "legal-sufficiency",
+    "authority-fit",
+    "material-analogy",
+    "strategy",
+    "filing-readiness"
+  ],
   "finding_fields": ["code", "location", "message"],
   "hard_failure_exit_status": "nonzero"
 }

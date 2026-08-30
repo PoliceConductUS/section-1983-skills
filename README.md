@@ -40,6 +40,8 @@ branch name: tags are the immutable release identity.
 | `drafting-section-1983-declarations-and-evidence` | Source-bounded factual declarations, statement classification, exhibit-foundation prompts, and human approval status for summary judgment.                                 |
 | `drafting-section-1983-rule-59e`                  | Rule 59(e) filing contract for postjudgment amendment, relief-first structure, manifest error, and claim-specific nonfutility.                                             |
 | `drafting-section-1983-complaints`                | Canonical owner of the complete general complaint skeleton, detailed count contract, and external-checker handoff.                                                         |
+| `planning-section-1983-monell-claims`             | Path-separated municipal-liability planning, candid recommendations, and optional read-only on-disk CaseGraph assessment.                                                  |
+| `drafting-section-1983-monell-claims`             | Approved-path-only Monell complaint deltas returned to the canonical complaint owner.                                                                                      |
 | `drafting-false-arrest-complaints`                | False-arrest specialization derived from a manually reviewed complaint corpus: seizure timing, offense elements, actor roles, incorporated-material risk, and compression. |
 | `drafting-section-1983-written-discovery`         | Mapped and bounded requests for production, interrogatories, and requests for admission without assumed evidence or selected service strategy.                             |
 | `auditing-section-1983-discovery-responses`       | Request-by-request audit of discovery responses, objections, production, withholding, deficiencies, and supported cures.                                                   |
@@ -67,33 +69,37 @@ does not replace source, authority, or court rules.
    summary judgment, add `drafting-section-1983-declarations-and-evidence`.
 3. For a Section 1983 Rule 59(e) filing, add `drafting-section-1983-rule-59e`.
 4. For complaints, add `drafting-section-1983-complaints`.
-5. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
+5. For municipal claims, add `planning-section-1983-monell-claims`; after the
+   litigation principal approves paths, add
+   `drafting-section-1983-monell-claims` and return its deltas to the canonical
+   complaint owner.
+6. For false-arrest, probable-cause, alternative-offense, arrest-timing, or
    incorporated-video issues, add `drafting-false-arrest-complaints`.
-6. Add `drafting-for-judge-scholer` when Judge Scholer is assigned.
-7. Add `building-litigation-alignment-overlays` before an amended complaint,
+7. Add `drafting-for-judge-scholer` when Judge Scholer is assigned.
+8. Add `building-litigation-alignment-overlays` before an amended complaint,
    leave package, or other filing that should consume the current docket's
    actual adversary positions and judicial treatment.
-8. Add `building-defense-counsel-overlays` when an actual-adversary review
+9. Add `building-defense-counsel-overlays` when an actual-adversary review
    should consume validated professional history for the effective defense team.
    Keep that material out of the blind common-attack review.
-9. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
-   specialization. Those planners hand amendment work back to the applicable
-   complaint skills.
-10. For discovery, use `drafting-section-1983-written-discovery`,
+10. For a Rule 12 response plan, use `rrd-rule12` and then the officers or city
+    specialization. Those planners hand amendment work back to the applicable
+    complaint skills.
+11. For discovery, use `drafting-section-1983-written-discovery`,
     `auditing-section-1983-discovery-responses`,
     `drafting-section-1983-meet-and-confer`,
     `auditing-section-1983-privilege-logs`, or
     `drafting-section-1983-deposition-outlines` for its named task. The existing
     drafting entrypoint supplies routing and the shared coordination contract;
     each peer remains independently usable.
-11. Before treating legal work as filing-ready, run `audit-authorities`,
+12. Before treating legal work as filing-ready, run `audit-authorities`,
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-12. Run `adversarial-filing-review` in a fresh clean-room context after
+13. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-13. Run `filing-ci` after the applicable prose and authority audits, after each
+14. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.
@@ -137,14 +143,20 @@ The host verifies the canonical draft and writes a new immutable report under
 invalid response produces an unavailable report and a nonzero exit; it is not a
 completed independent review.
 
-## Complaint checker boundary
+## Complaint contract and assessment boundary
 
-The canonical JSON complaint contract is a thin handoff for an external checker
-such as CaseGraph. It does not execute a checker and does not decide fact truth,
-legal sufficiency, authority fit, material analogy, strategy, or filing
-readiness. CaseGraph implementation remains outside this repository. Filing CI
-may orchestrate only a complete project-configured checker invocation; it does
-not invent an executable, flags, inputs, or output paths.
+The canonical JSON complaint contract and install-local validator enforce strict
+contract version 2. The validator checks typed individual-capacity, QI, and
+Monell records plus CaseGraph assessment receipts. It does not decide fact
+truth, legal sufficiency, authority fit, material analogy, strategy, or filing
+readiness.
+
+An optional reasoned assessment reads an explicitly supplied CaseGraph directly
+from disk and read-only; it does not require or invoke a CaseGraph CLI. Every
+used authority proposition must resolve to verified opinion bytes and hash,
+pinpoint, and an exact matching passage. Filing CI preserves structural and
+assessment results separately and fails closed in filing mode when the current
+assessment is missing, incomplete, stale, or unresolved.
 
 ## Project inputs and portability
 

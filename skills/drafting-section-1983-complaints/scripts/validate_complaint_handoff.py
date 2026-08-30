@@ -82,8 +82,9 @@ COMMON_MONELL_FIELDS = (
     "underlying_constitutional_violation",
     "particular_injury",
     "moving_force_chain",
-    "temporal_lane",
+    "temporal_lanes",
     "information_and_belief_basis",
+    "principal_decision",
 )
 PATH_FIELDS = {
     "formal_policy": (
@@ -126,6 +127,14 @@ PATH_FIELDS = {
         "deliberate_indifference",
         "supervision_causal_chain",
     ),
+}
+TEMPORAL_LANES = {
+    "pre_event_notice",
+    "event_implementation",
+    "post_event_ratification",
+    "recurrence",
+    "later_injury",
+    "corroboration",
 }
 AUTHORITY_FIELDS = (
     "status",
@@ -311,6 +320,52 @@ def validate_handoff(data, base_dir=None, mode="drafting"):
             else:
                 required = COMMON_MONELL_FIELDS + PATH_FIELDS[path_type]
             require_fields(path, required, "missing_monell_path_field", path_location, structural)
+            supporting_facts = path.get("supporting_facts")
+            fact_ids = set()
+            if not isinstance(supporting_facts, list) or not supporting_facts:
+                structural.append(finding("invalid_supporting_facts", f"{path_location}.supporting_facts", "Supporting facts must be typed records with stable fact IDs."))
+            else:
+                for fact_index, fact in enumerate(supporting_facts):
+                    fact_location = f"{path_location}.supporting_facts[{fact_index}]"
+                    if not isinstance(fact, dict) or not is_present(fact, "fact_id"):
+                        structural.append(finding("invalid_supporting_fact", fact_location, "Each supporting fact requires a stable fact_id."))
+                        continue
+                    if fact["fact_id"] in fact_ids:
+                        structural.append(finding("duplicate_supporting_fact_id", f"{fact_location}.fact_id", "Supporting fact IDs must be unique within a path."))
+                    fact_ids.add(fact["fact_id"])
+            lanes = path.get("temporal_lanes")
+            mapped_fact_ids = set()
+            if not isinstance(lanes, list) or not lanes:
+                structural.append(finding("invalid_temporal_lanes", f"{path_location}.temporal_lanes", "Temporal lanes must map supporting facts to one or more recognized lanes."))
+            else:
+                for lane_index, lane in enumerate(lanes):
+                    lane_location = f"{path_location}.temporal_lanes[{lane_index}]"
+                    if not isinstance(lane, dict) or lane.get("lane") not in TEMPORAL_LANES or not is_present(lane, "supporting_fact_refs"):
+                        structural.append(finding("invalid_temporal_lane", lane_location, "Each temporal-lane record requires a recognized lane and supporting fact references."))
+                    else:
+                        for fact_ref in lane["supporting_fact_refs"]:
+                            mapped_fact_ids.add(fact_ref)
+                            if fact_ref not in fact_ids:
+                                structural.append(finding("unresolved_temporal_fact_reference", f"{lane_location}.supporting_fact_refs", f"Temporal fact reference does not resolve: {fact_ref}"))
+            for fact_id in fact_ids - mapped_fact_ids:
+                structural.append(finding("unmapped_supporting_fact", f"{path_location}.temporal_lanes", f"Supporting fact is not assigned to a temporal lane: {fact_id}"))
+            belief = path.get("information_and_belief_basis")
+            if not isinstance(belief, dict) or not isinstance(belief.get("used"), bool):
+                structural.append(finding("invalid_information_and_belief_basis", f"{path_location}.information_and_belief_basis", "Information-and-belief basis must explicitly state whether it is used."))
+            elif belief["used"]:
+                require_fields(belief, ("known_facts", "expected_information", "controller", "inference", "affected_fields"), "missing_information_and_belief_field", f"{path_location}.information_and_belief_basis", structural)
+            decision = path.get("principal_decision")
+            if not isinstance(decision, dict) or decision.get("status") != "approved":
+                structural.append(finding("monell_path_not_approved", f"{path_location}.principal_decision", "A drafted Monell path requires the litigation principal's typed approved decision."))
+            else:
+                require_fields(decision, ("approver", "scope", "approved_narrowing", "decision_record_path", "decision_record_sha256"), "missing_principal_decision_field", f"{path_location}.principal_decision", structural)
+                decision_path = resolve_file(base_dir, decision.get("decision_record_path"))
+                if base_dir is None:
+                    structural.append(finding("principal_decision_verification_unavailable", f"{path_location}.principal_decision.decision_record_path", "A validation boundary is required to verify the decision record and hash."))
+                elif decision_path is None or not decision_path.is_file():
+                    structural.append(finding("missing_principal_decision_record", f"{path_location}.principal_decision.decision_record_path", "Decision record is missing or outside the validation boundary."))
+                elif base_dir is not None and file_sha256(decision_path) != str(decision.get("decision_record_sha256", "")).lower():
+                    structural.append(finding("principal_decision_hash_mismatch", f"{path_location}.principal_decision.decision_record_sha256", "Decision-record hash does not match the referenced bytes."))
             path_id = path.get("path_id")
             if path_id in seen_path_ids:
                 structural.append(finding("duplicate_monell_path_id", f"{path_location}.path_id", "Monell path IDs must be unique."))
@@ -371,7 +426,7 @@ def main(argv=None):
     except (OSError, json.JSONDecodeError) as error:
         print(json.dumps({"error": str(error)}, indent=2))
         return 2
-    result = validate_handoff(data, args.base_dir, args.mode)
+    result = validate_handoff(data, args.base_dir or args.handoff.parent, args.mode)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["filing_gate"]["status"] == "pass" else 1
 

@@ -48,10 +48,9 @@
 For every Monell claim and every alternative Monell theory, separately plead
 this complete sequence:
 
-1. **Identified municipal path** — the particular policy, custom,
-   final-policymaker decision, ratification theory, training failure,
-   supervisory failure, implementation failure, review failure, or other legally
-   recognized path relied on;
+1. **Identified municipal path** — one `formal_policy`, `custom_or_practice`,
+   `final_policymaker_decision`, `ratification`, `failure_to_train`, or
+   `failure_to_supervise_or_discipline` path;
 2. **Concrete supporting facts** — the source-supported facts bearing on that
    specific path;
 3. **Reasonable municipal inference** — the precise inference those facts permit
@@ -76,6 +75,13 @@ into one conclusion. Facts within municipal control may be alleged on
 information and belief only when the complaint states the factual basis for the
 inference and identifies the discovery-controlled information.
 
+Use `planning-section-1983-monell-claims` to evaluate every distinct candidate
+and reserve selection to the litigation principal. Use
+`drafting-section-1983-monell-claims` only after approval. Treat implementation,
+review, FTO, jail-handoff, or similar processes as supporting facts or
+mechanisms inside a recognized path unless verified authority establishes
+otherwise.
+
 When the case strategy alleges an end-to-end municipal decision path, audit
 every supported checkpoint and preserve the complete path in each summary. Do
 not stop at arrest or jail intake. Check only the supported stages material to
@@ -89,8 +95,9 @@ the relevant municipal act or omission predates and allegedly caused the injury
 or instead supplies later notice or causes a later continuing injury. A later
 prosecution, suppression, dismissal, civil-defense, records, or expunction event
 cannot be the moving force behind an earlier arrest or use of force. If any one
-of the six required steps is missing for a proposed path, omit that path from
-the complaint and log the missing proof as a GAP.
+of the six required steps is missing, log the missing connection and route the
+planner's recommendation to the litigation principal; do not silently select or
+omit the path.
 
 ## Record and video discipline
 

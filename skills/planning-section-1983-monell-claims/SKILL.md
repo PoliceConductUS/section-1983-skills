@@ -36,7 +36,10 @@ contract in the CaseGraph reference.
 
 ## One stable record per candidate path
 
-Inventory each candidate as one stable record with exactly one path type:
+Evaluate all six recognized path types, including an explicit `omit` record when
+no distinct candidate exists for a type. Return one stable record for every
+distinct candidate policy, custom, decision, or omission; multiple records may
+have the same path type. Each record has exactly one path type:
 
 - `formal_policy`
 - `custom_or_practice`
@@ -50,7 +53,9 @@ For each record, supply one recommendation: `include`, `include-with-narrowing`,
 municipal inference, attribution route, implementation or transmission
 mechanism, underlying violation, particular injury, moving-force chain, temporal
 lane, information-and-belief basis, contrary material, missing connections,
-reasons, and consequences.
+reasons, and consequences. Set `principal_decision` to `pending` unless the
+litigation principal has made and recorded the decision. Record
+`graph_assessment_status` for each path rather than only once for the plan.
 
 Do not merge alternatives into an omnibus path. Do not require one
 conduct-to-leadership chain for every path: apply the attribution route that
@@ -58,6 +63,12 @@ governing authority requires for that path. Do not treat repeated employee
 conduct, a supervisor's presence, or a statement that something is “policy” as
 self-proving final-policymaker authorization. They may be direct evidence of an
 implemented practice while the exact attribution connection remains identified.
+Repeated implementation and repeated statements identifying a rule as policy
+must also be evaluated as potential direct evidence for a narrowly framed
+`formal_policy` path. Where the policy text, operative status, or adopting
+authority is municipality-controlled, state the concrete information-and-belief
+basis; do not downgrade the evidence solely because those internal records are
+unavailable.
 
 ## Assessment and recommendation
 

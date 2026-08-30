@@ -2,8 +2,10 @@
 
 ## Common record
 
-Create one record per candidate path. Use a stable `path_id` and one
-`path_type`. Record:
+Evaluate each of the six recognized path types. Create one record for every
+distinct candidate policy, custom, decision, or omission, allowing multiple
+records of the same type, and an explicit `omit` record when a type has no
+candidate. Use a stable `path_id` and one `path_type`. Record:
 
 1. challenged policy, custom, decision, or omission;
 2. supporting facts and source or pleading locations;
@@ -13,17 +15,33 @@ Create one record per candidate path. Use a stable `path_id` and one
 6. underlying constitutional violation;
 7. particular injury;
 8. moving-force chain;
-9. temporal lane;
+9. `temporal_lanes`, mapping each supporting fact to every applicable lane;
 10. information-and-belief basis, when used;
 11. contrary material;
 12. missing connections;
 13. recommendation, reasons, and consequences.
+14. `graph_assessment_status` for that path; and
+15. `principal_decision`, using the typed record below.
+
+Before selection, `principal_decision` is `{ "status": "pending" }`. Approval
+replaces it with `status: approved`, approver identity, approval scope, approved
+narrowing, decision-record path, and decision-record SHA-256. Rejection uses
+`status: rejected` and its decision-record path and hash. A recommendation
+cannot populate or change this record.
 
 An FTO method, jail handoff, complaint review, classification practice, or
 rubber-stamp review is a mechanism or supporting fact inside an authorized
 Monell path unless verified authority establishes a separate path. Identify the
 employee who implemented the mechanism and the source of the inference; do not
 invent an unknown supervisor or policymaker.
+
+When repeated employees implement the same stated policy, evaluate that evidence
+under `formal_policy` as well as any supported `custom_or_practice` alternative.
+The `formal_policy` record may use information-and-belief pleading for the text,
+operative status, or adopting authority only when it identifies the repeated
+implementation facts, the records expected to confirm the allegation, and the
+municipality controlling those records. Do not invent a written policy or final
+policymaker.
 
 ## Path-specific records
 

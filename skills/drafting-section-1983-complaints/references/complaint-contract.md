@@ -308,11 +308,11 @@ install-local `../scripts/validate_complaint_handoff.py` against every handoff.
 Keep its `structural_validation`, `casegraph_assessment`, and `filing_gate`
 results separate. A structural pass does not make or replace a legal judgment.
 
-Every individual-capacity count must include a typed `individual_capacity`
-unit identifying the personal act or causal role, event stage, relevant time,
-facts then known, underlying violation, application, injury, and causation. The
-typed `qualified_immunity` unit must state whether QI applies and, when it does,
-must include every field in the JSON contract.
+Every individual-capacity count must include a typed `individual_capacity` unit
+identifying the personal act or causal role, event stage, relevant time, facts
+then known, underlying violation, application, injury, and causation. The typed
+`qualified_immunity` unit must state whether QI applies and, when it does, must
+include every field in the JSON contract.
 
 Every municipal count must contain one or more separately typed `monell_paths`.
 Do not combine formal policy, custom or practice, final-policymaker decision,

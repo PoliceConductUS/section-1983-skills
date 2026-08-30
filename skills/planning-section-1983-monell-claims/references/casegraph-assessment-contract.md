@@ -55,3 +55,14 @@ quality, procedural usability, confidence, opinion, explanation, supporting
 path, contrary path, missing connection, and every authority resolution used. Do
 not reduce those records to an opaque composite score or describe them as a
 court adjudication.
+
+Use only these values:
+
+- `element_coverage`: `satisfied`, `partial`, `missing`, or `not_applicable`;
+- `connection_quality`: `direct`, `strong_supported_inference`,
+  `plausible_inference`, `weak_inference`, `unsupported`, or `contradicted`;
+- `procedural_usability`: state the explicit Rule 12 or other governing record
+  treatment rather than a composite score;
+- `confidence`: `high`, `medium`, or `low`; and
+- `opinion`: `likely_sufficient`, `plausibly_sufficient_but_vulnerable`,
+  `likely_insufficient`, or `indeterminate`.

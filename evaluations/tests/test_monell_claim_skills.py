@@ -43,12 +43,17 @@ class MonellPlanningSkillTests(unittest.TestCase):
         ):
             self.assertIn(recommendation, text)
         self.assertRegex(text, r"(?is)one stable record.*one path type")
+        self.assertRegex(text, r"(?is)evaluate all six")
+        self.assertRegex(text, r"(?is)every\s+distinct\s+candidate.*multiple.*same.*type")
         self.assertRegex(text, r"(?is)litigation principal.*(?:approves|selects|decision)")
         self.assertRegex(text, r"(?is)contrary material.*missing connections.*consequences")
 
     def test_planner_keeps_mechanisms_and_temporal_lanes_bounded(self):
         text = (PLANNER / "references/path-planning-contract.md").read_text(encoding="utf-8")
+        self.assertIn("principal_decision", text)
+        self.assertIn("graph_assessment_status", text)
         self.assertRegex(text, r"(?is)FTO.*mechanism")
+        self.assertRegex(text, r"(?is)repeated.*policy.*formal_policy.*information.and.belief")
         self.assertRegex(text, r"(?is)post-event.*(?:notice|ratification|recurrence|later-injury|corroboration)")
         self.assertRegex(text, r"(?is)post-event.*(?:must not|cannot).*pre-event causation")
 
@@ -68,6 +73,14 @@ class MonellPlanningSkillTests(unittest.TestCase):
             "completed",
         ):
             self.assertIn(status, text)
+        for value in (
+            "satisfied",
+            "strong_supported_inference",
+            "procedural_usability",
+            "plausibly_sufficient_but_vulnerable",
+            "indeterminate",
+        ):
+            self.assertIn(value, text)
 
 
 class MonellDraftingSkillTests(unittest.TestCase):
@@ -100,12 +113,32 @@ class MonellDraftingSkillTests(unittest.TestCase):
         self.assertRegex(text, r"(?is)post-event.*(?:cannot|must not).*pre-event\s+causation")
         self.assertRegex(text, r"(?is)moving.force")
         self.assertRegex(text, r"(?is)particular\s+injury")
+        for lane in (
+            "pre_event_notice",
+            "event_implementation",
+            "post_event_ratification",
+            "recurrence",
+            "later_injury",
+            "corroboration",
+        ):
+            self.assertIn(lane, text)
+        self.assertRegex(text, r"(?is)formal_policy.*repeated.*information.and.belief.*unresolved")
+        self.assertRegex(text, r"(?is)do\s+not\s+silently\s+retype.*custom_or_practice")
+        self.assertRegex(text, r"(?is)fuzzy.*cannot.*exact passage")
 
     def test_drafter_cannot_convert_recommendation_into_approval(self):
         text = (DRAFTER / "references/approved-planning-handoff.md").read_text(encoding="utf-8")
         self.assertRegex(text, r"(?is)recommendation.*(?:is not|does not).*approval")
         self.assertRegex(text, r"(?is)litigation principal.*(?:approved|approval)")
         self.assertRegex(text, r"(?is)(?:missing|ambiguous).*approval.*stop")
+        for field in (
+            "status: approved",
+            "approver identity",
+            "approval scope",
+            "approved narrowing",
+            "decision-record\nSHA-256",
+        ):
+            self.assertIn(field, text)
 
 
 if __name__ == "__main__":

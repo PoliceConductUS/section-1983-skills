@@ -1,0 +1,74 @@
+{
+  "id": "monell-v2-path-and-authority-gates",
+  "synthetic": true,
+  "target_skill": "planning-section-1983-monell-claims",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "collapses-distinct-customs",
+      "candidate": "regression-omnibus.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "uses-post-event-notice-retroactively",
+      "candidate": "regression-temporal-leakage.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "accepts-citation-string-only",
+      "candidate": "regression-citation-string.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Path Records",
+      "Formal Policy",
+      "Custom Police",
+      "Custom Jail",
+      "Final Policymaker Decision",
+      "Ratification",
+      "Failure to Train",
+      "Failure to Supervise or Discipline",
+      "Authority Resolution",
+      "Principal Decisions"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "omnibus-custom",
+        "pattern": "(?is)single custom path.*police.*jail"
+      },
+      {
+        "id": "retroactive-notice",
+        "pattern": "(?is)post-event.*supplies pre-event notice"
+      },
+      {
+        "id": "citation-string-only",
+        "pattern": "(?is)citation and pinpoint alone.*resolved"
+      }
+    ],
+    "required_citations": ["MONELL-PLAN", "AUTH-RECEIPT"]
+  },
+  "rubric": [
+    {
+      "id": "separates-distinct-candidates",
+      "description": "Returns separate records for distinct police and jail custom candidates even though they share a path type."
+    },
+    {
+      "id": "preserves-temporal-lanes",
+      "description": "Keeps post-event material out of pre-event notice and causation while permitting bounded corroboration."
+    },
+    {
+      "id": "requires-exact-authority-resolution",
+      "description": "Treats authority as resolved only with verified artifact, hash, pinpoint, and exact matching passage."
+    },
+    {
+      "id": "reserves-selection",
+      "description": "Leaves every principal decision pending despite candid recommendations."
+    }
+  ]
+}

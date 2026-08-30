@@ -18,9 +18,9 @@ amendment proffer, read both install-local canonical references:
 
 The Markdown reference controls the complete general complaint skeleton and
 detailed count contract. The JSON reference defines strict contract version 2.
-Run its install-local `scripts/validate_complaint_handoff.py` validator for every
-handoff. The validator checks structure and assessment receipts; it does not
-make a legal judgment.
+Run its install-local `scripts/validate_complaint_handoff.py` validator for
+every handoff. The validator checks structure and assessment receipts; it does
+not make a legal judgment.
 
 If either reference cannot be read, report **complaint contract unavailable**
 and do not draft, revise, or audit the complaint. Do not invent or reconstruct
@@ -45,9 +45,9 @@ adds the specialized contract.
 
 When a complaint includes municipal liability, use
 `planning-section-1983-monell-claims` first. After the litigation principal
-approves the paths to plead, use `drafting-section-1983-monell-claims` to produce
-typed complaint deltas. This skill remains the canonical whole-complaint owner
-and integrates those deltas before rerunning the version-2 validator.
+approves the paths to plead, use `drafting-section-1983-monell-claims` to
+produce typed complaint deltas. This skill remains the canonical whole-complaint
+owner and integrates those deltas before rerunning the version-2 validator.
 
 Before drafting, read the repository `AGENTS.md` when one exists and obey its
 authority, source, citation, and gap rules. Use verified authority only.

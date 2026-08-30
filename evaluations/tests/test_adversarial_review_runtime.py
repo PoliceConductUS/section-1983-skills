@@ -9,6 +9,7 @@ import unittest
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest import mock
 
 from scripts.quality_control_report import publish_quality_control_report
 from scripts.validate_folder_invocation import validate_installed_skill_invocation
@@ -186,7 +187,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
 
     def execute_folder_review(self, *args, module=None, **kwargs):
         selected_module = module or self.launcher
-        execute = getattr(selected_module, "execute_trusted_review", None)
+        execute = getattr(selected_module, "execute_review", None)
         required = {
             "filing_root",
             "approved_sources_root",
@@ -196,12 +197,12 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         parameters = set(inspect.signature(execute).parameters) if execute else set()
         self.assertTrue(
             execute is not None and required <= parameters,
-            "folder-scoped execute_trusted_review API is not implemented",
+            "folder-scoped execute_review API is not implemented",
         )
         return execute(*args, **kwargs)
 
     def test_folder_processor_api_replaces_project_and_command_authority(self):
-        execute = self.trusted_api("execute_trusted_review")
+        execute = self.trusted_api("execute_review")
         parameters = set(inspect.signature(execute).parameters)
         required = {
             "filing_root",
@@ -210,6 +211,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             "internet_policy",
         }
         forbidden = {
+            "api_key",
             "project_boundary",
             "version_folder",
             "artifact_path",
@@ -245,7 +247,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             }
             arguments = {
                 "model": "gpt-synthetic",
-                "api_key": "secret-test-key",
                 "filing_root": filing,
                 "approved_sources_root": approved_sources,
                 "filing_target": "filing.md",
@@ -332,7 +333,7 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             self.assertNotIn(b"secret-test-key", first["report_bytes"])
 
     def test_provider_dispatch_requires_the_authorized_internet_policy(self):
-        execute = self.trusted_api("execute_trusted_review")
+        execute = self.trusted_api("execute_review")
         with tempfile.TemporaryDirectory() as directory:
             filing, approved_sources, _ = self.make_declared_roles(directory)
             disabled_transport = TransportSpy()
@@ -340,7 +341,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 self.execute_folder_review(
                     packet(),
                     model="gpt-synthetic",
-                    api_key="secret-test-key",
                     filing_root=filing,
                     approved_sources_root=approved_sources,
                     filing_target="filing.md",
@@ -354,7 +354,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             result = self.execute_folder_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -370,7 +369,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             result = self.execute_folder_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -386,7 +384,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             response_failure = self.execute_folder_review(
                 packet(),
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -444,7 +441,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             multibyte = self.execute_folder_review(
                 packet(),
                 model="é" * 5000,
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -463,8 +459,32 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         multibyte["report_bytes"].decode("utf-8")
         self.launcher._json_result(multibyte)
 
+    def test_json_result_excludes_undeclared_sensitive_fields(self):
+        public_result = self.launcher._json_result(
+            {
+                "outcome": "completed",
+                "artifact_path": "reports/review.md",
+                "report_bytes": b"# Review\n",
+                "internet_sources": [],
+                "dispatch": {"runtime": "synthetic", "capabilities": []},
+                "api_key": "secret-test-key",
+            }
+        )
+
+        self.assertEqual(
+            public_result,
+            {
+                "outcome": "completed",
+                "artifact_path": "reports/review.md",
+                "report": "# Review\n",
+                "internet_sources": [],
+                "dispatch": {"runtime": "synthetic", "capabilities": []},
+            },
+        )
+        self.assertNotIn("secret-test-key", json.dumps(public_result))
+
     def test_required_filing_target_is_canonical_and_confined(self):
-        execute = self.trusted_api("execute_trusted_review")
+        execute = self.trusted_api("execute_review")
         with tempfile.TemporaryDirectory() as directory:
             filing, approved_sources, _ = self.make_declared_roles(directory)
             outside = Path(directory) / "outside-filing.md"
@@ -487,7 +507,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                         self.execute_folder_review(
                             packet(),
                             model="gpt-synthetic",
-                            api_key="secret-test-key",
                             filing_root=filing,
                             approved_sources_root=approved_sources,
                             filing_target=target,
@@ -513,7 +532,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                         self.execute_folder_review(
                             packet(),
                             model="gpt-synthetic",
-                            api_key="secret-test-key",
                             filing_root=filing,
                             approved_sources_root=supplied_root,
                             filing_target="filing.md",
@@ -532,7 +550,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 self.execute_folder_review(
                     packet(),
                     model="gpt-synthetic",
-                    api_key="secret-test-key",
                     filing_root=filing,
                     approved_sources_root=approved_sources,
                     filing_target="filing.md",
@@ -599,7 +616,6 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                 packet(),
                 module=module,
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=approved_sources,
                 filing_target="filing.md",
@@ -611,13 +627,12 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         self.assertEqual(result["dispatch"]["capabilities"], [])
 
     def test_trusted_request_disables_tools_storage_and_session_continuation(self):
-        run_trusted_review = self.trusted_api("run_trusted_review")
+        run_review = self.trusted_api("run_review")
         transport = TransportSpy()
 
-        result = run_trusted_review(
+        result = run_review(
             packet(),
             model="gpt-synthetic",
-            api_key="secret-test-key",
             timeout_seconds=3,
             transport=transport,
         )
@@ -638,32 +653,78 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
             set(HEADINGS),
         )
         self.assertNotIn("secret-test-key", raw_body.decode("utf-8"))
-        self.assertEqual(headers["Authorization"], "Bearer secret-test-key")
+        self.assertEqual(headers, {"Content-Type": "application/json"})
         self.assertEqual(timeout_seconds, 3)
         dispatched_packet = json.loads(request["input"][0]["content"][0]["text"])
         self.assertEqual(dispatched_packet, packet())
         self.assertEqual(result["dispatch"]["capabilities"], [])
         self.assertEqual(result["review"], review_response())
 
-    def test_packet_model_and_credentials_validate_before_transport(self):
-        run_trusted_review = self.trusted_api("run_trusted_review")
+    def test_default_transport_keeps_credentials_out_of_review_runtime(self):
+        transport = TransportSpy()
+
+        with mock.patch.object(self.launcher, "_openai_transport", transport):
+            result = self.launcher.run_review(
+                packet(),
+                model="gpt-synthetic",
+            )
+
+        self.assertEqual(len(transport.calls), 1)
+        _, headers, _ = transport.calls[0]
+        self.assertEqual(headers, {"Content-Type": "application/json"})
+        self.assertEqual(result["review"], review_response())
+
+    def test_openai_transport_adds_environment_credential_at_http_boundary(self):
+        class Response:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self, _limit):
+                return b'{}'
+
+        with (
+            mock.patch.dict(
+                self.launcher.os.environ,
+                {"OPENAI_API_KEY": "secret-test-key"},
+            ),
+            mock.patch.object(
+                self.launcher.urllib.request,
+                "urlopen",
+                return_value=Response(),
+            ) as urlopen,
+        ):
+            status, body = self.launcher._openai_transport(
+                b"{}",
+                {"Content-Type": "application/json"},
+                3,
+            )
+
+        request = urlopen.call_args.args[0]
+        self.assertEqual(request.get_header("Authorization"), "Bearer secret-test-key")
+        self.assertEqual(urlopen.call_args.kwargs["timeout"], 3)
+        self.assertEqual((status, body), (200, b"{}"))
+
+    def test_packet_and_model_validate_before_transport(self):
+        run_review = self.trusted_api("run_review")
         invalid_packet = packet()
         invalid_packet["draft"]["sha256"] = "0" * 64
         invalid_source_id = packet()
         invalid_source_id["sources"][0]["id"] = "SRC-1\n## Forged"
         invalid_cases = (
-            ("packet", invalid_packet, "gpt-synthetic", "key"),
-            ("source-id", invalid_source_id, "gpt-synthetic", "key"),
-            ("model-empty", packet(), "", "key"),
-            ("model-whitespace", packet(), " \t", "key"),
-            ("model-surrogate", packet(), "\ud800", "key"),
-            ("model-line-break", packet(), "gpt\nforged", "key"),
-            ("credential-empty", packet(), "gpt-synthetic", ""),
-            ("credential-whitespace", packet(), "gpt-synthetic", " \t"),
-            ("credential-newline", packet(), "gpt-synthetic", "key\nvalue"),
+            ("packet", invalid_packet, "gpt-synthetic"),
+            ("source-id", invalid_source_id, "gpt-synthetic"),
+            ("model-empty", packet(), ""),
+            ("model-whitespace", packet(), " \t"),
+            ("model-surrogate", packet(), "\ud800"),
+            ("model-line-break", packet(), "gpt\nforged"),
         )
 
-        for label, supplied_packet, model, api_key in invalid_cases:
+        for label, supplied_packet, model in invalid_cases:
             with self.subTest(case=label):
                 transport = TransportSpy()
                 expected_error = (
@@ -672,16 +733,15 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
                     else self.launcher.ReviewLaunchError
                 )
                 with self.assertRaises(expected_error):
-                    run_trusted_review(
+                    run_review(
                         supplied_packet,
                         model=model,
-                        api_key=api_key,
                         transport=transport,
                     )
                 self.assertEqual(transport.calls, [])
 
     def test_provider_failure_classes_are_stable_bounded_and_secret_free(self):
-        run_trusted_review = self.trusted_api("run_trusted_review")
+        run_review = self.trusted_api("run_review")
         oversized = b"\xff" + b"x" * 9000
         credential_echo = (
             b'{"error":{"message":"Incorrect API key provided: '
@@ -726,10 +786,9 @@ class AdversarialReviewRuntimeTest(unittest.TestCase):
         for label, transport, expected_id in cases:
             with self.subTest(case=label):
                 with self.assertRaises(self.launcher.ReviewLaunchError) as captured:
-                    run_trusted_review(
+                    run_review(
                         packet(),
                         model="gpt-synthetic",
-                        api_key="secret-test-key",
                         transport=transport,
                     )
                 error = captured.exception

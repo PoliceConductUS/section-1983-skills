@@ -382,10 +382,9 @@ class MunicipalProfileConsumersTest(unittest.TestCase):
 
             transport = TransportSpy()
             current = fingerprint("current-profile-folder")
-            result = launcher.execute_trusted_review(
+            result = launcher.execute_review(
                 review_packet,
                 model="gpt-synthetic",
-                api_key="secret-test-key",
                 filing_root=filing,
                 approved_sources_root=sources,
                 municipal_profile_root=profile,
@@ -404,10 +403,9 @@ class MunicipalProfileConsumersTest(unittest.TestCase):
             misnamed_packet["sources"][-1]["id"] = "municipal-profile:other.yaml"
             blocked_transport = TransportSpy()
             with self.assertRaises(launcher.ReviewLaunchError) as captured:
-                launcher.execute_trusted_review(
+                launcher.execute_review(
                     misnamed_packet,
                     model="gpt-synthetic",
-                    api_key="secret-test-key",
                     filing_root=filing,
                     approved_sources_root=sources,
                     municipal_profile_root=profile,
@@ -428,10 +426,9 @@ class MunicipalProfileConsumersTest(unittest.TestCase):
             )
             blocked_transport = TransportSpy()
             with self.assertRaises(launcher.ReviewLaunchError) as captured:
-                launcher.execute_trusted_review(
+                launcher.execute_review(
                     review_packet,
                     model="gpt-synthetic",
-                    api_key="secret-test-key",
                     filing_root=filing,
                     approved_sources_root=sources,
                     municipal_profile_root=profile,

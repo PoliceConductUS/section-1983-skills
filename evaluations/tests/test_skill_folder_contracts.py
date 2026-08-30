@@ -20,6 +20,17 @@ REPOSITORY = Path(__file__).resolve().parents[2]
 
 CONTRACTS = {
     "adversarial-filing-review": (["filing", "approved-sources"], "required", ["filing"], "authorized"),
+    "analyzing-police-policy-sources": (
+        [
+            "department-identity",
+            "jurisdiction",
+            "policy-source",
+            "analysis-scope",
+        ],
+        "none",
+        [],
+        "disabled",
+    ),
     "audit-authorities": (
         ["filing-source", "verified-authority"],
         "required",

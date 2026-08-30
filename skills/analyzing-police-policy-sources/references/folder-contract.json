@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skill": "analyzing-police-policy-sources",
+  "input_roles": [
+    "department-identity",
+    "jurisdiction",
+    "policy-source",
+    "analysis-scope"
+  ],
+  "target": { "policy": "none", "roles": [] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

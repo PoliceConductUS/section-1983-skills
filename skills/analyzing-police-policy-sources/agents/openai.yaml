@@ -1,0 +1,6 @@
+interface:
+  display_name: "Analyze Police-Policy Sources"
+  short_description: "Build source-bounded policy requirements"
+  default_prompt:
+    "Use $analyzing-police-policy-sources to decompose reviewed adopted-policy
+    files into atomic source-bounded requirements and explicit gaps."

@@ -69,6 +69,12 @@
       }
     },
     {
+      "name": "analyzing-police-policy-sources",
+      "rules_mode": "rules-independent",
+      "reviewed_on": "2026-08-25",
+      "rationale": "Decomposes caller-approved policy sources without supplying procedural rules or deciding compliance."
+    },
+    {
       "name": "building-defense-counsel-overlays",
       "rules_mode": "runtime-sourced",
       "reviewed_on": "2026-08-22",

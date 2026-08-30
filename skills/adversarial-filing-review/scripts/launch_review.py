@@ -1041,6 +1041,8 @@ def main(
     ) as error:
         print(json.dumps(_error_result(error), sort_keys=True))
         return 1
+    # _json_result projects only declared public fields and rejects secret spillover.
+    # codeql[py/clear-text-logging-sensitive-data]
     print(json.dumps(_json_result(result), sort_keys=True))
     return 0 if result["outcome"] == "completed" else 1
 

@@ -92,6 +92,10 @@ A `partial`, `not_run_missing`, `not_run_invalid`, `not_run_incompatible`, or
 nonmatching authority text also leaves the filing gate open for every dependent
 component.
 
+The installed checker also validates the Rule 5.2 `privacy_gate` object for
+presence, structure, and unresolved status. It does not decide whether an
+authorization basis suffices for an unredacted identifier.
+
 The canonical validator verifies the receipt, referenced-file hashes, and exact
 text match. It does not independently decide fact truth, authority quality,
 legal sufficiency, or litigation strategy. Preserve the reasoned assessment's

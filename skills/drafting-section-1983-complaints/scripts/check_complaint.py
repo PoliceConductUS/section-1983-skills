@@ -735,6 +735,129 @@ def _limitations_findings(document, target):
     return findings
 
 
+_PRIVACY_CATEGORIES = (
+    "social-security-number",
+    "taxpayer-identification-number",
+    "birth-date",
+    "financial-account-number",
+)
+_PRIVACY_STATUSES = frozenset({"absent", "redacted", "unredacted-authorized", "unresolved"})
+_MINOR_NAME_FORMS = frozenset({"initials", "full-name-authorized"})
+_MINOR_PARTY_FIELDS = frozenset({"party_id", "name_form", "authorization_basis"})
+_PROTECTED_IDENTIFIER_FIELDS = frozenset(
+    {"category", "status", "locations", "authorization_basis"}
+)
+
+
+def _privacy_text(value):
+    return isinstance(value, str) and value.strip() != ""
+
+
+def _privacy_findings(document, target, paragraph_numbers):
+    if not isinstance(document, dict) or "privacy_gate" not in document:
+        return [
+            _finding(
+                "privacy-gate-presence",
+                target,
+                "privacy_gate",
+                "the complaint handoff requires a privacy_gate object",
+            )
+        ]
+    gate = document["privacy_gate"]
+    required = {"schema_version", "status", "minor_parties", "protected_identifiers"}
+    if not isinstance(gate, dict) or set(gate) != required or gate.get("schema_version") != 1:
+        return [
+            _finding(
+                "privacy-gate-presence",
+                target,
+                "privacy_gate",
+                "privacy_gate does not match schema version 1",
+            )
+        ]
+
+    findings = []
+    critical = False
+
+    def malformed(location, message):
+        findings.append(_finding("privacy-gate-structure", target, location, message))
+
+    minors = gate.get("minor_parties")
+    if not isinstance(minors, list):
+        malformed("privacy_gate.minor_parties", "minor parties must be an array")
+        minors = []
+        critical = True
+    seen_parties = set()
+    for index, entry in enumerate(minors):
+        location = f"privacy_gate.minor_parties[{index}]"
+        valid = isinstance(entry, dict) and set(entry) == _MINOR_PARTY_FIELDS
+        if valid:
+            party_id = entry["party_id"]
+            valid = (
+                _privacy_text(party_id)
+                and _IDENTIFIER.fullmatch(party_id) is not None
+                and party_id not in seen_parties
+                and entry["name_form"] in _MINOR_NAME_FORMS
+                and isinstance(entry["authorization_basis"], str)
+                and (
+                    entry["name_form"] != "full-name-authorized"
+                    or _privacy_text(entry["authorization_basis"])
+                )
+            )
+        if not valid:
+            malformed(location, "minor-party entry is malformed, duplicated, or lacks its authorization basis")
+            critical = True
+            continue
+        seen_parties.add(entry["party_id"])
+
+    identifiers = gate.get("protected_identifiers")
+    if not isinstance(identifiers, list):
+        malformed("privacy_gate.protected_identifiers", "protected identifiers must be an array")
+        identifiers = []
+        critical = True
+    seen_categories = []
+    unresolved = False
+    for index, entry in enumerate(identifiers):
+        location = f"privacy_gate.protected_identifiers[{index}]"
+        valid = isinstance(entry, dict) and set(entry) == _PROTECTED_IDENTIFIER_FIELDS
+        if valid:
+            locations = entry["locations"]
+            valid = (
+                entry["category"] in _PRIVACY_CATEGORIES
+                and entry["category"] not in seen_categories
+                and entry["status"] in _PRIVACY_STATUSES
+                and isinstance(locations, list)
+                and all(_valid_paragraph_reference(value, paragraph_numbers) for value in locations)
+                and isinstance(entry["authorization_basis"], str)
+                and (
+                    entry["status"] != "unredacted-authorized"
+                    or _privacy_text(entry["authorization_basis"])
+                )
+            )
+        if not valid:
+            malformed(location, "protected-identifier entry is malformed, duplicated, points to a missing paragraph, or lacks its authorization basis")
+            critical = True
+            continue
+        seen_categories.append(entry["category"])
+        unresolved = unresolved or entry["status"] == "unresolved"
+    for category in _PRIVACY_CATEGORIES:
+        if category not in seen_categories:
+            malformed(f"privacy_gate.protected_identifiers.{category}", "each Rule 5.2(a) category requires exactly one entry")
+            critical = True
+
+    if gate.get("status") not in {"clear", "blocked"}:
+        critical = True
+    if critical or unresolved or gate.get("status") == "blocked":
+        findings.append(
+            _finding(
+                "privacy-filing-critical-status",
+                target,
+                "privacy_gate.status",
+                "the privacy gate remains blocked or contains unresolved material",
+            )
+        )
+    return findings
+
+
 def _mechanical_findings(document, contract, target):
     findings = []
     sections = document.get("sections") if isinstance(document, dict) else None
@@ -803,6 +926,7 @@ def _mechanical_findings(document, contract, target):
         ):
             findings.append(_finding("incorporation-target", target, f"counts[{index}].incorporated_paragraphs", "incorporated paragraph target is missing"))
     findings.extend(_limitations_findings(document, target))
+    findings.extend(_privacy_findings(document, target, paragraph_numbers))
     return findings
 
 

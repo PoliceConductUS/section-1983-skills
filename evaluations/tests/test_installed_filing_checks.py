@@ -32,6 +32,28 @@ def empty_limitations_gate():
     }
 
 
+def clear_privacy_gate():
+    return {
+        "schema_version": 1,
+        "status": "clear",
+        "minor_parties": [],
+        "protected_identifiers": [
+            {
+                "category": category,
+                "status": "absent",
+                "locations": [],
+                "authorization_basis": "",
+            }
+            for category in (
+                "social-security-number",
+                "taxpayer-identification-number",
+                "birth-date",
+                "financial-account-number",
+            )
+        ],
+    }
+
+
 def intended_individual(defendant_id="officer-doe", **overrides):
     value = {
         "defendant_id": defendant_id,
@@ -263,6 +285,7 @@ def complaint_document():
         ],
         "counts": [count],
         "limitations_gate": empty_limitations_gate(),
+        "privacy_gate": clear_privacy_gate(),
     }
 
 
@@ -605,6 +628,9 @@ class InstalledFilingChecksTest(unittest.TestCase):
                 "limitations-record-cardinality",
                 "limitations-record-structure",
                 "limitations-filing-critical-status",
+                "privacy-gate-presence",
+                "privacy-gate-structure",
+                "privacy-filing-critical-status",
             },
         )
         self.assertTrue(set(contract["excluded_judgments"]).isdisjoint(finding_checks))

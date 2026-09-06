@@ -47,6 +47,41 @@ supported chronological or substantive order. When no arrest occurred, preserve
 the caller's defendant order unless a verified governing-court requirement
 controls it.
 
+## Criminal-proceeding posture and claim accrual
+
+Before drafting any count, record the posture of every criminal charge that
+arose from the events pleaded. State the charge, the court, the current status,
+and the disposition date with its source. Use one status for each charge: no
+charge, pending, dismissed, acquitted, convicted, plea, or expunged. Report an
+unknown status as a gap.
+
+For each count, state the accrual event and the authority that fixes it. Accrual
+is a question of federal law. A false-arrest or false-imprisonment claim accrues
+when the plaintiff is detained under legal process, such as arraignment, not at
+favorable termination. _Wallace v. Kato_, 549 U.S. 384, 397 (2007). A
+fabricated-evidence due process claim accrues when the criminal proceeding ends
+in the plaintiff's favor. _McDonough v. Smith_, 588 U.S. 109 (2019). A Fourth
+Amendment malicious-prosecution claim requires that the prosecution ended
+without a conviction, and no affirmative indication of innocence is required.
+_Thompson v. Clark_, 596 U.S. 36, 49 (2022). For any other claim, state the
+accrual event from verified authority. Do not assume it.
+
+Apply the _Heck_ rule to every count. When a conviction or sentence from the
+same events stands, a Section 1983 damages claim that would necessarily imply
+the invalidity of that conviction does not accrue until the conviction is
+reversed, expunged, declared invalid, or called into question by a writ of
+habeas corpus. _Heck v. Humphrey_, 512 U.S. 477, 486–87 (1994). A pending charge
+does not delay accrual of a false-arrest claim. The court may stay the civil
+action until the criminal case ends. _Wallace_, 549 U.S. at 393–94. For each
+count, state whether success would necessarily imply the invalidity of an
+outstanding conviction and why, comparing the charge, the plea or verdict, and
+the elements.
+
+Whether to file now, request a stay, plead a count in the alternative, or omit a
+count is a reserved user decision. Present each supported choice and its
+consequence. Do not select one. Do not describe a count as Heck-barred in filed
+text. Route the analysis to internal strategy and the completion audit.
+
 ## Unknown and new-defendant limitations gate
 
 Apply this gate whenever a proposed complaint or amendment includes an intended
@@ -162,6 +197,23 @@ to deliberate indifference. Plead supporting facts such as prior incidents,
 complaint histories, training records, and the policymaker's identity when
 applicable.
 
+An official-capacity claim against an officer is a claim against the entity the
+officer serves. _Kentucky v. Graham_, 473 U.S. 159, 165–66 (1985). Do not plead
+an official-capacity count against an individual that duplicates a municipal
+count on the same claim and challenged act. When the draft contains both, state
+the separate job each count performs or route the choice to the user as a
+reserved decision. State each defendant's capacity in the Parties section and in
+every count that names that defendant.
+
+## Relief by capacity
+
+Request punitive damages only from a defendant sued in an individual capacity. A
+municipality is immune from punitive damages under Section 1983. _City of
+Newport v. Fact Concerts, Inc._, 453 U.S. 247, 271 (1981). An official-capacity
+defendant shares that immunity because the claim runs against the entity. State
+compensatory, nominal, declaratory, and injunctive relief by the defendant and
+capacity that can answer for it.
+
 ## Rule 8, Rule 10, Rule 11, facts, and incorporation
 
 Rule 8(a) requires a short and plain statement. Rule 10(b) requires numbered
@@ -189,6 +241,27 @@ Each count must incorporate only the numbered factual paragraphs relevant to
 that count. Identify every incorporated paragraph by a valid paragraph number or
 range. Do not incorporate all preceding allegations indiscriminately, and do not
 make the reader assemble an element from unrelated sections.
+
+## Rule 5.2 privacy redaction
+
+Rule 5.2(a) limits what a filed complaint may show for four identifiers. Use
+only the last four digits of a social-security number or taxpayer-identification
+number. Use only the year of an individual's birth. Name a minor only by
+initials. Use only the last four digits of a financial-account number. Apply the
+rule to every party, witness, and person named in the caption, Parties section,
+facts, exhibits, and attachments.
+
+When the user wants a full identifier filed, Rule 5.2(d), (e), and (h) supply
+the routes: a sealed filing, a court order, or the person's own waiver. Record
+the basis for any unredacted identifier and route that choice to the user as a
+reserved decision. Do not select it.
+
+Include a `privacy_gate` object in the version-2 mechanical handoff. It lists
+every minor party with the name form used and, for each Rule 5.2(a) category,
+whether the identifier is absent, redacted, unredacted with a stated basis, or
+unresolved. An unresolved entry or a blocked gate is a hard structural finding
+in the installed checker and Filing CI. The checker validates structure only. It
+does not decide whether an authorization basis suffices.
 
 ## One mapping for every count tuple
 
@@ -377,8 +450,9 @@ conduct, binding case and authority status, materially similar facts, material
 differences, and why the case gave fair warning on the event date. Use the level
 of specificity at which the defendant acted. As applicable, identify the
 suspected offense, threat, resistance, flight, compliance, force type, duration,
-warning interval, injury, protected activity, probable-cause posture, and event
-sequence. Explain material differences rather than hiding them.
+warning interval, pre-force events, injury, protected activity, probable-cause
+posture, and event sequence. Explain material differences rather than hiding
+them.
 
 Do not use a district-court decision, an unpublished nonprecedential decision,
 or a later-decided case as the source of clearly established law. Such authority

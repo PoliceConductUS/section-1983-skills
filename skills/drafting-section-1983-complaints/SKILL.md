@@ -61,13 +61,14 @@ amendment proffer, read both install-local canonical references:
 - [references/complaint-structure-contract.json](references/complaint-structure-contract.json)
 - [references/limitations-record.schema.json](references/limitations-record.schema.json)
 
-The Markdown reference controls the complete general complaint skeleton and
-detailed count contract, and unknown/new-defendant limitations gate. The JSON
-references define strict contract version 2 and the limitations-record schema.
-Run `scripts/validate_complaint_handoff.py` for every version-2 handoff and use
-`scripts/check_complaint.py` for the folder-scoped packaged mechanical check.
-The validators check structure, assessment receipts, and the limitations gate;
-they do not make a legal judgment.
+The Markdown reference controls the complete general complaint skeleton,
+detailed count contract, criminal-proceeding posture and accrual rules, Rule 5.2
+privacy gate, capacity and relief rules, and unknown/new-defendant limitations
+gate. The JSON references define strict contract version 2 and the
+limitations-record schema. Run `scripts/validate_complaint_handoff.py` for every
+version-2 handoff and use `scripts/check_complaint.py` for the folder-scoped
+packaged mechanical check. The validators check structure, assessment receipts,
+the limitations gate, and the privacy gate; they do not make a legal judgment.
 
 If either reference cannot be read, report **complaint contract unavailable**
 and do not draft, revise, or audit the complaint. Do not invent or reconstruct

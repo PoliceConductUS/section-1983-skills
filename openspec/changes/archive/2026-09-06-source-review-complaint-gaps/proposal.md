@@ -2,12 +2,12 @@
 
 A source review on 2026-09-05 compared twenty public Section 1983 primers,
 guides, and court forms against the installed skills. Four rules were absent:
-claim-specific accrual and the _Heck_ bar, the pre-force events that
-_Barnes v. Felix_ (2025) requires in a totality analysis, Rule 5.2 privacy
-redaction, and the capacity rules that make an official-capacity count
-duplicative and bar punitive damages against a municipality. A complaint can
-pass every installed check while pleading a Heck-barred count, naming a minor in
-full, or demanding punitive damages from a city.
+claim-specific accrual and the _Heck_ bar, the pre-force events that _Barnes v.
+Felix_ (2025) requires in a totality analysis, Rule 5.2 privacy redaction, and
+the capacity rules that make an official-capacity count duplicative and bar
+punitive damages against a municipality. A complaint can pass every installed
+check while pleading a Heck-barred count, naming a minor in full, or demanding
+punitive damages from a city.
 
 ## What Changes
 
@@ -48,9 +48,9 @@ full, or demanding punitive damages from a city.
 - From: Capacity is a required count field with no rule about duplication or
   relief.
 - To: The contract states that an official-capacity claim runs against the
-  entity, forbids a duplicative official-capacity count without a stated
-  purpose or reserved decision, and limits punitive damages to
-  individual-capacity defendants.
+  entity, forbids a duplicative official-capacity count without a stated purpose
+  or reserved decision, and limits punitive damages to individual-capacity
+  defendants.
 - Reason: _Kentucky v. Graham_ and _City of Newport_ control these points.
 - Impact: Non-breaking prose and completion-audit change.
 
@@ -71,6 +71,6 @@ None.
 
 The change touches the canonical complaint contract, claim-specific contracts,
 completion audit, complaint skill routing, false-arrest delta, entry-skill case
-map, the version-2 structure contract, both installed checkers and the Filing
-CI contract copy, the governance provenance review dates, and tests. It adds no
+map, the version-2 structure contract, both installed checkers and the Filing CI
+contract copy, the governance provenance review dates, and tests. It adds no
 dependency, network access, or automated litigation decision.

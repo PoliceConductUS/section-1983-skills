@@ -17,7 +17,8 @@ Filing CI MUST NOT decide whether an authorization basis satisfies Rule 5.2;
 #### Scenario: Filing CI receives a handoff without a privacy gate
 
 - **WHEN** the selected complaint handoff omits the `privacy_gate` object
-- **THEN** Filing CI reports the presence finding and leaves its filing gate open
+- **THEN** Filing CI reports the presence finding and leaves its filing gate
+  open
 
 #### Scenario: Identical documents reach both checkers
 

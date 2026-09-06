@@ -24,8 +24,8 @@
       pre-force comparison term to the canonical contract.
 - [x] 3.2 Add pre-force events and _Barnes_ to the excessive-force contract and
       the posture bullet to the false-arrest contract and delta.
-- [x] 3.3 Add the completion-audit items, complaint-skill routing text, Filing CI
-      boundary text, and the case-map accrual note.
+- [x] 3.3 Add the completion-audit items, complaint-skill routing text, Filing
+      CI boundary text, and the case-map accrual note.
 
 ## 4. Installed checkers
 
@@ -38,4 +38,4 @@
 ## 5. Completion
 
 - [x] 5.1 Update provenance review dates, format, and run `npm run validate`.
-- [ ] 5.2 Write verify.md and retrospective.md, archive the change, and commit.
+- [x] 5.2 Write verify.md and retrospective.md, archive the change, and commit.

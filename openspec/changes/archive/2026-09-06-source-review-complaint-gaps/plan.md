@@ -14,6 +14,6 @@ Each task in tasks.md maps to one RED test group followed by one GREEN edit.
 3. Checkers: add `_privacy_findings` to `check_complaint.py` and
    `run_filing_ci.py`, call it after the limitations findings, and update both
    contract JSON files. Rerun the module and `test_installed_filing_checks`.
-4. Repository: `npx prettier --write` on changed files, then
-   `npm run validate`, then `npx openspec validate source-review-complaint-gaps --strict`.
+4. Repository: `npx prettier --write` on changed files, then `npm run validate`,
+   then `npx openspec validate source-review-complaint-gaps --strict`.
 5. Close: verify.md, retrospective.md, `npx openspec archive -y`, commit.

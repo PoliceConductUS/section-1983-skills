@@ -34,11 +34,11 @@ filed text.
 ### Requirement: Excessive-force counts plead the events preceding the force
 
 The claim-specific excessive-force contract MUST require the events preceding
-the force, including each officer's conduct that created, raised, or reduced
-the risk and the timing between each event and the force. The contract MUST
-forbid confining the application to the moment force was used and MUST cite
-_Barnes v. Felix_ (2025). The qualified-immunity comparison MUST include
-pre-force events among the compared facts.
+the force, including each officer's conduct that created, raised, or reduced the
+risk and the timing between each event and the force. The contract MUST forbid
+confining the application to the moment force was used and MUST cite _Barnes v.
+Felix_ (2025). The qualified-immunity comparison MUST include pre-force events
+among the compared facts.
 
 #### Scenario: Officer conduct created the risk
 

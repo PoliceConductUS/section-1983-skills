@@ -31,11 +31,11 @@ legal judgment. One, Rule 5.2 redaction, has a declarable structure.
 ### Prose rules cite verified Supreme Court authority
 
 _Wallace v. Kato_, _McDonough v. Smith_, _Thompson v. Clark_, _Heck v.
-Humphrey_, _Barnes v. Felix_, _Kentucky v. Graham_, and _City of Newport v.
-Fact Concerts_ are cited in the contract the way the existing contract cites
-_Johnson v. City of Shelby_. The existing rule that `audit-authorities` verifies
-every pinpoint before filing is unchanged. _Barnes_ is cited by docket number
-and date because the U.S. Reports page is not yet assigned.
+Humphrey_, _Barnes v. Felix_, _Kentucky v. Graham_, and _City of Newport v. Fact
+Concerts_ are cited in the contract the way the existing contract cites _Johnson
+v. City of Shelby_. The existing rule that `audit-authorities` verifies every
+pinpoint before filing is unchanged. _Barnes_ is cited by docket number and date
+because the U.S. Reports page is not yet assigned.
 
 ### One privacy gate, native validation, no schema file
 

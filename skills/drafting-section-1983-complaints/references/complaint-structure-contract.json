@@ -3,15 +3,42 @@
   "owner": "drafting-section-1983-complaints",
   "validator": "scripts/validate_complaint_handoff.py",
   "sections": [
-    { "id": "caption", "optional": false },
-    { "id": "introduction", "optional": true },
-    { "id": "jurisdiction-and-venue", "optional": false },
-    { "id": "parties", "optional": false },
-    { "id": "statement-of-facts", "optional": false },
-    { "id": "counts", "optional": false },
-    { "id": "prayer-for-relief", "optional": false },
-    { "id": "jury-demand", "optional": false },
-    { "id": "signature-block", "optional": false }
+    {
+      "id": "caption",
+      "optional": false
+    },
+    {
+      "id": "introduction",
+      "optional": true
+    },
+    {
+      "id": "jurisdiction-and-venue",
+      "optional": false
+    },
+    {
+      "id": "parties",
+      "optional": false
+    },
+    {
+      "id": "statement-of-facts",
+      "optional": false
+    },
+    {
+      "id": "counts",
+      "optional": false
+    },
+    {
+      "id": "prayer-for-relief",
+      "optional": false
+    },
+    {
+      "id": "jury-demand",
+      "optional": false
+    },
+    {
+      "id": "signature-block",
+      "optional": false
+    }
   ],
   "count_cardinality": ["claim", "defendant", "capacity", "challenged_act"],
   "required_count_fields": [
@@ -222,7 +249,10 @@
     "limitations-trigger-structure",
     "limitations-record-cardinality",
     "limitations-record-structure",
-    "limitations-filing-critical-status"
+    "limitations-filing-critical-status",
+    "privacy-gate-presence",
+    "privacy-gate-structure",
+    "privacy-filing-critical-status"
   ],
   "packaged_checker": {
     "count_cardinality": ["claim", "defendant", "challenged_act"],
@@ -271,7 +301,10 @@
       "limitations-trigger-structure",
       "limitations-record-cardinality",
       "limitations-record-structure",
-      "limitations-filing-critical-status"
+      "limitations-filing-critical-status",
+      "privacy-gate-presence",
+      "privacy-gate-structure",
+      "privacy-filing-critical-status"
     ],
     "excluded_judgments": [
       "fact-truth",
@@ -284,7 +317,8 @@
       "tolling",
       "mistake",
       "notice-sufficiency",
-      "service-sufficiency"
+      "service-sufficiency",
+      "redaction-authorization"
     ],
     "finding_fields": [
       "finding_id",
@@ -312,7 +346,8 @@
     "tolling",
     "mistake",
     "notice-sufficiency",
-    "service-sufficiency"
+    "service-sufficiency",
+    "redaction-authorization"
   ],
   "finding_fields": ["code", "location", "message"],
   "hard_failure_exit_status": "nonzero"

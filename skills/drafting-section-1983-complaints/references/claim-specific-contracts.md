@@ -11,6 +11,8 @@
   justification.
 - Treat later conduct as later conduct unless authority permits it to bear on
   the earlier decision.
+- Record the criminal-proceeding posture and the count's accrual event under the
+  canonical complaint contract.
 
 ### Retaliatory arrest
 
@@ -24,6 +26,13 @@
 
 - State the offense severity, threat, resistance, flight, force, duration,
   injury, and each participant's role.
+- State the events preceding the force. Include each officer's conduct that
+  created, raised, or reduced the risk and the time between each event and the
+  force.
+- Do not confine the application to the moment force was used. The
+  totality-of-the-circumstances inquiry has no time limit. _Barnes v. Felix_,
+  605 U.S. \_\_\_, No. 23-1239 (May 15, 2025) (rejecting the moment-of-threat
+  rule).
 - Distinguish visible facts from camera occlusion and inference.
 - Identify the force-specific clearly established authority.
 

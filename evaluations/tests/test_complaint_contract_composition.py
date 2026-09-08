@@ -91,6 +91,9 @@ MECHANICAL_CHECKS = (
     "limitations-record-cardinality",
     "limitations-record-structure",
     "limitations-filing-critical-status",
+    "privacy-gate-presence",
+    "privacy-gate-structure",
+    "privacy-filing-critical-status",
 )
 EXCLUDED_JUDGMENTS = (
     "fact-truth",
@@ -104,6 +107,7 @@ EXCLUDED_JUDGMENTS = (
     "mistake",
     "notice-sufficiency",
     "service-sufficiency",
+    "redaction-authorization",
 )
 FINDING_FIELDS = ("code", "location", "message")
 SECTION_HEADINGS = (

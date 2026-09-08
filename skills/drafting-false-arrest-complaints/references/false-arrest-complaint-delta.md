@@ -134,6 +134,12 @@ Post-seizure or other later facts may perform a limited later function, but they
 must be excluded from the officer's contemporaneous knowledge unless supported
 facts show the officer knew them at the challenged seizure point.
 
+Record the criminal-proceeding posture for the arrest under the canonical
+complaint contract: each charge, its court, its current status, and its
+disposition with a source. A false-arrest claim accrues at detention under legal
+process. A pending charge does not delay that accrual. Whether to file now, seek
+a stay, or plead in the alternative is a reserved user decision.
+
 Keep initial arrest, later force, continued detention, report conduct, and
 prosecution separate when their actors, decisions, knowledge sets, causal paths,
 or injuries differ. Incorporate only the factual paragraphs that perform work

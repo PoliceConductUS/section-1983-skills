@@ -70,6 +70,23 @@ A count is complete only if:
       entry creates an internal filing-critical GAP, and that filing-critical
       GAP blocks filing-ready status without adding an adverse merits
       characterization to filed text;
+- [ ] the criminal-proceeding posture of every charge from the pleaded events is
+      recorded with its status, disposition, and source, and each count states
+      its accrual event with verified authority;
+- [ ] each count states whether success would necessarily imply the invalidity
+      of an outstanding conviction, and any file, stay, alternative-pleading, or
+      omission choice is routed to the user without a Heck characterization in
+      filed text;
+- [ ] every excessive-force count pleads the events preceding the force and does
+      not confine the application to the moment force was used;
+- [ ] every identifier covered by Rule 5.2(a) is redacted or carries a recorded
+      authorization basis, every minor is named by initials unless authorized,
+      and the handoff `privacy_gate` is clear;
+- [ ] no official-capacity count against an individual duplicates a municipal
+      count on the same claim and challenged act unless the draft states the
+      distinct purpose of each count or records a reserved user decision;
+- [ ] punitive damages are requested only from individual-capacity defendants
+      and not from a municipality or official-capacity defendant;
 - [ ] the arrest audit is complete and, when an arrest occurred, the primary
       arresting officer appears first in the caption, Parties section, defendant
       lists or tables, and defendant-grouped claim presentation;

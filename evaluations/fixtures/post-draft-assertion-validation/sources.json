@@ -1,0 +1,7 @@
+[
+  { "id": "RECORDING", "path": "recording-observation.md" },
+  { "id": "TRANSCRIPT", "path": "transcript.md" },
+  { "id": "AUTHORITY", "path": "authority.md" },
+  { "id": "CONTROL", "path": "control.md" },
+  { "id": "PRIOR-REPORT", "path": "prior-report.md" }
+]

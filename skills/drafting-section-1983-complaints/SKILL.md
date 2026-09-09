@@ -322,6 +322,22 @@ Before treating a complaint or amendment proffer as complete, read
 run its defense-premise, preservation, amendment-cure, and final completion
 checks.
 
+## Shared post-draft assertion validation
+
+After the completion audit, provide the complete complaint candidate and its
+canonical claim, Defendant, challenged-act, limitations, qualified-immunity,
+Monell, injury, relief, and completion requirements to
+`validating-court-facing-assertions`. If that skill is unavailable, report
+**assertion validation contract unavailable** and do not reconstruct its
+contract or claim the complaint is validation-complete.
+
+The shared stage reviews the candidate read-only. Route any reported drafting
+defect, unauthorized omission, or reserved decision to a separate authorized
+complaint-drafting stage. After a supported correction creates the next
+candidate, revalidate affected assertions and dependencies and reconcile the
+complete complaint and rendered document. A mechanical complaint-contract pass
+does not replace this review.
+
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated

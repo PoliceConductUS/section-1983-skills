@@ -24,6 +24,7 @@ QUALITY_CONTROL_SKILLS = {
     "drafting-section-1983-complaints",
     "drafting-section-1983-rule-59e",
     "filing-ci",
+    "validating-court-facing-assertions",
 }
 QUALITY_CONTROL_TRIGGER = re.compile(
     r"(?:\buse when\b.{0,120}\b(?:independently\s+)?(?:auditing|reviewing|"

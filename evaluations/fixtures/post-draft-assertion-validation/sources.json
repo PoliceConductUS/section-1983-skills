@@ -1,0 +1,10 @@
+[
+  { "id": "TARGET", "path": "target-draft.md" },
+  { "id": "RECORDING", "path": "recording-observation.md" },
+  { "id": "TRANSCRIPT", "path": "transcript.md" },
+  { "id": "AUTHORITY", "path": "authority.md" },
+  { "id": "CONTROL", "path": "control.md" },
+  { "id": "PRIOR-REPORT", "path": "prior-report.md" },
+  { "id": "PARTY-FILING", "path": "plaintiff-drafted-motion.md" },
+  { "id": "PLAINTIFF-MEMORY", "path": "plaintiff-memory.md" }
+]

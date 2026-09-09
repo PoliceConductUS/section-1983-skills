@@ -115,3 +115,17 @@ changes are excluded from terminology rewrites.
 - **WHEN** a test double attempts network use or a path outside declared roles
 - **THEN** execution fails closed, input bytes remain unchanged, and no output
   artifact or success receipt is published
+
+### Requirement: Assertion validation has a fixed folder contract
+
+`validating-court-facing-assertions` MUST declare ordered required input roles
+`filing`, `record`, `authorities`, and `strategy`; optional input role
+`prior-reports` and `deterministic-results`; one required target in `filing`;
+disabled internet; and append-immutable output.
+
+#### Scenario: Validation invocation receives an undeclared folder
+
+- **WHEN** the invocation attempts to add an undeclared source, graph,
+  repository, or ambient workspace role
+- **THEN** folder-contract validation fails before case material is reviewed or
+  a report is published

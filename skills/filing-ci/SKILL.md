@@ -145,6 +145,22 @@ This skill owns only its registered deterministic checker logic. It does not own
 verified-authority-store verification, formatting, automatic correction, filing,
 or litigation judgment reserved to the user.
 
+## Shared assertion-validation boundary
+
+Provide applicable deterministic findings and artifact-freshness signals to a
+new `validating-court-facing-assertions` invocation only through its declared
+optional `deterministic-results` input role. Filing CI remains deterministic and
+cannot decide evidentiary support or legal sufficiency. It cannot verify
+original-source meaning, authority fit, inference reasoning, approved-content
+coverage, or closure of a semantic finding.
+
+A current successful Filing CI run is one independent gate. It does not make an
+unchecked assertion current, cure an omission, or upgrade an incomplete shared
+validation result. A material correction requires a fresh applicable Filing CI
+run and fresh affected-assertion and dependency validation. If the shared skill
+is unavailable, report **assertion validation contract unavailable** and
+preserve Filing CI's narrower result.
+
 ## Independent quality-control stage
 
 An independent quality-control stage is non-mutating. It may read designated

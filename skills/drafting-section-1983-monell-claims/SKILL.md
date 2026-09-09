@@ -69,3 +69,14 @@ path object, remaining gaps, and source identities. Hand the deltas to
 After integration, rerun `scripts/validate_complaint_handoff.py` from the
 canonical complaint package in drafting mode. Do not describe a structural pass
 as legal sufficiency or filing readiness.
+
+The isolated delta is not a complete court-facing candidate. After the canonical
+complaint owner integrates the approved Monell text, require
+`validating-court-facing-assertions` to review the integrated whole-document
+candidate and applicable path requirements. Route any correction through a
+separate authorized complaint-drafting stage and the shared revalidation loop.
+Do not use a validation finding to select, narrow, merge, or omit a Monell path
+without the litigation principal's decision.
+
+If the shared skill is unavailable, report **assertion validation contract
+unavailable** and do not reconstruct its rules or claim validation completion.

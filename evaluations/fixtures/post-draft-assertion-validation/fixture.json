@@ -1,0 +1,141 @@
+{
+  "id": "post-draft-assertion-validation",
+  "synthetic": true,
+  "target_skill": "validating-court-facing-assertions",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "command-recast-as-submission",
+      "candidate": "regression-command-as-submission.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "transcript-recast-as-native-audio",
+      "candidate": "regression-transcript-as-audio.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "inference-recast-as-personal-knowledge",
+      "candidate": "regression-inference-as-knowledge.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "relevant-authority-treated-as-support",
+      "candidate": "regression-relevant-authority.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "approved-claim-omission-ignored",
+      "candidate": "regression-omission-ignored.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "changed-wording-keeps-stale-pass",
+      "candidate": "regression-stale-pass.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "authorized-unknown-treated-as-defect",
+      "candidate": "regression-authorized-unknown.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "party-filing-used-as-event-evidence",
+      "candidate": "regression-party-filing-as-evidence.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Review Identity",
+      "Assertion Records",
+      "Requirement Coverage",
+      "Status Register",
+      "Freshness",
+      "Mermaid Summary",
+      "Stopping Decision"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "command-as-submission",
+        "pattern": "(?is)supported assertion.{0,160}plaintiff submitted.{0,160}arrest command"
+      },
+      {
+        "id": "transcript-as-native-audio",
+        "pattern": "(?is)method(?:s)? actually used.{0,100}native-audio verification.{0,180}(?:transcript only|no audio)"
+      },
+      {
+        "id": "inference-as-personal-knowledge",
+        "pattern": "(?is)personal knowledge.{0,160}inferred from"
+      },
+      {
+        "id": "relevance-as-support",
+        "pattern": "(?is)(?:supported|verified).{0,100}because.{0,80}(?:generally relevant|same general subject)"
+      },
+      {
+        "id": "omission-ignored",
+        "pattern": "(?is)no omission.{0,160}(?:approved count ii|principal correction).{0,80}(?:absent|omitted)"
+      },
+      {
+        "id": "changed-wording-stale-pass",
+        "pattern": "(?is)(?:prior|old) pass remains current.{0,160}(?:wording|text) changed"
+      },
+      {
+        "id": "authorized-unknown-as-defect",
+        "pattern": "(?is)authorized unknown.{0,120}(?:drafting defect|must be invented)"
+      },
+      {
+        "id": "party-filing-as-event-evidence",
+        "pattern": "(?is)supported assertion.{0,180}(?:event occurred|said.{0,80}you are under arrest).{0,180}(?:plaintiff|defense).{0,40}(?:complaint|motion|brief|filing)"
+      }
+    ],
+    "required_citations": [
+      "TARGET",
+      "RECORDING",
+      "TRANSCRIPT",
+      "AUTHORITY",
+      "CONTROL",
+      "PRIOR-REPORT",
+      "PARTY-FILING",
+      "PLAINTIFF-MEMORY"
+    ]
+  },
+  "rubric": [
+    {
+      "id": "source-substance",
+      "description": "The report tests the exact asserted conduct against the original observation instead of passing a related citation."
+    },
+    {
+      "id": "method-candor",
+      "description": "The report states whether review used native media, a transcript, or another derived source and claims no method it did not use."
+    },
+    {
+      "id": "inference-boundary",
+      "description": "The report preserves premise facts and reasoning instead of converting an inference into personal knowledge."
+    },
+    {
+      "id": "authority-fit",
+      "description": "The report rejects a real but proposition-irrelevant authority after specialist review."
+    },
+    {
+      "id": "omission-coverage",
+      "description": "The report maps approved claims and principal corrections and identifies absent material."
+    },
+    {
+      "id": "freshness",
+      "description": "Changed wording invalidates the affected assertion finding and dependent conclusions."
+    },
+    {
+      "id": "authorized-unknown",
+      "description": "An authorized unknown remains an accounted-for factual question rather than a drafting defect."
+    },
+    {
+      "id": "independent-event-source",
+      "description": "A party-drafted filing cannot prove an underlying event or quotation; separately documented Plaintiff memory remains an attributed independent source."
+    }
+  ]
+}

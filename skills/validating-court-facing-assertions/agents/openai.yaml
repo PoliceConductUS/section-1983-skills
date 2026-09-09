@@ -1,0 +1,6 @@
+interface:
+  display_name: "Validate Court-Facing Assertions"
+  short_description: "Trace every filing assertion to original sources"
+  default_prompt: >-
+    Use $validating-court-facing-assertions to perform a read-only post-draft
+    assertion and omission review of this court-facing document.

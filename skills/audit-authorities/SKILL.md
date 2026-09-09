@@ -317,6 +317,23 @@ court-safe rewrite.
 Every returned artifact must identify the actual approved source identity and
 checked date used.
 
+## Shared assertion-validation handoff
+
+When a court-facing document uses `validating-court-facing-assertions`, return
+authority-specific findings for each material legal proposition: actual holding,
+exact passage and pinpoint, controlling status, procedural posture, relevant
+later treatment, factual fit and differences, and application. Preserve the
+distinction among pre-event clearly established law, Defendant knowledge,
+municipal notice, and Rule 15(c) notice of the lawsuit.
+
+The shared validator owns complete document assertion and omission coverage.
+This skill does not infer whole-document coverage from its authority audit and
+does not pass a proposition merely because a real authority is generally
+relevant. Any authority-driven text correction occurs in a separate authorized
+drafting stage and invalidates the affected assertion findings and dependencies.
+If the shared skill is unavailable, report **assertion validation contract
+unavailable** rather than reconstructing its whole-document rules.
+
 ## Independent legal-RAG supervision
 
 A generation stage or material-revision stage cannot certify its own filing-near

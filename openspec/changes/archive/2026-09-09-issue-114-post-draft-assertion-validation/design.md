@@ -61,10 +61,17 @@ structured findings; only the trusted host publishes the immutable receipt.
 Every sentence is decomposed into independently assessable propositions. Each
 assertion record contains identity, exact text and location, classification,
 optional supplied documentation route, original source passage or recording
-observation, pinpoint, contrary context, inference reasoning, result, and
-corrective action. Substantive review separately tests actor, conduct, time,
-duration, attribution, knowledge, causation, quotation accuracy, and degree of
-certainty.
+observation, pinpoint, contrary context, inference reasoning, one or more
+independently applicable results, and corrective action. Substantive review
+separately tests actor, conduct, time, duration, attribution, knowledge,
+causation, quotation accuracy, and degree of certainty.
+
+A document drafted by either side may document its own filing text, an
+attributed party position, or a procedural act. It is never independent support
+for an underlying event or quoted words. Plaintiff memory is an eligible
+independent source only when recorded in a separate identified source document;
+the validation report attributes it as the Plaintiff's memory claim and does not
+upgrade it to adjudicated fact.
 
 The report has distinct sections and counts for supported assertions, supported
 inferences, contradictions, overstatements, insufficient sources, missing
@@ -90,13 +97,14 @@ drafting defect merely because it remains unknown.
 
 ### Freshness and iteration
 
-Every finding is bound to the assertion text, supporting source hashes,
-controlling authority identity and state, reasoning premises, applicable control
-versions, and reviewed target hash. A change invalidates that finding and any
-finding that depends on it. Unaffected findings may be carried forward only
-after verifying those bindings remain applicable. Final validation reconciles
-every assertion and applicable requirement in the complete candidate and
-includes a rendered-file review.
+The report is bound to the reviewed target hash. Each finding is separately
+bound to its assertion text, supporting source hashes, controlling authority
+identity and state, reasoning premises, and applicable control versions. A
+change invalidates each affected finding and every dependent finding; a target
+hash change alone does not invalidate an unrelated finding. Unaffected findings
+may be carried forward only after verifying their bindings remain applicable.
+Final validation reconciles every assertion and applicable requirement in the
+complete candidate and includes a rendered-file review.
 
 ### Report persistence
 
@@ -107,6 +115,11 @@ input and publishing proposed replacement bytes in its own separately authorized
 workflow. The public validation skill never overwrites an input or edits case
 controls. Independent receipts are preserved.
 
+When an exact prior report is supplied, the next proposed report reuses its
+existing issue register and stable issue identities. It explicitly updates or
+closes those entries and adds genuinely new findings instead of creating a
+parallel register that obscures unresolved history.
+
 ### Specialist handoffs
 
 - The umbrella drafting skill orchestrates the loop.
@@ -116,8 +129,13 @@ controls. Independent receipts are preserved.
 - Authority auditing supplies authority findings.
 - Adversarial review attacks a validation-complete candidate afterward and may
   send defects back to a separate correction and revalidation loop.
-- Filing CI contributes deterministic integrity findings and freshness inputs;
-  it cannot close semantic findings.
+- Filing CI contributes deterministic integrity findings and freshness inputs
+  through the optional `deterministic-results` role; it cannot close semantic
+  findings.
+- Rule 59(e) invokes validation once for each generated court-facing document,
+  then reconciles the complete packet without violating the one-target rule.
+- Declaration drafting routes each complete generated declaration through the
+  same one-target validation loop.
 
 ## Risks / Trade-offs
 

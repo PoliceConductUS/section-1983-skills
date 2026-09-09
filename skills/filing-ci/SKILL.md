@@ -147,11 +147,12 @@ or litigation judgment reserved to the user.
 
 ## Shared assertion-validation boundary
 
-Provide applicable deterministic findings and artifact-freshness signals to
-`validating-court-facing-assertions`. Filing CI remains deterministic and cannot
-decide evidentiary support or legal sufficiency. It cannot verify original-
-source meaning, authority fit, inference reasoning, approved-content coverage,
-or closure of a semantic finding.
+Provide applicable deterministic findings and artifact-freshness signals to a
+new `validating-court-facing-assertions` invocation only through its declared
+optional `deterministic-results` input role. Filing CI remains deterministic and
+cannot decide evidentiary support or legal sufficiency. It cannot verify
+original-source meaning, authority fit, inference reasoning, approved-content
+coverage, or closure of a semantic finding.
 
 A current successful Filing CI run is one independent gate. It does not make an
 unchecked assertion current, cure an omission, or upgrade an incomplete shared

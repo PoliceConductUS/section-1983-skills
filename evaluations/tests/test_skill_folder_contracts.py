@@ -24,7 +24,7 @@ OPTIONAL_INPUT_ROLES = {
     "drafting-section-1983-written-discovery": ["municipal-profile"],
     "planning-section-1983-monell-claims": ["municipal-profile", "casegraph"],
     "rrd-rule12-city": ["municipal-profile"],
-    "validating-court-facing-assertions": ["prior-reports"],
+    "validating-court-facing-assertions": ["prior-reports", "deterministic-results"],
 }
 
 CONTRACTS = {

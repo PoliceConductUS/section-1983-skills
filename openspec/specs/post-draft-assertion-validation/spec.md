@@ -1,4 +1,11 @@
-## ADDED Requirements
+# post-draft-assertion-validation Specification
+
+## Purpose
+
+TBD - created by archiving change issue-114-post-draft-assertion-validation.
+Update Purpose after archive.
+
+## Requirements
 
 ### Requirement: Every generated court-facing document enters the validation loop
 
@@ -69,6 +76,30 @@ MUST NOT be treated as substantive validation by itself.
 - **THEN** the report identifies the unsupported change in conduct and degree of
   certainty rather than passing the assertion because the recording is cited
 
+### Requirement: Party-drafted documents cannot bootstrap event or quotation support
+
+A document drafted by either Plaintiff or the defense MUST NOT be treated as
+evidence for an underlying event or quoted words. Such a document MAY establish
+its own text, an attributed party position, or a procedural act. Plaintiff
+memory MAY support an event or quotation only through a separate identified
+source document recording the Plaintiff's memory claims, with that source voice
+and degree of certainty preserved.
+
+#### Scenario: Filing repeats an event and quotation
+
+- **WHEN** a party-drafted filing is the only supplied document stating that an
+  event occurred or that a person spoke quoted words
+- **THEN** the event or quotation assertion has insufficient independent source
+  support even though the filing may support an attributed description of the
+  party's position
+
+#### Scenario: Plaintiff memory is separately documented
+
+- **WHEN** a separate declared source document records the Plaintiff's memory of
+  an event or quotation
+- **THEN** the report may treat that memory claim as an independent source while
+  preserving its attribution and without treating it as adjudicated fact
+
 ### Requirement: Inferences remain distinct from personal knowledge
 
 The report MUST distinguish source facts, supported inferences, and personal-
@@ -89,12 +120,23 @@ relevant later treatment, factual fit, and application. The report MUST keep
 pre-event clearly established law, defendant knowledge, municipal notice, and
 Rule 15(c) notice of the lawsuit as distinct legal uses.
 
+If the required authority audit or a current authority-specific finding is
+unavailable, the validator MUST record the proposition as an unchecked assertion
+and stop without substituting its own abbreviated authority review.
+
 #### Scenario: Generally relevant case does not support the proposition
 
 - **WHEN** a cited decision concerns the general subject but does not support
   the drafted proposition
 - **THEN** the authority assertion fails notwithstanding the decision's general
   relevance
+
+#### Scenario: Required authority finding is unavailable
+
+- **WHEN** a material authority proposition lacks a current `audit-authorities`
+  finding
+- **THEN** the validator records an unchecked assertion and cannot complete
+  validation
 
 ### Requirement: Omission coverage maps approved requirements to the draft
 
@@ -122,7 +164,10 @@ drafting defect.
 The report MUST separately present supported assertions, supported inferences,
 contradictions, overstatements, insufficient sources, missing documentation
 links, unchecked assertions, omissions, and unresolved factual questions.
-Missing documentation and missing substantive support MUST remain distinct.
+Missing documentation and missing substantive support MUST remain distinct. An
+assertion or coverage record MUST accept one or more independently applicable
+results so that substantive support and documentation status can be reported
+together without collapsing either condition.
 
 #### Scenario: Source supports an assertion but its optional route is absent
 
@@ -147,9 +192,11 @@ or contain invented counts.
 
 Changed assertion text or dependencies MUST invalidate affected reviews across
 documents. Dependencies include sources, controlling decisions, applicable
-controls, and reasoning premises. An unaffected finding MAY be reused only after
-its bindings and continued applicability are verified. The final candidate MUST
-receive complete coverage reconciliation.
+controls, and reasoning premises. The report MUST identify the exact reviewed
+target hash, but a target-hash change alone MUST NOT invalidate a finding whose
+assertion text and dependencies remain unchanged. An unaffected finding MAY be
+reused only after its bindings and continued applicability are verified. The
+final candidate MUST receive complete coverage reconciliation.
 
 #### Scenario: Previously passing wording changes
 
@@ -186,3 +233,32 @@ receipts.
   contents
 - **THEN** the skill returns proposed new bytes while leaving the prior report
   and every independent receipt unchanged
+
+### Requirement: Existing issue registers retain continuity
+
+When an exact prior report is supplied, the proposed successor report MUST reuse
+its existing issue register and stable issue identities. It MUST preserve
+unresolved entries, explicitly dispose of corrected or otherwise resolved
+entries, and add new entries without replacing the register with a parallel
+history.
+
+#### Scenario: Prior report contains an unresolved finding
+
+- **WHEN** a declared prior report contains an unresolved issue-register entry
+- **THEN** the successor proposal retains that issue ID and records its current
+  disposition rather than silently omitting it or assigning a new ID
+
+### Requirement: Specialist outputs cross declared role boundaries
+
+Applicable Filing CI reports and freshness signals MUST enter assertion
+validation only through the optional declared `deterministic-results` input
+role. Each Rule 59(e) court-facing document and each generated declaration MUST
+receive its own one-target validation invocation and receipt. Packet-level
+reconciliation MUST NOT combine several filing targets into one invocation.
+
+#### Scenario: Rule 59(e) packet has three court-facing documents
+
+- **WHEN** a Rule 59(e) workflow generates a motion, proposed amended complaint,
+  and proposed order
+- **THEN** it performs three one-target validation invocations and then
+  reconciles cross-document consistency at the packet level

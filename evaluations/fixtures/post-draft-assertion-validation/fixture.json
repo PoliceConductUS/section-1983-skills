@@ -9,37 +9,42 @@
     {
       "id": "command-recast-as-submission",
       "candidate": "regression-command-as-submission.md",
-      "expected_findings": ["command-as-submission"]
+      "expected_findings": ["banned-pattern"]
     },
     {
       "id": "transcript-recast-as-native-audio",
       "candidate": "regression-transcript-as-audio.md",
-      "expected_findings": ["transcript-as-native-audio"]
+      "expected_findings": ["banned-pattern"]
     },
     {
       "id": "inference-recast-as-personal-knowledge",
       "candidate": "regression-inference-as-knowledge.md",
-      "expected_findings": ["inference-as-personal-knowledge"]
+      "expected_findings": ["banned-pattern"]
     },
     {
       "id": "relevant-authority-treated-as-support",
       "candidate": "regression-relevant-authority.md",
-      "expected_findings": ["relevance-as-support"]
+      "expected_findings": ["banned-pattern"]
     },
     {
       "id": "approved-claim-omission-ignored",
       "candidate": "regression-omission-ignored.md",
-      "expected_findings": ["omission-ignored"]
+      "expected_findings": ["banned-pattern"]
     },
     {
       "id": "changed-wording-keeps-stale-pass",
       "candidate": "regression-stale-pass.md",
-      "expected_findings": ["changed-wording-stale-pass"]
+      "expected_findings": ["banned-pattern"]
     },
     {
       "id": "authorized-unknown-treated-as-defect",
       "candidate": "regression-authorized-unknown.md",
-      "expected_findings": ["authorized-unknown-as-defect"]
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "party-filing-used-as-event-evidence",
+      "candidate": "regression-party-filing-as-evidence.md",
+      "expected_findings": ["banned-pattern"]
     }
   ],
   "deterministic": {
@@ -81,15 +86,22 @@
       },
       {
         "id": "authorized-unknown-as-defect",
-        "pattern": "(?is)authorized unknown.{0,120}(?:drafting defect|must be invented|must be identified)"
+        "pattern": "(?is)authorized unknown.{0,120}(?:drafting defect|must be invented)"
+      },
+      {
+        "id": "party-filing-as-event-evidence",
+        "pattern": "(?is)supported assertion.{0,180}(?:event occurred|said.{0,80}you are under arrest).{0,180}(?:plaintiff|defense).{0,40}(?:complaint|motion|brief|filing)"
       }
     ],
     "required_citations": [
+      "TARGET",
       "RECORDING",
       "TRANSCRIPT",
       "AUTHORITY",
       "CONTROL",
-      "PRIOR-REPORT"
+      "PRIOR-REPORT",
+      "PARTY-FILING",
+      "PLAINTIFF-MEMORY"
     ]
   },
   "rubric": [
@@ -120,6 +132,10 @@
     {
       "id": "authorized-unknown",
       "description": "An authorized unknown remains an accounted-for factual question rather than a drafting defect."
+    },
+    {
+      "id": "independent-event-source",
+      "description": "A party-drafted filing cannot prove an underlying event or quotation; separately documented Plaintiff memory remains an attributed independent source."
     }
   ]
 }

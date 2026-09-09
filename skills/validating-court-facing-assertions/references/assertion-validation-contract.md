@@ -55,7 +55,8 @@ Every assertion record contains:
 - material `contrary context`, qualifiers, and conflicting source passages;
 - `inference reasoning`, including every premise and the procedural rule that
   permits the inference when applicable;
-- `result` using an allowed status below; and
+- `results` containing one or more independently applicable allowed statuses
+  below; and
 - `corrective action`, decision required, or reason no correction is needed.
 
 Do not invent a documentation route. This skill does not depend on or require
@@ -86,6 +87,28 @@ Record what each source establishes, what it does not establish, contrary
 material, and whether the draft uses a stronger, broader, earlier, later, or
 more certain proposition than the source supports.
 
+### Party-drafted documents and Plaintiff memory
+
+A party-drafted complaint, motion, response, brief, declaration draft, or other
+advocacy document is never evidence for an underlying event or quoted words,
+whether Plaintiff or the defense drafted it. It may establish its own text, the
+procedural fact that it was filed, or an attributed party position. Do not use
+its repetition of an event description or quotation to substantiate that event
+or quotation.
+
+Plaintiff's memory claims are an eligible independent source only when recorded
+in a separate identified source document, distinct from the drafted court-facing
+document under review and from other party advocacy. Record the memory source's
+identity, hash, passage, and pinpoint; classify the supported proposition with
+Plaintiff as its source voice and preserve all uncertainty and contrary context.
+The separate document does not convert memory into an adjudicated fact or trial
+proof.
+
+When the only supplied support for an event or quotation is a party-drafted
+document, record `insufficient source`. Separately assess whether that same
+document supports an attributed-position or procedural assertion about the
+party's own filing.
+
 ## Authority propositions
 
 Use `audit-authorities` for every material authority proposition. Carry its
@@ -99,6 +122,10 @@ record:
 - relevant later treatment and current validity;
 - material factual fit, differences, and analogy limits; and
 - the draft's application of the rule to the asserted facts.
+
+If the required authority audit or a current authority-specific finding is
+unavailable, record the proposition as an `unchecked assertion` and stop. Do not
+substitute an abbreviated authority review inside this skill.
 
 A real, published, or generally relevant decision does not support a proposition
 it did not decide. Keep these uses separate:
@@ -182,10 +209,12 @@ Recalculate the diagram after every report change.
 
 ## Freshness and dependency invalidation
 
-Bind each finding to its exact assertion text, target hash, every material
-source hash, controlling decision identity and reviewed status, applicable
-control versions, and every reasoning premise. Treat a finding as stale when any
-bound item changes.
+Bind the report to the exact target hash. Bind each finding to its exact
+assertion text, every material source hash, controlling decision identity and
+reviewed status, applicable control versions, and every reasoning premise. Treat
+a finding as stale when one of its finding-level bindings changes. A changed
+target hash triggers inventory reconciliation, but does not by itself invalidate
+an unrelated finding whose assertion text and dependencies remain unchanged.
 
 Invalidate the affected assertion and each dependent assertion, application,
 coverage conclusion, diagram count, and document-level conclusion. A correction
@@ -256,3 +285,9 @@ report from the declared `prior-reports` role and return proposed updated bytes
 for a separate authorized controller action. It does not overwrite the prior
 report, mutate case controls, write into a repository, or convert a mutable
 current report into an independent receipt.
+
+Reuse the existing issue register from an exact supplied prior report. Preserve
+each stable issue ID and unresolved entry; record an explicit disposition for a
+corrected or otherwise resolved entry, and add a new stable issue ID only for a
+genuinely new finding. Do not silently omit an entry or create a parallel issue
+register that obscures its history.

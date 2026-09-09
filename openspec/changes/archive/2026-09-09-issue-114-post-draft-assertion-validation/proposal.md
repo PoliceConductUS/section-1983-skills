@@ -19,6 +19,18 @@ deterministic checks with evidentiary support or legal sufficiency.
   coverage under one contract.
 - Impact: Non-breaking workflow addition for generated court-facing documents.
 
+**Independent event and quotation sources**
+
+- From: A party-drafted filing can be mistaken for evidentiary support merely
+  because it repeats an event description or quotation.
+- To: Plaintiff- and defense-drafted documents may establish attributed party
+  positions and procedural acts, but never independently prove an underlying
+  event or quoted words. Plaintiff memory is eligible only through a separate,
+  identified source document recording the Plaintiff's memory claims.
+- Reason: Drafted advocacy cannot bootstrap its own factual support.
+- Impact: Event and quotation assertions fail closed unless traced to an
+  independent verifiable source within the declared inputs.
+
 **Specialist coordination**
 
 - From: Complaint, Monell, authority, adversarial, and Filing CI stages can run
@@ -41,6 +53,10 @@ deterministic checks with evidentiary support or legal sufficiency.
   complaint requirements through the shared validation workflow.
 - `drafting-section-1983-monell-claims`: Preserve canonical-owner integration
   and validate integrated Monell assertions and omissions.
+- `drafting-section-1983-rule-59e`: Validate each generated court-facing packet
+  document through its own one-target invocation, then reconcile the packet.
+- `drafting-section-1983-declarations-and-evidence`: Validate each complete,
+  human-approved declaration before a filing-readiness assessment.
 - `verified-authority-audit`: Supply authority-specific findings to the shared
   report without becoming the whole-document owner.
 - `adversarial-filing-review`: Keep defense attack downstream and distinct from
@@ -54,7 +70,7 @@ deterministic checks with evidentiary support or legal sufficiency.
 
 ## Impact
 
-Adds one public skill package and behavioral evaluation corpus, updates six
+Adds one public skill package and behavioral evaluation corpus, updates eight
 existing skill contracts and routing metadata, and extends repository governance
 and OpenSpec capabilities. It does not change any case repository, CaseGraph,
 litigation decision, filed document, or general-purpose persistence tooling.

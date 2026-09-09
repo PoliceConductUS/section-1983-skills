@@ -31,12 +31,18 @@ case material if the host cannot enforce the filesystem and network boundary.
   of unresolved issues.
 - `prior-reports` optionally contains exact prior validation findings selected
   for a freshness and continued-applicability review.
+- `deterministic-results` optionally contains exact Filing CI findings and
+  freshness signals selected for this validation run.
 
-There is one required target in `filing`. Internet is `disabled`. The validation
-stage returns one proposed report and structured findings; only the trusted host
-derives the canonical output-relative path and publishes it append-immutable.
-Keep all extraction, staging, scratch, and temporary bytes beneath
-`<output-folder>/temp/`.
+Target is required in `filing`; select exactly one required target. Internet is
+`disabled`. The validation stage returns one proposed report and structured
+findings; only the trusted host derives the canonical output-relative path and
+publishes it append-immutable. Keep all extraction, staging, scratch, and
+temporary bytes beneath `<output-folder>/temp/`.
+
+Report a missing or unreadable required input, or an expressly selected prior
+report or deterministic result, as a gap without broadening the declared
+folders. The absence of an unselected optional role is not a gap.
 
 Never search an ambient workspace, infer an undeclared source, modify an input,
 or write directly to the output folder. This skill does not depend on CaseGraph
@@ -79,12 +85,13 @@ legal, strategic, or remedial choice.
 ## Perform the review
 
 1. Bind the report to the exact target, declared source bytes, controls, prior
-   findings, and methods actually used.
+   findings, selected deterministic results, and methods actually used.
 2. Inventory all text, including unchanged and inherited text, and split every
    compound sentence into separately assessable propositions.
 3. Trace each factual proposition to an original source passage or recording
    observation. Test what that source actually establishes, including contrary
-   context and limits.
+   context and limits. Never use a party-drafted document as evidence for an
+   underlying event or quoted words.
 4. Route every material legal proposition through `audit-authorities`. Consume
    its authority-specific findings; do not substitute a citation, route, or hash
    check for the authority audit.
@@ -118,6 +125,11 @@ legal, strategic, or remedial choice.
 A deterministic check does not decide evidentiary support or legal sufficiency.
 Passing deterministic output cannot close an assertion, authority, omission, or
 litigation-decision finding.
+
+## Output provenance
+
+Every returned artifact must identify the actual approved source identity and
+checked date used.
 
 ## Independent quality-control stage
 

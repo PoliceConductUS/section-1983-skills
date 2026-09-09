@@ -4,8 +4,8 @@
 
 `validating-court-facing-assertions` MUST declare ordered required input roles
 `filing`, `record`, `authorities`, and `strategy`; optional input role
-`prior-reports`; one required target in `filing`; disabled internet; and append-
-immutable output.
+`prior-reports` and `deterministic-results`; one required target in `filing`;
+disabled internet; and append-immutable output.
 
 #### Scenario: Validation invocation receives an undeclared folder
 

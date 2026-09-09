@@ -6,7 +6,8 @@ All sources reviewed. [cite:TARGET] [cite:RECORDING] [cite:TRANSCRIPT]
 
 # Assertion Records
 
-Supported assertion: Plaintiff submitted. The arrest command confirms it.
+Supported assertion: the event occurred and Officer Alder said “You are under
+arrest” because the Plaintiff's motion filing says so.
 
 # Requirement Coverage
 
@@ -14,7 +15,7 @@ Complete.
 
 # Status Register
 
-Pass.
+Supported assertions: 1.
 
 # Freshness
 
@@ -24,7 +25,7 @@ Current.
 
 ```mermaid
 flowchart LR
-  Reviewed --> Passed
+  Reviewed --> Supported
 ```
 
 # Stopping Decision

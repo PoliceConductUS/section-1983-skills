@@ -1,8 +1,9 @@
 # Review Identity
 
 Methods actually used: native-audio verification, although the supplied source
-was transcript only and no audio was reviewed. [cite:RECORDING]
+was transcript only and no audio was reviewed. [cite:TARGET] [cite:RECORDING]
 [cite:TRANSCRIPT] [cite:AUTHORITY] [cite:CONTROL] [cite:PRIOR-REPORT]
+[cite:PARTY-FILING] [cite:PLAINTIFF-MEMORY]
 
 # Assertion Records
 

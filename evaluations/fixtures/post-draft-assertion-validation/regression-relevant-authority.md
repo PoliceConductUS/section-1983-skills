@@ -1,7 +1,8 @@
 # Review Identity
 
-All sources reviewed. [cite:RECORDING] [cite:TRANSCRIPT] [cite:AUTHORITY]
-[cite:CONTROL] [cite:PRIOR-REPORT]
+All sources reviewed. [cite:TARGET] [cite:RECORDING] [cite:TRANSCRIPT]
+[cite:AUTHORITY] [cite:CONTROL] [cite:PRIOR-REPORT] [cite:PARTY-FILING]
+[cite:PLAINTIFF-MEMORY]
 
 # Assertion Records
 

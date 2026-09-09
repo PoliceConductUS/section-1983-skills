@@ -186,6 +186,20 @@ approval state, every blocking gap, the supplied actual execution location, and
 whether form selection is blocked. It does not label the declaration or filing
 ready.
 
+## Post-draft assertion validation
+
+After the human declarant approves every retained statement, provide the
+complete generated declaration as the single filing target for
+`validating-court-facing-assertions`. That read-only skill validates the
+declaration's assertions, source voice, omissions, and freshness before any
+filing-readiness assessment. If it is unavailable, report **assertion validation
+contract unavailable** and stop.
+
+Route a supported correction to a separate authorized declaration-drafting
+stage, reset every changed statement to `pending`, obtain exact human approval,
+and then run a new validation invocation for the complete generated declaration.
+Do not reproduce the shared report schema here.
+
 ## Boundaries
 
 This skill prepares source-bounded materials. It does not certify the truth,

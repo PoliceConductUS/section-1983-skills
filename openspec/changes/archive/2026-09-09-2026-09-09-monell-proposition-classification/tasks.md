@@ -21,8 +21,8 @@
 - [x] 3.2 Run complete repository validation.
 - [x] 3.3 Complete OpenSpec verification and retrospective records and archive
       the change.
-- [ ] 3.4 Commit and push each implementation state; create the issue and PR
-      after remote publication is explicitly authorized.
+- [x] 3.4 Commit and push the implementation after remote publication is
+      explicitly authorized; leave issue and PR creation for a separate request.
 
 ## 4. Staged Monell development
 

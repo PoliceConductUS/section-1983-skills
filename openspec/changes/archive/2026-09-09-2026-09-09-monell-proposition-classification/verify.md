@@ -92,7 +92,7 @@ marked the change ready to merge.
 
 ## Delivery state
 
-The completed OpenSpec change is archived. The implementation was held locally
-until the user explicitly authorized publication. Commit and push are the
-remaining actions in this delivery turn; creating a GitHub issue or PR was not
+The completed OpenSpec change is archived. After the user explicitly authorized
+publication, implementation commit `b8ed434` was pushed to
+`origin/codex/monell-proposition-classes`. Creating a GitHub issue or PR was not
 requested.

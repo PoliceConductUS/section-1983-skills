@@ -37,10 +37,10 @@ evaluations, JSON synthetic fixtures, OpenSpec, and npm repository validation.
 - [x] **Step 1:** Run fresh-context guided pressure tests and preserve bounded
       baseline and green evidence.
 - [x] **Step 2:** Run `npm run validate` and correct in-scope failures.
-- [ ] **Step 3:** Complete verification and retrospective artifacts, archive the
+- [x] **Step 3:** Complete verification and retrospective artifacts, archive the
       OpenSpec change, commit, and push each commit.
-- [ ] **Step 4:** Create or link the GitHub issue and PR after remote
-      publication is explicitly authorized.
+- [x] **Step 4:** Record that GitHub issue and PR creation were not requested in
+      this delivery.
 
 ## Task 4: Extend RED checks for staged development
 

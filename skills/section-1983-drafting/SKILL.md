@@ -103,6 +103,10 @@ Load each applicable skill once, in this order:
     proposition as verified.
 14. Run `horan-bad-words` on the substantively complete draft and rerun it after
     any material authority-driven revision.
+15. Run `validating-court-facing-assertions` against every complete generated
+    court-facing candidate. This skill orchestrates its read-only validation,
+    separate correction, affected-dependency revalidation, and final complete-
+    candidate review.
 
 The more specific skill adds requirements. It does not relax this skill,
 governing court rules, declared-input instructions, source gates, or authority
@@ -244,6 +248,38 @@ verified against its approved source, or a controlling term of art supported by
 the linter exemption record. Repair every unexempted violation. Review paragraph
 warnings as review heuristics; they do not change the score or establish filing
 readiness.
+
+## Post-draft assertion-validation loop
+
+After producing a substantively complete candidate and completing the authority
+and writing passes, load `validating-court-facing-assertions`. If it or its
+install-local contract is unavailable, report **assertion validation contract
+unavailable** and do not claim validation completion. Do not reconstruct its
+assertion fields, statuses, freshness rules, omission rules, or stopping
+criteria here.
+
+Supply one explicit filing target and the current declared record, authorities,
+strategy controls, and any exact prior report selected for reuse. The validation
+stage is read-only. It identifies atomic assertions, traces original sources,
+checks approved and required content, and returns its independent report.
+
+When the report contains a drafting defect, omission, or reserved decision:
+
+1. preserve the reviewed candidate and report;
+2. obtain any litigation-principal decision the report identifies;
+3. start a separately authorized drafting or revision stage;
+4. apply only selected, source-supported corrections and create a new version
+   when versioning applies;
+5. rerun every affected specialist, authority, and deterministic check;
+6. invoke `validating-court-facing-assertions` again for the changed assertions
+   and dependencies, verifying continued applicability before reusing any other
+   finding; and
+7. reconcile coverage of the entire final candidate and complete its rendered-
+   file review.
+
+After a validation-complete candidate undergoes adversarial or judicial review,
+an accepted material correction returns through this same loop. Filing CI is a
+separate deterministic gate and cannot close a substantive validation finding.
 
 ## The writing system
 

@@ -1,8 +1,11 @@
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
 from evaluations.deterministic import grade_candidate
 from evaluations.fixtures import load_fixture
+from scripts.validate_governance import validate_assertion_validation_owner
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
@@ -60,7 +63,7 @@ class PostDraftAssertionValidationContractTests(unittest.TestCase):
         self.assertIn("assertion validation contract unavailable", skill)
         self.assertIn("one required target", skill)
         self.assertIn("<output-folder>/temp/", skill)
-        self.assertIn('"internet": "denied"', folder_contract)
+        self.assertIn('"internet": "disabled"', folder_contract)
         for role in ("filing", "record", "authorities", "strategy"):
             self.assertIn(f'"{role}"', folder_contract)
 
@@ -153,9 +156,41 @@ class PostDraftAssertionValidationContractTests(unittest.TestCase):
                 self.assertIn(responsibility, text)
                 self.assertNotIn("assertion-validation-contract.md", text)
 
+    def test_governance_fails_when_owner_or_consumer_reference_is_missing(self):
+        self.assertEqual(validate_assertion_validation_owner(REPOSITORY), [])
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(SKILLS, root / "skills")
+            shutil.rmtree(root / "skills" / "validating-court-facing-assertions")
+            self.assertEqual(
+                validate_assertion_validation_owner(root),
+                ["assertion-validation-owner-missing"],
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(SKILLS, root / "skills")
+            consumer = root / "skills" / "filing-ci" / "SKILL.md"
+            consumer.write_text(
+                consumer.read_text(encoding="utf-8").replace(
+                    "validating-court-facing-assertions", "shared-validator"
+                ),
+                encoding="utf-8",
+            )
+            self.assertIn(
+                "assertion-validation-owner-reference-missing: filing-ci",
+                validate_assertion_validation_owner(root),
+            )
+
     def test_deterministic_boundaries_do_not_claim_semantic_judgment(self):
-        filing_ci = (SKILLS / "filing-ci" / "SKILL.md").read_text(encoding="utf-8").casefold()
-        owner = OWNER_SKILL.read_text(encoding="utf-8").casefold()
+        filing_ci = " ".join(
+            (SKILLS / "filing-ci" / "SKILL.md")
+            .read_text(encoding="utf-8")
+            .casefold()
+            .split()
+        )
+        owner = " ".join(OWNER_SKILL.read_text(encoding="utf-8").casefold().split())
 
         for text in (filing_ci, owner):
             self.assertRegex(

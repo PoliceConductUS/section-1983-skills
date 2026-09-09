@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "skill": "validating-court-facing-assertions",
+  "input_roles": ["filing", "record", "authorities", "strategy"],
+  "optional_input_roles": ["prior-reports"],
+  "target": { "policy": "required", "roles": ["filing"] },
+  "internet": "disabled",
+  "output": { "mode": "append-immutable" }
+}

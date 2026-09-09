@@ -49,6 +49,8 @@ deterministic checks with evidentiary support or legal sufficiency.
   substantive support or legal sufficiency.
 - `repository-skill-governance`: Require one semantic owner and bounded
   references while preserving install-local QC safeguards.
+- `implemented-skill-folder-migration`: Register the new skill's exact declared
+  folders, required target, disabled internet, and append-immutable output.
 
 ## Impact
 

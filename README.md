@@ -78,6 +78,7 @@ work. `temp/` is not a durable artifact destination.
 | `audit-authorities`                               | Final authority, pinpoint, posture, later-history, and clearly-established-law audit.                                                                                       |
 | `horan-bad-words`                                 | Final judge-facing plain-language and rhetoric review.                                                                                                                      |
 | `filing-ci`                                       | Runs fixed installed deterministic filing checks over declared folders and preserves a fail-closed filing gate.                                                             |
+| `validating-court-facing-assertions`              | Read-only atomic assertion, original-source, omission, freshness, and correction-loop validation for one generated court-facing document.                                   |
 
 ## How the skills compose
 
@@ -162,10 +163,14 @@ registry, graph, or case-management runtime is required.
     followed by the applicable writing-system pass and the required
     `horan-bad-words` edit pass. Every drafting skill requires that final pass;
     rerun it after a material authority-driven revision.
-18. Run `adversarial-filing-review` in a fresh clean-room context after
+18. Run `validating-court-facing-assertions` against the complete generated
+    court-facing candidate. Correct supported defects only in a separate
+    authorized drafting stage, revalidate affected assertions and dependencies,
+    and reconcile the complete final candidate and rendered file.
+19. Run `adversarial-filing-review` in a fresh clean-room context after
     substantive, authority, and writing review. Any approved correction returns
     to a separate drafting workflow and requires a new independent review.
-19. Run `filing-ci` after the applicable prose and authority audits, after each
+20. Run `filing-ci` after the applicable prose and authority audits, after each
     material change, and immediately before a filing-readiness statement. A
     current Filing CI pass does not replace authority or writing review; those
     remain independent gates.

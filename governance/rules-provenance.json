@@ -277,6 +277,16 @@
         "source_identity": "actual approved source identity used",
         "checked_date": "actual checked date used"
       }
+    },
+    {
+      "name": "validating-court-facing-assertions",
+      "rules_mode": "runtime-sourced",
+      "reviewed_on": "2026-09-08",
+      "rationale": "Validates court-facing assertions against case-specific original sources and controls supplied at runtime.",
+      "output_provenance": {
+        "source_identity": "actual original source identity used",
+        "checked_date": "actual review date used"
+      }
     }
   ]
 }

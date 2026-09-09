@@ -183,6 +183,15 @@ versioned draft. After any material change, run the applicable authority and
 writing checks, rerun independent adversarial review, and run Filing CI again as
 applicable. A prior review never transfers to changed draft content.
 
+Run this skill downstream from `validating-court-facing-assertions`. It remains
+a defense attack, not original-source assertion validation, authority
+certification, or omission reconciliation. If the principal accepts a material
+attack for correction, preserve this report, route the selected correction to a
+separate drafting stage, and rerun affected assertion and dependency validation
+before beginning another downstream adversarial review. If the shared skill is
+unavailable, report **assertion validation contract unavailable** and do not
+relabel this attack as substitute validation.
+
 ## Output provenance
 
 Every returned artifact must identify the actual approved source identity and

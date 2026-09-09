@@ -341,6 +341,18 @@ Reject the packet unless:
 18. page limit, conference statement, and appendix pagination are verified; and
 19. required input hashes, run manifests, and source records are verified.
 
+Then provide the complete Rule 59(e) candidate, its brief, proposed amended
+pleading, crosswalk, proposed order, appendix, current controls, and applicable
+final-review requirements to `validating-court-facing-assertions`. If that skill
+is unavailable, report **assertion validation contract unavailable** and do not
+claim validation completion.
+
+Keep the shared validation stage read-only. Route defects and omissions to a
+separate authorized Rule 59(e) drafting stage. Revalidate changed assertions and
+their dependencies, reconcile the entire packet, and repeat the rendered-file
+review before any filing-readiness assessment. Structural or Filing CI success
+does not replace substantive assertion and omission validation.
+
 Do not call the packet filing-ready while a load-bearing source, authority,
 deadline, conference statement, proposed-complaint cross-reference, requested
 ruling, or supersession effect remains unresolved.

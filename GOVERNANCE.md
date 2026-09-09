@@ -13,6 +13,22 @@ If the source is unavailable or its currency cannot be established, report the
 source gap rather than supplying a proposition from memory or a generic
 substitute.
 
+## Post-draft assertion validation
+
+`validating-court-facing-assertions` is the one semantic owner of the reusable
+post-draft assertion-validation workflow, proposition model, status taxonomy,
+freshness rules, omission coverage, and stopping criteria. Applicable drafting
+and review skills reference that owner and retain only their bounded specialist
+responsibilities. If the owner is unavailable, a consumer reports **assertion
+validation contract unavailable** and does not reconstruct a local substitute or
+claim validation completion.
+
+The shared semantic review does not replace the compact install-local
+non-mutation, folder-scope, and immutable-report safeguards required in each
+independently installable quality-control package. Deterministic validation may
+verify those contracts and report shapes; it does not decide evidentiary
+support, legal sufficiency, or filing readiness.
+
 ## Independent quality control
 
 An independent quality-control stage is non-mutating. It may read designated

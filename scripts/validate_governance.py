@@ -27,6 +27,28 @@ SOURCE_DOCUMENTED_SKILLS = (
     "collecting-legal-authority-sources",
     "collecting-police-policy-sources",
 )
+ASSERTION_VALIDATION_OWNER = "validating-court-facing-assertions"
+ASSERTION_VALIDATION_CONSUMERS = (
+    "section-1983-drafting",
+    "drafting-section-1983-complaints",
+    "drafting-section-1983-rule-59e",
+    "drafting-section-1983-monell-claims",
+    "audit-authorities",
+    "adversarial-filing-review",
+    "filing-ci",
+)
+ASSERTION_VALIDATION_OWNER_MARKERS = (
+    "assertion id",
+    "original supporting passage or recording observation",
+    "supported assertion",
+    "supported inference",
+    "missing documentation link",
+    "unchecked assertion",
+    "authorized unknown",
+    "mermaid summary",
+    "rendered-file review",
+    "pleading support is not trial proof",
+)
 
 
 def folder_contract(
@@ -309,6 +331,14 @@ APPROVED_FOLDER_CONTRACTS = {
         "optional",
         ["decisions"],
         "authorized",
+    ),
+    "validating-court-facing-assertions": folder_contract(
+        "validating-court-facing-assertions",
+        ["filing", "record", "authorities", "strategy"],
+        "required",
+        ["filing"],
+        "disabled",
+        ["prior-reports"],
     ),
 }
 CONTRIBUTION_RULES = (
@@ -1011,6 +1041,33 @@ def validate_source_documented_folder_guidance(repository_root):
     return errors
 
 
+def validate_assertion_validation_owner(repository_root):
+    errors = []
+    owner_root = repository_root / "skills" / ASSERTION_VALIDATION_OWNER
+    owner_entrypoint = owner_root / "SKILL.md"
+    owner_contract = owner_root / "references" / "assertion-validation-contract.md"
+    try:
+        entrypoint_text = normalized(owner_entrypoint.read_text())
+        contract_text = normalized(owner_contract.read_text())
+    except OSError:
+        return ["assertion-validation-owner-missing"]
+    if "references/assertion-validation-contract.md" not in entrypoint_text:
+        errors.append("assertion-validation-owner-link-missing")
+    if any(marker not in contract_text for marker in ASSERTION_VALIDATION_OWNER_MARKERS):
+        errors.append("assertion-validation-owner-contract-incomplete")
+    for skill in ASSERTION_VALIDATION_CONSUMERS:
+        try:
+            text = normalized((repository_root / "skills" / skill / "SKILL.md").read_text())
+        except OSError:
+            errors.append(f"assertion-validation-consumer-unreadable: {skill}")
+            continue
+        if ASSERTION_VALIDATION_OWNER not in text:
+            errors.append(f"assertion-validation-owner-reference-missing: {skill}")
+        if "assertion-validation-contract.md" in text:
+            errors.append(f"assertion-validation-contract-duplicated: {skill}")
+    return errors
+
+
 def validate_repository(repository_root):
     errors = []
     errors.extend(validate_registry(repository_root))
@@ -1021,6 +1078,7 @@ def validate_repository(repository_root):
     errors.extend(validate_folder_scope_contracts(repository_root))
     errors.extend(validate_skill_folder_contracts(repository_root))
     errors.extend(validate_source_documented_folder_guidance(repository_root))
+    errors.extend(validate_assertion_validation_owner(repository_root))
     return errors
 
 

@@ -19,6 +19,19 @@ def _has_field(value, address):
     return True
 
 
+def _get_field(value, address):
+    current = value
+    for segment in address.split("."):
+        if not isinstance(current, dict) or segment not in current:
+            return None, False
+        current = current[segment]
+    return current, True
+
+
+def _is_nonempty_string(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
 def _candidate_forms(candidate):
     if isinstance(candidate, str):
         text = candidate
@@ -39,6 +52,44 @@ def grade_candidate(fixture, candidate):
     for address in contract.get("required_fields", []):
         if not _has_field(structured, address):
             findings.append(_finding("required-field-missing", fixture_id, address))
+
+    for address in contract.get("required_nonempty_strings", []):
+        value, present = _get_field(structured, address)
+        if present and not _is_nonempty_string(value):
+            findings.append(
+                _finding("required-nonempty-string", fixture_id, address)
+            )
+
+    for rule in contract.get("required_exact_strings", []):
+        value, present = _get_field(structured, rule["address"])
+        if present and value != rule["value"]:
+            findings.append(
+                _finding("required-exact-string", fixture_id, rule["address"])
+            )
+
+    for rule in contract.get("required_object_entries", []):
+        collection, present = _get_field(structured, rule["address"])
+        if not present or not isinstance(collection, dict) or not collection:
+            findings.append(
+                _finding("required-object-invalid", fixture_id, rule["address"])
+            )
+            continue
+        for key, entry in collection.items():
+            location = f"{rule['address']}.{key}"
+            if not isinstance(entry, dict) or any(
+                not _is_nonempty_string(entry.get(field))
+                for field in rule["required_nonempty_string_fields"]
+            ):
+                findings.append(
+                    _finding("required-object-entry-invalid", fixture_id, location)
+                )
+                continue
+            if entry[rule["key_field"]] != key:
+                findings.append(
+                    _finding(
+                        "required-object-entry-key-mismatch", fixture_id, location
+                    )
+                )
 
     headings = [match.group(1).strip() for match in HEADING_PATTERN.finditer(text)]
     previous_index = -1

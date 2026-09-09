@@ -87,6 +87,24 @@ Record what each source establishes, what it does not establish, contrary
 material, and whether the draft uses a stronger, broader, earlier, later, or
 more certain proposition than the source supports.
 
+### Monell expected discovery
+
+For a Monell assertion, distinguish an existing source-documented fact, a
+supported inference from identified pleaded facts, and an expected-discovery
+proposition. Expected-discovery material must not be validated as an existing
+fact or evidence. If complaint text predicts the contents of unavailable
+training, discipline, policy, complaint-history, or other municipal material,
+record `insufficient source` or `overstatement` as the actual review supports.
+
+A supporting brief may explain an inference already grounded in facts pleaded in
+the complaint. It must not supply a missing complaint-level factual basis.
+Record that absence through assertion and omission findings rather than treating
+brief material as a cure.
+
+This is semantic source and coverage review. A deterministic marker can flag
+text for review, but deterministic checking does not decide evidentiary support
+or legal sufficiency.
+
 ### Party-drafted documents and Plaintiff memory
 
 A party-drafted complaint, motion, response, brief, declaration draft, or other

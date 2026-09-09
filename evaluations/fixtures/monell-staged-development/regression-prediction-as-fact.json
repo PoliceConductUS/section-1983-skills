@@ -1,0 +1,55 @@
+{
+  "recommendation": "preserve-internal",
+  "principal_decision": { "status": "pending" },
+  "current_pleading": "Allege that training files will show the City omitted required instruction. [cite:RECORD-1]",
+  "staged_development": {
+    "missing_connection": "Training links.",
+    "expected_records_or_testimony": "Training records.",
+    "information_controller": "City.",
+    "discovery_requests": {
+      "R-001": {
+        "request_id": "R-001",
+        "target_material": "Curriculum",
+        "independent_relevance": "Officer Rivera's instruction on the challenged task bears on his reasonableness defense to the live individual seizure claim.",
+        "anticipated_restrictions_or_stays": "Pending stay.",
+        "requested_at": "not_requested",
+        "produced_at": "not_produced",
+        "first_reasonably_knowable_at": "unknown"
+      },
+      "R-002": {
+        "request_id": "R-002",
+        "target_material": "Event-specific review material",
+        "independent_relevance": "The identified review material bears on the named supervisor credibility defense in the named individual due-process claim.",
+        "anticipated_restrictions_or_stays": "Pending qualified-immunity motion and requested stay; scope must comply with the ruling.",
+        "requested_at": "not_requested",
+        "produced_at": "not_produced",
+        "first_reasonably_knowable_at": "unknown"
+      }
+    },
+    "diligence_record": {
+      "status": "incomplete",
+      "current_chronology": "Unknown.",
+      "resolution_step": "Obtain dates."
+    },
+    "pleading_amendment_deadline": {
+      "status": "unknown",
+      "source": "not_supplied",
+      "relative_statement": "21 days away [cite:PLAN-1]",
+      "resolution_step": "Obtain order and as-of date."
+    },
+    "evidence_threshold_for_amendment": "Specific deficiency and causation support.",
+    "reassessment_triggers": {
+      "on_responsive_material": "required",
+      "before_deadline": "required"
+    },
+    "limitations_or_relation_back_risk": "unknown",
+    "amendment_conditions": {
+      "rule16_before_rule15_after_deadline": "required",
+      "principal_approval_required": "required"
+    }
+  },
+  "validation": {
+    "expected_discovery_treatment": "Prediction only; not existing fact or evidence.",
+    "brief_cure": "A brief cannot supply a missing complaint-level factual basis."
+  }
+}

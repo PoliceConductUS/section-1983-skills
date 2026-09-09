@@ -107,15 +107,52 @@ def _validate_rules(contract):
     _unique_identifiers(rules, "deterministic rule")
 
 
+def _validate_required_object_entries(contract):
+    rules = contract.get("required_object_entries", [])
+    if not isinstance(rules, list):
+        raise FixtureValidationError("required_object_entries must be a list")
+    _unique_identifiers(rules, "required object entry rule")
+    for rule in rules:
+        _nonempty_string(rule.get("address"), "required object entry address")
+        key_field = _nonempty_string(
+            rule.get("key_field"), "required object entry key field"
+        )
+        fields = _string_list(
+            rule.get("required_nonempty_string_fields"),
+            "required object entry field",
+            allow_empty=False,
+        )
+        if key_field not in fields:
+            raise FixtureValidationError(
+                "required object entry key field must be a required nonempty string field"
+            )
+
+
+def _validate_required_exact_strings(contract):
+    rules = contract.get("required_exact_strings", [])
+    if not isinstance(rules, list):
+        raise FixtureValidationError("required_exact_strings must be a list")
+    _unique_identifiers(rules, "required exact string rule")
+    for rule in rules:
+        _nonempty_string(rule.get("address"), "required exact string address")
+        _nonempty_string(rule.get("value"), "required exact string value")
+
+
 def _validate_contract(contract, source_ids):
     if not isinstance(contract, dict):
         raise FixtureValidationError("deterministic must be an object")
     _string_list(contract.get("required_fields"), "required field")
+    _string_list(
+        contract.get("required_nonempty_strings", []),
+        "required nonempty string",
+    )
     _string_list(contract.get("ordered_headings"), "ordered heading")
     required_citations = _string_list(
         contract.get("required_citations"), "required citation"
     )
     _validate_rules(contract)
+    _validate_required_exact_strings(contract)
+    _validate_required_object_entries(contract)
     unknown = sorted(set(required_citations) - set(source_ids))
     if unknown:
         raise FixtureValidationError(

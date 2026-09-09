@@ -161,6 +161,24 @@ class PostDraftAssertionValidationContractTests(unittest.TestCase):
             self.assertIn(marker, text)
         self.assertRegex(text, r"(?:does not|must not).{0,100}(?:depend on|require) casegraph")
 
+    def test_monell_expected_discovery_is_not_validated_as_present_support(self):
+        contract = OWNER_CONTRACT.read_text(encoding="utf-8")
+
+        normalized = " ".join(contract.casefold().split())
+        self.assertIn("monell expected discovery", normalized)
+        self.assertIn(
+            "expected-discovery material must not be validated as an existing fact or evidence",
+            normalized,
+        )
+        self.assertRegex(
+            contract,
+            r"(?is)supporting brief.*(?:must not|cannot).*supply.*missing complaint-level factual basis",
+        )
+        self.assertRegex(
+            contract,
+            r"(?is)semantic.*deterministic.*(?:does not|cannot|must not).*evidentiary support.*legal sufficiency",
+        )
+
     def test_every_consumer_references_owner_without_restating_report_schema(self):
         for name, responsibility in CONSUMERS.items():
             with self.subTest(skill=name):

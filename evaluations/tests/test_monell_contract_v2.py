@@ -135,6 +135,34 @@ def formal_policy_path():
             "decision_record_path": "approval.md",
             "decision_record_sha256": "b" * 64,
         },
+        "propositions": [
+            {
+                "proposition_id": "fact-1",
+                "text": "Employees repeatedly stated and implemented the rule.",
+                "classification": "source_documented_fact",
+                "placement": "complaint",
+                "source_locations": ["¶ 30"],
+                "attribution": "identified employees",
+                "temporal_limits": "event implementation",
+            },
+            {
+                "proposition_id": "inference-1",
+                "text": "The employees implemented a municipal rule.",
+                "classification": "supported_inference",
+                "placement": "complaint",
+                "pleaded_fact_refs": ["fact-1"],
+                "reasoning": "Repeated words and implementation support the inference.",
+                "attribution": "municipal implementation inference",
+                "temporal_limits": "event implementation",
+            },
+            {
+                "proposition_id": "expected-1",
+                "text": "The operative policy record will identify the rule's text.",
+                "classification": "expected_discovery",
+                "placement": "discovery_plan",
+                "discovery_plan_location": "request-policy-record",
+            },
+        ],
         "policy_source": "municipality-controlled record",
         "operative_status": "alleged on information and belief",
         "promulgating_or_adopting_authority": "municipality-controlled identity",
@@ -245,6 +273,119 @@ class MonellContractV2Tests(unittest.TestCase):
             "principal_decision_verification_unavailable",
             {item["code"] for item in result["structural_validation"]["findings"]},
         )
+
+    def test_monell_path_requires_proposition_collection(self):
+        count = common_count()
+        count["capacity"] = "municipal"
+        count["defendant"] = "City"
+        count.pop("individual_capacity")
+        count["qualified_immunity"] = {"applies": False}
+        path = formal_policy_path()
+        path.pop("propositions")
+        count["monell_paths"] = [path]
+
+        result = load_validator().validate_handoff(handoff(count))
+
+        self.assertIn(
+            "missing_monell_propositions",
+            {item["code"] for item in result["structural_validation"]["findings"]},
+        )
+
+    def test_monell_proposition_classes_require_bases_and_placements(self):
+        count = common_count()
+        count["capacity"] = "municipal"
+        count["defendant"] = "City"
+        count.pop("individual_capacity")
+        count["qualified_immunity"] = {"applies": False}
+        path = formal_policy_path()
+        path["propositions"] = [
+            {
+                "proposition_id": "fact-1",
+                "text": "Two employees stated the same rule.",
+                "classification": "source_documented_fact",
+                "placement": "discovery_plan",
+            },
+            {
+                "proposition_id": "inference-1",
+                "text": "The employees implemented a municipal rule.",
+                "classification": "supported_inference",
+                "placement": "complaint",
+                "pleaded_fact_refs": ["missing-fact"],
+            },
+            {
+                "proposition_id": "expected-1",
+                "text": "A written directive exists.",
+                "classification": "expected_discovery",
+                "placement": "complaint",
+            },
+        ]
+        count["monell_paths"] = [path]
+
+        result = load_validator().validate_handoff(handoff(count))
+        codes = {item["code"] for item in result["structural_validation"]["findings"]}
+
+        self.assertIn("missing_monell_proposition_field", codes)
+        self.assertIn("invalid_monell_proposition_placement", codes)
+        self.assertIn("unresolved_monell_proposition_reference", codes)
+
+    def test_monell_proposition_rejects_non_string_scalar_fields_without_crashing(self):
+        invalid_fields = {
+            "proposition_id": ["fact-1"],
+            "text": ["Employees stated the same rule."],
+            "classification": ["source_documented_fact"],
+            "placement": ["complaint"],
+            "attribution": ["identified employees"],
+            "temporal_limits": ["event implementation"],
+        }
+
+        for field, invalid_value in invalid_fields.items():
+            with self.subTest(field=field):
+                count = common_count()
+                count["capacity"] = "municipal"
+                count["defendant"] = "City"
+                count.pop("individual_capacity")
+                count["qualified_immunity"] = {"applies": False}
+                path = formal_policy_path()
+                path["propositions"][0][field] = invalid_value
+                count["monell_paths"] = [path]
+
+                result = load_validator().validate_handoff(handoff(count))
+
+                self.assertIn(
+                    "invalid_monell_proposition_field",
+                    {
+                        item["code"]
+                        for item in result["structural_validation"]["findings"]
+                    },
+                )
+
+    def test_monell_proposition_rejects_invalid_reference_and_location_arrays(self):
+        invalid_fields = (
+            (0, "source_locations", "¶ 30"),
+            (1, "pleaded_fact_refs", "fact-1"),
+            (1, "pleaded_fact_refs", [""]),
+        )
+
+        for proposition_index, field, invalid_value in invalid_fields:
+            with self.subTest(field=field, invalid_value=invalid_value):
+                count = common_count()
+                count["capacity"] = "municipal"
+                count["defendant"] = "City"
+                count.pop("individual_capacity")
+                count["qualified_immunity"] = {"applies": False}
+                path = formal_policy_path()
+                path["propositions"][proposition_index][field] = invalid_value
+                count["monell_paths"] = [path]
+
+                result = load_validator().validate_handoff(handoff(count))
+
+                self.assertIn(
+                    "invalid_monell_proposition_field",
+                    {
+                        item["code"]
+                        for item in result["structural_validation"]["findings"]
+                    },
+                )
 
     def test_exact_authority_passage_and_hash_are_verified(self):
         validator = load_validator()

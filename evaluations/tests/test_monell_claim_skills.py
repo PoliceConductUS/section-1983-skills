@@ -1,12 +1,18 @@
+import copy
+import json
 import re
 import unittest
 from pathlib import Path
+
+from evaluations.deterministic import grade_candidate
+from evaluations.fixtures import load_fixture
 
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 SKILLS = REPOSITORY / "skills"
 PLANNER = SKILLS / "planning-section-1983-monell-claims"
 DRAFTER = SKILLS / "drafting-section-1983-monell-claims"
+STAGED_FIXTURE = REPOSITORY / "evaluations" / "fixtures" / "monell-staged-development"
 
 
 class MonellPlanningSkillTests(unittest.TestCase):
@@ -56,6 +62,80 @@ class MonellPlanningSkillTests(unittest.TestCase):
         self.assertRegex(text, r"(?is)repeated.*policy.*formal_policy.*information.and.belief")
         self.assertRegex(text, r"(?is)post-event.*(?:notice|ratification|recurrence|later-injury|corroboration)")
         self.assertRegex(text, r"(?is)post-event.*(?:must not|cannot).*pre-event causation")
+
+    def test_planner_classifies_every_monell_proposition(self):
+        text = (PLANNER / "references/path-planning-contract.md").read_text(encoding="utf-8")
+        self.assertRegex(text, r"(?is)common record.*propositions")
+        for proposition_class in (
+            "source-documented fact",
+            "supported inference",
+            "expected-discovery proposition",
+        ):
+            self.assertIn(proposition_class, text)
+        self.assertRegex(
+            text,
+            r"(?is)supported\s+inference.*identified\s+pleaded\s+facts",
+        )
+        self.assertRegex(
+            text,
+            r"(?is)expected-discovery\s+proposition.*(?:not|never).*present\s+fact.*evidence",
+        )
+
+    def test_planner_defines_complete_staged_development_record(self):
+        skill = (PLANNER / "SKILL.md").read_text(encoding="utf-8")
+        contract = (PLANNER / "references/path-planning-contract.md").read_text(
+            encoding="utf-8"
+        )
+        text = "\n".join((skill, contract))
+        normalized = text.casefold().replace("_", " ").replace("-", " ")
+
+        self.assertRegex(
+            text,
+            r"(?is)presently supportable.*narrowest\s+(?:factually\s+)?plausible",
+        )
+        self.assertRegex(text, r"(?is)(?:do not|must not).*speculative.*placeholder")
+        self.assertRegex(text, r"(?is)preserve-internal.*staged.development")
+        self.assertRegex(
+            text,
+            r"(?is)relative (?:deadline )?interval.*not (?:an exact date|enough)",
+        )
+        self.assertRegex(
+            text,
+            r"(?is)do\s+not\s+(?:calculate|derive).*source-backed as-of date",
+        )
+        for field in (
+            "missing connection",
+            "expected records or testimony",
+            "information controller",
+            "independent relevance",
+            "anticipated discovery restrictions or stays",
+            "requested at",
+            "produced at",
+            "first reasonably knowable at",
+            "diligence record",
+            "pleading amendment deadline",
+            "evidence threshold",
+            "limitations or relation back risk",
+        ):
+            self.assertIn(field, normalized)
+
+    def test_planner_keeps_discovery_and_amendment_conditional(self):
+        text = "\n".join(
+            (
+                (PLANNER / "SKILL.md").read_text(encoding="utf-8"),
+                (PLANNER / "references/path-planning-contract.md").read_text(
+                    encoding="utf-8"
+                ),
+            )
+        )
+        self.assertRegex(
+            text,
+            r"(?is)(?:does not|must not).*assume.*discovery.*individual claim.*surviv",
+        )
+        self.assertRegex(text, r"(?is)each.*request.*independent relevance.*live claim or defense")
+        self.assertRegex(text, r"(?is)responsive material.*before.*amendment deadline")
+        self.assertRegex(text, r"(?is)after.*deadline.*Rule 16.*good cause.*before.*Rule 15")
+        self.assertRegex(text, r"(?is)litigation principal.*approv.*amend")
 
     def test_planner_reads_graph_directly_and_fails_closed_on_authority_text(self):
         text = (PLANNER / "references/casegraph-assessment-contract.md").read_text(encoding="utf-8")
@@ -126,6 +206,45 @@ class MonellDraftingSkillTests(unittest.TestCase):
         self.assertRegex(text, r"(?is)do\s+not\s+silently\s+retype.*custom_or_practice")
         self.assertRegex(text, r"(?is)fuzzy.*cannot.*exact passage")
 
+    def test_delta_places_monell_propositions_by_class(self):
+        text = (DRAFTER / "references/monell-complaint-delta.md").read_text(encoding="utf-8")
+        self.assertRegex(
+            text,
+            r"(?is)complaint\s+may\s+allege.*source-documented\s+facts.*supported\s+inferences",
+        )
+        self.assertRegex(
+            text,
+            r"(?is)expected-discovery\s+propositions.*not\s+present\s+facts\s+or\s+evidence.*discovery\s+plan",
+        )
+        self.assertRegex(
+            text,
+            r"(?is)supporting\s+brief.*may\s+explain.*reasonable\s+inference.*may\s+not\s+supply.*missing\s+complaint-\s*level\s+factual\s+basis",
+        )
+        self.assertRegex(text, r"(?is)typed delta.*propositions")
+
+    def test_delta_bars_placeholder_preservation_and_gates_later_amendment(self):
+        skill = (DRAFTER / "SKILL.md").read_text(encoding="utf-8")
+        delta = (DRAFTER / "references/monell-complaint-delta.md").read_text(
+            encoding="utf-8"
+        )
+        text = "\n".join((skill, delta))
+
+        for forbidden_basis in ("boilerplate", "underlying incident alone", "expected-discovery"):
+            self.assertIn(forbidden_basis, text.casefold())
+        self.assertRegex(text, r"(?is)(?:do not|must not).*placeholder.*preserve")
+        self.assertRegex(text, r"(?is)evidence threshold.*met")
+        self.assertRegex(text, r"(?is)applicable amendment gate.*satisfied")
+        self.assertRegex(text, r"(?is)litigation principal.*approv.*amend")
+
+    def test_approved_handoff_preserves_proposition_records(self):
+        text = (DRAFTER / "references/approved-planning-handoff.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertRegex(
+            text,
+            r"(?is)carry\s+forward.*proposition\s+record.*classification.*placement",
+        )
+
     def test_drafter_cannot_convert_recommendation_into_approval(self):
         text = (DRAFTER / "references/approved-planning-handoff.md").read_text(encoding="utf-8")
         self.assertRegex(text, r"(?is)recommendation.*(?:is not|does not).*approval")
@@ -139,6 +258,115 @@ class MonellDraftingSkillTests(unittest.TestCase):
             "decision-record\nSHA-256",
         ):
             self.assertIn(field, text)
+
+    def test_staged_development_regressions_are_permanent_and_discriminating(self):
+        fixture = load_fixture(STAGED_FIXTURE)
+        self.assertEqual(fixture["target_skill"], "planning-section-1983-monell-claims")
+        self.assertTrue(grade_candidate(fixture, fixture["passing_candidate"])["passed"])
+        self.assertEqual(len(fixture["regressions"]), 14)
+
+        required_fields = set(fixture["deterministic"]["required_fields"])
+        for field in (
+            "staged_development.discovery_requests",
+            "staged_development.diligence_record.current_chronology",
+            "staged_development.pleading_amendment_deadline.resolution_step",
+            "staged_development.evidence_threshold_for_amendment",
+            "staged_development.reassessment_triggers.before_deadline",
+            "staged_development.limitations_or_relation_back_risk",
+            "staged_development.amendment_conditions.rule16_before_rule15_after_deadline",
+            "staged_development.amendment_conditions.principal_approval_required",
+        ):
+            self.assertIn(field, required_fields)
+
+        request_rules = fixture["deterministic"]["required_object_entries"]
+        self.assertEqual(len(request_rules), 1)
+        self.assertEqual(
+            request_rules[0]["address"], "staged_development.discovery_requests"
+        )
+        self.assertEqual(
+            set(request_rules[0]["required_nonempty_string_fields"]),
+            {
+                "request_id",
+                "target_material",
+                "independent_relevance",
+                "anticipated_restrictions_or_stays",
+                "requested_at",
+                "produced_at",
+                "first_reasonably_knowable_at",
+            },
+        )
+
+        for regression in fixture["regressions"]:
+            with self.subTest(regression=regression["id"]):
+                result = grade_candidate(fixture, regression["candidate"])
+                observed_ids = {finding["id"] for finding in result["findings"]}
+                self.assertTrue(
+                    set(regression["expected_findings"]).issubset(observed_ids)
+                )
+                self.assertEqual(len(result["findings"]), 1)
+
+    def test_staged_fixture_rejects_invalid_gate_values(self):
+        fixture = load_fixture(STAGED_FIXTURE)
+        passing = json.loads(fixture["passing_candidate"])
+        requests = passing["staged_development"]["discovery_requests"]
+        self.assertIsInstance(requests, dict)
+        self.assertGreaterEqual(len(requests), 2)
+
+        mutations = (
+            lambda candidate: candidate.__setitem__("recommendation", "include"),
+            lambda candidate: candidate["principal_decision"].__setitem__(
+                "status", "approved"
+            ),
+            lambda candidate: candidate.__setitem__(
+                "principal_decision",
+                {"reason": "not yet approved", "status": "approved"},
+            ),
+            lambda candidate: candidate["staged_development"]["discovery_requests"][
+                "R-001"
+            ].__setitem__("request_id", "R-999"),
+            lambda candidate: candidate["staged_development"]["discovery_requests"][
+                "R-001"
+            ].__setitem__("independent_relevance", ""),
+            lambda candidate: candidate["staged_development"]["discovery_requests"][
+                "R-001"
+            ].__setitem__("anticipated_restrictions_or_stays", ""),
+            lambda candidate: candidate["staged_development"].__setitem__(
+                "evidence_threshold_for_amendment", ""
+            ),
+            lambda candidate: candidate["staged_development"].__setitem__(
+                "evidence_threshold_for_amendment", True
+            ),
+            lambda candidate: candidate["staged_development"][
+                "reassessment_triggers"
+            ].__setitem__("on_responsive_material", "not required"),
+            lambda candidate: candidate["staged_development"][
+                "reassessment_triggers"
+            ].__setitem__("before_deadline", "optional"),
+            lambda candidate: candidate["staged_development"]["discovery_requests"][
+                "R-001"
+            ].__setitem__("independent_relevance", None),
+            lambda candidate: candidate["staged_development"]["discovery_requests"].__setitem__(
+                "R-003", {}
+            ),
+            lambda candidate: candidate["staged_development"][
+                "amendment_conditions"
+            ].__setitem__("rule16_before_rule15_after_deadline", "not required"),
+            lambda candidate: candidate["staged_development"][
+                "amendment_conditions"
+            ].__setitem__("principal_approval_required", "no"),
+            lambda candidate: candidate["validation"].__setitem__(
+                "expected_discovery_treatment", "May be treated as fact"
+            ),
+            lambda candidate: candidate["validation"].__setitem__(
+                "brief_cure", "The brief may cure the omission"
+            ),
+        )
+
+        for index, mutate in enumerate(mutations):
+            with self.subTest(invalid_case=index):
+                candidate = copy.deepcopy(passing)
+                mutate(candidate)
+                self.assertFalse(grade_candidate(fixture, candidate)["passed"])
 
 
 if __name__ == "__main__":

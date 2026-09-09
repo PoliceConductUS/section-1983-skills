@@ -32,6 +32,9 @@ def write_fixture(directory, manifest_changes=None, source_changes=None):
         ],
         "deterministic": {
             "required_fields": [],
+            "required_nonempty_strings": [],
+            "required_exact_strings": [],
+            "required_object_entries": [],
             "ordered_headings": ["Result"],
             "banned_terms": [],
             "banned_patterns": [],
@@ -241,6 +244,21 @@ class FixtureLoaderTest(unittest.TestCase):
             ("required-fields-not-list", "required_fields", "analysis.result"),
             ("required-field-not-string", "required_fields", [7]),
             ("required-field-empty", "required_fields", [""]),
+            (
+                "required-nonempty-strings-not-list",
+                "required_nonempty_strings",
+                "analysis.result",
+            ),
+            (
+                "required-object-entries-not-list",
+                "required_object_entries",
+                {},
+            ),
+            (
+                "required-exact-strings-not-list",
+                "required_exact_strings",
+                {},
+            ),
             ("headings-not-list", "ordered_headings", "Result"),
             ("heading-not-string", "ordered_headings", [7]),
             ("heading-empty", "ordered_headings", [""]),
@@ -258,6 +276,67 @@ class FixtureLoaderTest(unittest.TestCase):
 
                 fixture_directory = write_fixture(
                     Path(root) / "fixture", manifest_changes=change_contract
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_malformed_required_object_entry_rules(self):
+        cases = (
+            [{}],
+            [{"id": "requests", "address": "analysis.requests"}],
+            [
+                {
+                    "id": "requests",
+                    "address": "analysis.requests",
+                    "required_nonempty_string_fields": ["request_id"],
+                }
+            ],
+            [
+                {
+                    "id": "requests",
+                    "address": "analysis.requests",
+                    "key_field": "request_id",
+                    "required_nonempty_string_fields": [],
+                }
+            ],
+            [
+                {
+                    "id": "requests",
+                    "address": 7,
+                    "key_field": "request_id",
+                    "required_nonempty_string_fields": ["request_id"],
+                }
+            ],
+        )
+
+        for rules in cases:
+            with self.subTest(rules=rules), tempfile.TemporaryDirectory() as root:
+                def change_rules(manifest):
+                    manifest["deterministic"]["required_object_entries"] = rules
+
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=change_rules
+                )
+
+                with self.assertRaises(FixtureValidationError):
+                    load_fixture(fixture_directory)
+
+    def test_rejects_malformed_required_exact_string_rules(self):
+        cases = (
+            [{}],
+            [{"id": "pending", "address": "principal_decision.status"}],
+            [{"id": "pending", "address": 7, "value": "pending"}],
+            [{"id": "pending", "address": "principal_decision.status", "value": 7}],
+        )
+
+        for rules in cases:
+            with self.subTest(rules=rules), tempfile.TemporaryDirectory() as root:
+                def change_rules(manifest):
+                    manifest["deterministic"]["required_exact_strings"] = rules
+
+                fixture_directory = write_fixture(
+                    Path(root) / "fixture", manifest_changes=change_rules
                 )
 
                 with self.assertRaises(FixtureValidationError):

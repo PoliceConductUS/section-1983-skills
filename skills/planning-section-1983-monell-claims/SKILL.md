@@ -60,6 +60,16 @@ municipal source material, event date, governing jurisdiction, and existing
 claim/gap controls. Keep allegations, supported facts, inferences, disputed
 interpretations, and discovery leads distinct.
 
+Classify every proposed Monell proposition under the install-local path-planning
+contract before recommending a path. Preserve the identified pleaded facts that
+support each inference and keep expected-discovery propositions out of present
+factual support.
+
+Recommend pleading every presently supportable path at the narrowest factually
+plausible level. Do not recommend a speculative placeholder merely to preserve a
+claim. Keep a supported but incomplete path internal under the staged-
+development contract rather than turning expected discovery into an allegation.
+
 An on-disk CaseGraph is optional. Inspect it only through the declared
 `casegraph` input role when the user or project supplies that folder. Apply the
 read-only and exact-source contract in the CaseGraph reference.
@@ -87,6 +97,13 @@ reasons, and consequences. Set `principal_decision` to `pending` unless the
 litigation principal has made and recorded the decision. Record
 `graph_assessment_status` for each path rather than only once for the plan.
 
+For every `preserve-internal` recommendation, complete the staged-development
+record. Do not assume discovery is available merely because an individual claim
+survives. Give each proposed request an independent relevance theory tied to a
+named live claim or defense, account for anticipated restrictions or stays, and
+preserve the request, production, knowability, diligence, deadline, evidence-
+threshold, and limitations or relation-back fields required by the contract.
+
 Do not merge alternatives into an omnibus path. Do not require one
 conduct-to-leadership chain for every path: apply the attribution route that
 governing authority requires for that path. Do not treat repeated employee
@@ -111,3 +128,9 @@ not a court finding.
 Return the complete path records, graph-assessment status, unresolved authority
 connections, a comparison of alternatives, and the decisions reserved to the
 litigation principal. Do not draft complaint allegations in this skill.
+
+Reassess preserved paths when responsive material arrives and before the
+pleading-amendment deadline. After that deadline, analyze Rule 16 good cause,
+including diligence and the explanation for delay, before Rule 15. Recommend an
+amendment only from what the developed record establishes and leave approval to
+the litigation principal.

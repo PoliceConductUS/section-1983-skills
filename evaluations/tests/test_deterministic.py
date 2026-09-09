@@ -8,6 +8,9 @@ from evaluations.deterministic import grade_candidate
 def fixture_with_contract(**contract_changes):
     contract = {
         "required_fields": [],
+        "required_nonempty_strings": [],
+        "required_exact_strings": [],
+        "required_object_entries": [],
         "ordered_headings": [],
         "banned_terms": [],
         "banned_patterns": [],
@@ -26,6 +29,103 @@ def finding_pairs(result):
 
 
 class DeterministicGraderTest(unittest.TestCase):
+
+    def test_requires_exact_structured_string_independent_of_key_order(self):
+        fixture = fixture_with_contract(
+            required_exact_strings=[
+                {
+                    "id": "pending-decision",
+                    "address": "principal_decision.status",
+                    "value": "pending",
+                }
+            ]
+        )
+
+        result = grade_candidate(
+            fixture,
+            {"principal_decision": {"reason": "not yet approved", "status": "approved"}},
+        )
+
+        self.assertIn(
+            ("required-exact-string", "principal_decision.status"),
+            finding_pairs(result),
+        )
+
+    def test_requires_nonempty_string_values_at_dot_addresses(self):
+        fixture = fixture_with_contract(
+            required_nonempty_strings=["analysis.threshold"]
+        )
+
+        for invalid in (None, True, 7, "", "   "):
+            with self.subTest(invalid=invalid):
+                result = grade_candidate(
+                    fixture, {"analysis": {"threshold": invalid}}
+                )
+                self.assertIn(
+                    ("required-nonempty-string", "analysis.threshold"),
+                    finding_pairs(result),
+                )
+
+        self.assertTrue(
+            grade_candidate(
+                fixture, {"analysis": {"threshold": "source-supported facts"}}
+            )["passed"]
+        )
+
+    def test_validates_every_member_of_a_required_object_collection(self):
+        fixture = fixture_with_contract(
+            required_object_entries=[
+                {
+                    "id": "request-records",
+                    "address": "analysis.requests",
+                    "key_field": "request_id",
+                    "required_nonempty_string_fields": [
+                        "request_id",
+                        "independent_relevance",
+                    ],
+                }
+            ]
+        )
+        complete = {
+            "analysis": {
+                "requests": {
+                    "R-001": {
+                        "request_id": "R-001",
+                        "independent_relevance": "Named live claim and issue.",
+                    },
+                    "R-002": {
+                        "request_id": "R-002",
+                        "independent_relevance": "Named live defense and issue.",
+                    },
+                }
+            }
+        }
+
+        self.assertTrue(grade_candidate(fixture, complete)["passed"])
+
+        mismatched = copy.deepcopy(complete)
+        mismatched["analysis"]["requests"]["R-001"]["request_id"] = "R-999"
+        self.assertIn(
+            ("required-object-entry-key-mismatch", "analysis.requests.R-001"),
+            finding_pairs(grade_candidate(fixture, mismatched)),
+        )
+
+        for invalid_entry in (
+            {},
+            {"request_id": "R-003", "independent_relevance": None},
+            {"request_id": "R-003", "independent_relevance": True},
+        ):
+            with self.subTest(invalid_entry=invalid_entry):
+                candidate = copy.deepcopy(complete)
+                candidate["analysis"]["requests"]["R-003"] = invalid_entry
+                result = grade_candidate(fixture, candidate)
+                self.assertIn(
+                    (
+                        "required-object-entry-invalid",
+                        "analysis.requests.R-003",
+                    ),
+                    finding_pairs(result),
+                )
 
     def test_reports_missing_dot_addressed_json_contract_field(self):
         fixture = fixture_with_contract(required_fields=["analysis.result"])

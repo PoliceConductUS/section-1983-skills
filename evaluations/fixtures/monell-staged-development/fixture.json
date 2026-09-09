@@ -1,0 +1,229 @@
+{
+  "id": "monell-staged-development",
+  "synthetic": true,
+  "target_skill": "planning-section-1983-monell-claims",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.json",
+  "regressions": [
+    {
+      "id": "speculative-placeholder",
+      "candidate": "regression-placeholder.json",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "generic-discovery-relevance",
+      "candidate": "regression-generic-relevance.json",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "missing-discovery-restrictions",
+      "candidate": "regression-missing-restrictions.json",
+      "expected_findings": ["required-object-entry-invalid"]
+    },
+    {
+      "id": "missing-requested-date",
+      "candidate": "regression-missing-requested-at.json",
+      "expected_findings": ["required-object-entry-invalid"]
+    },
+    {
+      "id": "missing-produced-date",
+      "candidate": "regression-missing-produced-at.json",
+      "expected_findings": ["required-object-entry-invalid"]
+    },
+    {
+      "id": "missing-knowable-date",
+      "candidate": "regression-missing-knowable-at.json",
+      "expected_findings": ["required-object-entry-invalid"]
+    },
+    {
+      "id": "missing-diligence-chronology",
+      "candidate": "regression-missing-diligence.json",
+      "expected_findings": ["required-field-missing"]
+    },
+    {
+      "id": "missing-deadline-resolution",
+      "candidate": "regression-missing-deadline-resolution.json",
+      "expected_findings": ["required-field-missing"]
+    },
+    {
+      "id": "missing-evidence-threshold",
+      "candidate": "regression-missing-threshold.json",
+      "expected_findings": ["required-field-missing"]
+    },
+    {
+      "id": "missing-pre-deadline-reassessment",
+      "candidate": "regression-missing-reassessment.json",
+      "expected_findings": ["required-field-missing"]
+    },
+    {
+      "id": "missing-limitations-risk",
+      "candidate": "regression-missing-limitations.json",
+      "expected_findings": ["required-field-missing"]
+    },
+    {
+      "id": "rule-15-without-rule-16",
+      "candidate": "regression-rule15-only.json",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "missing-principal-approval-gate",
+      "candidate": "regression-missing-principal-approval.json",
+      "expected_findings": ["required-field-missing"]
+    },
+    {
+      "id": "expected-discovery-as-fact",
+      "candidate": "regression-prediction-as-fact.json",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [
+      "recommendation",
+      "principal_decision.status",
+      "current_pleading",
+      "staged_development.missing_connection",
+      "staged_development.expected_records_or_testimony",
+      "staged_development.information_controller",
+      "staged_development.discovery_requests",
+      "staged_development.diligence_record.status",
+      "staged_development.diligence_record.current_chronology",
+      "staged_development.diligence_record.resolution_step",
+      "staged_development.pleading_amendment_deadline.status",
+      "staged_development.pleading_amendment_deadline.source",
+      "staged_development.pleading_amendment_deadline.relative_statement",
+      "staged_development.pleading_amendment_deadline.resolution_step",
+      "staged_development.evidence_threshold_for_amendment",
+      "staged_development.reassessment_triggers.on_responsive_material",
+      "staged_development.reassessment_triggers.before_deadline",
+      "staged_development.limitations_or_relation_back_risk",
+      "staged_development.amendment_conditions.rule16_before_rule15_after_deadline",
+      "staged_development.amendment_conditions.principal_approval_required",
+      "validation.expected_discovery_treatment",
+      "validation.brief_cure"
+    ],
+    "required_nonempty_strings": [
+      "recommendation",
+      "principal_decision.status",
+      "current_pleading",
+      "staged_development.missing_connection",
+      "staged_development.expected_records_or_testimony",
+      "staged_development.information_controller",
+      "staged_development.diligence_record.status",
+      "staged_development.diligence_record.current_chronology",
+      "staged_development.diligence_record.resolution_step",
+      "staged_development.pleading_amendment_deadline.status",
+      "staged_development.pleading_amendment_deadline.source",
+      "staged_development.pleading_amendment_deadline.relative_statement",
+      "staged_development.pleading_amendment_deadline.resolution_step",
+      "staged_development.evidence_threshold_for_amendment",
+      "staged_development.reassessment_triggers.on_responsive_material",
+      "staged_development.reassessment_triggers.before_deadline",
+      "staged_development.limitations_or_relation_back_risk",
+      "staged_development.amendment_conditions.rule16_before_rule15_after_deadline",
+      "staged_development.amendment_conditions.principal_approval_required",
+      "validation.expected_discovery_treatment",
+      "validation.brief_cure"
+    ],
+    "required_object_entries": [
+      {
+        "id": "complete-discovery-request-records",
+        "address": "staged_development.discovery_requests",
+        "key_field": "request_id",
+        "required_nonempty_string_fields": [
+          "request_id",
+          "target_material",
+          "independent_relevance",
+          "anticipated_restrictions_or_stays",
+          "requested_at",
+          "produced_at",
+          "first_reasonably_knowable_at"
+        ]
+      }
+    ],
+    "required_exact_strings": [
+      {
+        "id": "principal-decision-pending",
+        "address": "principal_decision.status",
+        "value": "pending"
+      },
+      {
+        "id": "reassess-on-responsive-material",
+        "address": "staged_development.reassessment_triggers.on_responsive_material",
+        "value": "required"
+      },
+      {
+        "id": "reassess-before-deadline",
+        "address": "staged_development.reassessment_triggers.before_deadline",
+        "value": "required"
+      }
+    ],
+    "ordered_headings": [],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "plead-placeholder-to-preserve",
+        "pattern": "(?is)\\\"current_pleading\\\":\\s*\\\"[^\\\"]*plead[^\\\"]*(?:placeholder|merely to preserve|to preserve every)"
+      },
+      {
+        "id": "generic-relevance-label",
+        "pattern": "(?is)\\\"independent_relevance\\\":\\s*\\\"(?:qualified immunity|punitive damages|Monell|relevant to the case generally)(?:[^\\\"]*)\\\""
+      },
+      {
+        "id": "predicted-training-fact",
+        "pattern": "(?is)\\\"current_pleading\\\":\\s*\\\"[^\\\"]*training files will (?:show|establish|confirm)"
+      },
+      {
+        "id": "recommendation-must-preserve-internal",
+        "pattern": "(?is)\\\"recommendation\\\":\\s*\\\"(?!preserve-internal\\\")[^\\\"]*\\\""
+      },
+      {
+        "id": "principal-decision-must-remain-pending",
+        "pattern": "(?is)\\\"principal_decision\\\":\\s*\\{\\s*\\\"status\\\":\\s*\\\"(?!pending\\\")[^\\\"]*\\\""
+      },
+      {
+        "id": "required-value-empty",
+        "pattern": "(?is)\\\"(?:missing_connection|expected_records_or_testimony|information_controller|request_id|target_material|independent_relevance|anticipated_restrictions_or_stays|requested_at|produced_at|first_reasonably_knowable_at|current_chronology|resolution_step|evidence_threshold_for_amendment|limitations_or_relation_back_risk)\\\":\\s*\\\"\\s*\\\""
+      },
+      {
+        "id": "rule16-gate-must-be-required",
+        "pattern": "(?is)\\\"rule16_before_rule15_after_deadline\\\":\\s*\\\"(?!required\\\")[^\\\"]*\\\""
+      },
+      {
+        "id": "principal-approval-must-be-required",
+        "pattern": "(?is)\\\"principal_approval_required\\\":\\s*\\\"(?!required\\\")[^\\\"]*\\\""
+      },
+      {
+        "id": "prediction-cannot-be-fact",
+        "pattern": "(?is)\\\"expected_discovery_treatment\\\":\\s*\\\"(?![^\\\"]*not existing fact or evidence)[^\\\"]*\\\""
+      },
+      {
+        "id": "brief-cannot-cure",
+        "pattern": "(?is)\\\"brief_cure\\\":\\s*\\\"(?![^\\\"]*cannot supply a missing complaint-level factual basis)[^\\\"]*\\\""
+      },
+      {
+        "id": "generic-placeholder-relevance",
+        "pattern": "(?is)\\\"independent_relevance\\\":\\s*\\\"Named defense relevance\\.\\\""
+      }
+    ],
+    "required_citations": ["RECORD-1", "PLAN-1"]
+  },
+  "rubric": [
+    {
+      "id": "pleads-only-supported-paths",
+      "description": "Presents only presently supportable Monell paths at their narrowest factually plausible level."
+    },
+    {
+      "id": "preserves-complete-staged-record",
+      "description": "Keeps incomplete paths internal with every discovery, diligence, deadline, threshold, and risk field."
+    },
+    {
+      "id": "keeps-discovery-and-amendment-conditional",
+      "description": "Uses request-specific relevance, accounts for restrictions, and applies Rule 16 before Rule 15 after the deadline."
+    },
+    {
+      "id": "validates-predictions-as-predictions",
+      "description": "Does not validate expected discovery as an existing fact or complaint-level factual basis."
+    }
+  ]
+}

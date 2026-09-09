@@ -1,0 +1,104 @@
+{
+  "id": "monell-proposition-placement",
+  "synthetic": true,
+  "target_skill": "drafting-section-1983-monell-claims",
+  "prompt": "prompt.md",
+  "sources": "sources.json",
+  "passing_candidate": "passing.md",
+  "regressions": [
+    {
+      "id": "expected-discovery-pleaded-as-fact",
+      "candidate": "regression-expected-discovery-in-complaint.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "brief-cures-missing-complaint-basis",
+      "candidate": "regression-brief-cure.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "unsupported-directive-without-discovery-phrase",
+      "candidate": "regression-unsupported-directive.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "information-and-belief-expectation-in-complaint",
+      "candidate": "regression-information-belief-expectation.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "missing-proposition-inventory",
+      "candidate": "regression-missing-classification.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "unsupported-written-guidance-paraphrase",
+      "candidate": "regression-written-guidance-paraphrase.md",
+      "expected_findings": ["banned-pattern"]
+    },
+    {
+      "id": "brief-factual-predicate-paraphrase",
+      "candidate": "regression-brief-factual-predicate-paraphrase.md",
+      "expected_findings": ["banned-pattern"]
+    }
+  ],
+  "deterministic": {
+    "required_fields": [],
+    "ordered_headings": [
+      "Proposition Classes",
+      "Complaint Paragraph",
+      "Supporting Brief",
+      "Discovery Plan"
+    ],
+    "banned_terms": [],
+    "banned_patterns": [
+      {
+        "id": "expected-discovery-in-complaint",
+        "pattern": "(?is)# Complaint Paragraph.*discovery will (?:confirm|show|establish).*# Supporting Brief"
+      },
+      {
+        "id": "brief-supplies-missing-basis",
+        "pattern": "(?is)# Supporting Brief.*brief supplies the missing complaint-level factual basis"
+      },
+      {
+        "id": "unsupported-written-directive",
+        "pattern": "(?is)# Complaint Paragraph.*\\bCity (?:maintained|adopted|issued) (?:an? )?written directive.*# Supporting Brief"
+      },
+      {
+        "id": "information-belief-expected-content",
+        "pattern": "(?is)# Complaint Paragraph.*on information and belief.*(?:will|is expected to) (?:confirm|show|establish|identify).*# Supporting Brief"
+      },
+      {
+        "id": "incomplete-proposition-inventory",
+        "pattern": "(?is)# Proposition Classes(?!(?:(?!# Complaint Paragraph).)*\\bSource-documented facts?\\b(?:(?!# Complaint Paragraph).)*\\bSupported inference\\b(?:(?!# Complaint Paragraph).)*\\bExpected discovery\\b(?:(?!# Complaint Paragraph).)*# Complaint Paragraph)"
+      },
+      {
+        "id": "unsupported-policy-guidance",
+        "pattern": "(?is)# Complaint Paragraph(?:(?!# Supporting Brief).)*(?:City(?:'s)?|municipality(?:'s)?)\\s+(?:(?:written|internal)\\s+)?(?:guidance|directive|policy)\\s+(?:required|mandated|directed)"
+      },
+      {
+        "id": "brief-provides-omitted-premise",
+        "pattern": "(?is)# Supporting Brief(?:(?!# Discovery Plan).)*(?:(?:omitted|missing)\\s+facts?.*(?:provide|suppl|establish).*(?:factual\\s+)?(?:predicate|basis|premise)|(?:factual\\s+)?(?:predicate|basis|premise).*(?:missing|omitted).*(?:complaint|pleading))"
+      }
+    ],
+    "required_citations": ["RECORD-1", "PLAN-1"]
+  },
+  "rubric": [
+    {
+      "id": "classifies-monell-propositions",
+      "description": "Separates source-documented facts, supported inferences tied to identified pleaded facts, and expected-discovery propositions."
+    },
+    {
+      "id": "keeps-expectations-out-of-complaint",
+      "description": "Uses only documented facts and supported inferences in the complaint and does not plead expected discovery as present support."
+    },
+    {
+      "id": "keeps-brief-explanatory",
+      "description": "Uses the brief to explain an inference already supported by pleaded facts rather than to cure a missing complaint-level basis."
+    },
+    {
+      "id": "preserves-discovery-expectations",
+      "description": "Places expected records and information in the discovery plan without converting them into facts or evidence."
+    }
+  ]
+}

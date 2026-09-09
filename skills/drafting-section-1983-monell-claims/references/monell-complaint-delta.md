@@ -4,7 +4,10 @@
 
 Return one object for every approved path with its `path_id`, one `path_type`,
 target count, target factual and count paragraphs, proposed paragraph text,
-source locations, and all version-2 common and path-specific fields.
+source locations, the complete carried-forward `propositions` collection, and
+all version-2 common and path-specific fields. Preserve each proposition's
+stable ID and classification. Set its placement to `complaint` or
+`discovery_plan` under the rule below.
 
 The filed prose must state:
 
@@ -23,6 +26,30 @@ review, handoff, or implementation path type. Authority suggesting a new path
 requires replanning and an approved contract change. Multiple employees making
 the same policy statement may support a reasonable practice inference; it does
 not by itself establish final-policymaker identity or authority.
+
+Do not plead boilerplate, the underlying incident alone, or an expected-
+discovery proposition as a speculative placeholder merely to preserve a Monell
+path. Plead only the narrowest factually plausible formulation approved on the
+current record. A previously preserved internal path may enter the typed delta
+only after its path-specific evidence threshold is met, current source support
+is recorded, the applicable amendment gate is satisfied, and the litigation
+principal approves amendment.
+
+## Proposition placement
+
+Every Monell paragraph must distinguish source-documented facts, supported
+inferences drawn from identified pleaded facts, and expected-discovery
+propositions. The complaint may allege source-documented facts and supported
+inferences, with attribution, temporal limits, and the inference's factual
+basis. Expected-discovery propositions are not present facts or evidence and
+belong in the discovery plan. A supporting brief may explain why the pleaded
+facts support a reasonable inference, but it may not supply a missing complaint-
+level factual basis.
+
+Treat a complete information-and-belief allegation as a supported inference, not
+as expected discovery, only when the known facts and every required basis field
+below support it. The fact that a municipality controls identified records does
+not establish the expected contents of those records.
 
 For an approved `formal_policy` path based on repeated statements and repeated
 implementation, preserve that approved type. Plead the repeated words, actors,
@@ -61,6 +88,8 @@ pinpoint.
 ## Integration receipt
 
 Identify every added or revised paragraph and the typed v2 path object it
-implements. List unresolved planning conditions and do not draft them as facts.
-After the canonical complaint owner integrates the delta, update the document
-fingerprint and rerun the version-2 validator.
+implements. Map every complaint proposition to its integrated paragraph and
+every expected-discovery proposition to its discovery-plan location. List
+unresolved planning conditions and do not draft them as facts. After the
+canonical complaint owner integrates the delta, update the document fingerprint
+and rerun the version-2 validator.

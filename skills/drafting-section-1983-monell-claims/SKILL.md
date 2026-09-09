@@ -59,6 +59,17 @@ standard and verified pinpoint authority. If authority came through CaseGraph,
 preserve the verified artifact, hash, pinpoint, and exact-text resolution
 receipt; a citation string alone is not verified support.
 
+Apply the install-local proposition-placement contract to every proposed Monell
+paragraph. Keep expected-discovery propositions in the discovery plan, and do
+not use a supporting brief to add a factual premise missing from the complaint.
+
+Do not use boilerplate, the underlying incident alone, or an expected-discovery
+proposition as a speculative placeholder to preserve a Monell path. A formerly
+preserved internal path may enter drafting only when its recorded evidence
+threshold is met, its current support is carried forward, the applicable
+amendment gate is satisfied, and the litigation principal approves the
+amendment.
+
 ## Handoff
 
 Return complaint deltas, not a competing full complaint. Identify the target

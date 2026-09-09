@@ -140,6 +140,27 @@ TEMPORAL_LANES = {
     "later_injury",
     "corroboration",
 }
+MONELL_PROPOSITION_CLASSES = {
+    "source_documented_fact": {
+        "placement": "complaint",
+        "string_fields": ("attribution", "temporal_limits"),
+        "string_list_fields": ("source_locations",),
+    },
+    "supported_inference": {
+        "placement": "complaint",
+        "string_fields": (
+            "reasoning",
+            "attribution",
+            "temporal_limits",
+        ),
+        "string_list_fields": ("pleaded_fact_refs",),
+    },
+    "expected_discovery": {
+        "placement": "discovery_plan",
+        "string_fields": ("discovery_plan_location",),
+        "string_list_fields": (),
+    },
+}
 AUTHORITY_FIELDS = (
     "status",
     "proposition_uid",
@@ -172,6 +193,40 @@ def require_fields(mapping, fields, code, location, findings):
     for field in fields:
         if not is_present(mapping, field):
             findings.append(finding(code, f"{location}.{field}", f"Required field is missing: {field}"))
+
+
+def validate_nonempty_string_fields(mapping, fields, code, location, findings):
+    for field in fields:
+        if field not in mapping:
+            continue
+        value = mapping[field]
+        if not isinstance(value, str) or not value.strip():
+            findings.append(
+                finding(
+                    code,
+                    f"{location}.{field}",
+                    f"Field must be a nonempty string: {field}",
+                )
+            )
+
+
+def validate_nonempty_string_list_fields(mapping, fields, code, location, findings):
+    for field in fields:
+        if field not in mapping:
+            continue
+        value = mapping[field]
+        if (
+            not isinstance(value, list)
+            or not value
+            or any(not isinstance(item, str) or not item.strip() for item in value)
+        ):
+            findings.append(
+                finding(
+                    code,
+                    f"{location}.{field}",
+                    f"Field must be a nonempty array of nonempty strings: {field}",
+                )
+            )
 
 
 def file_sha256(path):
@@ -324,6 +379,124 @@ def validate_handoff(data, base_dir=None, mode="drafting"):
             else:
                 required = COMMON_MONELL_FIELDS + PATH_FIELDS[path_type]
             require_fields(path, required, "missing_monell_path_field", path_location, structural)
+            propositions = path.get("propositions")
+            proposition_classes = {}
+            proposition_records = []
+            if not isinstance(propositions, list) or not propositions:
+                structural.append(
+                    finding(
+                        "missing_monell_propositions",
+                        f"{path_location}.propositions",
+                        "Every Monell path requires classified proposition records.",
+                    )
+                )
+            else:
+                for proposition_index, proposition in enumerate(propositions):
+                    proposition_location = (
+                        f"{path_location}.propositions[{proposition_index}]"
+                    )
+                    if not isinstance(proposition, dict):
+                        structural.append(
+                            finding(
+                                "invalid_monell_proposition",
+                                proposition_location,
+                                "Monell propositions must be objects.",
+                            )
+                        )
+                        continue
+                    require_fields(
+                        proposition,
+                        ("proposition_id", "text", "classification", "placement"),
+                        "missing_monell_proposition_field",
+                        proposition_location,
+                        structural,
+                    )
+                    validate_nonempty_string_fields(
+                        proposition,
+                        ("proposition_id", "text", "classification", "placement"),
+                        "invalid_monell_proposition_field",
+                        proposition_location,
+                        structural,
+                    )
+                    proposition_id = proposition.get("proposition_id")
+                    valid_proposition_id = (
+                        isinstance(proposition_id, str) and bool(proposition_id.strip())
+                    )
+                    if valid_proposition_id and proposition_id in proposition_classes:
+                        structural.append(
+                            finding(
+                                "duplicate_monell_proposition_id",
+                                f"{proposition_location}.proposition_id",
+                                "Proposition IDs must be unique within a path.",
+                            )
+                        )
+                    classification = proposition.get("classification")
+                    if valid_proposition_id:
+                        proposition_classes[proposition_id] = classification
+                    if (
+                        not isinstance(classification, str)
+                        or classification not in MONELL_PROPOSITION_CLASSES
+                    ):
+                        structural.append(
+                            finding(
+                                "invalid_monell_proposition_class",
+                                f"{proposition_location}.classification",
+                                "Monell propositions require one recognized classification.",
+                            )
+                        )
+                        continue
+                    class_contract = MONELL_PROPOSITION_CLASSES[classification]
+                    require_fields(
+                        proposition,
+                        class_contract["string_fields"]
+                        + class_contract["string_list_fields"],
+                        "missing_monell_proposition_field",
+                        proposition_location,
+                        structural,
+                    )
+                    validate_nonempty_string_fields(
+                        proposition,
+                        class_contract["string_fields"],
+                        "invalid_monell_proposition_field",
+                        proposition_location,
+                        structural,
+                    )
+                    validate_nonempty_string_list_fields(
+                        proposition,
+                        class_contract["string_list_fields"],
+                        "invalid_monell_proposition_field",
+                        proposition_location,
+                        structural,
+                    )
+                    if proposition.get("placement") != class_contract["placement"]:
+                        structural.append(
+                            finding(
+                                "invalid_monell_proposition_placement",
+                                f"{proposition_location}.placement",
+                                "Monell proposition placement does not match its classification.",
+                            )
+                        )
+                    proposition_records.append(
+                        (proposition_location, proposition, classification)
+                    )
+                for proposition_location, proposition, classification in proposition_records:
+                    if classification != "supported_inference":
+                        continue
+                    premise_refs = proposition.get("pleaded_fact_refs", [])
+                    if not isinstance(premise_refs, list) or any(
+                        not isinstance(item, str) or not item.strip()
+                        for item in premise_refs
+                    ):
+                        premise_refs = []
+                    for premise_ref in premise_refs:
+                        if proposition_classes.get(premise_ref) != "source_documented_fact":
+                            structural.append(
+                                finding(
+                                    "unresolved_monell_proposition_reference",
+                                    f"{proposition_location}.pleaded_fact_refs",
+                                    "Supported-inference premises must resolve to source-documented facts in the same path.",
+                                )
+                            )
             supporting_facts = path.get("supporting_facts")
             fact_ids = set()
             if not isinstance(supporting_facts, list) or not supporting_facts:

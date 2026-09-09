@@ -1,0 +1,55 @@
+{
+  "recommendation": "preserve-internal",
+  "principal_decision": { "status": "pending" },
+  "current_pleading": "Keep supported individual claims only; no unsupported Monell allegation. [cite:RECORD-1]",
+  "staged_development": {
+    "missing_connection": "Precise training deficiency, responsible authority, notice, deliberate indifference, and moving force.",
+    "expected_records_or_testimony": "Task-specific training records and custodian testimony; contents unknown.",
+    "information_controller": "City or identified custodian; exact controller unknown.",
+    "discovery_requests": {
+      "R-001": {
+        "request_id": "R-001",
+        "target_material": "Task-specific curriculum",
+        "independent_relevance": "Officer Rivera's instruction on the challenged task bears on his reasonableness defense to the live individual seizure claim.",
+        "anticipated_restrictions_or_stays": "Pending qualified-immunity motion and requested stay; scope must comply with the ruling.",
+        "requested_at": "not_requested",
+        "produced_at": "not_produced",
+        "first_reasonably_knowable_at": "unknown"
+      },
+      "R-002": {
+        "request_id": "R-002",
+        "target_material": "Event-specific review material",
+        "independent_relevance": "The event-specific review material bears on Supervisor Lee's attribution and credibility defenses in the live individual due-process claim.",
+        "anticipated_restrictions_or_stays": "Pending qualified-immunity motion and requested stay; scope must comply with the ruling.",
+        "requested_at": "not_requested",
+        "produced_at": "not_produced",
+        "first_reasonably_knowable_at": "unknown"
+      }
+    },
+    "diligence_record": {
+      "status": "incomplete",
+      "current_chronology": "Earlier public-record requests are reported incomplete; exact dates and responses are unknown.",
+      "resolution_step": "Obtain and record requests, responses, objections, follow-ups, productions, and review dates."
+    },
+    "pleading_amendment_deadline": {
+      "status": "unknown",
+      "source": "not_supplied",
+      "relative_statement": "21 days away [cite:PLAN-1]",
+      "resolution_step": "Obtain the scheduling order and a source-backed as-of date; do not calculate an exact date."
+    },
+    "evidence_threshold_for_amendment": "Source-supported facts establishing the task-specific training deficiency, responsible authority, applicable notice basis, deliberate-indifference connection, and moving force.",
+    "reassessment_triggers": {
+      "on_responsive_material": "required",
+      "before_deadline": "required"
+    },
+    "limitations_or_relation_back_risk": "unknown pending governing dates and authority analysis",
+    "amendment_conditions": {
+      "rule16_before_rule15_after_deadline": "required",
+      "principal_approval_required": "required"
+    }
+  },
+  "validation": {
+    "expected_discovery_treatment": "Prediction only; not existing fact or evidence.",
+    "brief_cure": "A brief cannot supply a missing complaint-level factual basis."
+  }
+}
